@@ -1,0 +1,31 @@
+name: gp
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  assets:
+    - assets/logo.png
+    - assets/logo2.png
+    - assets/reset_password.png
+    - assets/Password_changed.png
+    - assets/email_verification.png
+    - assets/account_verified.png
+  uses-material-design: true
+  generate: true
+#flutter pub get
