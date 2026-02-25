@@ -7,11 +7,19 @@ environment:
   sdk: ^3.9.2
 
 dependencies:
+  dartz: ^0.10.1
+  dio: ^5.9.1
+  equatable: ^2.0.8
   flutter:
     sdk: flutter
+  flutter_bloc: ^9.1.1
   flutter_localizations:
     sdk: flutter
-  intl: any
+  flutter_svg: ^2.2.3
+  geocoding: ^4.0.0
+  geolocator: ^14.0.2
+  get_it: ^9.2.1
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
@@ -20,6 +28,7 @@ dev_dependencies:
 
 flutter:
   assets:
+    - assets/home_screen/
     - assets/logo.png
     - assets/logo2.png
     - assets/reset_password.png
@@ -28,4 +37,3 @@ flutter:
     - assets/account_verified.png
   uses-material-design: true
   generate: true
-#flutter pub get
