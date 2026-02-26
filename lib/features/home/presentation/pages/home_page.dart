@@ -4,6 +4,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/gofix_bottom_nav_bar.dart';
+import '../../../../injection_container.dart';
+import '../../../professionals/domain/entities/service_category.dart';
+import '../../../professionals/presentation/bloc/professionals_bloc.dart';
+import '../../../professionals/presentation/pages/category_professionals_page.dart';
 import '../../domain/entities/category_entity.dart';
 import '../bloc/home_bloc.dart';
 import '../widgets/category_card.dart';
@@ -22,6 +26,24 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     context.read<HomeBloc>().add(HomeLoadRequested());
+  }
+
+  void _onCategoryTap(CategoryEntity category) {
+    // Map category name to ServiceCategory enum
+    final serviceCategory = ServiceCategory.values.firstWhere(
+      (e) => e.displayName == category.name,
+      orElse: () => ServiceCategory.plumbing,
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider(
+          create: (_) => sl<ProfessionalsBloc>(),
+          child: CategoryProfessionalsPage(category: serviceCategory),
+        ),
+      ),
+    );
   }
 
   @override
@@ -103,7 +125,10 @@ class _HomePageState extends State<HomePage> {
                 child: Text('Categories', style: AppTextStyles.sectionTitle),
               ),
               const SizedBox(height: 16),
-              _CategoriesGrid(categories: state.categories),
+              _CategoriesGrid(
+                categories: state.categories,
+                onCategoryTap: _onCategoryTap,
+              ),
               const SizedBox(height: 24),
             ],
           ),
@@ -153,7 +178,6 @@ class _HomeHeader extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Location
               Row(
                 children: [
                   SvgPicture.asset(
@@ -185,8 +209,6 @@ class _HomeHeader extends StatelessWidget {
                   ),
                 ],
               ),
-
-              // ── Notification bell — no background, no border ──────
               GestureDetector(
                 onTap: onNotificationTap,
                 child: SvgPicture.asset(
@@ -204,7 +226,7 @@ class _HomeHeader extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // ── Search bar — white background, dark icon + hint ───────
+          // ── Search bar ───────────────────────────────────────────
           GestureDetector(
             onTap: onSearchTap,
             child: Container(
@@ -226,10 +248,7 @@ class _HomeHeader extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Text(
-                    'Search',
-                    style: AppTextStyles.searchHint,
-                  ),
+                  Text('Search', style: AppTextStyles.searchHint),
                 ],
               ),
             ),
@@ -244,8 +263,12 @@ class _HomeHeader extends StatelessWidget {
 
 class _CategoriesGrid extends StatelessWidget {
   final List<CategoryEntity> categories;
+  final ValueChanged<CategoryEntity> onCategoryTap;
 
-  const _CategoriesGrid({required this.categories});
+  const _CategoriesGrid({
+    required this.categories,
+    required this.onCategoryTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -264,9 +287,7 @@ class _CategoriesGrid extends StatelessWidget {
         itemBuilder: (context, index) {
           return CategoryCard(
             category: categories[index],
-            onTap: () {
-              // TODO: Navigate to category professionals page
-            },
+            onTap: () => onCategoryTap(categories[index]),
           );
         },
       ),
