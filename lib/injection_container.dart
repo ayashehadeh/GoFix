@@ -79,7 +79,7 @@ Future<void> init() async {
   // ── External ──────────────────────────────────────────────────────
   sl.registerLazySingleton(() => Dio(
         BaseOptions(
-          baseUrl: 'https://your-api.com/api',
+          baseUrl: 'http://192.168.1.7:5109/api',
           connectTimeout: const Duration(seconds: 15),
           receiveTimeout: const Duration(seconds: 15),
           headers: {'Content-Type': 'application/json'},
