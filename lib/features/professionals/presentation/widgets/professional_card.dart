@@ -81,9 +81,9 @@ class ProfessionalCard extends StatelessWidget {
                     color: AppColors.primaryOrange, size: 16),
                 const SizedBox(width: 6),
                 Text(
-                  professional.distanceKm < 1
-                      ? '${(professional.distanceKm * 1000).toInt()} m away'
-                      : '${professional.distanceKm.toStringAsFixed(1)} Km away',
+                  professional.distanceKm != null && professional.distanceKm! < 1
+                      ? '${(professional.distanceKm! * 1000).toInt()} m away'
+                      : professional.distanceKm != null ? '${professional.distanceKm!.toStringAsFixed(1)} Km away' : '-- Km away',
                   style: AppTextStyles.bodySmall,
                 ),
               ],

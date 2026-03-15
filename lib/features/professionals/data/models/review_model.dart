@@ -17,16 +17,27 @@ class ReviewModel extends Review {
   factory ReviewModel.fromJson(Map<String, dynamic> json) {
     return ReviewModel(
       id: json['id'] as String,
-      professionalId: json['professional_id'] as String,
-      bookingId: json['booking_id'] as String,
-      reviewerId: json['reviewer_id'] as String,
-      reviewerName: json['reviewer_name'] as String,
-      reviewerImageUrl: json['reviewer_image_url'] as String?,
+      professionalId: json['professionalId'] as String? ??
+          json['professional_id'] as String? ??
+          '',
+      bookingId: json['bookingId'] as String? ??
+          json['booking_id'] as String? ??
+          '',
+      reviewerId: json['reviewerId'] as String? ??
+          json['reviewer_id'] as String? ??
+          '',
+      reviewerName: json['reviewerName'] as String? ??
+          json['reviewer_name'] as String? ??
+          '',
+      reviewerImageUrl: json['reviewerImageUrl'] as String? ??
+          json['reviewer_image_url'] as String?,
       rating: (json['rating'] as num).toDouble(),
-      comment: json['comment'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
+      comment: json['comment'] as String? ?? '',
+      createdAt: DateTime.parse(
+          json['createdAt'] as String? ?? json['created_at'] as String? ?? DateTime.now().toIso8601String()),
+      updatedAt: (json['updatedAt'] ?? json['updated_at']) != null
+          ? DateTime.parse(
+              (json['updatedAt'] ?? json['updated_at']) as String)
           : null,
     );
   }

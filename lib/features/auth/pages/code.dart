@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gp/auth/pages/created.dart';
-import 'package:gp/auth/services/auth_service.dart';
+import 'package:gp/features/auth/pages/created.dart';
+import 'package:gp/features/auth/services/auth_service.dart';
 import 'package:gp/core/theme/app_colors.dart';
 import 'package:gp/features/home/presentation/bloc/home_bloc.dart';
 import 'package:gp/injection_container.dart' as di;

@@ -1,7 +1,8 @@
 import 'package:dio/dio.dart';
 
 class AuthService {
-  static const String baseUrl = 'http://192.168.1.7:5109/api/auth';
+  static const String baseUrl =
+      'https://gofix-api-ceaaewf7hua0ghez.uaenorth-01.azurewebsites.net/api/auth';
 
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
@@ -30,16 +31,13 @@ class AuthService {
         'role': role,
       });
       return response.data;
-   } on DioException catch (e) {
-  print('DIO ERROR: ${e.type}');
-  print('DIO RESPONSE: ${e.response?.data}');
-  print('DIO STATUS: ${e.response?.statusCode}');
-  String message = 'Registration failed. Please try again.';
-  if (e.response?.data != null) {
-    message = e.response?.data['message'] ?? message;
-  }
-  throw Exception(message);
-}
+    } on DioException catch (e) {
+      String message = 'Registration failed. Please try again.';
+      if (e.response?.data != null) {
+        message = e.response?.data['message'] ?? message;
+      }
+      throw Exception(message);
+    }
   }
 
   Future<Map<String, dynamic>> login({

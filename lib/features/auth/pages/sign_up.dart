@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-//import 'package:gp/auth/pages/code.dart';
-import 'package:gp/auth/pages/created.dart';
-import 'package:gp/auth/services/auth_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/storage/token_storage.dart';
+import 'package:gp/features/auth/services/auth_service.dart';
 import 'package:gp/core/theme/app_colors.dart';
+import 'package:gp/features/home/presentation/bloc/home_bloc.dart';
+import 'package:gp/features/home/presentation/pages/home_page.dart';
+import 'package:gp/injection_container.dart' as di;
 import 'package:gp/l10n/app_localizations.dart';
 
 class Signup extends StatelessWidget {
@@ -65,22 +68,34 @@ class _SignupFormState extends State<_SignupForm> {
         confirmPassword: confirmPassword,
       );
 
-      if (!mounted) return;
-/*
       final token = result['data']['token'] as String;
+      final user  = result['data']['user'];
 
-      // Go to VerifyEmailPage with the token and email
+      // Save token and user info to local storage
+      await TokenStorage.saveToken(
+        token: token,
+        userId: user['id'] as String,
+        role: user['role'] as String,
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Welcome, ${user['firstName']}!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Navigate to home
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => VerifyEmailPage(
-            token: token,
-            email: email,
+          builder: (_) => BlocProvider(
+            create: (_) => di.sl<HomeBloc>(),
+            child: const HomePage(),
           ),
         ),
-      );*/
-      Navigator.of(context).pushReplacement(
-  MaterialPageRoute(builder: (_) => const Created()),
-);
+      );
     } catch (e) {
       _showError(e.toString().replaceAll('Exception: ', ''));
     } finally {
