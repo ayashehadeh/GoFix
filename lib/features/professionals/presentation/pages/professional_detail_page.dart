@@ -9,7 +9,7 @@ import 'package:gp/features/professionals/domain/entities/professional.dart';
 import 'package:gp/features/professionals/domain/entities/review.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
 import 'package:gp/features/professionals/presentation/widgets/star_rating.dart';
-import 'package:gp/Booking/booking.dart';
+import 'package:gp/features/Booking/booking.dart';
 
 class ProfessionalDetailPage extends StatefulWidget {
   final String professionalId;
@@ -275,7 +275,7 @@ class _DetailHeader extends StatelessWidget {
               ),
               _StatItem(
                 icon: Icons.bookmark_border,
-                value: professional.distanceKm.toStringAsFixed(1),
+                value: professional.distanceKm!.toStringAsFixed(1),
                 label: 'KM Away',
               ),
               _StatItem(
@@ -570,35 +570,65 @@ class _CertificationsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final certifications = professional.certifications;
+
     return Column(
       children: [
         _SectionCard(
           icon: Icons.description_outlined,
           title: 'Professional Certifications',
-          child: Column(
-            children: professional.certifications
-                .map((cert) => Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            cert.name,
-                            style: AppTextStyles.bodyMedium
-                                .copyWith(color: AppColors.primaryOrange),
-                          ),
-                          Text(cert.issuedLabel,
-                              style: AppTextStyles.bodySmall),
-                        ],
-                      ),
-                    ))
-                .toList(),
-          ),
+          child: certifications.isEmpty
+              ? Text('No certifications uploaded yet.',
+                  style: AppTextStyles.bodySmall)
+              : Column(
+                  children: certifications
+                      .map((doc) => Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.description_outlined,
+                                    color: AppColors.primaryOrange, size: 20),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(doc.name,
+                                          style: AppTextStyles.bodyMedium
+                                              .copyWith(
+                                                  color:
+                                                      AppColors.primaryOrange)),
+                                      if (doc.issuedBy != null)
+                                        Text(doc.issuedBy!,
+                                            style: AppTextStyles.bodySmall),
+                                      if (doc.issuedLabel.isNotEmpty)
+                                        Text(doc.issuedLabel,
+                                            style: AppTextStyles.bodySmall),
+                                    ],
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.open_in_new,
+                                      color: AppColors.primaryOrange, size: 20),
+                                  onPressed: () async {
+                                    final uri = Uri.parse(doc.fileUrl);
+                                    if (await canLaunchUrl(uri)) {
+                                      await launchUrl(uri,
+                                          mode: LaunchMode.externalApplication);
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ))
+                      .toList(),
+                ),
         ),
         const SizedBox(height: 16),
         _SectionCard(

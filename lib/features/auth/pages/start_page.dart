@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gp/auth/pages/sign_up.dart';
+import 'package:gp/features/auth/pages/sign_up.dart';
 import 'signin_page.dart';
 import 'package:gp/core/theme/app_colors.dart';
 import 'package:gp/l10n/app_localizations.dart';

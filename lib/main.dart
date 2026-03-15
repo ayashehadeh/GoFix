@@ -8,7 +8,7 @@ import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.d
 import 'package:gp/features/professionals/presentation/pages/category_professionals_page.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/injection_container.dart' as di;
-import 'auth/pages/start_page.dart';
+import 'features/auth/pages/start_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,21 +36,21 @@ class MainApp extends StatelessWidget {
       // ── Landing page options (uncomment the one you want) ──────────
 
       // Option 1: Home page (requires backend)
-      /*home: BlocProvider(
+      home: BlocProvider(
         create: (_) => di.sl<HomeBloc>(),
         child: const HomePage(),
-      ),*/
+      ),
 
       // Option 2: Auth flow
-      home: const StartPage(),
+     // home: const StartPage(),
 
       // Option 3: Category professionals page (testing, no auth needed)
-      /*home: BlocProvider(
+     /*  home: BlocProvider(
         create: (_) => di.sl<ProfessionalsBloc>(),
         child: const CategoryProfessionalsPage(
           category: ServiceCategory.plumbing,
         ),
-      ),*/
+      ), */
     );
   }
 }

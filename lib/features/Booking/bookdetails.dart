@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:gp/Booking/booksuccess.dart';
+import 'package:gp/features/Booking/booksuccess.dart';
 
 class BookingDetailsScreen extends StatelessWidget {
   final String serviceName;

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:gp/Booking/bookdetails.dart';
+import 'package:gp/features/Booking/bookdetails.dart';
 
 class BookServiceScreen extends StatefulWidget {
   final String serviceName;
