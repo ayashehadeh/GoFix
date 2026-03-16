@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gp/main.dart';
+import 'package:gp/features/home/presentation/pages/home_page.dart';
 
 class InQueue extends StatelessWidget {
   const InQueue({super.key});
@@ -61,8 +61,10 @@ class InQueue extends StatelessWidget {
                     elevation: 0,
                   ),
                   onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => const MainApp()),
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => const HomePage()),
+                      (route) => false,
                     );
                   },
                   child: const Text(
