@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:gp/core/storage/token_storage.dart';
 import 'package:gp/features/home/data/data_sources/data_remote_datasource.dart';
 import 'package:gp/features/home/domain/use_cases/get_categories_usecase.dart';
 import 'package:gp/features/professionals/data/datasources/professionals_remote_datasource.dart';
@@ -77,12 +78,36 @@ Future<void> init() async {
   );
 
   // ── External ──────────────────────────────────────────────────────
-  sl.registerLazySingleton(() => Dio(
-        BaseOptions(
-          baseUrl: 'https://your-api.com/api',
-          connectTimeout: const Duration(seconds: 15),
-          receiveTimeout: const Duration(seconds: 15),
-          headers: {'Content-Type': 'application/json'},
-        ),
-      ));
+  sl.registerLazySingleton(() {
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: 'https://gofix-api-ceaaewf7hua0ghez.uaenorth-01.azurewebsites.net/api',
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 15),
+        headers: {'Content-Type': 'application/json'},
+      ),
+    );
+
+    // Interceptor — automatically attaches JWT token to every request
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final token = await TokenStorage.getToken();
+          if (token != null && token.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+          return handler.next(options);
+        },
+        onError: (error, handler) {
+          // 401 means token expired — clear storage so user gets redirected to login
+          if (error.response?.statusCode == 401) {
+            TokenStorage.clear();
+          }
+          return handler.next(error);
+        },
+      ),
+    );
+
+    return dio;
+  });
 }
