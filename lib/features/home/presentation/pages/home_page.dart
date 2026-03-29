@@ -71,7 +71,11 @@ class _HomePageState extends State<HomePage> {
       ),
       bottomNavigationBar: GoFixBottomNavBar(
         currentIndex: _currentNavIndex,
-        onTap: (index) => setState(() => _currentNavIndex = index),
+        onTap: (index) {
+          if (index == 0) return; // already on home
+          if (index == 1) Navigator.pushReplacementNamed(context, '/bookings');
+          if (index == 2) Navigator.pushReplacementNamed(context, '/profile');
+        },
       ),
     );
   }
@@ -203,8 +207,10 @@ class _HomeHeader extends StatelessWidget {
                                 backgroundColor: Colors.white24,
                               ),
                             )
-                          : Text(locationName,
-                              style: AppTextStyles.locationValue),
+                          : Text(
+                              locationName,
+                              style: AppTextStyles.locationValue,
+                            ),
                     ],
                   ),
                 ],
