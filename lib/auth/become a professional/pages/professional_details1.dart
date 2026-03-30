@@ -40,7 +40,6 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 25),
-
           const Text(
             "Ready to go pro, Hazim?",
             style: TextStyle(
@@ -49,9 +48,7 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
               color: Color(0xFF062B4D),
             ),
           ),
-
           const SizedBox(height: 20),
-
           const Text(
             "Professional Details",
             style: TextStyle(
@@ -60,18 +57,14 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
               color: Color(0xFF062B4D),
             ),
           ),
-
           const SizedBox(height: 20),
-
           const Text(
             "Service category",
             style: TextStyle(fontSize: 18, color: Color(0xFF062B4D)),
           ),
-
           const SizedBox(height: 8),
-
           DropdownButtonFormField<String>(
-            value: selectedCategory,
+            initialValue: selectedCategory,
             isExpanded: true,
             decoration: InputDecoration(
               filled: true,
@@ -98,44 +91,34 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
               style: TextStyle(fontSize: 15, color: Color(0xFF062B4D)),
             ),
           ),
-
           const SizedBox(height: 25),
           const Divider(),
           const SizedBox(height: 10),
-
           const Text(
             "Experience years",
             style: TextStyle(fontSize: 18, color: Color(0xFF062B4D)),
           ),
-
           const SizedBox(height: 10),
-
-          ...experienceOptions
-              .map(
-                (exp) => RadioListTile<String>(
-                  title: Text(exp),
-                  value: exp,
-                  groupValue: selectedExperience,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedExperience = value;
-                    });
-                  },
-                  contentPadding: EdgeInsets.zero,
-                ),
-              )
-              .toList(),
-
+          ...experienceOptions.map(
+            (exp) => RadioListTile<String>(
+              title: Text(exp),
+              value: exp,
+              groupValue: selectedExperience,
+              onChanged: (value) {
+                setState(() {
+                  selectedExperience = value;
+                });
+              },
+              contentPadding: EdgeInsets.zero,
+            ),
+          ),
           const Divider(),
           const SizedBox(height: 15),
-
           const Text(
             "Work description",
             style: TextStyle(fontSize: 18, color: Color(0xFF062B4D)),
           ),
-
           const SizedBox(height: 8),
-
           TextField(
             maxLines: 3,
             decoration: InputDecoration(
@@ -152,9 +135,7 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
               hintText: "Describe your professional experience...",
             ),
           ),
-
           const SizedBox(height: 40),
-
           SizedBox(
             width: double.infinity,
             height: 55,
@@ -176,7 +157,6 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
               ),
             ),
           ),
-
           const SizedBox(height: 20),
         ],
       ),

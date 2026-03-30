@@ -20,7 +20,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _currentNavIndex = 0;
+  final int _currentNavIndex = 0;
 
   @override
   void initState() {

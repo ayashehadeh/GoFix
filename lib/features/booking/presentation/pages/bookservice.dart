@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:gp/features/Booking/bookdetails.dart';
+import 'package:gp/features/booking/presentation/pages/bookdetails.dart';
 
 class BookServiceScreen extends StatefulWidget {
   final String serviceName;
@@ -313,7 +313,6 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                           ],
                         ),
                         const SizedBox(height: 20),
-
                         const Row(
                           children: [
                             Icon(Icons.calendar_month, color: orange, size: 22),
@@ -329,7 +328,6 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                           ],
                         ),
                         const SizedBox(height: 12),
-
                         SizedBox(
                           height: 90,
                           child: ListView.separated(
@@ -391,9 +389,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                             },
                           ),
                         ),
-
                         const SizedBox(height: 20),
-
                         const Row(
                           children: [
                             Icon(Icons.access_time, color: orange, size: 22),
@@ -409,7 +405,6 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                           ],
                         ),
                         const SizedBox(height: 12),
-
                         GestureDetector(
                           onTap: _showTimePicker,
                           child: Row(

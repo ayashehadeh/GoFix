@@ -1,4 +1,4 @@
-name: gp
+﻿name: gp
 description: "A new Flutter project."
 publish_to: 'none'
 version: 0.1.0
@@ -15,9 +15,6 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  dartz: ^0.10.1
-  dio: ^5.9.1
-  equatable: ^2.0.8
   flutter_bloc: ^9.1.1
   flutter_svg: ^2.2.3
   geocoding: ^4.0.0
@@ -43,5 +40,7 @@ flutter:
     - assets/email_verification.png
     - assets/account_verified.png
     - assets/done.png
+    - assets/successbook.png
+
   uses-material-design: true
   generate: true

@@ -1,8 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:gp/features/Booking/bookservice.dart';
-import 'package:gp/core/theme/app_colors.dart';
+import 'package:gp/features/booking/presentation/pages/bookservice.dart';
 
 class ServiceItem {
   final String name;
