@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../pages/in_queue.dart';
+import 'in_queue.dart';
 
 class PageThree extends StatefulWidget {
   const PageThree({super.key});

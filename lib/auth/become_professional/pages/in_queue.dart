@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:gp/main.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/features/home/presentation/bloc/home_bloc.dart';
+import 'package:gp/features/home/presentation/pages/home_page.dart';
+import 'package:gp/injection_container.dart' as di;
 
 class InQueue extends StatelessWidget {
   const InQueue({super.key});
@@ -61,8 +64,14 @@ class InQueue extends StatelessWidget {
                     elevation: 0,
                   ),
                   onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => const MainApp()),
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (_) => BlocProvider(
+                          create: (_) => di.sl<HomeBloc>(),
+                          child: const HomePage(),
+                        ),
+                      ),
+                      (_) => false,
                     );
                   },
                   child: const Text(
