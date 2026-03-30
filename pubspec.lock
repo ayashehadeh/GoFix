@@ -763,5 +763,15 @@ packages:
     source: hosted
     version: "6.6.1"
 sdks:
+<<<<<<< HEAD
   dart: ">=3.10.0 <4.0.0"
   flutter: ">=3.38.0"
+=======
+<<<<<<< HEAD
+  dart: ">=3.9.0 <4.0.0"
+  flutter: ">=3.35.0"
+=======
+  dart: ">=3.10.0 <4.0.0"
+  flutter: ">=3.38.0"
+>>>>>>> 5b1a3d4 (booking done)
+>>>>>>> 77f90fd (booking done)

@@ -1,17 +1,103 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+<<<<<<< HEAD
 import 'package:gp/features/bookings/presentation/bloc/bookings_bloc.dart';
 import 'package:gp/features/bookings/presentation/pages/my_bookings_page.dart';
+=======
+
+// Home
+>>>>>>> 77f90fd (booking done)
 import 'package:gp/features/home/presentation/bloc/home_bloc.dart';
 import 'package:gp/features/home/presentation/pages/home_page.dart';
+
+// Profile
 import 'package:gp/features/profile.dart';
+<<<<<<< HEAD
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
 import 'package:gp/features/professionals/presentation/pages/category_professionals_page.dart';
 import 'package:gp/features/professionals/domain/entities/service_category.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/injection_container.dart' as di;
 import 'package:gp/auth/pages/start_page.dart';
+=======
+
+// Professionals
+import 'package:gp/features/professionals/domain/entities/service_category.dart';
+import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
+import 'package:gp/features/professionals/presentation/pages/category_professionals_page.dart';
+
+// Bookings (🔥 من كودك)
+import 'package:gp/features/bookings/presentation/bloc/bookings_bloc.dart';
+import 'package:gp/features/bookings/presentation/pages/my_bookings_page.dart';
+
+// Localization
+import 'package:gp/l10n/app_localizations.dart';
+
+// DI
+import 'package:gp/injection_container.dart' as di;
+
+// Auth (🔥 من HEAD)
+import 'features/auth/pages/start_page.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await di.init();
+  runApp(const MainApp());
+}
+
+class MainApp extends StatelessWidget {
+  const MainApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+
+      supportedLocales: const [Locale('en'), Locale('ar')],
+
+      // اختر واحد:
+      home: BlocProvider(
+        create: (_) => di.sl<HomeBloc>(),
+        child: const HomePage(),
+      ),
+
+      // لو بدك تبدأ بالـ auth بدل home:
+      // home: const StartPage(),
+      routes: {
+        '/home': (_) => BlocProvider(
+          create: (_) => di.sl<HomeBloc>(),
+          child: const HomePage(),
+        ),
+        '/bookings': (_) => BlocProvider(
+          create: (_) => di.sl<BookingsBloc>(),
+          child: const MyBookingsPage(),
+        ),
+        '/profile': (_) => const ProfilePage(),
+      },
+    );
+  }
+}
+
+
+/*import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/injection_container.dart' as di;
+import 'package:gp/features/home/presentation/bloc/home_bloc.dart';
+import 'package:gp/features/home/presentation/pages/home_page.dart';
+import 'package:gp/features/profile.dart';
+import 'package:gp/auth/become_professional/pages/professional_details1.dart';
+>>>>>>> 5b1a3d4 (booking done)
+>>>>>>> 77f90fd (booking done)
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
