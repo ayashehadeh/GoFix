@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/features/auth/pages/created.dart';
 import 'package:gp/features/auth/services/auth_service.dart';
 import 'package:gp/core/theme/app_colors.dart';
-import 'package:gp/features/home/presentation/bloc/home_bloc.dart';
-import 'package:gp/injection_container.dart' as di;
 import 'package:gp/l10n/app_localizations.dart';
 
 class VerifyEmailPage extends StatefulWidget {
@@ -32,8 +29,12 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
 
   @override
   void dispose() {
-    for (final c in _controllers) c.dispose();
-    for (final f in _focusNodes) f.dispose();
+    for (final c in _controllers) {
+      c.dispose();
+    }
+    for (final f in _focusNodes) {
+      f.dispose();
+    }
     super.dispose();
   }
 
@@ -156,7 +157,8 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: AppColors.accent, width: 2),
+                          borderSide:
+                              BorderSide(color: AppColors.accent, width: 2),
                         ),
                       ),
                       onChanged: (value) {

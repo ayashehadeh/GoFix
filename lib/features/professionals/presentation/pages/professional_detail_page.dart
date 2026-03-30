@@ -9,7 +9,7 @@ import 'package:gp/features/professionals/domain/entities/professional.dart';
 import 'package:gp/features/professionals/domain/entities/review.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
 import 'package:gp/features/professionals/presentation/widgets/star_rating.dart';
-import 'package:gp/features/Booking/booking.dart';
+import 'package:gp/features/booking/presentation/pages/booking.dart';
 
 class ProfessionalDetailPage extends StatefulWidget {
   final String professionalId;
@@ -275,7 +275,9 @@ class _DetailHeader extends StatelessWidget {
               ),
               _StatItem(
                 icon: Icons.bookmark_border,
-                value: professional.distanceKm!.toStringAsFixed(1),
+                value: professional.distanceKm != null
+                    ? professional.distanceKm!.toStringAsFixed(1)
+                    : 'N/A', // ✅ null-safe fix
                 label: 'KM Away',
               ),
               _StatItem(
