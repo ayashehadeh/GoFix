@@ -52,7 +52,10 @@ class MainApp extends StatelessWidget {
 
       // ── Starting screen ────────────────────────────────────────────────────
       // Option A: Start from Auth flow (recommended — checks login state)
-      home: const StartPage(),
+      home: BlocProvider(
+        create: (_) => di.sl<HomeBloc>(),
+        child: const HomePage(),
+      ),
 
       // Option B: Go straight to Home (useful during development)
       // home: BlocProvider(
