@@ -3,12 +3,6 @@ import 'created.dart';
 import 'package:gp/core/theme/app_colors.dart';
 import 'package:gp/l10n/app_localizations.dart';
 
-/// Email verification screen shown after registration.
-/// The user enters the 4-digit OTP sent to their email address.
-///
-/// NOTE: The "Continue" button currently navigates to [Created] without
-/// verifying the code against the backend (GET /auth/verify-email).
-/// The OTP field controllers and the API call still need to be wired up.
 class VerifyEmailPage extends StatelessWidget {
   const VerifyEmailPage({super.key});
 
@@ -57,8 +51,6 @@ class VerifyEmailPage extends StatelessWidget {
 
               const SizedBox(height: 40),
 
-              // Four single-character OTP input boxes.
-              // TODO: wire up controllers and auto-focus next box on input.
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: List.generate(4, (index) {
@@ -89,7 +81,6 @@ class VerifyEmailPage extends StatelessWidget {
 
               const SizedBox(height: 50),
 
-              // TODO: verify OTP via GET /auth/verify-email before navigating.
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -125,7 +116,6 @@ class VerifyEmailPage extends StatelessWidget {
                     t.didNotReceiveCode,
                     style: TextStyle(color: Colors.grey),
                   ),
-                  // TODO: implement resend OTP request to backend.
                   GestureDetector(
                     onTap: () {},
                     child: Text(

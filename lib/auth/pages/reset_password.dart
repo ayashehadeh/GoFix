@@ -3,11 +3,6 @@ import 'checkurmail.dart';
 import 'package:gp/core/theme/app_colors.dart';
 import 'package:gp/l10n/app_localizations.dart';
 
-/// Step 1 of the password-reset flow.
-/// The user enters their email address and taps "Send instructions".
-///
-/// NOTE: The button currently only navigates to [Checkurmail] — the API call
-/// (POST /auth/reset-password) still needs to be wired up.
 class ResetPassword extends StatelessWidget {
   const ResetPassword({super.key});
 
@@ -102,8 +97,6 @@ class ResetPassword extends StatelessWidget {
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          // TODO: POST /auth/reset-password with the email
-                          // before navigating forward.
                           onPressed: () {
                             Navigator.of(context).push(
                               MaterialPageRoute(

@@ -1,13 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Handles persistent storage of the JWT authentication token and basic user
-/// session data (userId, role) using SharedPreferences.
-///
-/// All methods are static — no instance needed. The stored token is
-/// automatically attached to every outgoing HTTP request by the Dio interceptor
-/// configured in [injection_container.dart].
 class TokenStorage {
-  // SharedPreferences keys for auth data
   static const String _tokenKey = 'auth_token';
   static const String _userIdKey = 'user_id';
   static const String _userRoleKey = 'user_role';

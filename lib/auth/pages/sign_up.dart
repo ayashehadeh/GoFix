@@ -3,12 +3,6 @@ import 'code.dart';
 import 'package:gp/core/theme/app_colors.dart';
 import 'package:gp/l10n/app_localizations.dart';
 
-/// Registration form collecting first name, last name, phone, email, password,
-/// and confirm-password.
-///
-/// NOTE: The "Sign Up" button currently only navigates to [VerifyEmailPage] —
-/// it does not yet call the backend (POST /auth/register). The API call and
-/// form controller wiring still need to be implemented.
 class Signup extends StatelessWidget {
   const Signup({super.key});
 
@@ -152,8 +146,6 @@ class Signup extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      // TODO: validate fields and POST /auth/register before
-                      // navigating to email verification.
                       ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).push(

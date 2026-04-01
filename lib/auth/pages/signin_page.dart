@@ -5,7 +5,6 @@ import 'package:gp/core/theme/app_colors.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'reset_password.dart';
 
-/// Entry point widget for the sign-in screen. Delegates to [LoginPage].
 class SigninPage extends StatelessWidget {
   const SigninPage({super.key});
 
@@ -15,9 +14,6 @@ class SigninPage extends StatelessWidget {
   }
 }
 
-/// Login form that authenticates via POST /auth/login (phone + password).
-/// On success, the JWT token, userId, and role are persisted in [TokenStorage]
-/// and the user is navigated to /home with the back stack cleared.
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -29,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  bool _rememberMe = false;    // UI-only; persistence not yet implemented
+  bool _rememberMe = false;
   bool _isLoading = false;
   bool _obscurePassword = true;
 
@@ -54,9 +50,6 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      // A local Dio instance is created here because this page is shown before
-      // the DI container is fully initialised. Once auth is complete the app
-      // uses the singleton Dio from injection_container.dart for all requests.
       final dio = Dio(
         BaseOptions(
           baseUrl: 'https://your-api.com/api',
@@ -66,7 +59,6 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
 
-      // POST /auth/login — expects { token, userId, role } in the response body
       final response = await dio.post(
         '/auth/login',
         data: {'phone': phone, 'password': password},

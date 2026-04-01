@@ -3,12 +3,6 @@ import 'changed.dart';
 import 'package:gp/core/theme/app_colors.dart';
 import 'package:gp/l10n/app_localizations.dart';
 
-/// Step 3 of the password-reset flow — new password entry form with
-/// client-side validation (min 6 chars, passwords must match).
-///
-/// NOTE: [_resetPassword] currently only validates the form locally and
-/// navigates to [PasswordChangedScreen]. The API call
-/// (POST /auth/change-password) still needs to be wired up.
 class ResetPassword2 extends StatefulWidget {
   const ResetPassword2({super.key});
 
@@ -33,9 +27,6 @@ class _ResetPasswordState extends State<ResetPassword2> {
     super.dispose();
   }
 
-  /// Validates the form; if valid, navigates to the success screen.
-  /// TODO: call POST /auth/change-password with the new password before
-  /// navigating, and pass the reset token received via email.
   void _resetPassword() {
     if (_formKey.currentState!.validate()) {
       Navigator.pushReplacement(

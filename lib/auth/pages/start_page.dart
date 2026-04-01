@@ -4,12 +4,6 @@ import 'signin_page.dart';
 import 'package:gp/core/theme/app_colors.dart';
 import 'package:gp/l10n/app_localizations.dart';
 
-/// App entry point / welcome screen.
-/// Presents Sign In and Sign Up buttons to unauthenticated users.
-///
-/// NOTE: This page does not check [TokenStorage.isLoggedIn] on startup.
-/// If the user already has a valid token they should be redirected directly
-/// to /home instead of being shown this screen again.
 class StartPage extends StatelessWidget {
   const StartPage({super.key});
 

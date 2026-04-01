@@ -3,8 +3,6 @@ import 'start_page.dart';
 import 'package:gp/core/theme/app_colors.dart';
 import 'package:gp/l10n/app_localizations.dart';
 
-/// Account-creation success screen, shown after email verification completes.
-/// "Continue" navigates back to [StartPage] so the user can sign in.
 class Created extends StatelessWidget {
   const Created({super.key});
 
