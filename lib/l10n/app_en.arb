@@ -1,0 +1,62 @@
+{
+  "hello": "Hello",
+  "startSubtitle": "Let’s build something great together!",
+
+  "signIn": "Sign In",
+  "signUp": "Sign Up",
+
+  "welcomeBack": "Welcome back",
+  "quickSignIn": "Just a quick sign-in and you're all set",
+
+  "enterPhone": "Enter your phone number",
+  "phoneHint": "07xxxxxxxx",
+
+  "password": "Password",
+  "confirmPassword": "Confirm Password",
+
+  "rememberMe": "Remember me",
+  "forgotPassword": "Forget password?",
+
+  "newMember": "New Member?",
+  "registerNow": "Register now",
+
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "enterEmail": "Enter your email",
+
+  "alreadyHaveAccount": "Already have an account?",
+  "signInSmall": " Sign in",
+
+  "resetPassword": "Reset Password",
+  "resetPasswordDesc": "Enter the email associated with your account and we’ll send you an email with instructions to reset your password.",
+  "sendInstructions": "Send Instructions",
+
+  "setNewPassword": "Set New Password",
+  "newPassword": "New Password",
+  "createStrongPassword": "Create a strong and unique password.",
+
+  "passwordEmpty": "Password cannot be empty",
+  "passwordTooShort": "Password must be at least 6 characters",
+  "confirmPassword": "Please confirm your password",
+  "passwordNotMatch": "Passwords do not match",
+
+  "accountCreated": "Account Created!",
+  "welcomeToApp": "Welcome to GoFix..",
+  "accountCreatedLine1": "Your account has been created",
+  "successfully": "Successfully!",
+  "continue1": "Continue",
+
+  "verifyEmail": "Verify your E-Mail",
+  "verifyEmailDesc": "Enter the confirmation code we sent to your email.",
+
+  "didNotReceiveCode": "Didn't receive the code?",
+  "sendAgain": "Send Again",
+
+  "checkYourMail": "Check Your Mail",
+  "checkMailDesc": "We have sent you a password recover instructions to your email.",
+  "checkSpam": "Did not receive the email? Check your spam filter.",
+
+  "passwordChanged": "Password Changed!",
+  "noHassle": "No hassle anymore.",
+  "passwordResetLine": "Your password has been reset"
+}

@@ -1,0 +1,62 @@
+{
+  "hello": "مرحباً",
+  "startSubtitle": "لنصنع شيئاً رائعاً معاً!",
+
+  "signIn": "تسجيل الدخول",
+  "signUp": "إنشاء حساب",
+
+  "welcomeBack": "مرحباً بعودتك",
+  "quickSignIn": "تسجيل دخول سريع وتكون جاهزاً",
+
+  "enterPhone": "أدخل رقم هاتفك",
+  "phoneHint": "07xxxxxxxx",
+
+  "password": "كلمة المرور",
+  "confirmPassword": "تأكيد كلمة المرور",
+
+  "rememberMe": "تذكرني",
+  "forgotPassword": "نسيت كلمة المرور؟",
+
+  "newMember": "مستخدم جديد؟",
+  "registerNow": "سجل الآن",
+
+  "firstName": "الاسم الأول",
+  "lastName": "اسم العائلة",
+  "enterEmail": "أدخل بريدك الإلكتروني",
+
+  "alreadyHaveAccount": "لديك حساب بالفعل؟",
+  "signInSmall": " تسجيل الدخول",
+
+  "resetPassword": "إعادة تعيين كلمة المرور",
+  "resetPasswordDesc": "أدخل البريد الإلكتروني المرتبط بحسابك وسنرسل لك تعليمات إعادة تعيين كلمة المرور.",
+  "sendInstructions": "إرسال التعليمات",
+
+  "setNewPassword": "تعيين كلمة مرور جديدة",
+  "newPassword": "كلمة مرور جديدة",
+  "createStrongPassword": "أنشئ كلمة مرور قوية وفريدة.",
+
+  "passwordEmpty": "كلمة المرور لا يمكن أن تكون فارغة",
+  "passwordTooShort": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+  "confirmPasswordRequired": "يرجى تأكيد كلمة المرور",
+  "passwordNotMatch": "كلمتا المرور غير متطابقتين",
+
+  "accountCreated": "تم إنشاء الحساب!",
+  "welcomeToApp": "مرحباً بك في GoFix",
+  "accountCreatedLine1": "تم إنشاء حسابك",
+  "successfully": "بنجاح!",
+  "continue1": "متابعة",
+
+  "verifyEmail": "تأكيد البريد الإلكتروني",
+  "verifyEmailDesc": "أدخل رمز التأكيد الذي أرسلناه إلى بريدك الإلكتروني.",
+
+  "didNotReceiveCode": "لم يصلك الرمز؟",
+  "sendAgain": "إعادة الإرسال",
+
+  "checkYourMail": "تحقق من بريدك الإلكتروني",
+  "checkMailDesc": "لقد أرسلنا لك تعليمات استعادة كلمة المرور على بريدك الإلكتروني.",
+  "checkSpam": "لم يصلك البريد؟ تحقق من مجلد الرسائل غير المرغوب فيها.",
+
+  "passwordChanged": "تم تغيير كلمة المرور!",
+  "noHassle": "لا داعي للقلق بعد الآن.",
+  "passwordResetLine": "تمت إعادة تعيين كلمة المرور"
+}
