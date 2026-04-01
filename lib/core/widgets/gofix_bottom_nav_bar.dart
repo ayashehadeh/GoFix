@@ -19,9 +19,7 @@ class GoFixBottomNavBar extends StatelessWidget {
       height: 70,
       decoration: BoxDecoration(
         color: AppColors.white,
-        border: Border(
-          top: BorderSide(color: AppColors.divider, width: 1),
-        ),
+        border: Border(top: BorderSide(color: AppColors.divider, width: 1)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),

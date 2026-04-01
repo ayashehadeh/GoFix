@@ -1,7 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'reset_password.dart';
+import 'package:gp/core/storage/token_storage.dart';
 import 'package:gp/core/theme/app_colors.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import 'reset_password.dart';
 
 class SigninPage extends StatelessWidget {
   const SigninPage({super.key});
@@ -20,10 +22,84 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
-  bool rememberMe = false;
+  bool _rememberMe = false;
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  // ── Login logic ────────────────────────────────────────────────────────────
+
+  Future<void> _handleLogin() async {
+    final phone = _phoneController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (phone.isEmpty || password.isEmpty) {
+      _showError('Please enter your phone number and password.');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: 'https://your-api.com/api',
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 15),
+          headers: {'Content-Type': 'application/json'},
+        ),
+      );
+
+      final response = await dio.post(
+        '/auth/login',
+        data: {'phone': phone, 'password': password},
+      );
+
+      final data = response.data;
+
+      // Save token and user info
+      await TokenStorage.saveToken(
+        token: data['token'] as String,
+        userId: data['userId'] as String,
+        role: data['role'] as String,
+      );
+
+      if (!mounted) return;
+
+      // Navigate to home and clear the back stack
+      Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+    } on DioException catch (e) {
+      final message =
+          e.response?.data?['message'] as String? ??
+          'Login failed. Please check your credentials.';
+      _showError(message);
+    } catch (e) {
+      _showError('An unexpected error occurred. Please try again.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red.shade700,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  // ── UI ─────────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +126,7 @@ class _LoginPageState extends State<LoginPage> {
 
             Text(
               t.welcomeBack,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -59,7 +135,7 @@ class _LoginPageState extends State<LoginPage> {
 
             const SizedBox(height: 6),
 
-            Text(t.quickSignIn, style: TextStyle(color: Colors.white70)),
+            Text(t.quickSignIn, style: const TextStyle(color: Colors.white70)),
 
             const SizedBox(height: 30),
 
@@ -77,11 +153,14 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(t.enterPhone, style: TextStyle(color: Colors.grey)),
+                      // Phone field
+                      Text(
+                        t.enterPhone,
+                        style: const TextStyle(color: Colors.grey),
+                      ),
                       const SizedBox(height: 8),
-
                       TextField(
-                        controller: phoneController,
+                        controller: _phoneController,
                         keyboardType: TextInputType.phone,
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.phone_android),
@@ -97,14 +176,27 @@ class _LoginPageState extends State<LoginPage> {
 
                       const SizedBox(height: 20),
 
-                      Text(t.password, style: TextStyle(color: Colors.grey)),
+                      // Password field
+                      Text(
+                        t.password,
+                        style: const TextStyle(color: Colors.grey),
+                      ),
                       const SizedBox(height: 8),
-
                       TextField(
-                        controller: passwordController,
-                        obscureText: true,
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.lock),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
+                          ),
                           filled: true,
                           fillColor: Colors.grey.shade100,
                           border: OutlineInputBorder(
@@ -116,15 +208,13 @@ class _LoginPageState extends State<LoginPage> {
 
                       const SizedBox(height: 16),
 
+                      // Remember me + Forgot password
                       Row(
                         children: [
                           Checkbox(
-                            value: rememberMe,
-                            onChanged: (value) {
-                              setState(() {
-                                rememberMe = value!;
-                              });
-                            },
+                            value: _rememberMe,
+                            onChanged: (value) =>
+                                setState(() => _rememberMe = value!),
                           ),
                           Text(t.rememberMe),
                           const Spacer(),
@@ -132,7 +222,7 @@ class _LoginPageState extends State<LoginPage> {
                             onPressed: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (context) => const ResetPassword(),
+                                  builder: (_) => const ResetPassword(),
                                 ),
                               );
                             },
@@ -146,6 +236,7 @@ class _LoginPageState extends State<LoginPage> {
 
                       const SizedBox(height: 20),
 
+                      // Sign In button
                       SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -156,28 +247,35 @@ class _LoginPageState extends State<LoginPage> {
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          onPressed: () {
-                            print(phoneController.text);
-                            print(passwordController.text);
-                          },
-                          child: Text(
-                            t.signIn,
-                            style: TextStyle(
-                              color: Color.fromARGB(255, 255, 255, 255),
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          onPressed: _isLoading ? null : _handleLogin,
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : Text(
+                                  t.signIn,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ),
                       ),
 
                       const SizedBox(height: 20),
 
+                      // Register link
                       Center(
                         child: RichText(
                           text: TextSpan(
                             text: t.newMember,
-                            style: TextStyle(color: Colors.black),
+                            style: const TextStyle(color: Colors.black),
                             children: [
                               TextSpan(
                                 text: t.registerNow,

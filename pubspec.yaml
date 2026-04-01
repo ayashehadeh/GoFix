@@ -21,6 +21,7 @@ dependencies:
   geolocator: ^14.0.2
   get_it: ^9.2.1
   intl: ^0.20.2
+  shared_preferences: ^2.3.2
   url_launcher: ^6.3.2
   image_picker: ^1.0.7
 
@@ -41,5 +42,3 @@ flutter:
     - assets/done.png
   uses-material-design: true
   generate: true
-
- #flutter pub get
