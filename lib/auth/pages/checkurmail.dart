@@ -3,6 +3,9 @@ import 'resetpass2.dart';
 import 'package:gp/core/theme/app_colors.dart';
 import 'package:gp/l10n/app_localizations.dart';
 
+/// Step 2 of the password-reset flow — confirmation screen telling the user to
+/// check their inbox for the reset link/code sent in step 1 ([ResetPassword]).
+/// Navigates to [ResetPassword2] when the user taps "Continue".
 class Checkurmail extends StatelessWidget {
   const Checkurmail({super.key});
 

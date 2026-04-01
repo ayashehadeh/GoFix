@@ -48,7 +48,9 @@ Future<void> init() async {
   final prefs = await SharedPreferences.getInstance();
   sl.registerLazySingleton<SharedPreferences>(() => prefs);
 
-  // Dio with auth token interceptor
+  // Dio HTTP client — single instance shared across the whole app.
+  // Auth token from [TokenStorage] is attached to every outgoing request via
+  // the interceptor below. This is the same base URL used in signin_page.dart.
   sl.registerLazySingleton<Dio>(() {
     final dio = Dio(
       BaseOptions(
@@ -63,6 +65,8 @@ Future<void> init() async {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          // Read the token from SharedPreferences on each request so that a
+          // freshly saved token is always used without restarting the app.
           final token = await TokenStorage.getToken();
           if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
@@ -70,7 +74,9 @@ Future<void> init() async {
           handler.next(options);
         },
         onError: (DioException error, handler) async {
-          // 401 = token expired — clear storage and let the app handle redirect
+          // 401 = token expired or invalid — clear local auth data so the
+          // app can redirect the user to the login screen.
+          // TODO: implement automatic redirect to StartPage on 401.
           if (error.response?.statusCode == 401) {
             await TokenStorage.clear();
           }

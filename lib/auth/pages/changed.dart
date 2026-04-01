@@ -3,6 +3,9 @@ import 'start_page.dart';
 import 'package:gp/core/theme/app_colors.dart';
 import 'package:gp/l10n/app_localizations.dart';
 
+/// Final step of the password-reset flow — success confirmation screen.
+/// "Continue" navigates back to [StartPage] so the user can sign in with
+/// their new password.
 class PasswordChangedScreen extends StatelessWidget {
   const PasswordChangedScreen({super.key});
 
