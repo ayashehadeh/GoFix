@@ -5,6 +5,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/gofix_bottom_nav_bar.dart';
 import '../../../../injection_container.dart';
+import '../../../notifications/presentation/bloc/notifications_bloc.dart';
+import '../../../notifications/presentation/pages/notifications_page.dart';
 import '../../../professionals/domain/entities/service_category.dart';
 import '../../../professionals/presentation/bloc/professionals_bloc.dart';
 import '../../../professionals/presentation/pages/category_professionals_page.dart';
@@ -29,7 +31,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onCategoryTap(CategoryEntity category) {
-    // Map category name to ServiceCategory enum
     final serviceCategory = ServiceCategory.values.firstWhere(
       (e) => e.displayName == category.name,
       orElse: () => ServiceCategory.plumbing,
@@ -41,6 +42,18 @@ class _HomePageState extends State<HomePage> {
         builder: (_) => BlocProvider(
           create: (_) => sl<ProfessionalsBloc>(),
           child: CategoryProfessionalsPage(category: serviceCategory),
+        ),
+      ),
+    );
+  }
+
+  void _onNotificationTap() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider(
+          create: (_) => sl<NotificationsBloc>(),
+          child: const NotificationsPage(),
         ),
       ),
     );
@@ -60,9 +73,7 @@ class _HomePageState extends State<HomePage> {
                 onSearchTap: () {
                   // TODO: Navigate to search page
                 },
-                onNotificationTap: () {
-                  // TODO: Navigate to notifications page
-                },
+                onNotificationTap: _onNotificationTap,
               ),
               Expanded(child: _buildBody(state)),
             ],
@@ -72,7 +83,7 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: GoFixBottomNavBar(
         currentIndex: _currentNavIndex,
         onTap: (index) {
-          if (index == 0) return; // already on home
+          if (index == 0) return;
           if (index == 1) Navigator.pushReplacementNamed(context, '/bookings');
           if (index == 2) Navigator.pushReplacementNamed(context, '/profile');
         },
@@ -178,7 +189,6 @@ class _HomeHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Location + notification row ───────────────────────────
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -215,6 +225,7 @@ class _HomeHeader extends StatelessWidget {
                   ),
                 ],
               ),
+              // Notification bell — navigates to NotificationsPage
               GestureDetector(
                 onTap: onNotificationTap,
                 child: SvgPicture.asset(
@@ -232,7 +243,6 @@ class _HomeHeader extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // ── Search bar ───────────────────────────────────────────
           GestureDetector(
             onTap: onSearchTap,
             child: Container(
