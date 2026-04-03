@@ -83,7 +83,8 @@ class BookingFeedbackPage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => BookingReviewPage(booking: booking),
+                            builder: (_) =>
+                                BookingReviewPage(booking: booking),
                           ),
                         );
                       },
@@ -115,7 +116,8 @@ class BookingFeedbackPage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => BookingReportPage(booking: booking),
+                            builder: (_) =>
+                                BookingReportPage(booking: booking),
                           ),
                         );
                       },
@@ -176,11 +178,8 @@ class _ProfessionalMiniCard extends StatelessWidget {
                 ? NetworkImage(booking.professionalImageUrl!)
                 : null,
             child: booking.professionalImageUrl == null
-                ? const Icon(
-                    Icons.person,
-                    color: AppColors.primaryDark,
-                    size: 26,
-                  )
+                ? const Icon(Icons.person,
+                    color: AppColors.primaryDark, size: 26)
                 : null,
           ),
           const SizedBox(width: 12),
@@ -248,18 +247,13 @@ class _BookingDetailsSummary extends StatelessWidget {
           const SizedBox(height: 12),
           _SummaryRow(icon: Icons.settings, text: booking.serviceName),
           _SummaryRow(
-            icon: Icons.calendar_month_outlined,
-            text: booking.formattedDate,
-          ),
+              icon: Icons.calendar_month_outlined, text: booking.formattedDate),
           _SummaryRow(
-            icon: Icons.access_time_outlined,
-            text: booking.scheduledTime,
-          ),
+              icon: Icons.access_time_outlined, text: booking.scheduledTime),
           _SummaryRow(
-            icon: Icons.location_on_outlined,
-            text: booking.address,
-            isLast: true,
-          ),
+              icon: Icons.location_on_outlined,
+              text: booking.address,
+              isLast: true),
         ],
       ),
     );

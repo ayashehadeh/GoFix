@@ -77,6 +77,46 @@ class BookingsRepositoryImpl implements BookingsRepository {
   }
 
   @override
+  Future<Either<Failure, Booking>> modifyBooking({
+    required String bookingId,
+    required String serviceName,
+    required String servicePrice,
+    required DateTime scheduledDate,
+    required String scheduledTime,
+    required String address,
+    required String description,
+  }) async {
+    try {
+      final result = await remoteDataSource.modifyBooking(
+        bookingId: bookingId,
+        serviceName: serviceName,
+        servicePrice: servicePrice,
+        scheduledDate: scheduledDate,
+        scheduledTime: scheduledTime,
+        address: address,
+        description: description,
+      );
+      return Right(result);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> cancelBooking(String bookingId) async {
+    try {
+      await remoteDataSource.cancelBooking(bookingId);
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> submitReport({
     required String bookingId,
     required String description,

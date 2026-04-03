@@ -21,27 +21,21 @@ class BookingModel extends Booking {
   factory BookingModel.fromJson(Map<String, dynamic> json) {
     return BookingModel(
       id: json['id'] as String,
-      professionalId:
-          json['professionalId'] as String? ??
+      professionalId: json['professionalId'] as String? ??
           json['professional_id'] as String? ??
           '',
-      professionalName:
-          json['professionalName'] as String? ??
+      professionalName: json['professionalName'] as String? ??
           json['professional_name'] as String? ??
           '',
-      professionalRole:
-          json['professionalRole'] as String? ??
+      professionalRole: json['professionalRole'] as String? ??
           json['professional_role'] as String? ??
           '',
-      professionalImageUrl:
-          json['professionalImageUrl'] as String? ??
+      professionalImageUrl: json['professionalImageUrl'] as String? ??
           json['professional_image_url'] as String?,
-      serviceName:
-          json['serviceName'] as String? ??
+      serviceName: json['serviceName'] as String? ??
           json['service_name'] as String? ??
           '',
-      servicePrice:
-          json['servicePrice'] as String? ??
+      servicePrice: json['servicePrice'] as String? ??
           json['service_price'] as String? ??
           '',
       scheduledDate: DateTime.parse(
@@ -49,8 +43,7 @@ class BookingModel extends Booking {
             json['scheduled_date'] as String? ??
             DateTime.now().toIso8601String(),
       ),
-      scheduledTime:
-          json['scheduledTime'] as String? ??
+      scheduledTime: json['scheduledTime'] as String? ??
           json['scheduled_time'] as String? ??
           '',
       address: json['address'] as String? ?? '',
@@ -58,7 +51,9 @@ class BookingModel extends Booking {
       imageUrls: List<String>.from(
         json['imageUrls'] as List? ?? json['image_urls'] as List? ?? [],
       ),
-      status: BookingStatus.fromString(json['status'] as String? ?? 'pending'),
+      status: BookingStatus.fromString(
+        json['status'] as String? ?? 'pending',
+      ),
       createdAt: DateTime.parse(
         json['createdAt'] as String? ??
             json['created_at'] as String? ??
@@ -68,19 +63,19 @@ class BookingModel extends Booking {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'professional_id': professionalId,
-    'professional_name': professionalName,
-    'professional_role': professionalRole,
-    'professional_image_url': professionalImageUrl,
-    'service_name': serviceName,
-    'service_price': servicePrice,
-    'scheduled_date': scheduledDate.toIso8601String(),
-    'scheduled_time': scheduledTime,
-    'address': address,
-    'description': description,
-    'image_urls': imageUrls,
-    'status': status.name,
-    'created_at': createdAt.toIso8601String(),
-  };
+        'id': id,
+        'professional_id': professionalId,
+        'professional_name': professionalName,
+        'professional_role': professionalRole,
+        'professional_image_url': professionalImageUrl,
+        'service_name': serviceName,
+        'service_price': servicePrice,
+        'scheduled_date': scheduledDate.toIso8601String(),
+        'scheduled_time': scheduledTime,
+        'address': address,
+        'description': description,
+        'image_urls': imageUrls,
+        'status': status.name,
+        'created_at': createdAt.toIso8601String(),
+      };
 }

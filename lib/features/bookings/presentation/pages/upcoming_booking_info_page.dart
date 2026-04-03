@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../injection_container.dart' as di;
 import '../../domain/entities/booking.dart';
 import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
 import '../bloc/bookings_state.dart';
-import 'booking_feedback_page.dart';
+import 'cancel_booking_page.dart';
+import 'modify_booking_page.dart';
 
-class BookingInfoPage extends StatefulWidget {
+class UpcomingBookingInfoPage extends StatefulWidget {
   final String bookingId;
 
-  const BookingInfoPage({super.key, required this.bookingId});
+  const UpcomingBookingInfoPage({super.key, required this.bookingId});
 
   @override
-  State<BookingInfoPage> createState() => _BookingInfoPageState();
+  State<UpcomingBookingInfoPage> createState() =>
+      _UpcomingBookingInfoPageState();
 }
 
-class _BookingInfoPageState extends State<BookingInfoPage> {
+class _UpcomingBookingInfoPageState extends State<UpcomingBookingInfoPage> {
   @override
   void initState() {
     super.initState();
@@ -41,46 +44,31 @@ class _BookingInfoPageState extends State<BookingInfoPage> {
         ),
         centerTitle: false,
       ),
-      body: BlocBuilder<BookingsBloc, BookingsState>(
+      body: BlocConsumer<BookingsBloc, BookingsState>(
+        listener: (context, state) {
+          if (state is BookingCancelledSuccess) {
+            // Return to My Bookings and refresh
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          }
+        },
         builder: (context, state) {
           if (state is BookingsLoading) {
             return const Center(
-              child:
-                  CircularProgressIndicator(color: AppColors.primaryOrange),
+              child: CircularProgressIndicator(color: AppColors.primaryOrange),
             );
           }
 
           if (state is BookingsError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline,
-                      color: AppColors.error, size: 48),
-                  const SizedBox(height: 12),
-                  Text(state.message,
-                      style: const TextStyle(
-                          color: AppColors.textSecondary)),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => context
-                        .read<BookingsBloc>()
-                        .add(LoadBookingById(widget.bookingId)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryOrange,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Text('Retry',
-                        style: TextStyle(color: Colors.white)),
-                  ),
-                ],
-              ),
+            return _ErrorBody(
+              message: state.message,
+              onRetry: () => context
+                  .read<BookingsBloc>()
+                  .add(LoadBookingById(widget.bookingId)),
             );
           }
 
           if (state is BookingDetailLoaded) {
-            return _BookingInfoBody(booking: state.booking);
+            return _UpcomingInfoBody(booking: state.booking);
           }
 
           return const SizedBox.shrink();
@@ -92,10 +80,10 @@ class _BookingInfoPageState extends State<BookingInfoPage> {
 
 // ─── Body ─────────────────────────────────────────────────────────────────────
 
-class _BookingInfoBody extends StatelessWidget {
+class _UpcomingInfoBody extends StatelessWidget {
   final Booking booking;
 
-  const _BookingInfoBody({required this.booking});
+  const _UpcomingInfoBody({required this.booking});
 
   @override
   Widget build(BuildContext context) {
@@ -106,42 +94,37 @@ class _BookingInfoBody extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // Professional card
+                // Professional card with favourite icon
                 _ProfessionalCard(booking: booking),
                 const SizedBox(height: 16),
 
-                // Booking details
+                // Booking details card
                 _SectionCard(
                   title: 'Booking Details',
                   child: Column(
                     children: [
                       _DetailRow(
-                        icon: Icons.settings,
-                        text: booking.serviceName,
-                      ),
+                          icon: Icons.settings,
+                          text: booking.serviceName),
                       _DetailRow(
-                        icon: Icons.calendar_month_outlined,
-                        text: booking.formattedDate,
-                      ),
+                          icon: Icons.calendar_month_outlined,
+                          text: booking.formattedDate),
                       _DetailRow(
-                        icon: Icons.access_time_outlined,
-                        text: booking.scheduledTime,
-                      ),
+                          icon: Icons.access_time_outlined,
+                          text: booking.scheduledTime),
                       _DetailRow(
-                        icon: Icons.location_on_outlined,
-                        text: booking.address,
-                      ),
+                          icon: Icons.location_on_outlined,
+                          text: booking.address),
                       _DetailRow(
-                        icon: Icons.attach_money,
-                        text: booking.servicePrice,
-                        isLast: true,
-                      ),
+                          icon: Icons.attach_money,
+                          text: booking.servicePrice,
+                          isLast: true),
                     ],
                   ),
                 ),
                 const SizedBox(height: 16),
 
-                // Service description
+                // Service description card
                 _SectionCard(
                   title: 'Service Description',
                   titleIcon: Icons.edit_outlined,
@@ -162,11 +145,8 @@ class _BookingInfoBody extends StatelessWidget {
                         const SizedBox(height: 14),
                         Row(
                           children: [
-                            const Icon(
-                              Icons.image_outlined,
-                              color: AppColors.primaryDark,
-                              size: 18,
-                            ),
+                            const Icon(Icons.image_outlined,
+                                color: AppColors.primaryDark, size: 18),
                             const SizedBox(width: 6),
                             Text(
                               '${booking.imageUrls.length} picture${booking.imageUrls.length > 1 ? 's' : ''} attached',
@@ -188,14 +168,112 @@ class _BookingInfoBody extends StatelessWidget {
           ),
         ),
 
-        // Bottom action buttons — only show for past bookings
-        if (booking.isPast) _BottomActions(booking: booking),
+        // Bottom action bar
+        _BottomActionBar(booking: booking),
       ],
     );
   }
 }
 
-// ─── Professional card ────────────────────────────────────────────────────────
+// ─── Bottom action bar ────────────────────────────────────────────────────────
+
+class _BottomActionBar extends StatelessWidget {
+  final Booking booking;
+
+  const _BottomActionBar({required this.booking});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
+      child: Row(
+        children: [
+          // Modify Booking — primary wide button
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BlocProvider(
+                      create: (_) => di.sl<BookingsBloc>(),
+                      child: ModifyBookingPage(booking: booking),
+                    ),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryOrange,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(0, 50),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                elevation: 0,
+              ),
+              child: const Text(
+                'Modify Booking',
+                style:
+                    TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+
+          // Cancel / trash icon button
+          _IconActionButton(
+            icon: Icons.delete_outline_rounded,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider.value(
+                    value: context.read<BookingsBloc>(),
+                    child: CancelBookingPage(booking: booking),
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 10),
+
+          // Chat icon button
+          _IconActionButton(
+            icon: Icons.chat_bubble_outline_rounded,
+            onTap: () {
+              // TODO: navigate to chat
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _IconActionButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _IconActionButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.primaryDark, width: 1.5),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(icon, color: AppColors.primaryDark, size: 22),
+      ),
+    );
+  }
+}
+
+// ─── Shared sub-widgets ───────────────────────────────────────────────────────
 
 class _ProfessionalCard extends StatelessWidget {
   final Booking booking;
@@ -254,24 +332,21 @@ class _ProfessionalCard extends StatelessWidget {
               ],
             ),
           ),
-          if (booking.isPast)
-            GestureDetector(
-              onTap: () {
-                // TODO: toggle favourite
-              },
-              child: const Icon(
-                Icons.favorite_border,
-                color: AppColors.primaryOrange,
-                size: 22,
-              ),
+          GestureDetector(
+            onTap: () {
+              // TODO: toggle favourite
+            },
+            child: const Icon(
+              Icons.favorite_border,
+              color: AppColors.primaryOrange,
+              size: 22,
             ),
+          ),
         ],
       ),
     );
   }
 }
-
-// ─── Generic section card ─────────────────────────────────────────────────────
 
 class _SectionCard extends StatelessWidget {
   final String title;
@@ -327,8 +402,6 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
-// ─── Detail row ───────────────────────────────────────────────────────────────
-
 class _DetailRow extends StatelessWidget {
   final IconData icon;
   final String text;
@@ -354,81 +427,44 @@ class _DetailRow extends StatelessWidget {
                 child: Text(
                   text,
                   style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.primaryDark,
-                  ),
+                      fontSize: 14, color: AppColors.primaryDark),
                 ),
               ),
             ],
           ),
         ),
-        if (!isLast)
-          const Divider(height: 1, color: Color(0xFFF0F0F0)),
+        if (!isLast) const Divider(height: 1, color: Color(0xFFF0F0F0)),
       ],
     );
   }
 }
 
-// ─── Bottom actions ───────────────────────────────────────────────────────────
+class _ErrorBody extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
 
-class _BottomActions extends StatelessWidget {
-  final Booking booking;
-
-  const _BottomActions({required this.booking});
+  const _ErrorBody({required this.message, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
-      child: Row(
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {
-                // Navigate back and trigger re-booking with same professional
-                Navigator.pop(context);
-                // TODO: Navigate to booking flow with professionalId pre-filled
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryOrange,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(0, 50),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                elevation: 0,
-              ),
-              child: const Text(
-                'Book Again',
-                style: TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.w700),
-              ),
+          const Icon(Icons.error_outline, color: AppColors.error, size: 48),
+          const SizedBox(height: 12),
+          Text(message,
+              style: const TextStyle(color: AppColors.textSecondary)),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: onRetry,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryOrange,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: OutlinedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BookingFeedbackPage(booking: booking),
-                  ),
-                );
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primaryDark,
-                minimumSize: const Size(0, 50),
-                side: const BorderSide(color: AppColors.primaryDark),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text(
-                'Feedback',
-                style: TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.w700),
-              ),
-            ),
+            child:
+                const Text('Retry', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

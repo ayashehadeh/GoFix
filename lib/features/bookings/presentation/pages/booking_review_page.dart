@@ -163,15 +163,15 @@ class _BookingReviewPageState extends State<BookingReviewPage> {
                           ? null
                           : () {
                               if (_validate()) {
-                                context.read<ProfessionalsBloc>().add(
-                                  AddReviewEvent(
-                                    professionalId:
-                                        widget.booking.professionalId,
-                                    bookingId: widget.booking.id,
-                                    rating: _selectedStars.toDouble(),
-                                    comment: _commentController.text.trim(),
-                                  ),
-                                );
+                                context
+                                    .read<ProfessionalsBloc>()
+                                    .add(AddReviewEvent(
+                                      professionalId:
+                                          widget.booking.professionalId,
+                                      bookingId: widget.booking.id,
+                                      rating: _selectedStars.toDouble(),
+                                      comment: _commentController.text.trim(),
+                                    ));
                               }
                             },
                       style: ElevatedButton.styleFrom(
@@ -216,7 +216,10 @@ class _StarRatingRow extends StatelessWidget {
   final int selectedStars;
   final ValueChanged<int> onStarTap;
 
-  const _StarRatingRow({required this.selectedStars, required this.onStarTap});
+  const _StarRatingRow({
+    required this.selectedStars,
+    required this.onStarTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -255,11 +258,8 @@ class _CommentField extends StatelessWidget {
       decoration: InputDecoration(
         prefixIcon: const Padding(
           padding: EdgeInsets.only(left: 12, right: 8, top: 12),
-          child: Icon(
-            Icons.edit_outlined,
-            color: AppColors.primaryOrange,
-            size: 18,
-          ),
+          child: Icon(Icons.edit_outlined,
+              color: AppColors.primaryOrange, size: 18),
         ),
         prefixIconConstraints: const BoxConstraints(),
         hintText: 'Write your feedback (optional)',
@@ -309,11 +309,8 @@ class _ProfessionalMiniCard extends StatelessWidget {
                 ? NetworkImage(booking.professionalImageUrl!)
                 : null,
             child: booking.professionalImageUrl == null
-                ? const Icon(
-                    Icons.person,
-                    color: AppColors.primaryDark,
-                    size: 26,
-                  )
+                ? const Icon(Icons.person,
+                    color: AppColors.primaryDark, size: 26)
                 : null,
           ),
           const SizedBox(width: 12),
@@ -378,18 +375,14 @@ class _BookingDetailsSummary extends StatelessWidget {
           const SizedBox(height: 12),
           _SummaryRow(icon: Icons.settings, text: booking.serviceName),
           _SummaryRow(
-            icon: Icons.calendar_month_outlined,
-            text: booking.formattedDate,
-          ),
+              icon: Icons.calendar_month_outlined,
+              text: booking.formattedDate),
           _SummaryRow(
-            icon: Icons.access_time_outlined,
-            text: booking.scheduledTime,
-          ),
+              icon: Icons.access_time_outlined, text: booking.scheduledTime),
           _SummaryRow(
-            icon: Icons.location_on_outlined,
-            text: booking.address,
-            isLast: true,
-          ),
+              icon: Icons.location_on_outlined,
+              text: booking.address,
+              isLast: true),
         ],
       ),
     );
@@ -421,9 +414,7 @@ class _SummaryRow extends StatelessWidget {
                 child: Text(
                   text,
                   style: const TextStyle(
-                    fontSize: 13,
-                    color: AppColors.primaryDark,
-                  ),
+                      fontSize: 13, color: AppColors.primaryDark),
                 ),
               ),
             ],

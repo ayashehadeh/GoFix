@@ -10,7 +10,6 @@ class BookingsInitial extends BookingsState {}
 
 class BookingsLoading extends BookingsState {}
 
-// Shown on the My Bookings list page
 class BookingsLoaded extends BookingsState {
   final List<Booking> upcomingBookings;
   final List<Booking> pastBookings;
@@ -26,16 +25,15 @@ class BookingsLoaded extends BookingsState {
       isUpcomingTab ? upcomingBookings : pastBookings;
 
   BookingsLoaded copyWith({bool? isUpcomingTab}) => BookingsLoaded(
-    upcomingBookings: upcomingBookings,
-    pastBookings: pastBookings,
-    isUpcomingTab: isUpcomingTab ?? this.isUpcomingTab,
-  );
+        upcomingBookings: upcomingBookings,
+        pastBookings: pastBookings,
+        isUpcomingTab: isUpcomingTab ?? this.isUpcomingTab,
+      );
 
   @override
   List<Object?> get props => [upcomingBookings, pastBookings, isUpcomingTab];
 }
 
-// Shown on the Booking Info / detail page
 class BookingDetailLoaded extends BookingsState {
   final Booking booking;
   BookingDetailLoaded(this.booking);
@@ -44,7 +42,6 @@ class BookingDetailLoaded extends BookingsState {
   List<Object?> get props => [booking];
 }
 
-// Shown while submitting report / creating booking
 class BookingActionLoading extends BookingsState {}
 
 class BookingActionSuccess extends BookingsState {
@@ -54,6 +51,12 @@ class BookingActionSuccess extends BookingsState {
   @override
   List<Object?> get props => [message];
 }
+
+/// Emitted after a successful cancel — the page pops back to My Bookings.
+class BookingCancelledSuccess extends BookingsState {}
+
+/// Emitted after a successful modify — the success page is shown.
+class BookingModifiedSuccess extends BookingsState {}
 
 class BookingsError extends BookingsState {
   final String message;

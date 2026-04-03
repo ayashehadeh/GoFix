@@ -7,5 +7,6 @@ class GetPastBookings {
   final BookingsRepository repository;
   const GetPastBookings(this.repository);
 
-  Future<Either<Failure, List<Booking>>> call() => repository.getPastBookings();
+  Future<Either<Failure, List<Booking>>> call() =>
+      repository.getPastBookings();
 }

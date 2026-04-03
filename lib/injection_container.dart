@@ -28,12 +28,15 @@ import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.d
 
 // ── Bookings ──────────────────────────────────────────────────────────────────
 import 'package:gp/features/bookings/data/datasources/bookings_remote_datasource.dart';
+import 'package:gp/features/bookings/data/datasources/mock_bookings_datasource.dart';
 import 'package:gp/features/bookings/data/repositories/bookings_repository_impl.dart';
 import 'package:gp/features/bookings/domain/repositories/bookings_repository.dart';
 import 'package:gp/features/bookings/domain/usecases/get_upcoming_bookings.dart';
 import 'package:gp/features/bookings/domain/usecases/get_past_bookings.dart';
 import 'package:gp/features/bookings/domain/usecases/get_booking_by_id.dart';
 import 'package:gp/features/bookings/domain/usecases/create_booking.dart';
+import 'package:gp/features/bookings/domain/usecases/modify_booking.dart';
+import 'package:gp/features/bookings/domain/usecases/cancel_booking.dart';
 import 'package:gp/features/bookings/domain/usecases/submit_report.dart';
 import 'package:gp/features/bookings/presentation/bloc/bookings_bloc.dart';
 
@@ -49,9 +52,17 @@ import 'package:gp/features/notifications/presentation/bloc/notifications_bloc.d
 
 final sl = GetIt.instance;
 
-/// Set to [true] while developing the UI without a backend.
-/// Flip to [false] to switch to the real API implementation.
+// ── Mock flags ────────────────────────────────────────────────────────────────
+// Set to [true] while developing the UI without a running backend.
+// Flip each one to [false] independently when the real API is ready.
+
+/// Controls the bookings feature mock.
+const bool _useMockBookings = true;
+
+/// Controls the notifications feature mock.
 const bool _useMockNotifications = true;
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 Future<void> init() async {
   // ── BLoC ──────────────────────────────────────────────────────────────────
@@ -77,6 +88,8 @@ Future<void> init() async {
       getPastBookings: sl(),
       getBookingById: sl(),
       createBooking: sl(),
+      modifyBooking: sl(),
+      cancelBooking: sl(),
       submitReport: sl(),
     ),
   );
@@ -112,6 +125,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetPastBookings(sl()));
   sl.registerLazySingleton(() => GetBookingById(sl()));
   sl.registerLazySingleton(() => CreateBooking(sl()));
+  sl.registerLazySingleton(() => ModifyBooking(sl()));
+  sl.registerLazySingleton(() => CancelBooking(sl()));
   sl.registerLazySingleton(() => SubmitReport(sl()));
 
   // ── Use Cases — Notifications ──────────────────────────────────────────────
@@ -152,12 +167,14 @@ Future<void> init() async {
     () => ProfessionalsRemoteDataSourceImpl(dio: sl()),
   );
 
+  // Bookings datasource — swap flag to go live
   sl.registerLazySingleton<BookingsRemoteDataSource>(
-    () => BookingsRemoteDataSourceImpl(dio: sl()),
+    () => _useMockBookings
+        ? MockBookingsDataSource()
+        : BookingsRemoteDataSourceImpl(dio: sl()),
   );
 
-  // Notifications datasource — controlled by the flag above.
-  // To go live: set _useMockNotifications = false
+  // Notifications datasource — swap flag to go live
   sl.registerLazySingleton<NotificationsRemoteDataSource>(
     () => _useMockNotifications
         ? MockNotificationsDataSource()

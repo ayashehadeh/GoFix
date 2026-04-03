@@ -176,11 +176,11 @@ class _BookingReportPageState extends State<BookingReportPage> {
                               final fullDescription =
                                   '${_titleController.text.trim()}\n\n${_descriptionController.text.trim()}';
                               context.read<BookingsBloc>().add(
-                                SubmitReportEvent(
-                                  bookingId: widget.booking.id,
-                                  description: fullDescription,
-                                ),
-                              );
+                                    SubmitReportEvent(
+                                      bookingId: widget.booking.id,
+                                      description: fullDescription,
+                                    ),
+                                  );
                             }
                           },
                     style: ElevatedButton.styleFrom(
@@ -228,11 +228,8 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Icon(
-          Icons.edit_outlined,
-          color: AppColors.primaryOrange,
-          size: 16,
-        ),
+        const Icon(Icons.edit_outlined,
+            color: AppColors.primaryOrange, size: 16),
         const SizedBox(width: 6),
         Text(
           label,
@@ -300,7 +297,9 @@ class _ReportTextField extends StatelessWidget {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(
-                color: hasError ? AppColors.error : AppColors.primaryOrange,
+                color: hasError
+                    ? AppColors.error
+                    : AppColors.primaryOrange,
                 width: 1.5,
               ),
             ),
@@ -349,11 +348,8 @@ class _ProfessionalMiniCard extends StatelessWidget {
                 ? NetworkImage(booking.professionalImageUrl!)
                 : null,
             child: booking.professionalImageUrl == null
-                ? const Icon(
-                    Icons.person,
-                    color: AppColors.primaryDark,
-                    size: 26,
-                  )
+                ? const Icon(Icons.person,
+                    color: AppColors.primaryDark, size: 26)
                 : null,
           ),
           const SizedBox(width: 12),
@@ -418,18 +414,14 @@ class _BookingDetailsSummary extends StatelessWidget {
           const SizedBox(height: 12),
           _SummaryRow(icon: Icons.settings, text: booking.serviceName),
           _SummaryRow(
-            icon: Icons.calendar_month_outlined,
-            text: booking.formattedDate,
-          ),
+              icon: Icons.calendar_month_outlined,
+              text: booking.formattedDate),
           _SummaryRow(
-            icon: Icons.access_time_outlined,
-            text: booking.scheduledTime,
-          ),
+              icon: Icons.access_time_outlined, text: booking.scheduledTime),
           _SummaryRow(
-            icon: Icons.location_on_outlined,
-            text: booking.address,
-            isLast: true,
-          ),
+              icon: Icons.location_on_outlined,
+              text: booking.address,
+              isLast: true),
         ],
       ),
     );
@@ -461,9 +453,7 @@ class _SummaryRow extends StatelessWidget {
                 child: Text(
                   text,
                   style: const TextStyle(
-                    fontSize: 13,
-                    color: AppColors.primaryDark,
-                  ),
+                      fontSize: 13, color: AppColors.primaryDark),
                 ),
               ),
             ],

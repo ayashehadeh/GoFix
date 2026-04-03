@@ -84,37 +84,27 @@ class Booking extends Equatable {
 
   String get formattedDate {
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ];
     return '${months[scheduledDate.month - 1]} ${scheduledDate.day}, ${scheduledDate.year}';
   }
 
   @override
   List<Object?> get props => [
-    id,
-    professionalId,
-    professionalName,
-    professionalRole,
-    professionalImageUrl,
-    serviceName,
-    servicePrice,
-    scheduledDate,
-    scheduledTime,
-    address,
-    description,
-    imageUrls,
-    status,
-    createdAt,
-  ];
+        id,
+        professionalId,
+        professionalName,
+        professionalRole,
+        professionalImageUrl,
+        serviceName,
+        servicePrice,
+        scheduledDate,
+        scheduledTime,
+        address,
+        description,
+        imageUrls,
+        status,
+        createdAt,
+      ];
 }

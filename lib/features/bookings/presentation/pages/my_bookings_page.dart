@@ -10,6 +10,7 @@ import '../bloc/bookings_event.dart';
 import '../bloc/bookings_state.dart';
 import '../widgets/booking_list_card.dart';
 import 'booking_info_page.dart';
+import 'upcoming_booking_info_page.dart';
 
 class MyBookingsPage extends StatefulWidget {
   const MyBookingsPage({super.key});
@@ -19,8 +20,6 @@ class MyBookingsPage extends StatefulWidget {
 }
 
 class _MyBookingsPageState extends State<MyBookingsPage> {
-  int _currentNavIndex = 1;
-
   @override
   void initState() {
     super.initState();
@@ -50,17 +49,16 @@ class _MyBookingsPageState extends State<MyBookingsPage> {
                   if (state is BookingsLoading) {
                     return const Center(
                       child: CircularProgressIndicator(
-                        color: AppColors.primaryOrange,
-                      ),
+                          color: AppColors.primaryOrange),
                     );
                   }
 
                   if (state is BookingsError) {
                     return _ErrorBody(
                       message: state.message,
-                      onRetry: () => context.read<BookingsBloc>().add(
-                        LoadUpcomingBookings(),
-                      ),
+                      onRetry: () => context
+                          .read<BookingsBloc>()
+                          .add(LoadUpcomingBookings()),
                     );
                   }
 
@@ -82,7 +80,15 @@ class _MyBookingsPageState extends State<MyBookingsPage> {
                               MaterialPageRoute(
                                 builder: (_) => BlocProvider(
                                   create: (_) => di.sl<BookingsBloc>(),
-                                  child: BookingInfoPage(bookingId: booking.id),
+                                  // Upcoming -> Modify/Cancel flow
+                                  // Past     -> Feedback/Review/Report flow
+                                  child: booking.isUpcoming
+                                      ? UpcomingBookingInfoPage(
+                                          bookingId: booking.id,
+                                        )
+                                      : BookingInfoPage(
+                                          bookingId: booking.id,
+                                        ),
                                 ),
                               ),
                             );
@@ -99,8 +105,7 @@ class _MyBookingsPageState extends State<MyBookingsPage> {
           ],
         ),
       ),
-
-      /*bottomNavigationBar: GoFixBottomNavBar(
+      bottomNavigationBar: GoFixBottomNavBar(
         currentIndex: 1,
         onTap: (index) {
           if (index == 0) {
@@ -118,24 +123,13 @@ class _MyBookingsPageState extends State<MyBookingsPage> {
             Navigator.pushReplacementNamed(context, '/profile');
           }
         },
-      ),*/
-      bottomNavigationBar: GoFixBottomNavBar(
-        currentIndex: _currentNavIndex,
-        onTap: (index) {
-          if (index == 0) Navigator.pushReplacementNamed(context, '/home');
-          if (index == 1) return;
-          if (index == 2) Navigator.pushReplacementNamed(context, '/profile');
-        },
       ),
     );
   }
 }
 
-// ─── Header ───────────────────────────────────────────────────────────────────
-
 class _BookingsHeader extends StatelessWidget {
   final void Function(bool isUpcoming) onSwitchTab;
-
   const _BookingsHeader({required this.onSwitchTab});
 
   @override
@@ -149,36 +143,23 @@ class _BookingsHeader extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'My Bookings',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primaryDark,
-                ),
-              ),
+              const Text('My Bookings',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryDark)),
               Row(
                 children: [
                   GestureDetector(
-                    onTap: () {
-                      // TODO: navigate to favourites
-                    },
-                    child: const Icon(
-                      Icons.favorite_border,
-                      color: AppColors.primaryDark,
-                      size: 24,
-                    ),
+                    onTap: () {},
+                    child: const Icon(Icons.favorite_border,
+                        color: AppColors.primaryDark, size: 24),
                   ),
                   const SizedBox(width: 14),
                   GestureDetector(
-                    onTap: () {
-                      // TODO: navigate to messages
-                    },
-                    child: const Icon(
-                      Icons.chat_bubble_outline,
-                      color: AppColors.primaryDark,
-                      size: 24,
-                    ),
+                    onTap: () {},
+                    child: const Icon(Icons.chat_bubble_outline,
+                        color: AppColors.primaryDark, size: 24),
                   ),
                 ],
               ),
@@ -187,13 +168,10 @@ class _BookingsHeader extends StatelessWidget {
           const SizedBox(height: 16),
           BlocBuilder<BookingsBloc, BookingsState>(
             builder: (context, state) {
-              final isUpcoming = state is BookingsLoaded
-                  ? state.isUpcomingTab
-                  : true;
+              final isUpcoming =
+                  state is BookingsLoaded ? state.isUpcomingTab : true;
               return _TabToggle(
-                isUpcoming: isUpcoming,
-                onSwitchTab: onSwitchTab,
-              );
+                  isUpcoming: isUpcoming, onSwitchTab: onSwitchTab);
             },
           ),
           const SizedBox(height: 4),
@@ -206,7 +184,6 @@ class _BookingsHeader extends StatelessWidget {
 class _TabToggle extends StatelessWidget {
   final bool isUpcoming;
   final void Function(bool) onSwitchTab;
-
   const _TabToggle({required this.isUpcoming, required this.onSwitchTab});
 
   @override
@@ -214,16 +191,14 @@ class _TabToggle extends StatelessWidget {
     return Row(
       children: [
         _TabButton(
-          label: 'Upcoming',
-          isSelected: isUpcoming,
-          onTap: () => onSwitchTab(true),
-        ),
+            label: 'Upcoming',
+            isSelected: isUpcoming,
+            onTap: () => onSwitchTab(true)),
         const SizedBox(width: 8),
         _TabButton(
-          label: 'Past',
-          isSelected: !isUpcoming,
-          onTap: () => onSwitchTab(false),
-        ),
+            label: 'Past',
+            isSelected: !isUpcoming,
+            onTap: () => onSwitchTab(false)),
       ],
     );
   }
@@ -233,12 +208,10 @@ class _TabButton extends StatelessWidget {
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
-
-  const _TabButton({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
+  const _TabButton(
+      {required this.label,
+      required this.isSelected,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -251,23 +224,21 @@ class _TabButton extends StatelessWidget {
           color: isSelected ? AppColors.primaryOrange : Colors.transparent,
           borderRadius: BorderRadius.circular(50),
           border: Border.all(
-            color: isSelected ? AppColors.primaryOrange : AppColors.divider,
-          ),
+              color: isSelected
+                  ? AppColors.primaryOrange
+                  : AppColors.divider),
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: isSelected ? Colors.white : AppColors.textSecondary,
-          ),
-        ),
+        child: Text(label,
+            style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isSelected
+                    ? Colors.white
+                    : AppColors.textSecondary)),
       ),
     );
   }
 }
-
-// ─── Empty / Error states ─────────────────────────────────────────────────────
 
 class _EmptyBody extends StatelessWidget {
   final bool isUpcoming;
@@ -279,20 +250,17 @@ class _EmptyBody extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            isUpcoming ? Icons.calendar_today_outlined : Icons.history,
-            size: 56,
-            color: AppColors.divider,
-          ),
+          Icon(isUpcoming ? Icons.calendar_today_outlined : Icons.history,
+              size: 56, color: AppColors.divider),
           const SizedBox(height: 16),
           Text(
-            isUpcoming ? 'No upcoming bookings' : 'No past bookings yet',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
-            ),
-          ),
+              isUpcoming
+                  ? 'No upcoming bookings'
+                  : 'No past bookings yet',
+              style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary)),
         ],
       ),
     );
@@ -312,21 +280,19 @@ class _ErrorBody extends StatelessWidget {
         children: [
           const Icon(Icons.error_outline, color: AppColors.error, size: 48),
           const SizedBox(height: 12),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: AppColors.textSecondary),
-          ),
+          Text(message,
+              textAlign: TextAlign.center,
+              style:
+                  const TextStyle(color: AppColors.textSecondary)),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: onRetry,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryOrange,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text('Retry', style: TextStyle(color: Colors.white)),
+                backgroundColor: AppColors.primaryOrange,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12))),
+            child: const Text('Retry',
+                style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

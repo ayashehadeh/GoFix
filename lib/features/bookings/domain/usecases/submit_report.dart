@@ -9,5 +9,9 @@ class SubmitReport {
   Future<Either<Failure, void>> call({
     required String bookingId,
     required String description,
-  }) => repository.submitReport(bookingId: bookingId, description: description);
+  }) =>
+      repository.submitReport(
+        bookingId: bookingId,
+        description: description,
+      );
 }

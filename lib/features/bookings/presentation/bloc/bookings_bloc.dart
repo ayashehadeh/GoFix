@@ -3,6 +3,8 @@ import '../../domain/usecases/get_upcoming_bookings.dart';
 import '../../domain/usecases/get_past_bookings.dart';
 import '../../domain/usecases/get_booking_by_id.dart';
 import '../../domain/usecases/create_booking.dart';
+import '../../domain/usecases/modify_booking.dart';
+import '../../domain/usecases/cancel_booking.dart';
 import '../../domain/usecases/submit_report.dart';
 import 'bookings_event.dart';
 import 'bookings_state.dart';
@@ -12,6 +14,8 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
   final GetPastBookings getPastBookings;
   final GetBookingById getBookingById;
   final CreateBooking createBooking;
+  final ModifyBooking modifyBooking;
+  final CancelBooking cancelBooking;
   final SubmitReport submitReport;
 
   BookingsBloc({
@@ -19,6 +23,8 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     required this.getPastBookings,
     required this.getBookingById,
     required this.createBooking,
+    required this.modifyBooking,
+    required this.cancelBooking,
     required this.submitReport,
   }) : super(BookingsInitial()) {
     on<LoadUpcomingBookings>(_onLoadUpcoming);
@@ -26,6 +32,8 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     on<LoadBookingById>(_onLoadBookingById);
     on<SubmitReportEvent>(_onSubmitReport);
     on<CreateBookingEvent>(_onCreateBooking);
+    on<CancelBookingEvent>(_onCancelBooking);
+    on<ModifyBookingEvent>(_onModifyBooking);
   }
 
   Future<void> _onLoadUpcoming(
@@ -33,24 +41,22 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     Emitter<BookingsState> emit,
   ) async {
     emit(BookingsLoading());
-
     final upcomingResult = await getUpcomingBookings();
     final pastResult = await getPastBookings();
 
-    upcomingResult.fold((failure) => emit(BookingsError(failure.message)), (
-      upcoming,
-    ) {
-      pastResult.fold(
-        (failure) => emit(BookingsError(failure.message)),
-        (past) => emit(
-          BookingsLoaded(
+    upcomingResult.fold(
+      (failure) => emit(BookingsError(failure.message)),
+      (upcoming) {
+        pastResult.fold(
+          (failure) => emit(BookingsError(failure.message)),
+          (past) => emit(BookingsLoaded(
             upcomingBookings: upcoming,
             pastBookings: past,
             isUpcomingTab: true,
-          ),
-        ),
-      );
-    });
+          )),
+        );
+      },
+    );
   }
 
   Future<void> _onLoadPast(
@@ -58,8 +64,7 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     Emitter<BookingsState> emit,
   ) async {
     if (state is BookingsLoaded) {
-      final current = state as BookingsLoaded;
-      emit(current.copyWith(isUpcomingTab: false));
+      emit((state as BookingsLoaded).copyWith(isUpcomingTab: false));
       return;
     }
 
@@ -67,20 +72,19 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     final upcomingResult = await getUpcomingBookings();
     final pastResult = await getPastBookings();
 
-    upcomingResult.fold((failure) => emit(BookingsError(failure.message)), (
-      upcoming,
-    ) {
-      pastResult.fold(
-        (failure) => emit(BookingsError(failure.message)),
-        (past) => emit(
-          BookingsLoaded(
+    upcomingResult.fold(
+      (failure) => emit(BookingsError(failure.message)),
+      (upcoming) {
+        pastResult.fold(
+          (failure) => emit(BookingsError(failure.message)),
+          (past) => emit(BookingsLoaded(
             upcomingBookings: upcoming,
             pastBookings: past,
             isUpcomingTab: false,
-          ),
-        ),
-      );
-    });
+          )),
+        );
+      },
+    );
   }
 
   Future<void> _onLoadBookingById(
@@ -127,7 +131,39 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     );
     result.fold(
       (failure) => emit(BookingsError(failure.message)),
-      (booking) => emit(BookingActionSuccess('Booking created successfully')),
+      (_) => emit(BookingActionSuccess('Booking created successfully')),
+    );
+  }
+
+  Future<void> _onCancelBooking(
+    CancelBookingEvent event,
+    Emitter<BookingsState> emit,
+  ) async {
+    emit(BookingActionLoading());
+    final result = await cancelBooking(event.bookingId);
+    result.fold(
+      (failure) => emit(BookingsError(failure.message)),
+      (_) => emit(BookingCancelledSuccess()),
+    );
+  }
+
+  Future<void> _onModifyBooking(
+    ModifyBookingEvent event,
+    Emitter<BookingsState> emit,
+  ) async {
+    emit(BookingActionLoading());
+    final result = await modifyBooking(
+      bookingId: event.bookingId,
+      serviceName: event.serviceName,
+      servicePrice: event.servicePrice,
+      scheduledDate: event.scheduledDate,
+      scheduledTime: event.scheduledTime,
+      address: event.address,
+      description: event.description,
+    );
+    result.fold(
+      (failure) => emit(BookingsError(failure.message)),
+      (_) => emit(BookingModifiedSuccess()),
     );
   }
 }
