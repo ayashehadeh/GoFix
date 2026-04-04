@@ -1,14 +1,14 @@
 import 'package:dartz/dartz.dart';
-import '../../domain/entities/profile_entity.dart';
-import '../../domain/repositories/profile_repository.dart';
-import '../models/profile_model.dart';
+import 'package:gp/features/settings/domain/entities/profile_entity.dart';
+import 'package:gp/features/settings/domain/repositories/profile_repository.dart';
+import 'package:gp/features/settings/data/models/profile_model.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<Either<String, ProfileEntity>> getProfile() async {
     try {
       await Future.delayed(const Duration(milliseconds: 300));
-      return const Right(ProfileModel(
+      return Right(ProfileModel(
         name: 'Hazim Amir',
         phone: '+9627xxxxxx52',
         email: 'haz***@gmail.com',

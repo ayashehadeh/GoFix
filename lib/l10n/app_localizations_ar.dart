@@ -12,7 +12,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get hello => 'مرحباً';
 
   @override
-  String get startSubtitle => 'لنصنع شيئاً رائعاً معاً!';
+  String get startSubtitle => 'لنصنع شيئاً رائعاً معاً';
 
   @override
   String get signIn => 'تسجيل الدخول';
@@ -69,8 +69,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resetPassword => 'إعادة تعيين كلمة المرور';
 
   @override
-  String get resetPasswordDesc =>
-      'أدخل البريد الإلكتروني المرتبط بحسابك وسنرسل لك تعليمات إعادة تعيين كلمة المرور.';
+  String get resetPasswordDesc => 'أدخل البريد الإلكتروني المرتبط بحسابك وسنرسل لك تعليمات إعادة تعيين كلمة المرور.';
 
   @override
   String get sendInstructions => 'إرسال التعليمات';
@@ -115,8 +114,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get verifyEmail => 'تأكيد البريد الإلكتروني';
 
   @override
-  String get verifyEmailDesc =>
-      'أدخل رمز التأكيد الذي أرسلناه إلى بريدك الإلكتروني.';
+  String get verifyEmailDesc => 'أدخل رمز التأكيد الذي أرسلناه إلى بريدك الإلكتروني.';
 
   @override
   String get didNotReceiveCode => 'لم يصلك الرمز؟';
@@ -128,12 +126,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get checkYourMail => 'تحقق من بريدك الإلكتروني';
 
   @override
-  String get checkMailDesc =>
-      'لقد أرسلنا لك تعليمات استعادة كلمة المرور على بريدك الإلكتروني.';
+  String get checkMailDesc => 'لقد أرسلنا لك تعليمات استعادة كلمة المرور على بريدك الإلكتروني.';
 
   @override
-  String get checkSpam =>
-      'لم يصلك البريد؟ تحقق من مجلد الرسائل غير المرغوب فيها.';
+  String get checkSpam => 'لم يصلك البريد؟ تحقق من مجلد الرسائل غير المرغوب فيها.';
 
   @override
   String get passwordChanged => 'تم تغيير كلمة المرور!';
@@ -143,4 +139,121 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get passwordResetLine => 'تمت إعادة تعيين كلمة المرور';
+
+  @override
+  String get yourAccount => 'حسابك';
+
+  @override
+  String get personalInformation => 'المعلومات الشخصية';
+
+  @override
+  String get notifications => 'الإشعارات';
+
+  @override
+  String get yourAddresses => 'عناوينك';
+
+  @override
+  String get deleteAccount => 'حذف الحساب';
+
+  @override
+  String get logOut => 'تسجيل الخروج';
+
+  @override
+  String get support => 'الدعم';
+
+  @override
+  String get helpAndSupport => 'المساعدة والدعم';
+
+  @override
+  String get becomeAProfessional => 'كن محترفاً';
+
+  @override
+  String get sendFeedback => 'إرسال ملاحظات';
+
+  @override
+  String get preferences => 'التفضيلات';
+
+  @override
+  String get language => 'اللغة';
+
+  @override
+  String get selectLanguage => 'اختر اللغة';
+
+  @override
+  String get chooseLanguage => 'اختر لغتك المفضلة';
+
+  @override
+  String get english => 'الإنجليزية';
+
+  @override
+  String get arabic => 'العربية';
+
+  @override
+  String get done => 'تم';
+
+  @override
+  String get logOutTitle => 'تسجيل الخروج';
+
+  @override
+  String get logOutMessage => 'هل أنت متأكد أنك تريد تسجيل الخروج من حسابك؟';
+
+  @override
+  String get cancel => 'إلغاء';
+
+  @override
+  String get deleteAccountTitle => 'حذف الحساب';
+
+  @override
+  String get deleteAccountMessage => 'هل أنت متأكد أنك تريد حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get yesDelete => 'نعم، احذف الحساب';
+
+  @override
+  String get noKeep => 'لا، احتفظ بالحساب';
+
+  @override
+  String get rateExperience => 'قيّم تجربتك';
+
+  @override
+  String get feedbackHelps => 'ملاحظاتك تساعدنا على التحسين';
+
+  @override
+  String get shareFeedback => 'شارك أفكارك حول التطبيق.';
+
+  @override
+  String get submit => 'إرسال';
+
+  @override
+  String get thankYouFeedback => 'شكراً على ملاحظاتك!';
+
+  @override
+  String get helpTitle => 'المساعدة والدعم';
+
+  @override
+  String get contactUs => 'تواصل معنا';
+
+  @override
+  String get faq1Q => 'كيف أحجز خدمة؟';
+
+  @override
+  String get faq1A => 'اذهب إلى الشاشة الرئيسية، اختر فئة، اختر محترفاً واضغط احجز الآن.';
+
+  @override
+  String get faq2Q => 'كيف ألغي حجزاً؟';
+
+  @override
+  String get faq2A => 'اذهب إلى حجوزاتك، اختر الحجز واضغط إلغاء.';
+
+  @override
+  String get faq3Q => 'كيف أتواصل مع المحترف؟';
+
+  @override
+  String get faq3A => 'بعد الحجز يمكنك مراسلة المحترف مباشرة من تفاصيل الحجز.';
+
+  @override
+  String get faq4Q => 'كيف أبلغ عن مشكلة؟';
+
+  @override
+  String get faq4A => 'اذهب إلى المساعدة والدعم واضغط إرسال ملاحظات للإبلاغ عن أي مشاكل.';
 }
