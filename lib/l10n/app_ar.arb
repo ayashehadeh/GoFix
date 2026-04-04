@@ -1,62 +1,85 @@
 {
   "hello": "مرحباً",
   "startSubtitle": "لنصنع شيئاً رائعاً معاً!",
-
   "signIn": "تسجيل الدخول",
   "signUp": "إنشاء حساب",
-
   "welcomeBack": "مرحباً بعودتك",
   "quickSignIn": "تسجيل دخول سريع وتكون جاهزاً",
-
   "enterPhone": "أدخل رقم هاتفك",
   "phoneHint": "07xxxxxxxx",
-
   "password": "كلمة المرور",
   "confirmPassword": "تأكيد كلمة المرور",
-
   "rememberMe": "تذكرني",
   "forgotPassword": "نسيت كلمة المرور؟",
-
   "newMember": "مستخدم جديد؟",
   "registerNow": "سجل الآن",
-
   "firstName": "الاسم الأول",
   "lastName": "اسم العائلة",
   "enterEmail": "أدخل بريدك الإلكتروني",
-
   "alreadyHaveAccount": "لديك حساب بالفعل؟",
   "signInSmall": " تسجيل الدخول",
-
   "resetPassword": "إعادة تعيين كلمة المرور",
   "resetPasswordDesc": "أدخل البريد الإلكتروني المرتبط بحسابك وسنرسل لك تعليمات إعادة تعيين كلمة المرور.",
   "sendInstructions": "إرسال التعليمات",
-
   "setNewPassword": "تعيين كلمة مرور جديدة",
   "newPassword": "كلمة مرور جديدة",
   "createStrongPassword": "أنشئ كلمة مرور قوية وفريدة.",
-
   "passwordEmpty": "كلمة المرور لا يمكن أن تكون فارغة",
   "passwordTooShort": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
   "confirmPasswordRequired": "يرجى تأكيد كلمة المرور",
   "passwordNotMatch": "كلمتا المرور غير متطابقتين",
-
   "accountCreated": "تم إنشاء الحساب!",
   "welcomeToApp": "مرحباً بك في GoFix",
   "accountCreatedLine1": "تم إنشاء حسابك",
   "successfully": "بنجاح!",
   "continue1": "متابعة",
-
   "verifyEmail": "تأكيد البريد الإلكتروني",
   "verifyEmailDesc": "أدخل رمز التأكيد الذي أرسلناه إلى بريدك الإلكتروني.",
-
   "didNotReceiveCode": "لم يصلك الرمز؟",
   "sendAgain": "إعادة الإرسال",
-
   "checkYourMail": "تحقق من بريدك الإلكتروني",
   "checkMailDesc": "لقد أرسلنا لك تعليمات استعادة كلمة المرور على بريدك الإلكتروني.",
   "checkSpam": "لم يصلك البريد؟ تحقق من مجلد الرسائل غير المرغوب فيها.",
-
   "passwordChanged": "تم تغيير كلمة المرور!",
   "noHassle": "لا داعي للقلق بعد الآن.",
-  "passwordResetLine": "تمت إعادة تعيين كلمة المرور"
+  "passwordResetLine": "تمت إعادة تعيين كلمة المرور",
+  "yourAccount": "حسابك",
+  "personalInformation": "المعلومات الشخصية",
+  "notifications": "الإشعارات",
+  "yourAddresses": "عناوينك",
+  "deleteAccount": "حذف الحساب",
+  "logOut": "تسجيل الخروج",
+  "support": "الدعم",
+  "helpAndSupport": "المساعدة والدعم",
+  "becomeAProfessional": "كن محترفاً",
+  "sendFeedback": "إرسال ملاحظات",
+  "preferences": "التفضيلات",
+  "language": "اللغة",
+  "selectLanguage": "اختر اللغة",
+  "chooseLanguage": "اختر لغتك المفضلة",
+  "english": "الإنجليزية",
+  "arabic": "العربية",
+  "done": "تم",
+  "logOutTitle": "تسجيل الخروج",
+  "logOutMessage": "هل أنت متأكد أنك تريد تسجيل الخروج من حسابك؟",
+  "cancel": "إلغاء",
+  "deleteAccountTitle": "حذف الحساب",
+  "deleteAccountMessage": "هل أنت متأكد أنك تريد حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.",
+  "yesDelete": "نعم، احذف الحساب",
+  "noKeep": "لا، احتفظ بالحساب",
+  "rateExperience": "قيّم تجربتك",
+  "feedbackHelps": "ملاحظاتك تساعدنا على التحسين",
+  "shareFeedback": "شارك أفكارك حول التطبيق.",
+  "submit": "إرسال",
+  "thankYouFeedback": "شكراً على ملاحظاتك!",
+  "helpTitle": "المساعدة والدعم",
+  "contactUs": "تواصل معنا",
+  "faq1Q": "كيف أحجز خدمة؟",
+  "faq1A": "اذهب إلى الشاشة الرئيسية، اختر فئة، اختر محترفاً واضغط احجز الآن.",
+  "faq2Q": "كيف ألغي حجزاً؟",
+  "faq2A": "اذهب إلى حجوزاتك، اختر الحجز واضغط إلغاء.",
+  "faq3Q": "كيف أتواصل مع المحترف؟",
+  "faq3A": "بعد الحجز يمكنك مراسلة المحترف مباشرة من تفاصيل الحجز.",
+  "faq4Q": "كيف أبلغ عن مشكلة؟",
+  "faq4A": "اذهب إلى المساعدة والدعم واضغط إرسال ملاحظات للإبلاغ عن أي مشاكل."
 }
