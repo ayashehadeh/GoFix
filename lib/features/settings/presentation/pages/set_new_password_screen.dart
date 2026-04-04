@@ -81,8 +81,10 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                   const SizedBox(height: 8),
                   Text('Set New Password', style: AppTextStyles.heading1),
                   const SizedBox(height: 6),
-                  Text('Create a unique password.',
-                      style: AppTextStyles.bodySmall),
+                  Text(
+                    'Create a unique password.',
+                    style: AppTextStyles.bodySmall,
+                  ),
                   const SizedBox(height: 32),
                   PasswordField(
                     controller: _newPasswordController,

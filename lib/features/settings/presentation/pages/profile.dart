@@ -817,8 +817,9 @@ class _ProfilePageState extends State<ProfilePage> {
             currentIndex: 2,
             onTap: (index) {
               if (index == 0) Navigator.pushReplacementNamed(context, '/home');
-              if (index == 1)
+              if (index == 1) {
                 Navigator.pushReplacementNamed(context, '/bookings');
+              }
               if (index == 2) return;
             },
           ),
