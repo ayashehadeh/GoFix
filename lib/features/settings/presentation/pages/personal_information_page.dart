@@ -33,14 +33,16 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
     final result = await _repo.getProfile();
     result.fold(
       (err) => setState(() => _loading = false),
-      (profile) => setState(() {
-        name = profile.name;
-        phone = profile.phone;
-        email = profile.email;
-        dob = profile.dateOfBirth;
-        gender = profile.gender;
-        _loading = false;
-      }),
+      (profile) {
+        setState(() {
+          name = profile.name;
+          phone = profile.phone;
+          email = profile.email;
+          dob = profile.dateOfBirth;
+          gender = profile.gender;
+          _loading = false;
+        });
+      },
     );
   }
 
@@ -48,10 +50,10 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
     final result = await _repo.updateName(val);
     result.fold(
       (err) => _showSnackbar(err, success: false),
-      (_) => setState(() {
-        name = val;
+      (_) {
+        setState(() => name = val);
         _showSnackbar('Name updated successfully ✓');
-      }),
+      },
     );
   }
 
@@ -59,10 +61,10 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
     final result = await _repo.updatePhone(val);
     result.fold(
       (err) => _showSnackbar(err, success: false),
-      (_) => setState(() {
-        phone = val;
+      (_) {
+        setState(() => phone = val);
         _showSnackbar('Phone updated successfully ✓');
-      }),
+      },
     );
   }
 
@@ -70,10 +72,10 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
     final result = await _repo.updateEmail(val);
     result.fold(
       (err) => _showSnackbar(err, success: false),
-      (_) => setState(() {
-        email = val;
+      (_) {
+        setState(() => email = val);
         _showSnackbar('Email updated successfully ✓');
-      }),
+      },
     );
   }
 
@@ -81,10 +83,10 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
     final result = await _repo.updateDateOfBirth(val);
     result.fold(
       (err) => _showSnackbar(err, success: false),
-      (_) => setState(() {
-        dob = val;
+      (_) {
+        setState(() => dob = val);
         _showSnackbar('Date of birth updated successfully ✓');
-      }),
+      },
     );
   }
 
@@ -92,10 +94,10 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
     final result = await _repo.updateGender(val);
     result.fold(
       (err) => _showSnackbar(err, success: false),
-      (_) => setState(() {
-        gender = val;
+      (_) {
+        setState(() => gender = val);
         _showSnackbar('Gender updated successfully ✓');
-      }),
+      },
     );
   }
 
