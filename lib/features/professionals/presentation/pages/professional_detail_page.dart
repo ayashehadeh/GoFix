@@ -9,6 +9,7 @@ import 'package:gp/features/professionals/domain/entities/professional.dart';
 import 'package:gp/features/professionals/domain/entities/review.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
 import 'package:gp/features/professionals/presentation/widgets/star_rating.dart';
+import 'package:gp/features/booking/presentation/pages/booking.dart';
 
 class ProfessionalDetailPage extends StatefulWidget {
   final String professionalId;
@@ -16,8 +17,7 @@ class ProfessionalDetailPage extends StatefulWidget {
   const ProfessionalDetailPage({super.key, required this.professionalId});
 
   @override
-  State<ProfessionalDetailPage> createState() =>
-      _ProfessionalDetailPageState();
+  State<ProfessionalDetailPage> createState() => _ProfessionalDetailPageState();
 }
 
 class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
@@ -52,7 +52,6 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                 backgroundColor: AppColors.primaryOrange,
               ),
             );
-            // Stay on detail page with updated data
             context
                 .read<ProfessionalsBloc>()
                 .add(LoadProfessionalDetail(widget.professionalId));
@@ -61,8 +60,7 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
         builder: (context, state) {
           if (state is ProfessionalsLoading) {
             return const Center(
-              child:
-                  CircularProgressIndicator(color: AppColors.primaryOrange),
+              child: CircularProgressIndicator(color: AppColors.primaryOrange),
             );
           }
 
@@ -70,14 +68,12 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
             return Center(child: Text(state.message));
           }
 
-          if (state is ProfessionalDetailLoaded ||
-              state is ReviewsLoading) {
+          if (state is ProfessionalDetailLoaded || state is ReviewsLoading) {
             final professional = state is ProfessionalDetailLoaded
                 ? state.professional
                 : (state as ReviewsLoading).professional;
-            final reviews = state is ProfessionalDetailLoaded
-                ? state.reviews
-                : <Review>[];
+            final reviews =
+                state is ProfessionalDetailLoaded ? state.reviews : <Review>[];
 
             return Column(
               children: [
@@ -91,16 +87,15 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                 // ── Tabs ────────────────────────────────────────
                 Container(
                   color: AppColors.white,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: List.generate(_tabs.length, (index) {
                         final selected = _selectedTab == index;
                         return GestureDetector(
-                          onTap: () =>
-                              setState(() => _selectedTab = index),
+                          onTap: () => setState(() => _selectedTab = index),
                           child: Container(
                             margin: const EdgeInsets.only(right: 10),
                             padding: const EdgeInsets.symmetric(
@@ -143,7 +138,17 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                 // ── Bottom Actions ───────────────────────────────
                 _BottomActions(
                   onBookNow: () {
-                    // TODO: Navigate to booking flow
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SelectServiceScreen(
+                          professionalName: professional.name,
+                          professionalRole:
+                              'Professional ${professional.category.displayName}',
+                          professionalId: professional.id,
+                        ),
+                      ),
+                    );
                   },
                   onMessage: () {
                     // TODO: Navigate to chat
@@ -213,7 +218,6 @@ class _DetailHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Back + Favorite
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -235,7 +239,6 @@ class _DetailHeader extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          // Profile image
           CircleAvatar(
             radius: 46,
             backgroundColor: AppColors.surface,
@@ -262,7 +265,6 @@ class _DetailHeader extends StatelessWidget {
             style: const TextStyle(color: Colors.white70, fontSize: 13),
           ),
           const SizedBox(height: 16),
-          // Stats row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -273,7 +275,9 @@ class _DetailHeader extends StatelessWidget {
               ),
               _StatItem(
                 icon: Icons.bookmark_border,
-                value: professional.distanceKm.toStringAsFixed(1),
+                value: professional.distanceKm != null
+                    ? professional.distanceKm!.toStringAsFixed(1)
+                    : 'N/A', // ✅ null-safe fix
                 label: 'KM Away',
               ),
               _StatItem(
@@ -342,14 +346,12 @@ class _AboutTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // About Me
         _SectionCard(
           icon: Icons.person_outline,
           title: 'About Me',
           child: Text(professional.bio, style: AppTextStyles.bodySmall),
         ),
         const SizedBox(height: 16),
-        // Service Areas
         _SectionCard(
           icon: Icons.bookmark_border,
           title: 'Service Areas',
@@ -371,7 +373,6 @@ class _AboutTab extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        // Working Hours
         _SectionCard(
           icon: Icons.access_time,
           title: 'Working Hours',
@@ -384,8 +385,8 @@ class _AboutTab extends StatelessWidget {
                         children: [
                           Text(s.day, style: AppTextStyles.bodySmall),
                           Text(s.timeRange,
-                              style: AppTextStyles.bodySmall.copyWith(
-                                  fontWeight: FontWeight.w600)),
+                              style: AppTextStyles.bodySmall
+                                  .copyWith(fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ))
@@ -412,8 +413,8 @@ class _ServicesTab extends StatelessWidget {
         children: professional.services
             .map((service) => Container(
                   margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
                     color: AppColors.surface,
                     borderRadius: BorderRadius.circular(10),
@@ -444,8 +445,7 @@ class _ReviewsTab extends StatelessWidget {
   final Professional professional;
   final List<Review> reviews;
 
-  const _ReviewsTab(
-      {required this.professional, required this.reviews});
+  const _ReviewsTab({required this.professional, required this.reviews});
 
   @override
   Widget build(BuildContext context) {
@@ -455,7 +455,6 @@ class _ReviewsTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Rating summary
           Row(
             children: [
               Column(
@@ -476,8 +475,7 @@ class _ReviewsTab extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [5, 4, 3, 2, 1].map((star) {
-                    final count =
-                        professional.ratingBreakdown[star] ?? 0;
+                    final count = professional.ratingBreakdown[star] ?? 0;
                     final total = professional.reviewCount == 0
                         ? 1
                         : professional.reviewCount;
@@ -485,8 +483,7 @@ class _ReviewsTab extends StatelessWidget {
                       children: [
                         Text('$star', style: AppTextStyles.bodySmall),
                         const SizedBox(width: 4),
-                        const Icon(Icons.star,
-                            color: AppColors.star, size: 12),
+                        const Icon(Icons.star, color: AppColors.star, size: 12),
                         const SizedBox(width: 6),
                         Expanded(
                           child: ClipRRect(
@@ -510,7 +507,6 @@ class _ReviewsTab extends StatelessWidget {
           const SizedBox(height: 16),
           const Divider(color: AppColors.divider),
           const SizedBox(height: 8),
-          // Reviews list
           ...reviews.map((review) => _ReviewItem(review: review)),
         ],
       ),
@@ -545,14 +541,12 @@ class _ReviewItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(review.reviewerName,
-                      style: AppTextStyles.bodyMedium),
+                  Text(review.reviewerName, style: AppTextStyles.bodyMedium),
                   Row(
                     children: [
                       StarRating(rating: review.rating, size: 13),
                       const SizedBox(width: 6),
-                      Text(review.timeAgo,
-                          style: AppTextStyles.bodySmall),
+                      Text(review.timeAgo, style: AppTextStyles.bodySmall),
                     ],
                   ),
                 ],
@@ -578,35 +572,65 @@ class _CertificationsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final certifications = professional.certifications;
+
     return Column(
       children: [
         _SectionCard(
           icon: Icons.description_outlined,
           title: 'Professional Certifications',
-          child: Column(
-            children: professional.certifications
-                .map((cert) => Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            cert.name,
-                            style: AppTextStyles.bodyMedium.copyWith(
-                                color: AppColors.primaryOrange),
-                          ),
-                          Text(cert.issuedLabel,
-                              style: AppTextStyles.bodySmall),
-                        ],
-                      ),
-                    ))
-                .toList(),
-          ),
+          child: certifications.isEmpty
+              ? Text('No certifications uploaded yet.',
+                  style: AppTextStyles.bodySmall)
+              : Column(
+                  children: certifications
+                      .map((doc) => Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.description_outlined,
+                                    color: AppColors.primaryOrange, size: 20),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(doc.name,
+                                          style: AppTextStyles.bodyMedium
+                                              .copyWith(
+                                                  color:
+                                                      AppColors.primaryOrange)),
+                                      if (doc.issuedBy != null)
+                                        Text(doc.issuedBy!,
+                                            style: AppTextStyles.bodySmall),
+                                      if (doc.issuedLabel.isNotEmpty)
+                                        Text(doc.issuedLabel,
+                                            style: AppTextStyles.bodySmall),
+                                    ],
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.open_in_new,
+                                      color: AppColors.primaryOrange, size: 20),
+                                  onPressed: () async {
+                                    final uri = Uri.parse(doc.fileUrl);
+                                    if (await canLaunchUrl(uri)) {
+                                      await launchUrl(uri,
+                                          mode: LaunchMode.externalApplication);
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ))
+                      .toList(),
+                ),
         ),
         const SizedBox(height: 16),
         _SectionCard(
@@ -709,7 +733,6 @@ class _BottomActions extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          // Message button
           GestureDetector(
             onTap: onMessage,
             child: Container(
@@ -725,7 +748,6 @@ class _BottomActions extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          // Call button
           GestureDetector(
             onTap: onCall,
             child: Container(

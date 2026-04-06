@@ -194,6 +194,7 @@ Future<void> init() async {
       ),
     );
 
+    // Interceptor — automatically attaches JWT token to every request
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
@@ -204,6 +205,7 @@ Future<void> init() async {
           return handler.next(options);
         },
         onError: (error, handler) {
+          // 401 means token expired — clear storage so user gets redirected to login
           if (error.response?.statusCode == 401) {
             TokenStorage.clear();
           }

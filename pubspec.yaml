@@ -1,10 +1,10 @@
-name: gp
+﻿name: gp
 description: "A new Flutter project."
 publish_to: 'none'
 version: 0.1.0
 
 environment:
-  sdk: ^3.9.2
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   blur: ^3.1.0
@@ -13,17 +13,21 @@ dependencies:
   equatable: ^2.0.8
   flutter:
     sdk: flutter
-  flutter_bloc: ^9.1.1
   flutter_localizations:
     sdk: flutter
+  flutter_bloc: ^9.1.1
   flutter_svg: ^2.2.3
   geocoding: ^4.0.0
   geolocator: ^14.0.2
   get_it: ^9.2.1
+  image_picker: ^1.1.2
   intl: ^0.20.2
   shared_preferences: ^2.3.2
   url_launcher: ^6.3.2
-  image_picker: ^1.0.7
+  shared_preferences: ^2.5.4
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  uuid: ^4.5.1
 
 dev_dependencies:
   flutter_test:
@@ -40,5 +44,7 @@ flutter:
     - assets/email_verification.png
     - assets/account_verified.png
     - assets/done.png
+    - assets/successbook.png
+
   uses-material-design: true
   generate: true

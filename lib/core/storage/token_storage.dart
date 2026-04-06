@@ -48,4 +48,8 @@ class TokenStorage {
     await prefs.remove(_userIdKey);
     await prefs.remove(_userRoleKey);
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7cb56b76def373e493976b300645a6599eeb54ae

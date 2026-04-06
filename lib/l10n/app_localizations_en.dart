@@ -12,7 +12,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hello => 'Hello';
 
   @override
-  String get startSubtitle => 'Let’s build something great together!';
+  String get startSubtitle => 'Lets build something great together!';
 
   @override
   String get signIn => 'Sign In';
@@ -24,7 +24,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomeBack => 'Welcome back';
 
   @override
-  String get quickSignIn => 'Just a quick sign-in and you\'re all set';
+  String get quickSignIn => 'Just a quick sign-in and you are all set';
 
   @override
   String get enterPhone => 'Enter your phone number';
@@ -69,8 +69,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetPassword => 'Reset Password';
 
   @override
-  String get resetPasswordDesc =>
-      'Enter the email associated with your account and we’ll send you an email with instructions to reset your password.';
+  String get resetPasswordDesc => 'Enter the email associated with your account and we will send you an email with instructions to reset your password.';
 
   @override
   String get sendInstructions => 'Send Instructions';
@@ -115,11 +114,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verifyEmail => 'Verify your E-Mail';
 
   @override
-  String get verifyEmailDesc =>
-      'Enter the confirmation code we sent to your email.';
+  String get verifyEmailDesc => 'Enter the confirmation code we sent to your email.';
 
   @override
-  String get didNotReceiveCode => 'Didn\'t receive the code?';
+  String get didNotReceiveCode => 'Did not receive the code?';
 
   @override
   String get sendAgain => 'Send Again';
@@ -128,8 +126,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkYourMail => 'Check Your Mail';
 
   @override
-  String get checkMailDesc =>
-      'We have sent you a password recover instructions to your email.';
+  String get checkMailDesc => 'We have sent you a password recover instructions to your email.';
 
   @override
   String get checkSpam => 'Did not receive the email? Check your spam filter.';
@@ -142,4 +139,121 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get passwordResetLine => 'Your password has been reset';
+
+  @override
+  String get yourAccount => 'Your account';
+
+  @override
+  String get personalInformation => 'Personal information';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get yourAddresses => 'Your addresses';
+
+  @override
+  String get deleteAccount => 'Delete account';
+
+  @override
+  String get logOut => 'Log out';
+
+  @override
+  String get support => 'Support';
+
+  @override
+  String get helpAndSupport => 'Help and Support';
+
+  @override
+  String get becomeAProfessional => 'Become a professional';
+
+  @override
+  String get sendFeedback => 'Send Feedback';
+
+  @override
+  String get preferences => 'Preferences';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get selectLanguage => 'Select Language';
+
+  @override
+  String get chooseLanguage => 'Choose your preferred language';
+
+  @override
+  String get english => 'English';
+
+  @override
+  String get arabic => 'Arabic';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get logOutTitle => 'Log Out';
+
+  @override
+  String get logOutMessage => 'Are you sure you want to log out from your account?';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get deleteAccountTitle => 'Delete Account';
+
+  @override
+  String get deleteAccountMessage => 'Are you sure you want to delete your account? This action cannot be undone.';
+
+  @override
+  String get yesDelete => 'Yes, Delete Account';
+
+  @override
+  String get noKeep => 'No, Keep Account';
+
+  @override
+  String get rateExperience => 'Rate Your Experience';
+
+  @override
+  String get feedbackHelps => 'Your feedback helps us improve';
+
+  @override
+  String get shareFeedback => 'Share your thoughts about the app.';
+
+  @override
+  String get submit => 'Submit';
+
+  @override
+  String get thankYouFeedback => 'Thank you for your feedback!';
+
+  @override
+  String get helpTitle => 'Help and Support';
+
+  @override
+  String get contactUs => 'Contact Us';
+
+  @override
+  String get faq1Q => 'How do I book a service?';
+
+  @override
+  String get faq1A => 'Go to the home screen, select a category, choose a professional and tap Book Now.';
+
+  @override
+  String get faq2Q => 'How do I cancel a booking?';
+
+  @override
+  String get faq2A => 'Go to your bookings, select the booking and tap Cancel.';
+
+  @override
+  String get faq3Q => 'How do I contact a professional?';
+
+  @override
+  String get faq3A => 'After booking, you can message the professional directly from the booking details.';
+
+  @override
+  String get faq4Q => 'How do I report an issue?';
+
+  @override
+  String get faq4A => 'Go to Help and Support and tap Send Feedback to report any issues.';
 }

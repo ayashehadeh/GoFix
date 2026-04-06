@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'start_page.dart';
 import 'package:gp/core/theme/app_colors.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/injection_container.dart' as di;
+import 'package:gp/features/home/presentation/bloc/home_bloc.dart';
+import 'package:gp/features/home/presentation/pages/home_page.dart';
 
 class Created extends StatelessWidget {
   const Created({super.key});
@@ -73,10 +76,15 @@ class Created extends StatelessWidget {
                     elevation: 0,
                   ),
                   onPressed: () {
-                    Navigator.of(context).push(
+                    Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
-                        builder: (context) => const StartPage(),
+                        builder: (_) => BlocProvider(
+                          create: (_) => di.sl<HomeBloc>(),
+                          child: const HomePage(),
+                        ),
                       ),
+                      (route) =>
+                          false, // removes all previous routes (no back button)
                     );
                   },
                   child: Text(

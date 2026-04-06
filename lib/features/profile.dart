@@ -11,7 +11,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  int _currentNavIndex = 2;
+  final int _currentNavIndex = 2;
 
   Widget menuItem(
     IconData icon,
@@ -69,7 +69,6 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(14),
@@ -91,23 +90,17 @@ class _ProfilePageState extends State<ProfilePage> {
                       color: Color(0xFF062B4D),
                     ),
                   ),
-
                   const SizedBox(height: 20),
                   const Divider(),
-
                   sectionTitle("Your account"),
-
                   menuItem(Icons.person, "Personal information"),
                   menuItem(Icons.notifications, "Notifications"),
                   menuItem(Icons.key, "Password"),
                   menuItem(Icons.location_on, "Your addresses"),
                   menuItem(Icons.cancel, "Delete account"),
                   menuItem(Icons.logout, "Log out"),
-
                   const Divider(),
-
                   sectionTitle("Support"),
-
                   menuItem(Icons.help_outline, "Help & Support"),
                   menuItem(
                     Icons.build,
@@ -121,11 +114,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     },
                   ),
                   menuItem(Icons.feedback, "Send Feedback"),
-
                   const Divider(),
-
                   sectionTitle("Preferences"),
-
                   menuItem(Icons.language, "Language", trailing: "EN"),
                 ],
               ),
@@ -133,7 +123,6 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ),
-
       bottomNavigationBar: GoFixBottomNavBar(
         currentIndex: _currentNavIndex,
         onTap: (index) {
