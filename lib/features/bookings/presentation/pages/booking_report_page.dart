@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -16,6 +17,72 @@ class BookingReportPage extends StatefulWidget {
 }
 
 class _BookingReportPageState extends State<BookingReportPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _showReportSheet());
+  }
+
+  void _showReportSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      isDismissible: true,
+      builder: (sheetContext) {
+        return BlocProvider.value(
+          value: context.read<BookingsBloc>(),
+          child: _ReportSheet(booking: widget.booking),
+        );
+      },
+    ).then((_) {
+      if (mounted) Navigator.of(context).maybePop();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F6FA),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: const BackButton(color: AppColors.primaryDark),
+        title: const Text(
+          'Booking Information',
+          style: TextStyle(
+            color: AppColors.primaryDark,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        centerTitle: false,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            _ProfessionalMiniCard(booking: widget.booking),
+            const SizedBox(height: 16),
+            _BookingDetailsSummary(booking: widget.booking),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Report bottom sheet ──────────────────────────────────────────────────────
+
+class _ReportSheet extends StatefulWidget {
+  final Booking booking;
+  const _ReportSheet({required this.booking});
+
+  @override
+  State<_ReportSheet> createState() => _ReportSheetState();
+}
+
+class _ReportSheetState extends State<_ReportSheet> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   bool _showTitleError = false;
@@ -41,13 +108,13 @@ class _BookingReportPageState extends State<BookingReportPage> {
     return BlocConsumer<BookingsBloc, BookingsState>(
       listener: (context, state) {
         if (state is BookingActionSuccess) {
+          Navigator.of(context).pop(); // close sheet
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Report submitted successfully'),
               backgroundColor: AppColors.primaryOrange,
             ),
           );
-          // Pop back to My Bookings root
           Navigator.of(context).popUntil((route) => route.isFirst);
         }
         if (state is BookingsError) {
@@ -62,56 +129,51 @@ class _BookingReportPageState extends State<BookingReportPage> {
       builder: (context, state) {
         final isLoading = state is BookingActionLoading;
 
-        return Scaffold(
-          backgroundColor: const Color(0xFFF5F6FA),
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 0,
-            leading: const BackButton(color: AppColors.primaryDark),
-            title: const Text(
-              'Booking Information',
-              style: TextStyle(
-                color: AppColors.primaryDark,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
+        return Stack(
+          children: [
+            // ── Blurred + dimmed backdrop ──────────────────────────────────
+            BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+              child: Container(color: Colors.black.withOpacity(0.25)),
             ),
-            centerTitle: false,
-          ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                // Professional mini card
-                _ProfessionalMiniCard(booking: widget.booking),
-                const SizedBox(height: 16),
 
-                // Booking details summary
-                _BookingDetailsSummary(booking: widget.booking),
-                const SizedBox(height: 16),
-
-                // Report form card
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
+            // ── Sheet ──────────────────────────────────────────────────────
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.only(
+                  left: 24,
+                  right: 24,
+                  top: 28,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 40,
+                ),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                ),
+                child: SingleChildScrollView(
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Drag handle
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          margin: const EdgeInsets.only(bottom: 24),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE0E0E0),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+
                       const Text(
                         'Report an Issue',
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 22,
                           fontWeight: FontWeight.w700,
                           color: AppColors.primaryDark,
                         ),
@@ -126,7 +188,7 @@ class _BookingReportPageState extends State<BookingReportPage> {
                       ),
                       const SizedBox(height: 24),
 
-                      // Issue title field
+                      // Issue title
                       _FieldLabel(label: 'Describe the issue'),
                       const SizedBox(height: 8),
                       _ReportTextField(
@@ -143,14 +205,14 @@ class _BookingReportPageState extends State<BookingReportPage> {
                       ),
                       const SizedBox(height: 18),
 
-                      // Details field
+                      // Details
                       _FieldLabel(label: 'Provide details'),
                       const SizedBox(height: 8),
                       _ReportTextField(
                         controller: _descriptionController,
                         hintText:
                             'Provide details so our team can investigate.',
-                        maxLines: 5,
+                        maxLines: 4,
                         hasError: _showDescriptionError,
                         errorText: 'Please provide details',
                         onChanged: (_) {
@@ -159,66 +221,66 @@ class _BookingReportPageState extends State<BookingReportPage> {
                           }
                         },
                       ),
+                      const SizedBox(height: 24),
+
+                      // Submit button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: isLoading
+                              ? null
+                              : () {
+                                  if (_validate()) {
+                                    final full =
+                                        '${_titleController.text.trim()}\n\n${_descriptionController.text.trim()}';
+                                    context.read<BookingsBloc>().add(
+                                      SubmitReportEvent(
+                                        bookingId: widget.booking.id,
+                                        description: full,
+                                      ),
+                                    );
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryOrange,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: isLoading
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Text(
+                                  'Submit Report',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
-
-                // Submit button
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: isLoading
-                        ? null
-                        : () {
-                            if (_validate()) {
-                              final fullDescription =
-                                  '${_titleController.text.trim()}\n\n${_descriptionController.text.trim()}';
-                              context.read<BookingsBloc>().add(
-                                    SubmitReportEvent(
-                                      bookingId: widget.booking.id,
-                                      description: fullDescription,
-                                    ),
-                                  );
-                            }
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryOrange,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: isLoading
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : const Text(
-                            'Submit Report',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+          ],
         );
       },
     );
   }
 }
 
-// ─── Field label ──────────────────────────────────────────────────────────────
+// ─── Field helpers ────────────────────────────────────────────────────────────
 
 class _FieldLabel extends StatelessWidget {
   final String label;
@@ -228,8 +290,11 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.edit_outlined,
-            color: AppColors.primaryOrange, size: 16),
+        const Icon(
+          Icons.edit_outlined,
+          color: AppColors.primaryOrange,
+          size: 16,
+        ),
         const SizedBox(width: 6),
         Text(
           label,
@@ -243,8 +308,6 @@ class _FieldLabel extends StatelessWidget {
     );
   }
 }
-
-// ─── Text field with error ────────────────────────────────────────────────────
 
 class _ReportTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -297,9 +360,7 @@ class _ReportTextField extends StatelessWidget {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(
-                color: hasError
-                    ? AppColors.error
-                    : AppColors.primaryOrange,
+                color: hasError ? AppColors.error : AppColors.primaryOrange,
                 width: 1.5,
               ),
             ),
@@ -318,7 +379,7 @@ class _ReportTextField extends StatelessWidget {
   }
 }
 
-// ─── Reused sub-widgets ───────────────────────────────────────────────────────
+// ─── Shared background sub-widgets ───────────────────────────────────────────
 
 class _ProfessionalMiniCard extends StatelessWidget {
   final Booking booking;
@@ -348,8 +409,11 @@ class _ProfessionalMiniCard extends StatelessWidget {
                 ? NetworkImage(booking.professionalImageUrl!)
                 : null,
             child: booking.professionalImageUrl == null
-                ? const Icon(Icons.person,
-                    color: AppColors.primaryDark, size: 26)
+                ? const Icon(
+                    Icons.person,
+                    color: AppColors.primaryDark,
+                    size: 26,
+                  )
                 : null,
           ),
           const SizedBox(width: 12),
@@ -412,32 +476,25 @@ class _BookingDetailsSummary extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          _SummaryRow(icon: Icons.settings, text: booking.serviceName),
-          _SummaryRow(
-              icon: Icons.calendar_month_outlined,
-              text: booking.formattedDate),
-          _SummaryRow(
-              icon: Icons.access_time_outlined, text: booking.scheduledTime),
-          _SummaryRow(
-              icon: Icons.location_on_outlined,
-              text: booking.address,
-              isLast: true),
+          _R(icon: Icons.settings, text: booking.serviceName),
+          _R(icon: Icons.calendar_month_outlined, text: booking.formattedDate),
+          _R(icon: Icons.access_time_outlined, text: booking.scheduledTime),
+          _R(
+            icon: Icons.location_on_outlined,
+            text: booking.address,
+            isLast: true,
+          ),
         ],
       ),
     );
   }
 }
 
-class _SummaryRow extends StatelessWidget {
+class _R extends StatelessWidget {
   final IconData icon;
   final String text;
   final bool isLast;
-
-  const _SummaryRow({
-    required this.icon,
-    required this.text,
-    this.isLast = false,
-  });
+  const _R({required this.icon, required this.text, this.isLast = false});
 
   @override
   Widget build(BuildContext context) {
@@ -453,7 +510,9 @@ class _SummaryRow extends StatelessWidget {
                 child: Text(
                   text,
                   style: const TextStyle(
-                      fontSize: 13, color: AppColors.primaryDark),
+                    fontSize: 13,
+                    color: AppColors.primaryDark,
+                  ),
                 ),
               ),
             ],

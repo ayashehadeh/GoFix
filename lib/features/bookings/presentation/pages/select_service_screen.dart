@@ -1,7 +1,9 @@
+// lib/features/bookings/presentation/pages/select_service_screen.dart
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:gp/features/booking/presentation/pages/bookservice.dart';
+import 'package:gp/features/bookings/presentation/pages/book_service_screen.dart';
 
 class ServiceItem {
   final String name;
@@ -10,7 +12,6 @@ class ServiceItem {
 }
 
 class SelectServiceScreen extends StatefulWidget {
-  /// The professional's name passed in from ProfessionalDetailPage
   final String professionalName;
   final String professionalRole;
   final String professionalId;

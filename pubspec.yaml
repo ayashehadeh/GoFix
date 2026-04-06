@@ -22,7 +22,6 @@ dependencies:
   get_it: ^9.2.1
   image_picker: ^1.1.2
   intl: ^0.20.2
-  shared_preferences: ^2.3.2
   url_launcher: ^6.3.2
   shared_preferences: ^2.5.4
   flutter_map: ^7.0.2
@@ -44,7 +43,7 @@ flutter:
     - assets/email_verification.png
     - assets/account_verified.png
     - assets/done.png
+    - assets/email_sent.png
     - assets/successbook.png
-
   uses-material-design: true
   generate: true

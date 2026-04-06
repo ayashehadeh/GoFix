@@ -1,8 +1,10 @@
+// lib/features/bookings/presentation/pages/book_details_screen.dart
+
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:gp/features/booking/presentation/pages/booksuccess.dart';
+import 'package:gp/features/bookings/presentation/pages/booking_success_screen.dart';
 
-class BookingDetailsScreen extends StatelessWidget {
+class BookDetailsScreen extends StatelessWidget {
   final String serviceName;
   final String servicePrice;
   final String description;
@@ -12,7 +14,7 @@ class BookingDetailsScreen extends StatelessWidget {
   final String address;
   final String workerName;
 
-  const BookingDetailsScreen({
+  const BookDetailsScreen({
     super.key,
     required this.serviceName,
     required this.servicePrice,
@@ -122,8 +124,14 @@ class BookingDetailsScreen extends StatelessWidget {
                           icon: Icons.settings,
                           text: serviceName,
                         ),
-                        _buildDetailRow(icon: Icons.calendar_month, text: date),
-                        _buildDetailRow(icon: Icons.access_time, text: time),
+                        _buildDetailRow(
+                          icon: Icons.calendar_month,
+                          text: date,
+                        ),
+                        _buildDetailRow(
+                          icon: Icons.access_time,
+                          text: time,
+                        ),
                         _buildDetailRow(
                           icon: Icons.map_outlined,
                           text: address,
@@ -241,7 +249,6 @@ class BookingDetailsScreen extends StatelessWidget {
               height: 52,
               child: ElevatedButton(
                 onPressed: () {
-                  // TODO: Call .NET API here
                   Navigator.push(
                     context,
                     MaterialPageRoute(

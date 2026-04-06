@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -6,17 +7,86 @@ import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
 import '../bloc/bookings_state.dart';
 
-class CancelBookingPage extends StatelessWidget {
+class CancelBookingPage extends StatefulWidget {
   final Booking booking;
 
   const CancelBookingPage({super.key, required this.booking});
+
+  @override
+  State<CancelBookingPage> createState() => _CancelBookingPageState();
+}
+
+class _CancelBookingPageState extends State<CancelBookingPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _showCancelSheet());
+  }
+
+  void _showCancelSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      isDismissible: true,
+      builder: (sheetContext) {
+        return BlocProvider.value(
+          value: context.read<BookingsBloc>(),
+          child: _CancelSheet(booking: widget.booking),
+        );
+      },
+    ).then((_) {
+      // If dismissed by tapping backdrop (not confirming), just go back
+      if (mounted) Navigator.of(context).maybePop();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Background: booking info screen blurred behind the sheet
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F6FA),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: const BackButton(color: AppColors.primaryDark),
+        title: const Text(
+          'Booking Information',
+          style: TextStyle(
+            color: AppColors.primaryDark,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        centerTitle: false,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            _ProfessionalCard(booking: widget.booking),
+            const SizedBox(height: 16),
+            _BookingDetailsSummary(booking: widget.booking),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Cancel confirmation sheet ────────────────────────────────────────────────
+
+class _CancelSheet extends StatelessWidget {
+  final Booking booking;
+  const _CancelSheet({required this.booking});
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<BookingsBloc, BookingsState>(
       listener: (context, state) {
         if (state is BookingCancelledSuccess) {
-          // Pop all booking pages back to My Bookings root
+          Navigator.of(context).pop(); // close sheet
+          // Pop entire booking stack back to My Bookings
           Navigator.of(context).popUntil((route) => route.isFirst);
         }
         if (state is BookingsError) {
@@ -26,165 +96,147 @@ class CancelBookingPage extends StatelessWidget {
               backgroundColor: AppColors.error,
             ),
           );
-          Navigator.pop(context);
+          Navigator.of(context).pop();
         }
       },
       builder: (context, state) {
         final isLoading = state is BookingActionLoading;
 
-        return Scaffold(
-          backgroundColor: const Color(0xFFF5F6FA),
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 0,
-            leading: const BackButton(color: AppColors.primaryDark),
-            title: const Text(
-              'Booking Information',
-              style: TextStyle(
-                color: AppColors.primaryDark,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
+        return Stack(
+          children: [
+            // ── Blurred + dimmed backdrop ──────────────────────────────────
+            BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+              child: Container(color: Colors.black.withOpacity(0.25)),
             ),
-            centerTitle: false,
-          ),
-          body: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      // Professional mini card
-                      _ProfessionalCard(booking: booking),
-                      const SizedBox(height: 16),
 
-                      // Booking details (greyed out, non-interactive)
-                      _BookingDetailsSummary(booking: booking),
-                      const SizedBox(height: 24),
+            // ── Sheet ──────────────────────────────────────────────────────
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(24, 28, 24, 48),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Drag handle
+                    Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 28),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE0E0E0),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
 
-                      // Cancel confirmation card
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                    const Text(
+                      'Cancel Booking?',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryDark,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'This action is permanent and cannot be reversed. '
+                      'Your booking will be removed immediately.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                        height: 1.6,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // Yes, Cancel Booking
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () {
+                                context.read<BookingsBloc>().add(
+                                  CancelBookingEvent(booking.id),
+                                );
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryOrange,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 0,
                         ),
-                        child: Column(
-                          children: [
-                            const Text(
-                              'Cancel Booking?',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.primaryDark,
+                        child: isLoading
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Yes, Cancel Booking',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 12),
-                            const Text(
-                              'This action is permanent and cannot be reversed. Your booking will be removed immediately.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: AppColors.textSecondary,
-                                height: 1.6,
-                              ),
-                            ),
-                            const SizedBox(height: 28),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
 
-                            // Yes, Cancel Booking
-                            SizedBox(
-                              width: double.infinity,
-                              height: 50,
-                              child: ElevatedButton(
-                                onPressed: isLoading
-                                    ? null
-                                    : () {
-                                        context.read<BookingsBloc>().add(
-                                              CancelBookingEvent(booking.id),
-                                            );
-                                      },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primaryOrange,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(12)),
-                                  elevation: 0,
-                                ),
-                                child: isLoading
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : const Text(
-                                        'Yes, Cancel Booking',
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-
-                            // Keep my Booking
-                            SizedBox(
-                              width: double.infinity,
-                              height: 50,
-                              child: OutlinedButton(
-                                onPressed: isLoading
-                                    ? null
-                                    : () => Navigator.pop(context),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: AppColors.primaryDark,
-                                  side: const BorderSide(
-                                      color: AppColors.primaryDark),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(12)),
-                                ),
-                                child: const Text(
-                                  'Keep my Booking',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                    // Keep my Booking
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: OutlinedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () => Navigator.of(context).pop(),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.primaryDark,
+                          side: const BorderSide(
+                            color: AppColors.primaryDark,
+                            width: 1.5,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        child: const Text(
+                          'Keep my Booking',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );
   }
 }
 
-// ─── Shared sub-widgets ───────────────────────────────────────────────────────
+// ─── Background sub-widgets ───────────────────────────────────────────────────
 
 class _ProfessionalCard extends StatelessWidget {
   final Booking booking;
-
   const _ProfessionalCard({required this.booking});
 
   @override
@@ -211,8 +263,11 @@ class _ProfessionalCard extends StatelessWidget {
                 ? NetworkImage(booking.professionalImageUrl!)
                 : null,
             child: booking.professionalImageUrl == null
-                ? const Icon(Icons.person,
-                    color: AppColors.primaryDark, size: 26)
+                ? const Icon(
+                    Icons.person,
+                    color: AppColors.primaryDark,
+                    size: 26,
+                  )
                 : null,
           ),
           const SizedBox(width: 12),
@@ -231,7 +286,9 @@ class _ProfessionalCard extends StatelessWidget {
               Text(
                 booking.professionalRole,
                 style: const TextStyle(
-                    fontSize: 12, color: AppColors.textSecondary),
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ),
@@ -243,7 +300,6 @@ class _ProfessionalCard extends StatelessWidget {
 
 class _BookingDetailsSummary extends StatelessWidget {
   final Booking booking;
-
   const _BookingDetailsSummary({required this.booking});
 
   @override
@@ -274,35 +330,29 @@ class _BookingDetailsSummary extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          _SummaryRow(icon: Icons.settings, text: booking.serviceName),
-          _SummaryRow(
-              icon: Icons.calendar_month_outlined,
-              text: booking.formattedDate),
-          _SummaryRow(
-              icon: Icons.access_time_outlined,
-              text: booking.scheduledTime),
-          _SummaryRow(
-              icon: Icons.location_on_outlined, text: booking.address),
-          _SummaryRow(
-              icon: Icons.attach_money,
-              text: booking.servicePrice,
-              isLast: true),
+          _Row(icon: Icons.settings, text: booking.serviceName),
+          _Row(
+            icon: Icons.calendar_month_outlined,
+            text: booking.formattedDate,
+          ),
+          _Row(icon: Icons.access_time_outlined, text: booking.scheduledTime),
+          _Row(icon: Icons.location_on_outlined, text: booking.address),
+          _Row(
+            icon: Icons.attach_money,
+            text: booking.servicePrice,
+            isLast: true,
+          ),
         ],
       ),
     );
   }
 }
 
-class _SummaryRow extends StatelessWidget {
+class _Row extends StatelessWidget {
   final IconData icon;
   final String text;
   final bool isLast;
-
-  const _SummaryRow({
-    required this.icon,
-    required this.text,
-    this.isLast = false,
-  });
+  const _Row({required this.icon, required this.text, this.isLast = false});
 
   @override
   Widget build(BuildContext context) {
@@ -318,7 +368,9 @@ class _SummaryRow extends StatelessWidget {
                 child: Text(
                   text,
                   style: const TextStyle(
-                      fontSize: 13, color: AppColors.primaryDark),
+                    fontSize: 13,
+                    color: AppColors.primaryDark,
+                  ),
                 ),
               ),
             ],

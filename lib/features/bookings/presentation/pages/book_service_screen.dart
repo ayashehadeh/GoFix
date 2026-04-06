@@ -1,7 +1,9 @@
+// lib/features/bookings/presentation/pages/book_service_screen.dart
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:gp/features/booking/presentation/pages/bookdetails.dart';
+import 'package:gp/features/bookings/presentation/pages/book_details_screen.dart';
 
 class BookServiceScreen extends StatefulWidget {
   final String serviceName;
@@ -190,7 +192,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => BookingDetailsScreen(
+          builder: (context) => BookDetailsScreen(
             serviceName: widget.serviceName,
             servicePrice: widget.servicePrice,
             description: widget.description,
