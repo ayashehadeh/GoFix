@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/widgets/gofix_bottom_nav_bar.dart';
-import 'package:gp/auth/become a professional/pages/stepper_screen.dart';
+import 'package:gp/auth/become_professional/pages/stepper_screen.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});

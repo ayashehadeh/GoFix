@@ -43,7 +43,7 @@ flutter:
     - assets/email_verification.png
     - assets/account_verified.png
     - assets/done.png
+    - assets/email_sent.png
     - assets/successbook.png
-
   uses-material-design: true
   generate: true

@@ -9,7 +9,7 @@ import 'package:gp/features/professionals/domain/entities/professional.dart';
 import 'package:gp/features/professionals/domain/entities/review.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
 import 'package:gp/features/professionals/presentation/widgets/star_rating.dart';
-import 'package:gp/features/booking/presentation/pages/booking.dart';
+import 'package:gp/features/bookings/presentation/pages/select_service_screen.dart';
 
 class ProfessionalDetailPage extends StatefulWidget {
   final String professionalId;
@@ -27,9 +27,9 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
   @override
   void initState() {
     super.initState();
-    context
-        .read<ProfessionalsBloc>()
-        .add(LoadProfessionalDetail(widget.professionalId));
+    context.read<ProfessionalsBloc>().add(
+          LoadProfessionalDetail(widget.professionalId),
+        );
   }
 
   Future<void> _callProfessional(String phone) async {
@@ -52,9 +52,9 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                 backgroundColor: AppColors.primaryOrange,
               ),
             );
-            context
-                .read<ProfessionalsBloc>()
-                .add(LoadProfessionalDetail(widget.professionalId));
+            context.read<ProfessionalsBloc>().add(
+                  LoadProfessionalDetail(widget.professionalId),
+                );
           }
         },
         builder: (context, state) {
@@ -80,15 +80,17 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                 _DetailHeader(
                   professional: professional,
                   onCall: () => _callProfessional(professional.phone),
-                  onFavorite: () => context
-                      .read<ProfessionalsBloc>()
-                      .add(ToggleFavoriteEvent(professional.id)),
+                  onFavorite: () => context.read<ProfessionalsBloc>().add(
+                        ToggleFavoriteEvent(professional.id),
+                      ),
                 ),
                 // ── Tabs ────────────────────────────────────────
                 Container(
                   color: AppColors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -99,7 +101,9 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                           child: Container(
                             margin: const EdgeInsets.only(right: 10),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 18, vertical: 10),
+                              horizontal: 18,
+                              vertical: 10,
+                            ),
                             decoration: BoxDecoration(
                               color: selected
                                   ? AppColors.primaryOrange
@@ -132,7 +136,10 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
                     child: _buildTabContent(
-                        professional, reviews, state is ReviewsLoading),
+                      professional,
+                      reviews,
+                      state is ReviewsLoading,
+                    ),
                   ),
                 ),
                 // ── Bottom Actions ───────────────────────────────
@@ -166,7 +173,10 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
   }
 
   Widget _buildTabContent(
-      Professional professional, List<Review> reviews, bool isLoadingReviews) {
+    Professional professional,
+    List<Review> reviews,
+    bool isLoadingReviews,
+  ) {
     switch (_selectedTab) {
       case 0:
         return _AboutTab(professional: professional);
@@ -175,8 +185,10 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
       case 2:
         return isLoadingReviews
             ? const Center(
-                child:
-                    CircularProgressIndicator(color: AppColors.primaryOrange))
+                child: CircularProgressIndicator(
+                  color: AppColors.primaryOrange,
+                ),
+              )
             : _ReviewsTab(professional: professional, reviews: reviews);
       case 3:
         return _CertificationsTab(professional: professional);
@@ -223,8 +235,11 @@ class _DetailHeader extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () => Navigator.pop(context),
-                child: const Icon(Icons.chevron_left,
-                    color: Colors.white, size: 28),
+                child: const Icon(
+                  Icons.chevron_left,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
               GestureDetector(
                 onTap: onFavorite,
@@ -246,8 +261,11 @@ class _DetailHeader extends StatelessWidget {
                 ? NetworkImage(professional.profileImageUrl!)
                 : null,
             child: professional.profileImageUrl == null
-                ? const Icon(Icons.person,
-                    size: 46, color: AppColors.textSecondary)
+                ? const Icon(
+                    Icons.person,
+                    size: 46,
+                    color: AppColors.textSecondary,
+                  )
                 : null,
           ),
           const SizedBox(height: 12),
@@ -313,9 +331,11 @@ class _StatItem extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(icon,
-                color: isStar ? AppColors.star : AppColors.primaryOrange,
-                size: 18),
+            Icon(
+              icon,
+              color: isStar ? AppColors.star : AppColors.primaryOrange,
+              size: 18,
+            ),
             const SizedBox(width: 4),
             Text(
               value,
@@ -328,8 +348,10 @@ class _StatItem extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 4),
-        Text(label,
-            style: const TextStyle(color: Colors.white70, fontSize: 12)),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white70, fontSize: 12),
+        ),
       ],
     );
   }
@@ -359,16 +381,20 @@ class _AboutTab extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: professional.serviceAreas
-                .map((area) => Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.divider),
-                      ),
-                      child: Text(area, style: AppTextStyles.bodySmall),
-                    ))
+                .map(
+                  (area) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.divider),
+                    ),
+                    child: Text(area, style: AppTextStyles.bodySmall),
+                  ),
+                )
                 .toList(),
           ),
         ),
@@ -378,18 +404,23 @@ class _AboutTab extends StatelessWidget {
           title: 'Working Hours',
           child: Column(
             children: professional.workingHours.schedules
-                .map((s) => Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(s.day, style: AppTextStyles.bodySmall),
-                          Text(s.timeRange,
-                              style: AppTextStyles.bodySmall
-                                  .copyWith(fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                    ))
+                .map(
+                  (s) => Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(s.day, style: AppTextStyles.bodySmall),
+                        Text(
+                          s.timeRange,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
                 .toList(),
           ),
         ),
@@ -411,28 +442,32 @@ class _ServicesTab extends StatelessWidget {
       title: 'Services Offered',
       child: Column(
         children: professional.services
-            .map((service) => Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(service.name, style: AppTextStyles.bodySmall),
-                      Text(
-                        service.priceDisplay,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                        ),
+            .map(
+              (service) => Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(service.name, style: AppTextStyles.bodySmall),
+                    Text(
+                      service.priceDisplay,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
                       ),
-                    ],
-                  ),
-                ))
+                    ),
+                  ],
+                ),
+              ),
+            )
             .toList(),
       ),
     );
@@ -467,8 +502,10 @@ class _ReviewsTab extends StatelessWidget {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  Text('${professional.reviewCount} Reviews',
-                      style: AppTextStyles.bodySmall),
+                  Text(
+                    '${professional.reviewCount} Reviews',
+                    style: AppTextStyles.bodySmall,
+                  ),
                 ],
               ),
               const SizedBox(width: 16),
@@ -532,8 +569,11 @@ class _ReviewItem extends StatelessWidget {
                   ? NetworkImage(review.reviewerImageUrl!)
                   : null,
               child: review.reviewerImageUrl == null
-                  ? const Icon(Icons.person,
-                      size: 18, color: AppColors.textSecondary)
+                  ? const Icon(
+                      Icons.person,
+                      size: 18,
+                      color: AppColors.textSecondary,
+                    )
                   : null,
             ),
             const SizedBox(width: 10),
@@ -580,55 +620,71 @@ class _CertificationsTab extends StatelessWidget {
           icon: Icons.description_outlined,
           title: 'Professional Certifications',
           child: certifications.isEmpty
-              ? Text('No certifications uploaded yet.',
-                  style: AppTextStyles.bodySmall)
+              ? Text(
+                  'No certifications uploaded yet.',
+                  style: AppTextStyles.bodySmall,
+                )
               : Column(
                   children: certifications
-                      .map((doc) => Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.description_outlined,
-                                    color: AppColors.primaryOrange, size: 20),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(doc.name,
-                                          style: AppTextStyles.bodyMedium
-                                              .copyWith(
-                                                  color:
-                                                      AppColors.primaryOrange)),
-                                      if (doc.issuedBy != null)
-                                        Text(doc.issuedBy!,
-                                            style: AppTextStyles.bodySmall),
-                                      if (doc.issuedLabel.isNotEmpty)
-                                        Text(doc.issuedLabel,
-                                            style: AppTextStyles.bodySmall),
-                                    ],
-                                  ),
+                      .map(
+                        (doc) => Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.description_outlined,
+                                color: AppColors.primaryOrange,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      doc.name,
+                                      style: AppTextStyles.bodyMedium.copyWith(
+                                        color: AppColors.primaryOrange,
+                                      ),
+                                    ),
+                                    if (doc.issuedBy != null)
+                                      Text(
+                                        doc.issuedBy!,
+                                        style: AppTextStyles.bodySmall,
+                                      ),
+                                    if (doc.issuedLabel.isNotEmpty)
+                                      Text(
+                                        doc.issuedLabel,
+                                        style: AppTextStyles.bodySmall,
+                                      ),
+                                  ],
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.open_in_new,
-                                      color: AppColors.primaryOrange, size: 20),
-                                  onPressed: () async {
-                                    final uri = Uri.parse(doc.fileUrl);
-                                    if (await canLaunchUrl(uri)) {
-                                      await launchUrl(uri,
-                                          mode: LaunchMode.externalApplication);
-                                    }
-                                  },
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.open_in_new,
+                                  color: AppColors.primaryOrange,
+                                  size: 20,
                                 ),
-                              ],
-                            ),
-                          ))
+                                onPressed: () async {
+                                  final uri = Uri.parse(doc.fileUrl);
+                                  if (await canLaunchUrl(uri)) {
+                                    await launchUrl(
+                                      uri,
+                                      mode: LaunchMode.externalApplication,
+                                    );
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
                       .toList(),
                 ),
         ),
@@ -672,9 +728,12 @@ class _VerificationRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
-              style: AppTextStyles.bodyMedium
-                  .copyWith(color: AppColors.primaryOrange)),
+          Text(
+            label,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.primaryOrange,
+            ),
+          ),
           Text(
             verified ? 'Verified 2026' : 'Not Verified',
             style: AppTextStyles.bodySmall,
@@ -721,14 +780,16 @@ class _BottomActions extends StatelessWidget {
                 backgroundColor: AppColors.primaryOrange,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
               child: const Text(
                 'Book Now',
                 style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16),
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
               ),
             ),
           ),
@@ -743,8 +804,11 @@ class _BottomActions extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: AppColors.divider, width: 1.5),
               ),
-              child: const Icon(Icons.chat_bubble_outline,
-                  color: AppColors.primaryDark, size: 22),
+              child: const Icon(
+                Icons.chat_bubble_outline,
+                color: AppColors.primaryDark,
+                size: 22,
+              ),
             ),
           ),
           const SizedBox(width: 10),
@@ -758,8 +822,11 @@ class _BottomActions extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: AppColors.divider, width: 1.5),
               ),
-              child: const Icon(Icons.phone,
-                  color: AppColors.primaryDark, size: 22),
+              child: const Icon(
+                Icons.phone,
+                color: AppColors.primaryDark,
+                size: 22,
+              ),
             ),
           ),
         ],

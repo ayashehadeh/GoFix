@@ -1,8 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:gp/core/storage/token_storage.dart';
+import 'package:gp/core/theme/app_colors.dart';
 import 'package:gp/features/auth/pages/reset_password.dart';
 import 'package:gp/features/auth/services/auth_service.dart';
-import 'package:gp/core/theme/app_colors.dart';
-import 'package:gp/core/storage/token_storage.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/features/home/presentation/pages/home_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,17 +27,26 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController emailController    = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
   bool _rememberMe = false;
-  bool _isLoading  = false;
+  bool _isLoading = false;
+  bool _obscurePassword = true;
 
   final AuthService _authService = AuthService();
 
-  // ─── Login Logic ──────────────────────────────────────────────────────────
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  // ── Login logic ────────────────────────────────────────────────────────────
+
   Future<void> _handleLogin() async {
-    final email    = emailController.text.trim();
+    final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
@@ -47,15 +57,11 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      final result = await _authService.login(
-        email: email,
-        password: password,
-      );
+      final result = await _authService.login(email: email, password: password);
 
       final token = result['data']['token'] as String;
-      final user  = result['data']['user'];
+      final user = result['data']['user'];
 
-      // Save token and user info to local storage
       await TokenStorage.saveToken(
         token: token,
         userId: user['id'] as String,
@@ -88,16 +94,15 @@ class _LoginPageState extends State<LoginPage> {
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red.shade700,
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 
-  @override
-  void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
-  }
+  // ── UI ─────────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -132,12 +137,17 @@ class _LoginPageState extends State<LoginPage> {
             ),
 
             const SizedBox(height: 6),
+
             Text(t.quickSignIn, style: const TextStyle(color: Colors.white70)),
+
             const SizedBox(height: 30),
 
             Expanded(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 30,
+                ),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
@@ -146,9 +156,11 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
-                      // ── Email ────────────────────────────────────────────
-                      Text(t.enterEmail, style: const TextStyle(color: Colors.grey)),
+                      // ── Email ─────────────────────────────────────────────
+                      Text(
+                        t.enterEmail,
+                        style: const TextStyle(color: Colors.grey),
+                      ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: emailController,
@@ -167,14 +179,27 @@ class _LoginPageState extends State<LoginPage> {
 
                       const SizedBox(height: 20),
 
-                      // ── Password ─────────────────────────────────────────
-                      Text(t.password, style: const TextStyle(color: Colors.grey)),
+                      // ── Password ──────────────────────────────────────────
+                      Text(
+                        t.password,
+                        style: const TextStyle(color: Colors.grey),
+                      ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: passwordController,
-                        obscureText: true,
+                        obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.lock),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            onPressed: () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
+                          ),
                           filled: true,
                           fillColor: Colors.grey.shade100,
                           border: OutlineInputBorder(
@@ -197,7 +222,9 @@ class _LoginPageState extends State<LoginPage> {
                           const Spacer(),
                           TextButton(
                             onPressed: () => Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const ResetPassword()),
+                              MaterialPageRoute(
+                                builder: (_) => const ResetPassword(),
+                              ),
                             ),
                             child: Text(
                               t.forgotPassword,
@@ -222,7 +249,14 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           onPressed: _isLoading ? null : _handleLogin,
                           child: _isLoading
-                              ? const CircularProgressIndicator(color: Colors.white)
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
                               : Text(
                                   t.signIn,
                                   style: const TextStyle(
@@ -236,6 +270,7 @@ class _LoginPageState extends State<LoginPage> {
 
                       const SizedBox(height: 20),
 
+                      // ── Register link ─────────────────────────────────────
                       Center(
                         child: RichText(
                           text: TextSpan(
