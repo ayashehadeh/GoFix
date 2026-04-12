@@ -1,20 +1,23 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:gp/features/settings/domain/entities/profile_entity.dart';
 import 'package:gp/features/settings/domain/repositories/profile_repository.dart';
 import 'package:gp/features/settings/data/models/profile_model.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {
+  final Dio dio;
+
+  ProfileRepositoryImpl({required this.dio});
+
   @override
   Future<Either<String, ProfileEntity>> getProfile() async {
     try {
-      await Future.delayed(const Duration(milliseconds: 300));
-      return Right(ProfileModel(
-        name: 'Hazim Amir',
-        phone: '+9627xxxxxx52',
-        email: 'haz***@gmail.com',
-        dateOfBirth: '06-10-2004',
-        gender: 'Male',
-      ));
+      final response = await dio.get('/settings/profile');
+      final data = response.data['data'];
+      return Right(ProfileModel.fromJson(data));
+    } on DioException catch (e) {
+      final msg = e.response?.data?['message'] ?? 'Failed to load profile.';
+      return Left(msg);
     } catch (e) {
       return Left(e.toString());
     }
@@ -23,9 +26,11 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<Either<String, void>> updateName(String name) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 300));
-      // TODO: http.put('/api/profile/name')
+      await dio.put('/settings/profile/name', data: {'name': name});
       return const Right(null);
+    } on DioException catch (e) {
+      final msg = e.response?.data?['message'] ?? 'Failed to update name.';
+      return Left(msg);
     } catch (e) {
       return Left(e.toString());
     }
@@ -34,9 +39,11 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<Either<String, void>> updatePhone(String phone) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 300));
-      // TODO: http.put('/api/profile/phone')
+      await dio.put('/settings/profile/phone', data: {'phone': phone});
       return const Right(null);
+    } on DioException catch (e) {
+      final msg = e.response?.data?['message'] ?? 'Failed to update phone.';
+      return Left(msg);
     } catch (e) {
       return Left(e.toString());
     }
@@ -45,9 +52,11 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<Either<String, void>> updateEmail(String email) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 300));
-      // TODO: http.put('/api/profile/email')
+      await dio.put('/settings/profile/email', data: {'email': email});
       return const Right(null);
+    } on DioException catch (e) {
+      final msg = e.response?.data?['message'] ?? 'Failed to update email.';
+      return Left(msg);
     } catch (e) {
       return Left(e.toString());
     }
@@ -56,9 +65,12 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<Either<String, void>> updateDateOfBirth(String dob) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 300));
-      // TODO: http.put('/api/profile/dob')
+      await dio.put('/settings/profile/dob', data: {'dateOfBirth': dob});
       return const Right(null);
+    } on DioException catch (e) {
+      final msg =
+          e.response?.data?['message'] ?? 'Failed to update date of birth.';
+      return Left(msg);
     } catch (e) {
       return Left(e.toString());
     }
@@ -67,9 +79,11 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<Either<String, void>> updateGender(String gender) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 300));
-      // TODO: http.put('/api/profile/gender')
+      await dio.put('/settings/profile/gender', data: {'gender': gender});
       return const Right(null);
+    } on DioException catch (e) {
+      final msg = e.response?.data?['message'] ?? 'Failed to update gender.';
+      return Left(msg);
     } catch (e) {
       return Left(e.toString());
     }
