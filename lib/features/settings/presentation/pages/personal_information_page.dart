@@ -1,4 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:gp/features/settings/data/repositories/profile_repository_impl.dart';
 import 'package:gp/features/settings/presentation/pages/update_field_page.dart';
 import 'package:gp/features/settings/presentation/pages/update_phone_page.dart';
@@ -14,7 +16,7 @@ class PersonalInformationPage extends StatefulWidget {
 }
 
 class _PersonalInformationPageState extends State<PersonalInformationPage> {
-  final _repo = ProfileRepositoryImpl();
+  final _repo = ProfileRepositoryImpl(dio: GetIt.instance<Dio>());
 
   String name = '';
   String phone = '';

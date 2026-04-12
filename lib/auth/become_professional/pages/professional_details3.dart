@@ -2,10 +2,11 @@ import 'dart:ui';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'in_queue.dart';
 
 class PageThree extends StatefulWidget {
-  const PageThree({super.key});
+  final VoidCallback onContinue;
+
+  const PageThree({super.key, required this.onContinue});
 
   @override
   State<PageThree> createState() => _PageThreeState();
@@ -203,13 +204,11 @@ class _PageThreeState extends State<PageThree> {
           const SizedBox(height: 25),
 
           uploadRow("Upload Profile picture"),
-
           uploadRow("Upload ID"),
-
           uploadRow("Upload certification"),
-
           uploadRow("Certificate of good conduct"),
-          SizedBox(height: 250),
+
+          const SizedBox(height: 250),
 
           SizedBox(
             width: double.infinity,
@@ -221,17 +220,13 @@ class _PageThreeState extends State<PageThree> {
                   borderRadius: BorderRadius.circular(15),
                 ),
               ),
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const InQueue()),
-                );
-              },
+              onPressed: widget.onContinue, // ✅ uses callback instead of Navigator
               child: const Text(
                 "Done",
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 255, 255, 255),
+                  color: Colors.white,
                 ),
               ),
             ),

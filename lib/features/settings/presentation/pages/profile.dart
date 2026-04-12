@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/core/widgets/gofix_bottom_nav_bar.dart';
@@ -5,6 +6,7 @@ import 'package:gp/auth/become_professional/pages/stepper_screen.dart';
 import 'package:gp/features/settings/presentation/pages/personal_information_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:get_it/get_it.dart';
 
 // Notifications
 import 'package:gp/features/settings/presentation/bloc/notification_settings_bloc.dart';
@@ -26,7 +28,7 @@ import 'package:gp/features/settings/presentation/bloc/address_bloc.dart';
 import 'package:gp/features/settings/presentation/pages/addresses_screen.dart';
 import 'package:gp/features/settings/domain/usecases/address_usecases.dart';
 import 'package:gp/features/settings/data/repositories/address_repository_impl.dart';
-import 'package:gp/features/settings/data/datasources/address_local_datasource.dart';
+import 'package:gp/features/settings/data/datasources/address_remote_datasource.dart';
 
 // Account
 import 'package:gp/features/settings/presentation/bloc/account_bloc.dart';
@@ -38,6 +40,8 @@ import 'package:gp/features/settings/data/datasources/account_remote_datasource.
 import 'package:gp/features/auth/pages/start_page.dart';
 import 'package:gp/core/bloc/locale_bloc.dart';
 
+final _dio = GetIt.instance<Dio>();
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -47,12 +51,14 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   AccountBloc _createAccountBloc() => AccountBloc(
-    logout: LogoutUseCase(AccountRepositoryImpl(AccountRemoteDataSourceImpl())),
+    logout: LogoutUseCase(
+      AccountRepositoryImpl(AccountRemoteDataSourceImpl(dio: _dio)),
+    ),
     deleteAccount: DeleteAccountUseCase(
-      AccountRepositoryImpl(AccountRemoteDataSourceImpl()),
+      AccountRepositoryImpl(AccountRemoteDataSourceImpl(dio: _dio)),
     ),
     sendFeedback: SendFeedbackUseCase(
-      AccountRepositoryImpl(AccountRemoteDataSourceImpl()),
+      AccountRepositoryImpl(AccountRemoteDataSourceImpl(dio: _dio)),
     ),
   );
 
@@ -832,13 +838,13 @@ class _ProfilePageState extends State<ProfilePage> {
                                 getNotificationSettings:
                                     GetNotificationSettingsUseCase(
                                       NotificationSettingsRepositoryImpl(
-                                        NotificationSettingsRemoteDataSourceImpl(),
+                                        NotificationSettingsRemoteDataSourceImpl(dio: _dio),
                                       ),
                                     ),
                                 updateNotificationSettings:
                                     UpdateNotificationSettingsUseCase(
                                       NotificationSettingsRepositoryImpl(
-                                        NotificationSettingsRemoteDataSourceImpl(),
+                                        NotificationSettingsRemoteDataSourceImpl(dio: _dio),
                                       ),
                                     ),
                               )..add(const GetNotificationSettingsEvent()),
@@ -875,28 +881,17 @@ class _ProfilePageState extends State<ProfilePage> {
                           context,
                           MaterialPageRoute(
                             builder: (_) => BlocProvider(
-                              create: (_) => AddressBloc(
-                                getAddresses: GetAddressesUseCase(
-                                  AddressRepositoryImpl(
-                                    AddressLocalDataSourceImpl(),
-                                  ),
-                                ),
-                                addAddress: AddAddressUseCase(
-                                  AddressRepositoryImpl(
-                                    AddressLocalDataSourceImpl(),
-                                  ),
-                                ),
-                                updateAddress: UpdateAddressUseCase(
-                                  AddressRepositoryImpl(
-                                    AddressLocalDataSourceImpl(),
-                                  ),
-                                ),
-                                deleteAddress: DeleteAddressUseCase(
-                                  AddressRepositoryImpl(
-                                    AddressLocalDataSourceImpl(),
-                                  ),
-                                ),
-                              )..add(const GetAddressesEvent()),
+                              create: (_) {
+                                final addressRepo = AddressRepositoryImpl(
+                                  AddressRemoteDataSourceImpl(dio: _dio),
+                                );
+                                return AddressBloc(
+                                  getAddresses: GetAddressesUseCase(addressRepo),
+                                  addAddress: AddAddressUseCase(addressRepo),
+                                  updateAddress: UpdateAddressUseCase(addressRepo),
+                                  deleteAddress: DeleteAddressUseCase(addressRepo),
+                                )..add(const GetAddressesEvent());
+                              },
                               child: const AddressesScreen(),
                             ),
                           ),
