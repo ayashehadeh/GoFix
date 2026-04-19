@@ -4,8 +4,8 @@ import 'package:gp/features/home/presentation/bloc/home_bloc.dart';
 import 'package:gp/features/home/presentation/pages/home_page.dart';
 import 'package:gp/injection_container.dart' as di;
 
-class InQueue extends StatelessWidget {
-  const InQueue({super.key});
+class InQueuePage extends StatelessWidget {
+  const InQueuePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,30 +27,30 @@ class InQueue extends StatelessWidget {
                   color: Color(0xFF062B54),
                 ),
               ),
-
               const SizedBox(height: 20),
 
               const Text(
-                "We've received your application and will review it within 24 to 48 hours. You'll get a notification once your profile is approved and ready to go live.",
+                "We've received your application and will review it within "
+                '24 to 48 hours. You\'ll get a notification once your profile '
+                'is approved and ready to go live.',
                 style: TextStyle(
                   fontSize: 16,
                   color: Color(0xFF062B54),
                   height: 1.4,
                 ),
               ),
-
-              const SizedBox(height: 80),
+              const SizedBox(height: 60),
 
               Align(
                 alignment: Alignment.centerRight,
                 child: Image.asset(
                   'assets/done.png',
-                  height: 320,
+                  height: 280,
                   fit: BoxFit.contain,
                 ),
               ),
 
-              const SizedBox(height: 150),
+              const Spacer(),
 
               SizedBox(
                 width: double.infinity,
@@ -75,7 +75,7 @@ class InQueue extends StatelessWidget {
                     );
                   },
                   child: const Text(
-                    "Done",
+                    'Done',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -84,8 +84,7 @@ class InQueue extends StatelessWidget {
                   ),
                 ),
               ),
-
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
             ],
           ),
         ),
