@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/injection_container.dart' as di;
 import '../bloc/become_professional_bloc.dart';
 import '../bloc/become_professional_event.dart';
 import '../bloc/become_professional_state.dart';
@@ -9,14 +10,31 @@ import 'professional_details2_page.dart';
 import 'professional_details3_page.dart';
 import 'in_queue_page.dart';
 
-class StepperScreen extends StatefulWidget {
+class StepperScreen extends StatelessWidget {
   const StepperScreen({super.key});
 
   @override
-  State<StepperScreen> createState() => _StepperScreenState();
+  Widget build(BuildContext context) {
+    // BlocProvider lives HERE so every widget below (including BlocListener)
+    // is a proper descendant of it. Never rely on an externally-provided bloc
+    // for this screen.
+    return BlocProvider(
+      create: (_) => di.sl<BecomeProfessionalBloc>(),
+      child: const _StepperBody(),
+    );
+  }
 }
 
-class _StepperScreenState extends State<StepperScreen> {
+// ─── Private stateful body ────────────────────────────────────────────────────
+
+class _StepperBody extends StatefulWidget {
+  const _StepperBody();
+
+  @override
+  State<_StepperBody> createState() => _StepperBodyState();
+}
+
+class _StepperBodyState extends State<_StepperBody> {
   final PageController _controller = PageController();
   int _currentPage = 0;
 
@@ -37,6 +55,7 @@ class _StepperScreenState extends State<StepperScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // context here is a CHILD of BlocProvider above — BlocListener works fine
     return BlocListener<BecomeProfessionalBloc, BecomeProfessionalState>(
       listener: (context, state) {
         if (state is BecomeProfessionalSuccess) {

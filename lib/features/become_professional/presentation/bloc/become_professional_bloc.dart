@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entities/professional_application.dart';
 import '../../domain/usecases/submit_professional_application.dart';
 import 'become_professional_event.dart';
 import 'become_professional_state.dart';

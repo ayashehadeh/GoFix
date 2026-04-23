@@ -117,7 +117,7 @@ class _ProfessionalDetails1PageState extends State<ProfessionalDetails1Page> {
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
-            value: _selectedCategory,
+            initialValue: _selectedCategory,
             isExpanded: true,
             decoration: InputDecoration(
               filled: true,
