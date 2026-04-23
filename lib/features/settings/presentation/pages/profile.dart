@@ -1,18 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/core/widgets/gofix_bottom_nav_bar.dart';
-
-// ── OLD import (delete this): ─────────────────────────────────────────────────
-// import 'package:gp/auth/become_professional/pages/stepper_screen.dart';
-
-// ── NEW import ────────────────────────────────────────────────────────────────
 import 'package:gp/features/become_professional/presentation/pages/stepper_screen.dart';
-import 'package:gp/features/become_professional/presentation/bloc/become_professional_bloc.dart';
-import 'package:gp/injection_container.dart' as di;
-
 import 'package:gp/features/settings/presentation/pages/personal_information_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:get_it/get_it.dart';
 
 // Notifications
 import 'package:gp/features/settings/presentation/bloc/notification_settings_bloc.dart';
@@ -34,7 +28,7 @@ import 'package:gp/features/settings/presentation/bloc/address_bloc.dart';
 import 'package:gp/features/settings/presentation/pages/addresses_screen.dart';
 import 'package:gp/features/settings/domain/usecases/address_usecases.dart';
 import 'package:gp/features/settings/data/repositories/address_repository_impl.dart';
-import 'package:gp/features/settings/data/datasources/address_local_datasource.dart';
+import 'package:gp/features/settings/data/datasources/address_remote_datasource.dart';
 
 // Account
 import 'package:gp/features/settings/presentation/bloc/account_bloc.dart';
@@ -46,6 +40,8 @@ import 'package:gp/features/settings/data/datasources/account_remote_datasource.
 import 'package:gp/features/auth/pages/start_page.dart';
 import 'package:gp/core/bloc/locale_bloc.dart';
 
+final _dio = GetIt.instance<Dio>();
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -55,13 +51,14 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   AccountBloc _createAccountBloc() => AccountBloc(
-        logout:
-            LogoutUseCase(AccountRepositoryImpl(AccountRemoteDataSourceImpl())),
+        logout: LogoutUseCase(
+          AccountRepositoryImpl(AccountRemoteDataSourceImpl(dio: _dio)),
+        ),
         deleteAccount: DeleteAccountUseCase(
-          AccountRepositoryImpl(AccountRemoteDataSourceImpl()),
+          AccountRepositoryImpl(AccountRemoteDataSourceImpl(dio: _dio)),
         ),
         sendFeedback: SendFeedbackUseCase(
-          AccountRepositoryImpl(AccountRemoteDataSourceImpl()),
+          AccountRepositoryImpl(AccountRemoteDataSourceImpl(dio: _dio)),
         ),
       );
 
@@ -122,23 +119,33 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             const SizedBox(height: 8),
-            const Row(
-              children: [
-                Icon(Icons.email_outlined,
-                    color: AppColors.primaryOrange, size: 18),
+            Row(
+              children: const [
+                Icon(
+                  Icons.email_outlined,
+                  color: AppColors.primaryOrange,
+                  size: 18,
+                ),
                 SizedBox(width: 8),
-                Text('support@gofix.com',
-                    style: TextStyle(color: AppColors.primaryDark)),
+                Text(
+                  'support@gofix.com',
+                  style: TextStyle(color: AppColors.primaryDark),
+                ),
               ],
             ),
             const SizedBox(height: 8),
-            const Row(
-              children: [
-                Icon(Icons.phone_outlined,
-                    color: AppColors.primaryOrange, size: 18),
+            Row(
+              children: const [
+                Icon(
+                  Icons.phone_outlined,
+                  color: AppColors.primaryOrange,
+                  size: 18,
+                ),
                 SizedBox(width: 8),
-                Text('+962 79 000 0000',
-                    style: TextStyle(color: AppColors.primaryDark)),
+                Text(
+                  '+962 79 000 0000',
+                  style: TextStyle(color: AppColors.primaryDark),
+                ),
               ],
             ),
             const SizedBox(height: 24),
@@ -154,13 +161,21 @@ class _ProfilePageState extends State<ProfilePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(question,
-              style: const TextStyle(
-                  fontWeight: FontWeight.w600, color: AppColors.primaryDark)),
+          Text(
+            question,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryDark,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text(answer,
-              style: const TextStyle(
-                  color: AppColors.textSecondary, fontSize: 13)),
+          Text(
+            answer,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 13,
+            ),
+          ),
         ],
       ),
     );
@@ -187,16 +202,20 @@ class _ProfilePageState extends State<ProfilePage> {
             listener: (context, state) {
               if (state is FeedbackSuccess) {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(t.thankYouFeedback),
-                  backgroundColor: AppColors.primaryOrange,
-                ));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(t.thankYouFeedback),
+                    backgroundColor: AppColors.primaryOrange,
+                  ),
+                );
               }
               if (state is AccountError) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: AppColors.error,
-                ));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
               }
             },
             builder: (context, state) {
@@ -215,19 +234,27 @@ class _ProfilePageState extends State<ProfilePage> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(2)),
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                     const SizedBox(height: 20),
-                    Text(t.rateExperience,
-                        style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryDark)),
+                    Text(
+                      t.rateExperience,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryDark,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(t.feedbackHelps,
-                        style: const TextStyle(
-                            color: AppColors.textSecondary, fontSize: 13)),
+                    Text(
+                      t.feedbackHelps,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 13,
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -252,7 +279,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       decoration: InputDecoration(
                         hintText: t.shareFeedback,
                         hintStyle: const TextStyle(
-                            color: AppColors.textSecondary, fontSize: 13),
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
                         filled: true,
                         fillColor: Colors.grey[100],
                         border: OutlineInputBorder(
@@ -281,7 +310,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           disabledBackgroundColor:
                               AppColors.primaryOrange.withOpacity(0.6),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
+                            borderRadius: BorderRadius.circular(30),
+                          ),
                           elevation: 0,
                         ),
                         child: isLoading
@@ -289,12 +319,18 @@ class _ProfilePageState extends State<ProfilePage> {
                                 height: 22,
                                 width: 22,
                                 child: CircularProgressIndicator(
-                                    color: Colors.white, strokeWidth: 2.5))
-                            : Text(t.submit,
+                                  color: Colors.white,
+                                  strokeWidth: 2.5,
+                                ),
+                              )
+                            : Text(
+                                t.submit,
                                 style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16)),
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
                       ),
                     ),
                   ],
@@ -325,10 +361,12 @@ class _ProfilePageState extends State<ProfilePage> {
               _navigateToStart(context);
             }
             if (state is AccountError) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-              ));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: AppColors.error,
+                ),
+              );
             }
           },
           builder: (context, state) {
@@ -342,20 +380,28 @@ class _ProfilePageState extends State<ProfilePage> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2)),
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                   const SizedBox(height: 24),
-                  Text(t.deleteAccountTitle,
-                      style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryDark)),
+                  Text(
+                    t.deleteAccountTitle,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryDark,
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  Text(t.deleteAccountMessage,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          color: AppColors.textSecondary, fontSize: 13)),
+                  Text(
+                    t.deleteAccountMessage,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                    ),
+                  ),
                   const SizedBox(height: 28),
                   SizedBox(
                     width: double.infinity,
@@ -363,15 +409,16 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: ElevatedButton(
                       onPressed: isLoading
                           ? null
-                          : () => context
-                              .read<AccountBloc>()
-                              .add(const DeleteAccountEvent()),
+                          : () => context.read<AccountBloc>().add(
+                                const DeleteAccountEvent(),
+                              ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryOrange,
                         disabledBackgroundColor:
                             AppColors.primaryOrange.withOpacity(0.6),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30)),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
                         elevation: 0,
                       ),
                       child: isLoading
@@ -379,12 +426,18 @@ class _ProfilePageState extends State<ProfilePage> {
                               height: 22,
                               width: 22,
                               child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2.5))
-                          : Text(t.yesDelete,
+                                color: Colors.white,
+                                strokeWidth: 2.5,
+                              ),
+                            )
+                          : Text(
+                              t.yesDelete,
                               style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16)),
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -396,13 +449,17 @@ class _ProfilePageState extends State<ProfilePage> {
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: Colors.grey[300]!),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30)),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
                       ),
-                      child: Text(t.noKeep,
-                          style: const TextStyle(
-                              color: AppColors.primaryDark,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16)),
+                      child: Text(
+                        t.noKeep,
+                        style: const TextStyle(
+                          color: AppColors.primaryDark,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -438,19 +495,27 @@ class _ProfilePageState extends State<ProfilePage> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2)),
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
               const SizedBox(height: 24),
-              Text(t.selectLanguage,
-                  style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryDark)),
+              Text(
+                t.selectLanguage,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryDark,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text(t.chooseLanguage,
-                  style: const TextStyle(
-                      color: AppColors.textSecondary, fontSize: 13)),
+              Text(
+                t.chooseLanguage,
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                ),
+              ),
               const SizedBox(height: 24),
               Row(
                 children: ['English', 'Arabic'].map((lang) {
@@ -506,14 +571,18 @@ class _ProfilePageState extends State<ProfilePage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryOrange,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30)),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
                     elevation: 0,
                   ),
-                  child: Text(t.done,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16)),
+                  child: Text(
+                    t.done,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -542,10 +611,12 @@ class _ProfilePageState extends State<ProfilePage> {
               _navigateToStart(context);
             }
             if (state is AccountError) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-              ));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: AppColors.error,
+                ),
+              );
             }
           },
           builder: (context, state) {
@@ -559,20 +630,28 @@ class _ProfilePageState extends State<ProfilePage> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2)),
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                   const SizedBox(height: 24),
-                  Text(t.logOutTitle,
-                      style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryDark)),
+                  Text(
+                    t.logOutTitle,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primaryDark,
+                    ),
+                  ),
                   const SizedBox(height: 8),
-                  Text(t.logOutMessage,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          color: AppColors.textSecondary, fontSize: 13)),
+                  Text(
+                    t.logOutMessage,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                    ),
+                  ),
                   const SizedBox(height: 28),
                   SizedBox(
                     width: double.infinity,
@@ -580,15 +659,16 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: ElevatedButton(
                       onPressed: isLoading
                           ? null
-                          : () => context
-                              .read<AccountBloc>()
-                              .add(const LogoutEvent()),
+                          : () => context.read<AccountBloc>().add(
+                                const LogoutEvent(),
+                              ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryOrange,
                         disabledBackgroundColor:
                             AppColors.primaryOrange.withOpacity(0.6),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30)),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
                         elevation: 0,
                       ),
                       child: isLoading
@@ -596,12 +676,18 @@ class _ProfilePageState extends State<ProfilePage> {
                               height: 22,
                               width: 22,
                               child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2.5))
-                          : Text(t.logOut,
+                                color: Colors.white,
+                                strokeWidth: 2.5,
+                              ),
+                            )
+                          : Text(
+                              t.logOut,
                               style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16)),
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -613,13 +699,17 @@ class _ProfilePageState extends State<ProfilePage> {
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: Colors.grey[300]!),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30)),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
                       ),
-                      child: Text(t.cancel,
-                          style: const TextStyle(
-                              color: AppColors.primaryDark,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16)),
+                      child: Text(
+                        t.cancel,
+                        style: const TextStyle(
+                          color: AppColors.primaryDark,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -649,15 +739,24 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             Icon(icon, color: const Color(0xFF062B4D)),
             const SizedBox(width: 15),
-            Text(text,
-                style: const TextStyle(fontSize: 16, color: Color(0xFF062B4D))),
+            Text(
+              text,
+              style: const TextStyle(fontSize: 16, color: Color(0xFF062B4D)),
+            ),
             const Spacer(),
             trailing != null
-                ? Text(trailing,
+                ? Text(
+                    trailing,
                     style: const TextStyle(
-                        fontWeight: FontWeight.bold, color: Color(0xFF062B4D)))
-                : const Icon(Icons.arrow_forward_ios,
-                    size: 16, color: Color(0xFF062B4D)),
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF062B4D),
+                    ),
+                  )
+                : const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: Color(0xFF062B4D),
+                  ),
           ],
         ),
       ),
@@ -670,9 +769,10 @@ class _ProfilePageState extends State<ProfilePage> {
       child: Text(
         title,
         style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF062B4D)),
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF062B4D),
+        ),
       ),
     );
   }
@@ -707,9 +807,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       const Text(
                         'Hazim Amir',
                         style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF062B4D)),
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF062B4D),
+                        ),
                       ),
                       const SizedBox(height: 20),
                       const Divider(),
@@ -737,13 +838,15 @@ class _ProfilePageState extends State<ProfilePage> {
                                 getNotificationSettings:
                                     GetNotificationSettingsUseCase(
                                   NotificationSettingsRepositoryImpl(
-                                    NotificationSettingsRemoteDataSourceImpl(),
+                                    NotificationSettingsRemoteDataSourceImpl(
+                                        dio: _dio),
                                   ),
                                 ),
                                 updateNotificationSettings:
                                     UpdateNotificationSettingsUseCase(
                                   NotificationSettingsRepositoryImpl(
-                                    NotificationSettingsRemoteDataSourceImpl(),
+                                    NotificationSettingsRemoteDataSourceImpl(
+                                        dio: _dio),
                                   ),
                                 ),
                               )..add(const GetNotificationSettingsEvent()),
@@ -780,24 +883,20 @@ class _ProfilePageState extends State<ProfilePage> {
                           context,
                           MaterialPageRoute(
                             builder: (_) => BlocProvider(
-                              create: (_) => AddressBloc(
-                                getAddresses: GetAddressesUseCase(
-                                  AddressRepositoryImpl(
-                                      AddressLocalDataSourceImpl()),
-                                ),
-                                addAddress: AddAddressUseCase(
-                                  AddressRepositoryImpl(
-                                      AddressLocalDataSourceImpl()),
-                                ),
-                                updateAddress: UpdateAddressUseCase(
-                                  AddressRepositoryImpl(
-                                      AddressLocalDataSourceImpl()),
-                                ),
-                                deleteAddress: DeleteAddressUseCase(
-                                  AddressRepositoryImpl(
-                                      AddressLocalDataSourceImpl()),
-                                ),
-                              )..add(const GetAddressesEvent()),
+                              create: (_) {
+                                final addressRepo = AddressRepositoryImpl(
+                                  AddressRemoteDataSourceImpl(dio: _dio),
+                                );
+                                return AddressBloc(
+                                  getAddresses:
+                                      GetAddressesUseCase(addressRepo),
+                                  addAddress: AddAddressUseCase(addressRepo),
+                                  updateAddress:
+                                      UpdateAddressUseCase(addressRepo),
+                                  deleteAddress:
+                                      DeleteAddressUseCase(addressRepo),
+                                )..add(const GetAddressesEvent());
+                              },
                               child: const AddressesScreen(),
                             ),
                           ),
@@ -823,10 +922,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         t.helpAndSupport,
                         onTap: () => _showHelpSupport(context),
                       ),
-
-                      // ── Become a Professional ──────────────────────────
-                      // BlocProvider wraps StepperScreen so each session
-                      // starts with a clean BecomeProfessionalBloc state.
                       _menuItem(
                         context,
                         Icons.build,
@@ -834,14 +929,10 @@ class _ProfilePageState extends State<ProfilePage> {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => BlocProvider(
-                              create: (_) => di.sl<BecomeProfessionalBloc>(),
-                              child: const StepperScreen(),
-                            ),
+                            builder: (_) => const StepperScreen(),
                           ),
                         ),
                       ),
-
                       _menuItem(
                         context,
                         Icons.feedback,
