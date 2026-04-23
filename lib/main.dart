@@ -4,10 +4,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:gp/core/bloc/locale_bloc.dart';
 import 'package:gp/features/home/presentation/bloc/home_bloc.dart';
 import 'package:gp/features/home/presentation/pages/home_page.dart';
-import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
+import 'package:gp/features/settings/presentation/pages/profile.dart';
 import 'package:gp/features/bookings/presentation/bloc/bookings_bloc.dart';
 import 'package:gp/features/bookings/presentation/pages/my_bookings_page.dart';
-import 'package:gp/features/settings/presentation/pages/profile.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/injection_container.dart' as di;
 import 'package:gp/features/auth/pages/start_page.dart';
@@ -41,13 +40,13 @@ class MainApp extends StatelessWidget {
           ),
           routes: {
             '/home': (_) => BlocProvider(
-              create: (_) => di.sl<HomeBloc>(),
-              child: const HomePage(),
-            ),
+                  create: (_) => di.sl<HomeBloc>(),
+                  child: const HomePage(),
+                ),
             '/bookings': (_) => BlocProvider(
-              create: (_) => di.sl<BookingsBloc>(),
-              child: const MyBookingsPage(),
-            ),
+                  create: (_) => di.sl<BookingsBloc>(),
+                  child: const MyBookingsPage(),
+                ),
             '/profile': (_) => const ProfilePage(),
             '/login': (_) => const StartPage(),
           },

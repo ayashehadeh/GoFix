@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/booking.dart';
-import 'booking_status_badge.dart';
 
 class BookingListCard extends StatelessWidget {
   final Booking booking;

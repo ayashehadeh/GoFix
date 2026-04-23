@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/core/widgets/gofix_bottom_nav_bar.dart';
-import 'package:gp/auth/become_professional/pages/stepper_screen.dart';
+import 'package:gp/features/become_professional/presentation/pages/stepper_screen.dart';
 import 'package:gp/features/settings/presentation/pages/personal_information_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
@@ -51,16 +51,16 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   AccountBloc _createAccountBloc() => AccountBloc(
-    logout: LogoutUseCase(
-      AccountRepositoryImpl(AccountRemoteDataSourceImpl(dio: _dio)),
-    ),
-    deleteAccount: DeleteAccountUseCase(
-      AccountRepositoryImpl(AccountRemoteDataSourceImpl(dio: _dio)),
-    ),
-    sendFeedback: SendFeedbackUseCase(
-      AccountRepositoryImpl(AccountRemoteDataSourceImpl(dio: _dio)),
-    ),
-  );
+        logout: LogoutUseCase(
+          AccountRepositoryImpl(AccountRemoteDataSourceImpl(dio: _dio)),
+        ),
+        deleteAccount: DeleteAccountUseCase(
+          AccountRepositoryImpl(AccountRemoteDataSourceImpl(dio: _dio)),
+        ),
+        sendFeedback: SendFeedbackUseCase(
+          AccountRepositoryImpl(AccountRemoteDataSourceImpl(dio: _dio)),
+        ),
+      );
 
   void _navigateToStart(BuildContext context) {
     Navigator.of(context).pushAndRemoveUntil(
@@ -199,145 +199,145 @@ class _ProfilePageState extends State<ProfilePage> {
         child: StatefulBuilder(
           builder: (context, setState) =>
               BlocConsumer<AccountBloc, AccountState>(
-                listener: (context, state) {
-                  if (state is FeedbackSuccess) {
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(t.thankYouFeedback),
-                        backgroundColor: AppColors.primaryOrange,
+            listener: (context, state) {
+              if (state is FeedbackSuccess) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(t.thankYouFeedback),
+                    backgroundColor: AppColors.primaryOrange,
+                  ),
+                );
+              }
+              if (state is AccountError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              final isLoading = state is AccountLoading;
+              return Padding(
+                padding: EdgeInsets.only(
+                  left: 24,
+                  right: 24,
+                  top: 24,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                    );
-                  }
-                  if (state is AccountError) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.message),
-                        backgroundColor: AppColors.error,
-                      ),
-                    );
-                  }
-                },
-                builder: (context, state) {
-                  final isLoading = state is AccountLoading;
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      left: 24,
-                      right: 24,
-                      top: 24,
-                      bottom: MediaQuery.of(context).viewInsets.bottom + 24,
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(2),
+                    const SizedBox(height: 20),
+                    Text(
+                      t.rateExperience,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryDark,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      t.feedbackHelps,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(5, (index) {
+                        return GestureDetector(
+                          onTap: () =>
+                              setState(() => selectedStars = index + 1),
+                          child: Icon(
+                            index < selectedStars
+                                ? Icons.star
+                                : Icons.star_border,
+                            color: AppColors.primaryOrange,
+                            size: 36,
                           ),
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: feedbackCtrl,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        hintText: t.shareFeedback,
+                        hintStyle: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
                         ),
-                        const SizedBox(height: 20),
-                        Text(
-                          t.rateExperience,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primaryDark,
-                          ),
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          t.feedbackHelps,
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 13,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(5, (index) {
-                            return GestureDetector(
-                              onTap: () =>
-                                  setState(() => selectedStars = index + 1),
-                              child: Icon(
-                                index < selectedStars
-                                    ? Icons.star
-                                    : Icons.star_border,
-                                color: AppColors.primaryOrange,
-                                size: 36,
-                              ),
-                            );
-                          }),
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: feedbackCtrl,
-                          maxLines: 4,
-                          decoration: InputDecoration(
-                            hintText: t.shareFeedback,
-                            hintStyle: const TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 13,
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[100],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 52,
-                          child: ElevatedButton(
-                            onPressed: isLoading
-                                ? null
-                                : () {
-                                    context.read<AccountBloc>().add(
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () {
+                                context.read<AccountBloc>().add(
                                       SendFeedbackEvent(
                                         stars: selectedStars,
                                         message: feedbackCtrl.text.trim(),
                                       ),
                                     );
-                                  },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primaryOrange,
-                              disabledBackgroundColor: AppColors.primaryOrange
-                                  .withOpacity(0.6),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: isLoading
-                                ? const SizedBox(
-                                    height: 22,
-                                    width: 22,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2.5,
-                                    ),
-                                  )
-                                : Text(
-                                    t.submit,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryOrange,
+                          disabledBackgroundColor:
+                              AppColors.primaryOrange.withOpacity(0.6),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
                           ),
+                          elevation: 0,
                         ),
-                      ],
+                        child: isLoading
+                            ? const SizedBox(
+                                height: 22,
+                                width: 22,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2.5,
+                                ),
+                              )
+                            : Text(
+                                t.submit,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                      ),
                     ),
-                  );
-                },
-              ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -410,12 +410,12 @@ class _ProfilePageState extends State<ProfilePage> {
                       onPressed: isLoading
                           ? null
                           : () => context.read<AccountBloc>().add(
-                              const DeleteAccountEvent(),
-                            ),
+                                const DeleteAccountEvent(),
+                              ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryOrange,
-                        disabledBackgroundColor: AppColors.primaryOrange
-                            .withOpacity(0.6),
+                        disabledBackgroundColor:
+                            AppColors.primaryOrange.withOpacity(0.6),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
@@ -660,12 +660,12 @@ class _ProfilePageState extends State<ProfilePage> {
                       onPressed: isLoading
                           ? null
                           : () => context.read<AccountBloc>().add(
-                              const LogoutEvent(),
-                            ),
+                                const LogoutEvent(),
+                              ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryOrange,
-                        disabledBackgroundColor: AppColors.primaryOrange
-                            .withOpacity(0.6),
+                        disabledBackgroundColor:
+                            AppColors.primaryOrange.withOpacity(0.6),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
@@ -837,16 +837,18 @@ class _ProfilePageState extends State<ProfilePage> {
                               create: (_) => NotificationSettingsBloc(
                                 getNotificationSettings:
                                     GetNotificationSettingsUseCase(
-                                      NotificationSettingsRepositoryImpl(
-                                        NotificationSettingsRemoteDataSourceImpl(dio: _dio),
-                                      ),
-                                    ),
+                                  NotificationSettingsRepositoryImpl(
+                                    NotificationSettingsRemoteDataSourceImpl(
+                                        dio: _dio),
+                                  ),
+                                ),
                                 updateNotificationSettings:
                                     UpdateNotificationSettingsUseCase(
-                                      NotificationSettingsRepositoryImpl(
-                                        NotificationSettingsRemoteDataSourceImpl(dio: _dio),
-                                      ),
-                                    ),
+                                  NotificationSettingsRepositoryImpl(
+                                    NotificationSettingsRemoteDataSourceImpl(
+                                        dio: _dio),
+                                  ),
+                                ),
                               )..add(const GetNotificationSettingsEvent()),
                               child: const NotificationSettingsScreen(),
                             ),
@@ -886,10 +888,13 @@ class _ProfilePageState extends State<ProfilePage> {
                                   AddressRemoteDataSourceImpl(dio: _dio),
                                 );
                                 return AddressBloc(
-                                  getAddresses: GetAddressesUseCase(addressRepo),
+                                  getAddresses:
+                                      GetAddressesUseCase(addressRepo),
                                   addAddress: AddAddressUseCase(addressRepo),
-                                  updateAddress: UpdateAddressUseCase(addressRepo),
-                                  deleteAddress: DeleteAddressUseCase(addressRepo),
+                                  updateAddress:
+                                      UpdateAddressUseCase(addressRepo),
+                                  deleteAddress:
+                                      DeleteAddressUseCase(addressRepo),
                                 )..add(const GetAddressesEvent());
                               },
                               child: const AddressesScreen(),

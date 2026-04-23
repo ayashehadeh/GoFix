@@ -17,15 +17,14 @@ class StepIndicator extends StatelessWidget {
     return Row(
       children: List.generate(totalSteps * 2 - 1, (index) {
         if (index.isEven) {
-          int step = index ~/ 2;
-          bool isActive = step == currentStep;
-
+          final step = index ~/ 2;
+          final isActive = step == currentStep;
           return GestureDetector(
             onTap: () => onStepTapped(step),
             child: _buildCircle(step, isActive),
           );
         } else {
-          return _buildLine(index);
+          return _buildLine();
         }
       }),
     );
@@ -43,7 +42,7 @@ class StepIndicator extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: Text(
-        "${step + 1}",
+        '${step + 1}',
         style: TextStyle(
           color: isActive ? Colors.white : const Color(0xFF062B4D),
           fontWeight: FontWeight.bold,
@@ -52,7 +51,7 @@ class StepIndicator extends StatelessWidget {
     );
   }
 
-  Widget _buildLine(int index) {
+  Widget _buildLine() {
     return Expanded(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 6),

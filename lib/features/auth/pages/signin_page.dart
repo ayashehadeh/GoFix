@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:gp/core/storage/token_storage.dart';
 import 'package:gp/core/theme/app_colors.dart';
@@ -115,7 +114,6 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           children: [
             const SizedBox(height: 20),
-
             CircleAvatar(
               radius: 60,
               backgroundColor: Colors.white,
@@ -124,9 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: Image.asset('assets/logo2.png', fit: BoxFit.contain),
               ),
             ),
-
             const SizedBox(height: 20),
-
             Text(
               t.welcomeBack,
               style: const TextStyle(
@@ -135,13 +131,9 @@ class _LoginPageState extends State<LoginPage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(height: 6),
-
             Text(t.quickSignIn, style: const TextStyle(color: Colors.white70)),
-
             const SizedBox(height: 30),
-
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(
