@@ -83,6 +83,14 @@ import 'package:gp/features/become_professional/domain/repositories/become_profe
 import 'package:gp/features/become_professional/domain/usecases/submit_professional_application.dart';
 import 'package:gp/features/become_professional/presentation/bloc/become_professional_bloc.dart';
 
+// ── Search ────────────────────────────────────────────────────────────────────
+import 'package:gp/features/search/data/datasources/search_remote_datasource.dart';
+import 'package:gp/features/search/data/repositories/search_repository_impl.dart';
+import 'package:gp/features/search/domain/repositories/search_repository.dart';
+import 'package:gp/features/search/domain/usecases/search_usecase.dart';
+import 'package:gp/features/search/domain/usecases/get_professionals_by_area.dart';
+import 'package:gp/features/search/presentation/bloc/search_bloc.dart';
+
 final sl = GetIt.instance;
 
 // ── Mock flags ────────────────────────────────────────────────────────────────
@@ -158,6 +166,11 @@ Future<void> init() async {
     () => BecomeProfessionalBloc(submitApplication: sl()),
   );
 
+  // Search — new fresh BLoC per search session (debounce + state management)
+  sl.registerFactory(
+    () => SearchBloc(searchUseCase: sl(), getProfessionalsByArea: sl()),
+  );
+
   // ── Use Cases — Home ───────────────────────────────────────────────────────
 
   sl.registerLazySingleton(() => GetCategoriesUseCase(sl()));
@@ -208,6 +221,11 @@ Future<void> init() async {
 
   sl.registerLazySingleton(() => SubmitProfessionalApplication(sl()));
 
+  // ── Use Cases — Search ─────────────────────────────────────────────────────
+
+  sl.registerLazySingleton(() => SearchUseCase(sl()));
+  sl.registerLazySingleton(() => GetProfessionalsByArea(sl()));
+
   // ── Repositories ──────────────────────────────────────────────────────────
 
   sl.registerLazySingleton<HomeRepository>(
@@ -254,6 +272,10 @@ Future<void> init() async {
     () => BecomeProfessionalRepositoryImpl(remoteDataSource: sl()),
   );
 
+  sl.registerLazySingleton<SearchRepository>(
+    () => SearchRepositoryImpl(remoteDataSource: sl()),
+  );
+
   // ── Data Sources ──────────────────────────────────────────────────────────
 
   sl.registerLazySingleton<HomeRemoteDataSource>(
@@ -296,6 +318,11 @@ Future<void> init() async {
 
   sl.registerLazySingleton<BecomeProfessionalRemoteDataSource>(
     () => BecomeProfessionalRemoteDataSourceImpl(dio: sl()),
+  );
+
+  // Search datasource — MockSearchDataSource for frontend; swap when API ready
+  sl.registerLazySingleton<SearchRemoteDataSource>(
+    () => MockSearchDataSource(),
   );
 
   // ── External ──────────────────────────────────────────────────────────────
