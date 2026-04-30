@@ -13,8 +13,6 @@ import '../../../professionals/presentation/pages/category_professionals_page.da
 import '../../domain/entities/category_entity.dart';
 import '../bloc/home_bloc.dart';
 import '../widgets/category_card.dart';
-import '../../../search/presentation/bloc/search_bloc.dart';
-import '../../../search/presentation/pages/search_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -49,18 +47,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _onSearchTap() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => BlocProvider(
-          create: (_) => sl<SearchBloc>(),
-          child: const SearchPage(),
-        ),
-      ),
-    );
-  }
-
   void _onNotificationTap() {
     Navigator.push(
       context,
@@ -84,7 +70,9 @@ class _HomePageState extends State<HomePage> {
               _HomeHeader(
                 locationName: state is HomeLoaded ? state.locationName : '...',
                 isLoadingLocation: state is HomeLoading,
-                onSearchTap: _onSearchTap,
+                onSearchTap: () {
+                  // TODO: Navigate to search page
+                },
                 onNotificationTap: _onNotificationTap,
               ),
               Expanded(child: _buildBody(state)),
@@ -252,7 +240,9 @@ class _HomeHeader extends StatelessWidget {
               ),
             ],
           ),
+
           const SizedBox(height: 16),
+
           GestureDetector(
             onTap: onSearchTap,
             child: Container(

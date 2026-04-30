@@ -5,12 +5,20 @@ import '../../../../core/widgets/gofix_bottom_nav_bar.dart';
 import '../../../../injection_container.dart' as di;
 import '../../../home/presentation/bloc/home_bloc.dart';
 import '../../../home/presentation/pages/home_page.dart';
+import '../../../favorites/presentation/bloc/favorites_bloc.dart';
+import '../../../favorites/presentation/pages/favorites_page.dart';
+import '../../../chat/presentation/bloc/chat_bloc.dart';
+import '../../../chat/presentation/pages/all_chats_page.dart';
 import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
 import '../bloc/bookings_state.dart';
 import '../widgets/booking_list_card.dart';
 import 'booking_info_page.dart';
 import 'upcoming_booking_info_page.dart';
+import 'package:gp/features/favorites/presentation/bloc/favorites_bloc.dart';
+import 'package:gp/features/favorites/presentation/pages/favorites_page.dart';
+import 'package:gp/features/chat/presentation/bloc/chat_bloc.dart';
+import 'package:gp/features/chat/presentation/pages/all_chats_page.dart';
 
 class MyBookingsPage extends StatefulWidget {
   const MyBookingsPage({super.key});
@@ -52,7 +60,6 @@ class _MyBookingsPageState extends State<MyBookingsPage> {
                           color: AppColors.primaryOrange),
                     );
                   }
-
                   if (state is BookingsError) {
                     return _ErrorBody(
                       message: state.message,
@@ -61,14 +68,14 @@ class _MyBookingsPageState extends State<MyBookingsPage> {
                           .add(LoadUpcomingBookings()),
                     );
                   }
-
                   if (state is BookingsLoaded) {
                     final bookings = state.activeList;
                     if (bookings.isEmpty) {
                       return _EmptyBody(isUpcoming: state.isUpcomingTab);
                     }
                     return ListView.builder(
-                      padding: const EdgeInsets.only(top: 12, bottom: 20),
+                      padding:
+                          const EdgeInsets.only(top: 12, bottom: 20),
                       itemCount: bookings.length,
                       itemBuilder: (context, index) {
                         final booking = bookings[index];
@@ -80,8 +87,6 @@ class _MyBookingsPageState extends State<MyBookingsPage> {
                               MaterialPageRoute(
                                 builder: (_) => BlocProvider(
                                   create: (_) => di.sl<BookingsBloc>(),
-                                  // Upcoming -> Modify/Cancel flow
-                                  // Past     -> Feedback/Review/Report flow
                                   child: booking.isUpcoming
                                       ? UpcomingBookingInfoPage(
                                           bookingId: booking.id,
@@ -97,7 +102,6 @@ class _MyBookingsPageState extends State<MyBookingsPage> {
                       },
                     );
                   }
-
                   return const SizedBox.shrink();
                 },
               ),
@@ -143,24 +147,47 @@ class _BookingsHeader extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('My Bookings',
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primaryDark)),
+              const Text(
+                'My Bookings',
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryDark),
+              ),
               Row(
                 children: [
-                  GestureDetector(
-                    onTap: () {},
-                    child: const Icon(Icons.favorite_border,
-                        color: AppColors.primaryDark, size: 24),
-                  ),
-                  const SizedBox(width: 14),
-                  GestureDetector(
-                    onTap: () {},
-                    child: const Icon(Icons.chat_bubble_outline,
-                        color: AppColors.primaryDark, size: 24),
-                  ),
+               GestureDetector(
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider(
+          create: (_) => di.sl<FavoritesBloc>(),
+          child: const FavoritesPage(),
+        ),
+      ),
+    );
+  },
+  child: const Icon(Icons.favorite_border,
+      color: AppColors.primaryDark, size: 24),
+),
+const SizedBox(width: 14),
+// Chat icon
+GestureDetector(
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider(
+          create: (_) => di.sl<ChatBloc>(),
+          child: const AllChatsPage(),
+        ),
+      ),
+    );
+  },
+  child: const Icon(Icons.chat_bubble_outline,
+      color: AppColors.primaryDark, size: 24),
+),
                 ],
               ),
             ],
@@ -184,7 +211,8 @@ class _BookingsHeader extends StatelessWidget {
 class _TabToggle extends StatelessWidget {
   final bool isUpcoming;
   final void Function(bool) onSwitchTab;
-  const _TabToggle({required this.isUpcoming, required this.onSwitchTab});
+  const _TabToggle(
+      {required this.isUpcoming, required this.onSwitchTab});
 
   @override
   Widget build(BuildContext context) {
@@ -219,22 +247,27 @@ class _TabButton extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryOrange : Colors.transparent,
+          color: isSelected
+              ? AppColors.primaryOrange
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(50),
           border: Border.all(
               color: isSelected
                   ? AppColors.primaryOrange
                   : AppColors.divider),
         ),
-        child: Text(label,
-            style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isSelected
-                    ? Colors.white
-                    : AppColors.textSecondary)),
+        child: Text(
+          label,
+          style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: isSelected
+                  ? Colors.white
+                  : AppColors.textSecondary),
+        ),
       ),
     );
   }
@@ -250,8 +283,12 @@ class _EmptyBody extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(isUpcoming ? Icons.calendar_today_outlined : Icons.history,
-              size: 56, color: AppColors.divider),
+          Icon(
+              isUpcoming
+                  ? Icons.calendar_today_outlined
+                  : Icons.history,
+              size: 56,
+              color: AppColors.divider),
           const SizedBox(height: 16),
           Text(
               isUpcoming
@@ -278,7 +315,8 @@ class _ErrorBody extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, color: AppColors.error, size: 48),
+          const Icon(Icons.error_outline,
+              color: AppColors.error, size: 48),
           const SizedBox(height: 12),
           Text(message,
               textAlign: TextAlign.center,

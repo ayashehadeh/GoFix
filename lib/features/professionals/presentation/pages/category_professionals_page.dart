@@ -12,6 +12,8 @@ import 'package:gp/features/professionals/presentation/pages/filter_page.dart';
 import 'package:gp/features/professionals/presentation/pages/professional_detail_page.dart';
 import 'package:gp/features/professionals/presentation/widgets/professional_card.dart';
 import 'package:gp/injection_container.dart';
+import 'package:gp/features/favorites/domain/entities/favorite_entity.dart';
+import 'package:gp/features/favorites/domain/usecases/favorites_usecases.dart';
 
 class CategoryProfessionalsPage extends StatefulWidget {
   final ServiceCategory category;
@@ -19,7 +21,8 @@ class CategoryProfessionalsPage extends StatefulWidget {
   const CategoryProfessionalsPage({super.key, required this.category});
 
   @override
-  State<CategoryProfessionalsPage> createState() => _CategoryProfessionalsPageState();
+  State<CategoryProfessionalsPage> createState() =>
+      _CategoryProfessionalsPageState();
 }
 
 class _CategoryProfessionalsPageState extends State<CategoryProfessionalsPage> {
@@ -29,7 +32,9 @@ class _CategoryProfessionalsPageState extends State<CategoryProfessionalsPage> {
   @override
   void initState() {
     super.initState();
-    context.read<ProfessionalsBloc>().add(LoadProfessionalsByCategory(widget.category));
+    context
+        .read<ProfessionalsBloc>()
+        .add(LoadProfessionalsByCategory(widget.category));
   }
 
   @override
@@ -42,7 +47,9 @@ class _CategoryProfessionalsPageState extends State<CategoryProfessionalsPage> {
     setState(() {
       _filteredList = query.isEmpty
           ? all
-          : all.where((p) => p.name.toLowerCase().contains(query.toLowerCase())).toList();
+          : all
+              .where((p) => p.name.toLowerCase().contains(query.toLowerCase()))
+              .toList();
     });
   }
 
@@ -70,7 +77,8 @@ class _CategoryProfessionalsPageState extends State<CategoryProfessionalsPage> {
 
   Widget _buildBody(ProfessionalsState state) {
     if (state is ProfessionalsLoading) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.primaryOrange));
+      return const Center(
+          child: CircularProgressIndicator(color: AppColors.primaryOrange));
     }
 
     if (state is ProfessionalsError) {
@@ -83,10 +91,13 @@ class _CategoryProfessionalsPageState extends State<CategoryProfessionalsPage> {
             Text(state.message, style: AppTextStyles.bodyMedium),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => context.read<ProfessionalsBloc>().add(LoadProfessionalsByCategory(widget.category)),
+              onPressed: () => context
+                  .read<ProfessionalsBloc>()
+                  .add(LoadProfessionalsByCategory(widget.category)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryOrange,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
               ),
               child: const Text('Retry', style: TextStyle(color: Colors.white)),
             ),
@@ -115,7 +126,8 @@ class _CategoryProfessionalsPageState extends State<CategoryProfessionalsPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Row(
                       children: [
-                        const Icon(Icons.search, color: AppColors.textSecondary, size: 20),
+                        const Icon(Icons.search,
+                            color: AppColors.textSecondary, size: 20),
                         const SizedBox(width: 8),
                         Expanded(
                           child: TextField(
@@ -156,7 +168,8 @@ class _CategoryProfessionalsPageState extends State<CategoryProfessionalsPage> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: AppColors.divider),
                     ),
-                    child: const Icon(Icons.tune, color: AppColors.primaryDark, size: 22),
+                    child: const Icon(Icons.tune,
+                        color: AppColors.primaryDark, size: 22),
                   ),
                 ),
               ],
@@ -165,7 +178,9 @@ class _CategoryProfessionalsPageState extends State<CategoryProfessionalsPage> {
           // ── Professionals list ───────────────────────────────────
           Expanded(
             child: _filteredList.isEmpty
-                ? Center(child: Text('No professionals found', style: AppTextStyles.bodyMedium))
+                ? Center(
+                    child: Text('No professionals found',
+                        style: AppTextStyles.bodyMedium))
                 : ListView.separated(
                     padding: const EdgeInsets.all(16),
                     itemCount: _filteredList.length,
@@ -179,14 +194,39 @@ class _CategoryProfessionalsPageState extends State<CategoryProfessionalsPage> {
                             context,
                             MaterialPageRoute(
                               builder: (_) => BlocProvider(
-                                create: (_) => sl<ProfessionalsBloc>(), // fresh bloc instance
-                                child: ProfessionalDetailPage(professionalId: professional.id),
+                                create: (_) => sl<
+                                    ProfessionalsBloc>(), // fresh bloc instance
+                                child: ProfessionalDetailPage(
+                                    professionalId: professional.id),
                               ),
                             ),
                           );
                         },
-                        onFavoriteTap: () {
-                          context.read<ProfessionalsBloc>().add(ToggleFavoriteEvent(professional.id));
+                        onFavoriteTap: () async {
+                          // Capture state BEFORE toggling
+                          final wasFavorite = professional.isFavorite;
+
+                          // Toggle in ProfessionalsBloc (updates UI)
+                          context.read<ProfessionalsBloc>().add(
+                                ToggleFavoriteEvent(professional.id),
+                              );
+
+                          // Sync with favorites datasource
+                          if (!wasFavorite) {
+                            // Was NOT favorite → add it
+                            await sl<AddFavorite>()(
+                              FavoriteEntity(
+                                id: professional.id,
+                                name: professional.name,
+                                role: professional.category.displayName,
+                                yearsExperience: professional.experienceYears,
+                                imageUrl: professional.profileImageUrl,
+                              ),
+                            );
+                          } else {
+                            // WAS favorite → remove it
+                            await sl<RemoveFavorite>()(professional.id);
+                          }
                         },
                       );
                     },
@@ -213,9 +253,14 @@ class _CategoryHeader extends StatelessWidget {
       width: double.infinity,
       decoration: const BoxDecoration(
         color: AppColors.primaryDark,
-        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(28), bottomRight: Radius.circular(28)),
+        borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(28), bottomRight: Radius.circular(28)),
       ),
-      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 12, bottom: 28, left: 20, right: 20),
+      padding: EdgeInsets.only(
+          top: MediaQuery.of(context).padding.top + 12,
+          bottom: 28,
+          left: 20,
+          right: 20),
       child: Column(
         children: [
           // Back button
@@ -223,7 +268,8 @@ class _CategoryHeader extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: GestureDetector(
               onTap: () => Navigator.pop(context),
-              child: const Icon(Icons.chevron_left, color: Colors.white, size: 28),
+              child:
+                  const Icon(Icons.chevron_left, color: Colors.white, size: 28),
             ),
           ),
           const SizedBox(height: 12),
@@ -231,20 +277,23 @@ class _CategoryHeader extends StatelessWidget {
           Container(
             width: 80,
             height: 80,
-            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+            decoration: const BoxDecoration(
+                color: Colors.white, shape: BoxShape.circle),
             child: Center(
               child: SvgPicture.asset(
                 category.iconAsset,
                 width: 42,
                 height: 42,
-                colorFilter: const ColorFilter.mode(AppColors.primaryOrange, BlendMode.srcIn),
+                colorFilter: const ColorFilter.mode(
+                    AppColors.primaryOrange, BlendMode.srcIn),
               ),
             ),
           ),
           const SizedBox(height: 12),
           Text(
             category.displayName,
-            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+                color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 6),
           Text(

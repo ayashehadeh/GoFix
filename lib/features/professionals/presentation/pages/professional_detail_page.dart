@@ -10,6 +10,12 @@ import 'package:gp/features/professionals/domain/entities/review.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
 import 'package:gp/features/professionals/presentation/widgets/star_rating.dart';
 import 'package:gp/features/bookings/presentation/pages/select_service_screen.dart';
+import 'package:gp/features/favorites/domain/entities/favorite_entity.dart';
+import 'package:gp/features/favorites/domain/usecases/favorites_usecases.dart';
+import 'package:gp/features/chat/domain/usecases/chat_usecases.dart';
+import 'package:gp/features/chat/presentation/bloc/chat_bloc.dart';
+import 'package:gp/features/chat/presentation/pages/chat_page.dart';
+import 'package:gp/injection_container.dart' as di;
 
 class ProfessionalDetailPage extends StatefulWidget {
   final String professionalId;
@@ -80,9 +86,32 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                 _DetailHeader(
                   professional: professional,
                   onCall: () => _callProfessional(professional.phone),
-                  onFavorite: () => context.read<ProfessionalsBloc>().add(
-                        ToggleFavoriteEvent(professional.id),
-                      ),
+                  onFavorite: () async {
+                    // Capture state BEFORE toggling
+                    final wasFavorite = professional.isFavorite;
+
+                    // Toggle in ProfessionalsBloc (updates UI)
+                    context.read<ProfessionalsBloc>().add(
+                          ToggleFavoriteEvent(professional.id),
+                        );
+
+                    // Add/remove from favorites datasource
+                    if (!wasFavorite) {
+                      // Was NOT favorite → add it
+                      await di.sl<AddFavorite>()(
+                        FavoriteEntity(
+                          id: professional.id,
+                          name: professional.name,
+                          role: professional.category.displayName,
+                          yearsExperience: professional.experienceYears,
+                          imageUrl: professional.profileImageUrl,
+                        ),
+                      );
+                    } else {
+                      // WAS favorite → remove it
+                      await di.sl<RemoveFavorite>()(professional.id);
+                    }
+                  },
                 ),
                 // ── Tabs ────────────────────────────────────────
                 Container(
@@ -144,6 +173,7 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                 ),
                 // ── Bottom Actions ───────────────────────────────
                 _BottomActions(
+                  professional: professional,
                   onBookNow: () {
                     Navigator.push(
                       context,
@@ -156,9 +186,6 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                         ),
                       ),
                     );
-                  },
-                  onMessage: () {
-                    // TODO: Navigate to chat
                   },
                   onCall: () => _callProfessional(professional.phone),
                 ),
@@ -295,7 +322,7 @@ class _DetailHeader extends StatelessWidget {
                 icon: Icons.bookmark_border,
                 value: professional.distanceKm != null
                     ? professional.distanceKm!.toStringAsFixed(1)
-                    : 'N/A', // ✅ null-safe fix
+                    : 'N/A',
                 label: 'KM Away',
               ),
               _StatItem(
@@ -747,13 +774,13 @@ class _VerificationRow extends StatelessWidget {
 // ─── Bottom Actions ───────────────────────────────────────────────────────────
 
 class _BottomActions extends StatelessWidget {
+  final Professional professional;
   final VoidCallback onBookNow;
-  final VoidCallback onMessage;
   final VoidCallback onCall;
 
   const _BottomActions({
+    required this.professional,
     required this.onBookNow,
-    required this.onMessage,
     required this.onCall,
   });
 
@@ -795,7 +822,34 @@ class _BottomActions extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           GestureDetector(
-            onTap: onMessage,
+            onTap: () async {
+              final result = await di.sl<GetOrCreateChat>()(
+                professionalId: professional.id,
+                professionalName: professional.name,
+              );
+
+              result.fold(
+                (failure) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to open chat')),
+                  );
+                },
+                (chat) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider(
+                        create: (_) => di.sl<ChatBloc>(),
+                        child: ChatPage(
+                          chatId: chat.id,
+                          professionalName: chat.name,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
             child: Container(
               width: 50,
               height: 50,

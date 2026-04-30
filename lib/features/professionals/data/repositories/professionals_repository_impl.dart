@@ -2,23 +2,62 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:gp/core/error/failures.dart';
 import 'package:gp/features/professionals/data/datasources/professionals_remote_datasource.dart';
+import 'package:gp/features/professionals/data/models/professional_model.dart';
 import 'package:gp/features/professionals/domain/entities/professional.dart';
 import 'package:gp/features/professionals/domain/entities/review.dart';
 import 'package:gp/features/professionals/domain/entities/service_category.dart';
 import 'package:gp/features/professionals/domain/repositories/professionals_repository.dart';
 import 'package:gp/features/professionals/domain/repositories/reviews_repository.dart';
+import 'package:gp/features/favorites/data/datasources/favorites_remote_datasource.dart';
+import 'package:gp/injection_container.dart' as di;
 
 class ProfessionalsRepositoryImpl implements ProfessionalsRepository {
   final ProfessionalsRemoteDataSource remoteDataSource;
 
   const ProfessionalsRepositoryImpl({required this.remoteDataSource});
 
+  // Helper to sync isFavorite flags with the favorites datasource
+  Future<List<Professional>> _syncFavorites(
+      List<Professional> professionals) async {
+    try {
+      final favDataSource = di.sl<FavoritesRemoteDataSource>();
+      final favorites = await favDataSource.getFavorites();
+      final favoriteIds = favorites.map((f) => f.id).toSet();
+
+      return professionals.map((prof) {
+        // Check if this professional is in favorites
+        final shouldBeFavorite = favoriteIds.contains(prof.id);
+
+        // If the flag is already correct, return as-is
+        if (prof.isFavorite == shouldBeFavorite) {
+          return prof;
+        }
+
+        // Reconstruct with updated isFavorite flag
+        if (prof is ProfessionalModel) {
+          final json = prof.toJson();
+          json['is_favorite'] = shouldBeFavorite;
+          json['isFavorite'] = shouldBeFavorite;
+          return ProfessionalModel.fromJson(json);
+        }
+
+        // Fallback: return as-is
+        return prof;
+      }).toList();
+    } catch (e) {
+      // If favorites check fails, return original list
+      return professionals;
+    }
+  }
+
   @override
   Future<Either<Failure, List<Professional>>> getProfessionalsByCategory(
       ServiceCategory category) async {
     try {
-      final result = await remoteDataSource.getProfessionalsByCategory(category);
-      return Right(result);
+      final result =
+          await remoteDataSource.getProfessionalsByCategory(category);
+      final synced = await _syncFavorites(result);
+      return Right(synced);
     } on DioException catch (e) {
       return Left(_handleDioError(e));
     } catch (e) {
@@ -30,7 +69,8 @@ class ProfessionalsRepositoryImpl implements ProfessionalsRepository {
   Future<Either<Failure, Professional>> getProfessionalById(String id) async {
     try {
       final result = await remoteDataSource.getProfessionalById(id);
-      return Right(result);
+      final synced = await _syncFavorites([result]);
+      return Right(synced.first);
     } on DioException catch (e) {
       return Left(_handleDioError(e));
     } catch (e) {
@@ -67,7 +107,8 @@ class ProfessionalsRepositoryImpl implements ProfessionalsRepository {
       String query) async {
     try {
       final result = await remoteDataSource.searchProfessionals(query);
-      return Right(result);
+      final synced = await _syncFavorites(result);
+      return Right(synced);
     } on DioException catch (e) {
       return Left(_handleDioError(e));
     } catch (e) {
@@ -89,7 +130,8 @@ class ProfessionalsRepositoryImpl implements ProfessionalsRepository {
         maxDistanceKm: maxDistanceKm,
         minRating: minRating,
       );
-      return Right(result);
+      final synced = await _syncFavorites(result);
+      return Right(synced);
     } on DioException catch (e) {
       return Left(_handleDioError(e));
     } catch (e) {

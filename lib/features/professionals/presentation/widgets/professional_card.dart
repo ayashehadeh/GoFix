@@ -37,7 +37,6 @@ class ProfessionalCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Name + Stars + Favorite ──────────────────────────
             Row(
               children: [
                 Expanded(
@@ -61,11 +60,13 @@ class ProfessionalCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-            // ── Experience ───────────────────────────────────────
             Row(
               children: [
-                const Icon(Icons.access_time,
-                    color: AppColors.primaryOrange, size: 16),
+                const Icon(
+                  Icons.access_time,
+                  color: AppColors.primaryOrange,
+                  size: 16,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   '${professional.experienceYears} ${professional.experienceYears == 1 ? 'year' : 'years'} experience',
@@ -74,16 +75,21 @@ class ProfessionalCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            // ── Distance ─────────────────────────────────────────
             Row(
               children: [
-                const Icon(Icons.bookmark_border,
-                    color: AppColors.primaryOrange, size: 16),
+                const Icon(
+                  Icons.bookmark_border,
+                  color: AppColors.primaryOrange,
+                  size: 16,
+                ),
                 const SizedBox(width: 6),
                 Text(
-                  professional.distanceKm != null && professional.distanceKm! < 1
+                  professional.distanceKm != null &&
+                          professional.distanceKm! < 1
                       ? '${(professional.distanceKm! * 1000).toInt()} m away'
-                      : professional.distanceKm != null ? '${professional.distanceKm!.toStringAsFixed(1)} Km away' : '-- Km away',
+                      : professional.distanceKm != null
+                          ? '${professional.distanceKm!.toStringAsFixed(1)} Km away'
+                          : '-- Km away',
                   style: AppTextStyles.bodySmall,
                 ),
               ],
