@@ -43,4 +43,48 @@ class SearchRepositoryImpl implements SearchRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  // ── Recent searches ───────────────────────────────────────────────────────
+
+  @override
+  Future<Either<Failure, List<RecentSearch>>> getRecentSearches() async {
+    try {
+      final result = await remoteDataSource.getRecentSearches();
+      return Right(result
+          .map((m) => RecentSearch(id: m.id, query: m.query))
+          .toList());
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> recordSearch(String query) async {
+    try {
+      await remoteDataSource.recordSearch(query);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteRecentSearch(String id) async {
+    try {
+      await remoteDataSource.deleteRecentSearch(id);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> clearRecentSearches() async {
+    try {
+      await remoteDataSource.clearRecentSearches();
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

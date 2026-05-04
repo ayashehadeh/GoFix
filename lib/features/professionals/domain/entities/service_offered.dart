@@ -1,11 +1,13 @@
 import 'package:equatable/equatable.dart';
 
 class ServiceOffered extends Equatable {
+  final int? serviceId;
   final String name;
   final double minPrice;
   final double? maxPrice; // null = fixed price, non-null = price range
 
   const ServiceOffered({
+    this.serviceId,
     required this.name,
     required this.minPrice,
     this.maxPrice,
@@ -19,5 +21,5 @@ class ServiceOffered extends Equatable {
       : '${minPrice.toInt()} - ${maxPrice!.toInt()} JD';
 
   @override
-  List<Object?> get props => [name, minPrice, maxPrice];
+  List<Object?> get props => [serviceId, name, minPrice, maxPrice];
 }

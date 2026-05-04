@@ -1,7 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:gp/features/professionals/data/models/professional_model.dart';
 import 'package:gp/features/professionals/domain/entities/service_category.dart';
-import 'package:gp/features/professionals/domain/entities/service_offered.dart';
-import 'package:gp/features/professionals/domain/entities/working_hours.dart';
 import 'package:gp/features/search/domain/entities/search_result.dart';
 import '../models/area_result_model.dart';
 
@@ -13,112 +12,119 @@ abstract class SearchRemoteDataSource {
     required String areaName,
     ServiceCategory? category,
   });
+
+  // Recent searches (require auth)
+  Future<List<RecentSearchModel>> getRecentSearches();
+  Future<void> recordSearch(String query);
+  Future<void> deleteRecentSearch(String id);
+  Future<void> clearRecentSearches();
 }
 
-/// Mock implementation — swap for a real Dio datasource when the API is ready.
-class MockSearchDataSource implements SearchRemoteDataSource {
-  // ── Static mock professional pool ─────────────────────────────────────────
+// ─── Model for a single recent search row ────────────────────────────────────
 
-  static final List<ProfessionalModel> _allProfessionals = [
-    _pro('p1',  'Ahmad Khalil',    ServiceCategory.plumbing,       4.9, 34, 8, ['Khalda', 'Sweifieh', 'AlJubaiha'], 20),
-    _pro('p2',  'Ali Emad',        ServiceCategory.electricalWork, 4.7, 21, 5, ['Sweifieh', 'Khalda'],              18),
-    _pro('p3',  'Omar Amer',       ServiceCategory.carpentry,      4.6, 18, 3, ['Khalda', 'Marka'],                 25),
-    _pro('p4',  'Yousef Abdallah', ServiceCategory.electricalWork, 4.7, 31, 7, ['Khalda', 'AlJubaiha'],             18),
-    _pro('p5',  'Omar Hamed',      ServiceCategory.plumbing,       4.8, 23, 5, ['Khalda', 'Sweifieh'],              15),
-    _pro('p6',  'Rami Nasser',     ServiceCategory.acRepair,       4.6, 18, 3, ['Khalda', 'Bayader'],               25),
-    _pro('p7',  'Khalid Mansour',  ServiceCategory.plumbing,       4.5, 12, 4, ['Irbid', 'Ramtha'],                 22),
-    _pro('p8',  'Mahmoud Saleh',   ServiceCategory.painting,       4.8, 27, 6, ['Sweifieh', 'Shmeisani'],           30),
-    _pro('p9',  'Hassan Khalil',   ServiceCategory.cleaning,       4.4,  9, 2, ['AlJubaiha', 'Khalda'],             12),
-    _pro('p10', 'Firas Khalid',    ServiceCategory.applianceRepair,4.7, 15, 5, ['Marka', 'Zarqa'],                  20),
-  ];
+class RecentSearchModel {
+  final String id;
+  final String query;
 
-  // ── Static mock area pool ─────────────────────────────────────────────────
+  const RecentSearchModel({required this.id, required this.query});
 
-  static final List<AreaResultModel> _allAreas = [
-    const AreaResultModel(name: 'Khalda',        city: 'Amman', proCount: 18),
-    const AreaResultModel(name: 'Khaldun Street',city: 'Irbid',  proCount: 4),
-    const AreaResultModel(name: 'Sweifieh',      city: 'Amman', proCount: 22),
-    const AreaResultModel(name: 'AlJubaiha',     city: 'Amman', proCount: 11),
-    const AreaResultModel(name: 'Shmeisani',     city: 'Amman', proCount: 15),
-    const AreaResultModel(name: 'Marka',         city: 'Amman', proCount:  8),
-    const AreaResultModel(name: 'Bayader',       city: 'Amman', proCount:  6),
-    const AreaResultModel(name: 'Zarqa',         city: 'Zarqa', proCount:  9),
-    const AreaResultModel(name: 'Ramtha',        city: 'Irbid',  proCount:  5),
-    const AreaResultModel(name: 'Irbid Center',  city: 'Irbid',  proCount: 13),
-  ];
+  factory RecentSearchModel.fromJson(Map<String, dynamic> json) {
+    return RecentSearchModel(
+      id: json['id']?.toString() ?? '',
+      query: json['query'] as String? ?? '',
+    );
+  }
+}
 
-  // ── Static mock service pool ──────────────────────────────────────────────
-  // Each entry is a named service that a professional can offer, mapped to its
-  // parent category and how many pros in the mock pool offer it.
+// ─── Real implementation ──────────────────────────────────────────────────────
 
-  static const List<ServiceResult> _allServices = [
-    // Plumbing
-    ServiceResult(serviceName: 'Pipe Installation',   category: ServiceCategory.plumbing,       proCount: 3),
-    ServiceResult(serviceName: 'Pipe Repair',         category: ServiceCategory.plumbing,       proCount: 3),
-    ServiceResult(serviceName: 'Leak Repairs',        category: ServiceCategory.plumbing,       proCount: 2),
-    ServiceResult(serviceName: 'Water Heater Service',category: ServiceCategory.plumbing,       proCount: 2),
-    ServiceResult(serviceName: 'Drain Unclogging',    category: ServiceCategory.plumbing,       proCount: 3),
-    ServiceResult(serviceName: 'Bathroom Fixtures',   category: ServiceCategory.plumbing,       proCount: 2),
-    ServiceResult(serviceName: 'Faucet Repair',       category: ServiceCategory.plumbing,       proCount: 3),
-    // Electrical
-    ServiceResult(serviceName: 'Wiring Repair',       category: ServiceCategory.electricalWork, proCount: 2),
-    ServiceResult(serviceName: 'Light Fixture Install',category: ServiceCategory.electricalWork,proCount: 2),
-    ServiceResult(serviceName: 'Circuit Breaker Fix', category: ServiceCategory.electricalWork, proCount: 2),
-    ServiceResult(serviceName: 'Outlet Installation', category: ServiceCategory.electricalWork, proCount: 2),
-    // AC
-    ServiceResult(serviceName: 'AC Installation',     category: ServiceCategory.acRepair,       proCount: 1),
-    ServiceResult(serviceName: 'AC Maintenance',      category: ServiceCategory.acRepair,       proCount: 1),
-    ServiceResult(serviceName: 'AC Cleaning',         category: ServiceCategory.acRepair,       proCount: 1),
-    ServiceResult(serviceName: 'Refrigerant Refill',  category: ServiceCategory.acRepair,       proCount: 1),
-    // Carpentry
-    ServiceResult(serviceName: 'Furniture Assembly',  category: ServiceCategory.carpentry,      proCount: 1),
-    ServiceResult(serviceName: 'Door Repair',         category: ServiceCategory.carpentry,      proCount: 1),
-    ServiceResult(serviceName: 'Cabinet Installation',category: ServiceCategory.carpentry,      proCount: 1),
-    ServiceResult(serviceName: 'Wood Flooring',       category: ServiceCategory.carpentry,      proCount: 1),
-    // Painting
-    ServiceResult(serviceName: 'Interior Painting',   category: ServiceCategory.painting,       proCount: 1),
-    ServiceResult(serviceName: 'Exterior Painting',   category: ServiceCategory.painting,       proCount: 1),
-    ServiceResult(serviceName: 'Ceiling Painting',    category: ServiceCategory.painting,       proCount: 1),
-    // Cleaning
-    ServiceResult(serviceName: 'Deep Cleaning',       category: ServiceCategory.cleaning,       proCount: 1),
-    ServiceResult(serviceName: 'Post-Construction Cleaning', category: ServiceCategory.cleaning, proCount: 1),
-    ServiceResult(serviceName: 'Sofa Cleaning',       category: ServiceCategory.cleaning,       proCount: 1),
-    // Moving
-    ServiceResult(serviceName: 'Furniture Moving',    category: ServiceCategory.movingServices, proCount: 0),
-    ServiceResult(serviceName: 'Packing Service',     category: ServiceCategory.movingServices, proCount: 0),
-    // Appliance Repair
-    ServiceResult(serviceName: 'Washing Machine Repair', category: ServiceCategory.applianceRepair, proCount: 1),
-    ServiceResult(serviceName: 'Refrigerator Repair', category: ServiceCategory.applianceRepair, proCount: 1),
-    ServiceResult(serviceName: 'Oven Repair',         category: ServiceCategory.applianceRepair, proCount: 1),
-  ];
+class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
+  final Dio dio;
 
-  // ── Interface ─────────────────────────────────────────────────────────────
+  const SearchRemoteDataSourceImpl({required this.dio});
+
+  // Maps ServiceCategory enum → backend categoryId
+  int? _categoryId(ServiceCategory? category) {
+    if (category == null) return null;
+    switch (category) {
+      case ServiceCategory.plumbing:        return 1;
+      case ServiceCategory.electricalWork:  return 2;
+      case ServiceCategory.acRepair:        return 3;
+      case ServiceCategory.carpentry:       return 4;
+      case ServiceCategory.painting:        return 5;
+      case ServiceCategory.cleaning:        return 6;
+      case ServiceCategory.movingServices:  return 7;
+      case ServiceCategory.applianceRepair: return 8;
+    }
+  }
 
   @override
   Future<List<ProfessionalModel>> searchProfessionals(String query) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    final q = query.toLowerCase();
-    return _allProfessionals
-        .where((p) => p.name.toLowerCase().contains(q))
-        .toList();
+    // Piggybacks on the unified search — extracts the professionals section
+    final results = await _unifiedSearch(query);
+    return results.professionals;
   }
 
   @override
   Future<List<AreaResultModel>> searchAreas(String query) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    final q = query.toLowerCase();
-    return _allAreas
-        .where((a) => a.name.toLowerCase().contains(q))
-        .toList();
+    final results = await _unifiedSearch(query);
+    return results.areas;
   }
 
   @override
   Future<List<ServiceResult>> searchServices(String query) async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    final q = query.toLowerCase();
-    return _allServices
-        .where((s) => s.serviceName.toLowerCase().contains(q))
+    final results = await _unifiedSearch(query);
+    return results.services;
+  }
+
+  /// Calls `GET /api/search?q={query}&limit=10` and parses grouped results.
+  Future<_UnifiedPayload> _unifiedSearch(String query) async {
+    final response = await dio.get(
+      '/search',
+      queryParameters: {'q': query, 'limit': 10},
+    );
+
+    final data = response.data['data'] as Map<String, dynamic>? ?? {};
+
+    // ── Professionals ──────────────────────────────────────────────────────
+    final rawPros = data['professionals'] as List? ?? [];
+    final professionals = rawPros
+        .map((e) => ProfessionalModel.fromJson(e as Map<String, dynamic>))
         .toList();
+
+    // ── Areas ──────────────────────────────────────────────────────────────
+    final rawAreas = data['areas'] as List? ?? [];
+    final areas = rawAreas.map((e) {
+      final map = e as Map<String, dynamic>;
+      return AreaResultModel(
+        name: map['name'] as String? ?? '',
+        city: map['city'] as String? ?? '',
+        proCount: (map['availableProfessionalCount'] as num? ?? 0).toInt(),
+      );
+    }).toList();
+
+    // ── Services ───────────────────────────────────────────────────────────
+    final rawServices = data['services'] as List? ?? [];
+    final services = rawServices.map((e) {
+      final map = e as Map<String, dynamic>;
+      final categoryName = map['category'] as String? ?? '';
+      final category = ServiceCategory.values.firstWhere(
+        (c) => c.displayName.toLowerCase() == categoryName.toLowerCase(),
+        orElse: () => ServiceCategory.plumbing,
+      );
+      return ServiceResult(
+        serviceName: map['name'] as String? ?? '',
+        category: category,
+        proCount:
+            (map['availableProfessionalCount'] as num? ?? 0).toInt(),
+      );
+    }).toList();
+
+    return _UnifiedPayload(
+      professionals: professionals,
+      areas: areas,
+      services: services,
+    );
   }
 
   @override
@@ -126,58 +132,56 @@ class MockSearchDataSource implements SearchRemoteDataSource {
     required String areaName,
     ServiceCategory? category,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 400));
-    var results = _allProfessionals
-        .where((p) => p.serviceAreas.any(
-              (a) => a.toLowerCase() == areaName.toLowerCase(),
-            ))
-        .toList();
-    if (category != null) {
-      results = results.where((p) => p.category == category).toList();
-    }
-    return results;
-  }
-
-  // ── Factory helper ────────────────────────────────────────────────────────
-
-  static ProfessionalModel _pro(
-    String id,
-    String name,
-    ServiceCategory category,
-    double rating,
-    int reviewCount,
-    int experienceYears,
-    List<String> serviceAreas,
-    double startingPrice,
-  ) {
-    return ProfessionalModel(
-      id: id,
-      name: name,
-      category: category,
-      rating: rating,
-      reviewCount: reviewCount,
-      ratingBreakdown: const {},
-      experienceYears: experienceYears,
-      isFavorite: false,
-      profileImageUrl: null,
-      phone: '+962 7X XXX XXXX',
-      email: '${name.toLowerCase().replaceAll(' ', '.')}@gofix.jo',
-      bio: 'Experienced ${category.displayName.toLowerCase()} professional.',
-      serviceAreas: serviceAreas,
-      workingHours: const WorkingHours(
-        schedules: [
-          DaySchedule(day: 'Sun - Thu', openTime: '8:00 AM', closeTime: '6:00 PM'),
-        ],
-      ),
-      services: [
-        ServiceOffered(
-          name: category.displayName,
-          minPrice: startingPrice,
-        ),
-      ],
-      documents: const [],
-      isVerified: true,
-      isIdentityVerified: true,
+    final response = await dio.get(
+      '/professionals/by-area',
+      queryParameters: {
+        'areaName': areaName,
+        if (_categoryId(category) != null) 'categoryId': _categoryId(category),
+      },
     );
+    final data = response.data['data'] as List? ?? [];
+    return data
+        .map((e) => ProfessionalModel.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
+
+  // ── Recent searches ───────────────────────────────────────────────────────
+
+  @override
+  Future<List<RecentSearchModel>> getRecentSearches() async {
+    final response = await dio.get('/search/recent');
+    final data = response.data['data'] as List? ?? [];
+    return data
+        .map((e) => RecentSearchModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  @override
+  Future<void> recordSearch(String query) async {
+    await dio.post('/search/recent', data: {'query': query});
+  }
+
+  @override
+  Future<void> deleteRecentSearch(String id) async {
+    await dio.delete('/search/recent/$id');
+  }
+
+  @override
+  Future<void> clearRecentSearches() async {
+    await dio.delete('/search/recent');
+  }
+}
+
+// ─── Internal helper ──────────────────────────────────────────────────────────
+
+class _UnifiedPayload {
+  final List<ProfessionalModel> professionals;
+  final List<AreaResultModel> areas;
+  final List<ServiceResult> services;
+
+  const _UnifiedPayload({
+    required this.professionals,
+    required this.areas,
+    required this.services,
+  });
 }

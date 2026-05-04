@@ -1,32 +1,31 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:gp/features/professionals/domain/entities/service_category.dart';
-import 'package:gp/features/search/domain/usecases/get_professionals_by_area.dart';
-import 'package:gp/features/search/domain/usecases/search_usecase.dart';
+import 'package:gp/features/search/domain/repositories/search_repository.dart';
+import 'package:gp/features/search/domain/usecases/search_usecase.dart'; // ← has ALL use cases
 import 'search_event.dart';
 import 'search_state.dart';
 
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
   final SearchUseCase searchUseCase;
   final GetProfessionalsByArea getProfessionalsByArea;
+  final GetRecentSearchesUseCase getRecentSearches;
+  final RecordSearchUseCase recordSearch;
+  final DeleteRecentSearchUseCase deleteRecentSearch;
+  final ClearRecentSearchesUseCase clearRecentSearches;
 
-  static const String _prefsKey = 'gofix_recent_searches';
-  static const int _maxRecent = 8;
-
-  // In-memory cache of recent searches for the session
-  List<String> _recentSearches = [];
-
-  // Remembered for category re-filter
+  List<RecentSearch> _recentSearches = [];
   String? _selectedAreaName;
   String? _selectedAreaCity;
   int? _selectedAreaProCount;
-
   Timer? _debounce;
 
   SearchBloc({
     required this.searchUseCase,
     required this.getProfessionalsByArea,
+    required this.getRecentSearches,
+    required this.recordSearch,
+    required this.deleteRecentSearch,
+    required this.clearRecentSearches,
   }) : super(SearchInitial()) {
     on<LoadRecentSearches>(_onLoadRecent);
     on<SearchQueryChanged>(_onQueryChanged);
@@ -45,37 +44,43 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     return super.close();
   }
 
-  // ── Recent search persistence ──────────────────────────────────────────────
+  List<String> get _labels => _recentSearches.map((r) => r.query).toList();
 
-  Future<void> _loadFromPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    _recentSearches = prefs.getStringList(_prefsKey) ?? [];
-  }
-
-  Future<void> _saveToPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_prefsKey, _recentSearches);
-  }
-
-  void _addToRecent(String query) {
-    final q = query.trim();
-    if (q.isEmpty) return;
-    _recentSearches.remove(q); // remove duplicate if exists
-    _recentSearches.insert(0, q); // put at top
-    if (_recentSearches.length > _maxRecent) {
-      _recentSearches = _recentSearches.sublist(0, _maxRecent);
-    }
-    _saveToPrefs();
-  }
-
-  // ── Handlers ──────────────────────────────────────────────────────────────
+  SearchInitial get _initialState => SearchInitial(
+        recentSearches: _labels,
+        recentSearchObjects: List.from(_recentSearches),
+      );
 
   Future<void> _onLoadRecent(
     LoadRecentSearches event,
     Emitter<SearchState> emit,
   ) async {
-    await _loadFromPrefs();
-    emit(SearchInitial(recentSearches: List.from(_recentSearches)));
+    final result = await getRecentSearches();
+    result.fold(
+      (_) => emit(SearchInitial()),
+      (list) {
+        _recentSearches = list;
+        emit(_initialState);
+      },
+    );
+  }
+
+  Future<void> _onRecentDeleted(
+    RecentSearchDeleted event,
+    Emitter<SearchState> emit,
+  ) async {
+    _recentSearches.removeWhere((r) => r.id == event.id);
+    emit(_initialState);
+    await deleteRecentSearch(event.id);
+  }
+
+  Future<void> _onRecentCleared(
+    RecentSearchesCleared event,
+    Emitter<SearchState> emit,
+  ) async {
+    _recentSearches = [];
+    emit(SearchInitial());
+    await clearRecentSearches();
   }
 
   void _onQueryChanged(
@@ -85,55 +90,34 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     final query = event.query.trim();
     if (query.isEmpty) {
       _debounce?.cancel();
-      emit(SearchInitial(recentSearches: List.from(_recentSearches)));
+      emit(_initialState);
       return;
     }
-    emit(SearchTyping(query, recentSearches: List.from(_recentSearches)));
+    emit(SearchTyping(query, recentSearches: _labels));
     _debounce?.cancel();
-    _debounce = Timer(
-      const Duration(milliseconds: 400),
-      () { if (!isClosed) add(_TriggerSearch(query)); },
-    );
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      if (!isClosed) add(_TriggerSearch(query));
+    });
   }
 
   void _onCleared(SearchCleared event, Emitter<SearchState> emit) {
     _debounce?.cancel();
-    emit(SearchInitial(recentSearches: List.from(_recentSearches)));
+    emit(_initialState);
   }
 
   Future<void> _onRecentTapped(
     RecentSearchTapped event,
     Emitter<SearchState> emit,
   ) async {
-    // Treat exactly like typing + immediate search (no debounce)
     emit(SearchLoading(event.query));
     final result = await searchUseCase(event.query);
     result.fold(
-      (failure) => emit(SearchError(failure.message,
-          recentSearches: List.from(_recentSearches))),
-      (results) {
-        _addToRecent(event.query);
-        emit(SearchLoaded(results));
-      },
+      (failure) =>
+          emit(SearchError(failure.message, recentSearches: _labels)),
+      (results) => emit(SearchLoaded(results)),
     );
-  }
-
-  void _onRecentDeleted(
-    RecentSearchDeleted event,
-    Emitter<SearchState> emit,
-  ) {
-    _recentSearches.remove(event.query);
-    _saveToPrefs();
-    emit(SearchInitial(recentSearches: List.from(_recentSearches)));
-  }
-
-  void _onRecentCleared(
-    RecentSearchesCleared event,
-    Emitter<SearchState> emit,
-  ) {
-    _recentSearches.clear();
-    _saveToPrefs();
-    emit(SearchInitial(recentSearches: const []));
+    await recordSearch(event.query);
+    await _refreshRecents();
   }
 
   Future<void> _onTriggerSearch(
@@ -143,13 +127,17 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     emit(SearchLoading(event.query));
     final result = await searchUseCase(event.query);
     result.fold(
-      (failure) => emit(SearchError(failure.message,
-          recentSearches: List.from(_recentSearches))),
-      (results) {
-        _addToRecent(event.query);
-        emit(SearchLoaded(results));
-      },
+      (failure) =>
+          emit(SearchError(failure.message, recentSearches: _labels)),
+      (results) => emit(SearchLoaded(results)),
     );
+    await recordSearch(event.query);
+    await _refreshRecents();
+  }
+
+  Future<void> _refreshRecents() async {
+    final result = await getRecentSearches();
+    result.fold((_) => null, (list) => _recentSearches = list);
   }
 
   Future<void> _onAreaSelected(

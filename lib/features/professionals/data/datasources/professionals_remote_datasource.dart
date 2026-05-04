@@ -1,10 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:gp/features/professionals/data/models/city_model.dart';
 import 'package:gp/features/professionals/data/models/professional_model.dart';
 import 'package:gp/features/professionals/data/models/review_model.dart';
+import 'package:gp/features/professionals/data/models/service_area_model.dart';
 import 'package:gp/features/professionals/domain/entities/service_category.dart';
 
 abstract class ProfessionalsRemoteDataSource {
+  Future<List<CityModel>> getCities();
+  Future<List<ServiceAreaModel>> getServiceAreas({int? cityId});
   Future<List<ProfessionalModel>> getProfessionalsByCategory(ServiceCategory category);
   Future<ProfessionalModel> getProfessionalById(String id);
   Future<List<ProfessionalModel>> getFavorites();
@@ -42,8 +46,7 @@ class ProfessionalsRemoteDataSourceImpl implements ProfessionalsRemoteDataSource
   Future<Position?> _getUserLocation() async {
     try {
       final permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
+      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
         return null;
       }
       return await Geolocator.getCurrentPosition();
@@ -55,14 +58,22 @@ class ProfessionalsRemoteDataSourceImpl implements ProfessionalsRemoteDataSource
   // Maps ServiceCategory enum to backend categoryId
   int _categoryId(ServiceCategory category) {
     switch (category) {
-      case ServiceCategory.plumbing:        return 1;
-      case ServiceCategory.electricalWork:  return 2;
-      case ServiceCategory.acRepair:        return 3;
-      case ServiceCategory.carpentry:       return 4;
-      case ServiceCategory.painting:        return 5;
-      case ServiceCategory.cleaning:        return 6;
-      case ServiceCategory.movingServices:  return 7;
-      case ServiceCategory.applianceRepair: return 8;
+      case ServiceCategory.plumbing:
+        return 1;
+      case ServiceCategory.electricalWork:
+        return 2;
+      case ServiceCategory.acRepair:
+        return 3;
+      case ServiceCategory.carpentry:
+        return 4;
+      case ServiceCategory.painting:
+        return 5;
+      case ServiceCategory.cleaning:
+        return 6;
+      case ServiceCategory.movingServices:
+        return 7;
+      case ServiceCategory.applianceRepair:
+        return 8;
     }
   }
 
@@ -208,4 +219,23 @@ class ProfessionalsRemoteDataSourceImpl implements ProfessionalsRemoteDataSource
   Future<void> deleteReview(String reviewId) async {
     await dio.delete('/reviews/$reviewId');
   }
+
+  @override
+Future<List<CityModel>> getCities() async {
+  final response = await dio.get('/cities');
+  final data = response.data['data'] as List;
+  return data.map((e) => CityModel.fromJson(e)).toList();
+}
+
+@override
+Future<List<ServiceAreaModel>> getServiceAreas({int? cityId}) async {
+  final response = await dio.get(
+    '/professionals/service-areas',
+    queryParameters: {
+      if (cityId != null) 'cityId': cityId,
+    },
+  );
+  final data = response.data['data'] as List;
+  return data.map((e) => ServiceAreaModel.fromJson(e)).toList();
+}
 }

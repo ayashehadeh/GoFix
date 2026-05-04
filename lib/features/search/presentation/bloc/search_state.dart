@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:gp/features/professionals/domain/entities/professional.dart';
 import 'package:gp/features/professionals/domain/entities/service_category.dart';
 import 'package:gp/features/search/domain/entities/search_result.dart';
+import 'package:gp/features/search/domain/repositories/search_repository.dart';
 
 abstract class SearchState extends Equatable {
   @override
@@ -10,10 +11,19 @@ abstract class SearchState extends Equatable {
 
 /// Empty field — shows recent searches (may be an empty list)
 class SearchInitial extends SearchState {
+  /// Display labels (query strings) — kept for backward compat
   final List<String> recentSearches;
-  SearchInitial({this.recentSearches = const []});
+
+  /// Full objects with server id — used by search_page for id-based deletion
+  final List<RecentSearch> recentSearchObjects;
+
+  SearchInitial({
+    this.recentSearches = const [],
+    this.recentSearchObjects = const [],
+  });
+
   @override
-  List<Object?> get props => [recentSearches];
+  List<Object?> get props => [recentSearches, recentSearchObjects];
 }
 
 /// Typing but waiting for debounce

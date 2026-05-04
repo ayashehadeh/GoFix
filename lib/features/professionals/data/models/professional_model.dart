@@ -3,6 +3,7 @@ import 'package:gp/features/professionals/domain/entities/professional_document.
 import 'package:gp/features/professionals/domain/entities/service_category.dart';
 import 'package:gp/features/professionals/domain/entities/service_offered.dart';
 import 'package:gp/features/professionals/domain/entities/working_hours.dart';
+import 'package:gp/features/professionals/data/models/service_area_model.dart';
 
 class ProfessionalModel extends Professional {
   const ProfessionalModel({
@@ -59,9 +60,17 @@ class ProfessionalModel extends Professional {
       phone: json['phone'] as String? ?? '',
       email: json['email'] as String? ?? '',
       bio: json['bio'] as String? ?? '',
-      serviceAreas: List<String>.from(json['serviceAreas'] as List? ??
-          json['service_areas'] as List? ??
-          []),
+
+      // ── Service areas — backend now returns objects with id/name/cityId ──
+      serviceAreas: ((json['serviceAreas'] as List?) ??
+              (json['service_areas'] as List?) ??
+              [])
+          .map((e) => e is String
+              // legacy plain-string fallback — safe to remove once backend is live
+              ? ServiceAreaModel(id: 0, name: e, cityId: 0)
+              : ServiceAreaModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+
       workingHours: WorkingHours(
         schedules: ((json['workingHours'] as List? ??
                 json['working_hours'] as List? ??
@@ -79,6 +88,9 @@ class ProfessionalModel extends Professional {
       ),
       services: ((json['services'] as List?) ?? [])
           .map((e) => ServiceOffered(
+                serviceId: (e['serviceId'] ?? e['service_id']) is num
+                    ? (e['serviceId'] ?? e['service_id'])?.toInt()
+                    : int.tryParse('${e['serviceId'] ?? e['service_id']}'),
                 name: e['name'] as String,
                 minPrice: (e['minPrice'] as num? ?? e['min_price'] as num? ?? 0)
                     .toDouble(),
@@ -131,7 +143,10 @@ class ProfessionalModel extends Professional {
         'phone': phone,
         'email': email,
         'bio': bio,
-        'service_areas': serviceAreas,
+        // ── Serialize as objects, not plain strings ──
+        'service_areas': serviceAreas
+            .map((a) => (a as ServiceAreaModel).toJson())
+            .toList(),
         'working_hours': workingHours.schedules
             .map((e) => {
                   'day': e.day,

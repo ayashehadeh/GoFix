@@ -18,7 +18,6 @@ class InQueuePage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 50),
-
               const Text(
                 "You're In the Queue!",
                 style: TextStyle(
@@ -28,11 +27,10 @@ class InQueuePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-
               const Text(
                 "We've received your application and will review it within "
-                '24 to 48 hours. You\'ll get a notification once your profile '
-                'is approved and ready to go live.',
+                "24 to 48 hours. You'll get a notification once your profile "
+                "is approved and ready to go live.",
                 style: TextStyle(
                   fontSize: 16,
                   color: Color(0xFF062B54),
@@ -40,7 +38,6 @@ class InQueuePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 60),
-
               Align(
                 alignment: Alignment.centerRight,
                 child: Image.asset(
@@ -49,9 +46,7 @@ class InQueuePage extends StatelessWidget {
                   fit: BoxFit.contain,
                 ),
               ),
-
               const Spacer(),
-
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -59,8 +54,7 @@ class InQueuePage extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF8C1A),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+                        borderRadius: BorderRadius.circular(14)),
                     elevation: 0,
                   ),
                   onPressed: () {
@@ -77,10 +71,9 @@ class InQueuePage extends StatelessWidget {
                   child: const Text(
                     'Done',
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
                   ),
                 ),
               ),

@@ -4,6 +4,7 @@ import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
 import 'package:gp/features/professionals/presentation/pages/category_professionals_page.dart';
 import 'package:gp/features/professionals/presentation/pages/professional_detail_page.dart';
+import 'package:gp/features/search/domain/repositories/search_repository.dart';
 import 'package:gp/injection_container.dart' as di;
 import '../bloc/search_bloc.dart';
 import '../bloc/search_event.dart';
@@ -27,7 +28,6 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
-    // Load recent searches from SharedPreferences
     context.read<SearchBloc>().add(LoadRecentSearches());
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _focus.requestFocus());
@@ -49,7 +49,6 @@ class _SearchPageState extends State<SearchPage> {
     _focus.requestFocus();
   }
 
-  /// Called when user taps a recent search — fills the text field and fires search
   void _onRecentTapped(String query) {
     _controller.text = query;
     _controller.selection = TextSelection.fromPosition(
@@ -167,8 +166,7 @@ class _SearchHeader extends StatelessWidget {
                   ),
                   BlocBuilder<SearchBloc, SearchState>(
                     builder: (context, state) {
-                      final hasText = controller.text.isNotEmpty;
-                      if (!hasText) return const SizedBox();
+                      if (controller.text.isEmpty) return const SizedBox();
                       return GestureDetector(
                         onTap: onClear,
                         child: const Icon(Icons.close,
@@ -204,16 +202,16 @@ class _SearchBody extends StatelessWidget {
         // ── Empty field — show recent searches ─────────────────────────────
         if (state is SearchInitial) {
           return _RecentSearchesView(
-            recentSearches: state.recentSearches,
+            recentSearches: state.recentSearchObjects,
             onTap: onRecentTapped,
-            onDelete: (q) =>
-                context.read<SearchBloc>().add(RecentSearchDeleted(q)),
+            onDelete: (id) =>
+                context.read<SearchBloc>().add(RecentSearchDeleted(id)),
             onClearAll: () =>
                 context.read<SearchBloc>().add(RecentSearchesCleared()),
           );
         }
 
-        // ── Typing — show spinner or recent below ──────────────────────────
+        // ── Typing / loading ───────────────────────────────────────────────
         if (state is SearchTyping || state is SearchLoading) {
           final query = state is SearchTyping
               ? state.query
@@ -275,9 +273,9 @@ class _SearchBody extends StatelessWidget {
 // ─── Recent searches view ─────────────────────────────────────────────────────
 
 class _RecentSearchesView extends StatelessWidget {
-  final List<String> recentSearches;
-  final ValueChanged<String> onTap;
-  final ValueChanged<String> onDelete;
+  final List<RecentSearch> recentSearches;
+  final ValueChanged<String> onTap;    // passes query string
+  final ValueChanged<String> onDelete; // passes server id
   final VoidCallback onClearAll;
 
   const _RecentSearchesView({
@@ -310,7 +308,6 @@ class _RecentSearchesView extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
       children: [
-        // Header row
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -337,13 +334,11 @@ class _RecentSearchesView extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 14),
-
-        // Recent search rows
         ...recentSearches.map(
-          (query) => _RecentSearchRow(
-            query: query,
-            onTap: () => onTap(query),
-            onDelete: () => onDelete(query),
+          (item) => _RecentSearchRow(
+            query: item.query,
+            onTap: () => onTap(item.query),
+            onDelete: () => onDelete(item.id),
           ),
         ),
       ],
@@ -384,9 +379,9 @@ class _RecentSearchRow extends StatelessWidget {
             GestureDetector(
               onTap: onDelete,
               behavior: HitTestBehavior.opaque,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 12),
-                child: const Icon(Icons.close,
+              child: const Padding(
+                padding: EdgeInsets.only(left: 12),
+                child: Icon(Icons.close,
                     size: 16, color: Color(0xFFCCCCCC)),
               ),
             ),

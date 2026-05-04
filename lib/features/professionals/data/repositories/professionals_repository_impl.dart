@@ -3,8 +3,10 @@ import 'package:dio/dio.dart';
 import 'package:gp/core/error/failures.dart';
 import 'package:gp/features/professionals/data/datasources/professionals_remote_datasource.dart';
 import 'package:gp/features/professionals/data/models/professional_model.dart';
+import 'package:gp/features/professionals/domain/entities/city.dart';
 import 'package:gp/features/professionals/domain/entities/professional.dart';
 import 'package:gp/features/professionals/domain/entities/review.dart';
+import 'package:gp/features/professionals/domain/entities/service_area.dart';
 import 'package:gp/features/professionals/domain/entities/service_category.dart';
 import 'package:gp/features/professionals/domain/repositories/professionals_repository.dart';
 import 'package:gp/features/professionals/domain/repositories/reviews_repository.dart';
@@ -17,8 +19,7 @@ class ProfessionalsRepositoryImpl implements ProfessionalsRepository {
   const ProfessionalsRepositoryImpl({required this.remoteDataSource});
 
   // Helper to sync isFavorite flags with the favorites datasource
-  Future<List<Professional>> _syncFavorites(
-      List<Professional> professionals) async {
+  Future<List<Professional>> _syncFavorites(List<Professional> professionals) async {
     try {
       final favDataSource = di.sl<FavoritesRemoteDataSource>();
       final favorites = await favDataSource.getFavorites();
@@ -51,11 +52,9 @@ class ProfessionalsRepositoryImpl implements ProfessionalsRepository {
   }
 
   @override
-  Future<Either<Failure, List<Professional>>> getProfessionalsByCategory(
-      ServiceCategory category) async {
+  Future<Either<Failure, List<Professional>>> getProfessionalsByCategory(ServiceCategory category) async {
     try {
-      final result =
-          await remoteDataSource.getProfessionalsByCategory(category);
+      final result = await remoteDataSource.getProfessionalsByCategory(category);
       final synced = await _syncFavorites(result);
       return Right(synced);
     } on DioException catch (e) {
@@ -103,8 +102,7 @@ class ProfessionalsRepositoryImpl implements ProfessionalsRepository {
   }
 
   @override
-  Future<Either<Failure, List<Professional>>> searchProfessionals(
-      String query) async {
+  Future<Either<Failure, List<Professional>>> searchProfessionals(String query) async {
     try {
       final result = await remoteDataSource.searchProfessionals(query);
       final synced = await _syncFavorites(result);
@@ -140,13 +138,32 @@ class ProfessionalsRepositoryImpl implements ProfessionalsRepository {
   }
 
   Failure _handleDioError(DioException e) {
-    if (e.type == DioExceptionType.connectionError ||
-        e.type == DioExceptionType.connectionTimeout) {
+    if (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout) {
       return const NetworkFailure();
     }
     return ServerFailure(
       e.response?.data?['message'] as String? ?? 'Something went wrong',
     );
+  }
+
+  @override
+  Future<Either<Failure, List<City>>> getCities() async {
+    try {
+      final result = await remoteDataSource.getCities();
+      return Right(result);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<ServiceArea>>> getServiceAreas({int? cityId}) async {
+    try {
+      final result = await remoteDataSource.getServiceAreas(cityId: cityId);
+      return Right(result);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    }
   }
 }
 
@@ -156,11 +173,9 @@ class ReviewsRepositoryImpl implements ReviewsRepository {
   const ReviewsRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<Either<Failure, List<Review>>> getReviewsByProfessional(
-      String professionalId) async {
+  Future<Either<Failure, List<Review>>> getReviewsByProfessional(String professionalId) async {
     try {
-      final result =
-          await remoteDataSource.getReviewsByProfessional(professionalId);
+      final result = await remoteDataSource.getReviewsByProfessional(professionalId);
       return Right(result);
     } on DioException catch (e) {
       return Left(_handleDioError(e));
@@ -224,8 +239,7 @@ class ReviewsRepositoryImpl implements ReviewsRepository {
   }
 
   Failure _handleDioError(DioException e) {
-    if (e.type == DioExceptionType.connectionError ||
-        e.type == DioExceptionType.connectionTimeout) {
+    if (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout) {
       return const NetworkFailure();
     }
     return ServerFailure(
