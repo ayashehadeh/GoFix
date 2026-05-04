@@ -1,160 +1,153 @@
 import 'package:equatable/equatable.dart';
-import 'package:gp/features/professionals/domain/entities/city.dart';
-import 'package:gp/features/professionals/domain/entities/service_area.dart';
-import 'package:gp/features/professionals/domain/entities/service_offered.dart';
+import '../../domain/entities/category.dart';
+import '../../domain/entities/category_service.dart';
+import '../../domain/entities/document_type.dart';
 import '../../domain/entities/professional_application.dart';
-import 'become_professional_event.dart';
+import '../../domain/entities/service_area.dart';
 
-abstract class BecomeProfessionalState extends Equatable {
-  @override
-  List<Object?> get props => [];
-}
+/// Per-action status flag for transient operations (network calls).
+enum ActionStatus { idle, loading, success, failure }
 
-class BecomeProfessionalInitial extends BecomeProfessionalState {}
+/// Single state object covers all 4 screens. Each long-running action has
+/// its own status field so the UI can react granularly without juggling
+/// multiple state classes.
+class BecomeProfessionalState extends Equatable {
+  // ── Lookups ─────────────────────────────────────────────────────────────
+  final ActionStatus initialDataStatus;
+  final List<Category> categories;
+  final List<ServiceArea> serviceAreas; // all areas; UI filters by cityId
+  final ActionStatus categoryServicesStatus;
+  final List<CategoryService> categoryServices;
 
-// ── Main form state (persists across all 3 steps) ─────────────────────────────
+  // ── Application data ────────────────────────────────────────────────────
+  final ProfessionalApplication application;
 
-class BecomeProfessionalFormState extends BecomeProfessionalState {
-  final String serviceCategory;
-  final int categoryId;
-  final String experienceLevel;
-  final String workDescription;
-  final int cityId;
-  final int serviceAreaId;
-  final List<ServicePricing> services;
-  final String? profileImagePath;
-  final String? idImagePath;
-  final String? certificationImagePath;
-  final String? conductImagePath;
+  // ── Per-action statuses ─────────────────────────────────────────────────
+  final ActionStatus step1Status;
+  final ActionStatus step2Status;
+  final ActionStatus profilePictureUploadStatus;
+  final Map<DocumentType, ActionStatus> documentUploadStatus;
+  final ActionStatus submitStatus;
 
-  BecomeProfessionalFormState({
-    this.serviceCategory = '',
-    this.categoryId = 0,
-    this.experienceLevel = '',
-    this.workDescription = '',
-    this.cityId = 0,
-    this.serviceAreaId = 0,
-    this.services = const [],
-    this.profileImagePath,
-    this.idImagePath,
-    this.certificationImagePath,
-    this.conductImagePath,
+  /// Last error message — surfaced via SnackBar by the UI listener.
+  final String? errorMessage;
+
+  const BecomeProfessionalState({
+    this.initialDataStatus = ActionStatus.idle,
+    this.categories = const [],
+    this.serviceAreas = const [],
+    this.categoryServicesStatus = ActionStatus.idle,
+    this.categoryServices = const [],
+    this.application = const ProfessionalApplication(),
+    this.step1Status = ActionStatus.idle,
+    this.step2Status = ActionStatus.idle,
+    this.profilePictureUploadStatus = ActionStatus.idle,
+    this.documentUploadStatus = const {},
+    this.submitStatus = ActionStatus.idle,
+    this.errorMessage,
   });
 
-  String? pathFor(DocumentType type) {
-    switch (type) {
-      case DocumentType.profile:
-        return profileImagePath;
-      case DocumentType.id:
-        return idImagePath;
-      case DocumentType.certification:
-        return certificationImagePath;
-      case DocumentType.conduct:
-        return conductImagePath;
-    }
+  /// Areas filtered to the currently-selected city.
+  List<ServiceArea> get areasForSelectedCity {
+    final cityId = application.cityId;
+    if (cityId == null) return const [];
+    return serviceAreas.where((a) => a.cityId == cityId).toList();
   }
 
-  BecomeProfessionalFormState copyWith({
-    String? serviceCategory,
-    int? categoryId,
-    String? experienceLevel,
-    String? workDescription,
-    int? cityId,
-    int? serviceAreaId,
-    List<ServicePricing>? services,
-    String? profileImagePath,
-    String? idImagePath,
-    String? certificationImagePath,
-    String? conductImagePath,
+  /// Unique cities derived from the service areas list. Groups by cityId
+  /// and attempts to use cityName from service areas. Falls back to
+  /// cityId-based mapping if city names aren't in the API response.
+  List<({int id, String name})> get derivedCities {
+    final seen = <int>{};
+    final result = <({int id, String name})>[];
+    for (final area in serviceAreas) {
+      if (area.cityId == 0) continue;
+      if (seen.add(area.cityId)) {
+        // Use cityName from API if available, otherwise map from cityId
+        final name = area.cityName ?? _mapCityIdToName(area.cityId);
+        result.add((id: area.cityId, name: name));
+      }
+    }
+    result.sort((a, b) => a.name.compareTo(b.name));
+    return result;
+  }
+
+  /// Maps cityId to city name. This is used as a fallback when the API
+  /// doesn't return city names. Update this mapping based on your backend data.
+  String _mapCityIdToName(int cityId) {
+    const cityMap = {
+      1: 'Amman',
+      2: 'Irbid',
+      3: 'Zarqa',
+      4: 'Aqaba',
+    };
+    return cityMap[cityId] ?? 'City $cityId';
+  }
+
+  ActionStatus statusFor(DocumentType type) =>
+      documentUploadStatus[type] ?? ActionStatus.idle;
+
+  BecomeProfessionalState copyWith({
+    ActionStatus? initialDataStatus,
+    List<Category>? categories,
+    List<ServiceArea>? serviceAreas,
+    ActionStatus? categoryServicesStatus,
+    List<CategoryService>? categoryServices,
+    ProfessionalApplication? application,
+    ActionStatus? step1Status,
+    ActionStatus? step2Status,
+    ActionStatus? profilePictureUploadStatus,
+    Map<DocumentType, ActionStatus>? documentUploadStatus,
+    ActionStatus? submitStatus,
+    String? errorMessage,
+    bool clearError = false,
   }) {
-    return BecomeProfessionalFormState(
-      serviceCategory: serviceCategory ?? this.serviceCategory,
-      categoryId: categoryId ?? this.categoryId,
-      experienceLevel: experienceLevel ?? this.experienceLevel,
-      workDescription: workDescription ?? this.workDescription,
-      cityId: cityId ?? this.cityId,
-      serviceAreaId: serviceAreaId ?? this.serviceAreaId,
-      services: services ?? this.services,
-      profileImagePath: profileImagePath ?? this.profileImagePath,
-      idImagePath: idImagePath ?? this.idImagePath,
-      certificationImagePath:
-          certificationImagePath ?? this.certificationImagePath,
-      conductImagePath: conductImagePath ?? this.conductImagePath,
+    return BecomeProfessionalState(
+      initialDataStatus: initialDataStatus ?? this.initialDataStatus,
+      categories: categories ?? this.categories,
+      serviceAreas: serviceAreas ?? this.serviceAreas,
+      categoryServicesStatus:
+          categoryServicesStatus ?? this.categoryServicesStatus,
+      categoryServices: categoryServices ?? this.categoryServices,
+      application: application ?? this.application,
+      step1Status: step1Status ?? this.step1Status,
+      step2Status: step2Status ?? this.step2Status,
+      profilePictureUploadStatus:
+          profilePictureUploadStatus ?? this.profilePictureUploadStatus,
+      documentUploadStatus:
+          documentUploadStatus ?? this.documentUploadStatus,
+      submitStatus: submitStatus ?? this.submitStatus,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 
-  ProfessionalApplication toEntity() => ProfessionalApplication(
-        serviceCategory: serviceCategory,
-        experienceLevel: experienceLevel,
-        workDescription: workDescription,
-        categoryId: categoryId,
-        cityId: cityId,
-        serviceAreaId: serviceAreaId,
-        services: services,
-        profileImagePath: profileImagePath,
-        idImagePath: idImagePath,
-        certificationImagePath: certificationImagePath,
-        conductImagePath: conductImagePath,
-      );
-
   @override
   List<Object?> get props => [
-        serviceCategory,
-        categoryId,
-        experienceLevel,
-        workDescription,
-        cityId,
-        serviceAreaId,
-        services,
-        profileImagePath,
-        idImagePath,
-        certificationImagePath,
-        conductImagePath,
+        initialDataStatus,
+        categories,
+        serviceAreas,
+        categoryServicesStatus,
+        categoryServices,
+        application,
+        step1Status,
+        step2Status,
+        profilePictureUploadStatus,
+        documentUploadStatus,
+        submitStatus,
+        errorMessage,
       ];
 }
-
-// ── Cities ────────────────────────────────────────────────────────────────────
-
-class CitiesLoading extends BecomeProfessionalState {}
-
-class CitiesLoaded extends BecomeProfessionalState {
-  final List<City> cities;
-  CitiesLoaded(this.cities);
-  @override
-  List<Object?> get props => [cities];
-}
-
-// ── Areas ─────────────────────────────────────────────────────────────────────
-
-class AreasLoading extends BecomeProfessionalState {}
-
-class AreasLoaded extends BecomeProfessionalState {
-  final List<ServiceArea> areas;
-  AreasLoaded(this.areas);
-  @override
-  List<Object?> get props => [areas];
-}
-
-// ── Category services ─────────────────────────────────────────────────────────
-
-class CategoryServicesLoading extends BecomeProfessionalState {}
-
-class CategoryServicesLoaded extends BecomeProfessionalState {
-  final List<ServiceOffered> services;
-  CategoryServicesLoaded(this.services);
-  @override
-  List<Object?> get props => [services];
-}
-
-// ── Submission ────────────────────────────────────────────────────────────────
-
-class BecomeProfessionalSubmitting extends BecomeProfessionalState {}
-
-class BecomeProfessionalSuccess extends BecomeProfessionalState {}
-
-class BecomeProfessionalError extends BecomeProfessionalState {
-  final String message;
-  BecomeProfessionalError(this.message);
-  @override
-  List<Object?> get props => [message];
-}
+  /// Maps cityId to city name. This is used as a fallback when the API
+  /// doesn't return city names. Update this mapping based on your backend data.
+  String _mapCityIdToName(int cityId) {
+    const cityMap = {
+      1: 'Abu Dhabi',
+      2: 'Dubai',
+      3: 'Sharjah',
+      4: 'Ajman',
+      5: 'Ras Al Khaimah',
+      6: 'Fujairah',
+      7: 'Umm Al Quwain',
+    };
+    return cityMap[cityId] ?? 'City $cityId';
+  }

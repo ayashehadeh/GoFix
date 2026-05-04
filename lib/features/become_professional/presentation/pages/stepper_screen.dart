@@ -1,45 +1,65 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gp/features/become_professional/presentation/bloc/become_professional_event.dart';
-import 'package:gp/injection_container.dart' as di;
+import '../../../../core/constants/app_colors.dart';
+import '../../../../injection_container.dart' as di;
 import '../bloc/become_professional_bloc.dart';
+import '../bloc/become_professional_event.dart';
 import '../bloc/become_professional_state.dart';
 import '../widgets/step_indicator.dart';
-import 'professional_details1_page.dart';
-import 'professional_details2_page.dart';
-import 'professional_details3_page.dart';
 import 'in_queue_page.dart';
+import 'professional_details_page.dart';
+import 'services_pricing_page.dart';
+import 'verification_upload_page.dart';
 
+/// Entry page for the Become Professional flow.
+/// Holds the BLoC, the step indicator, and a PageView that swaps between
+/// the 3 step pages.
 class StepperScreen extends StatelessWidget {
   const StepperScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => di.sl<BecomeProfessionalBloc>(),
-      child: const _StepperBody(),
+      create: (_) =>
+          di.sl<BecomeProfessionalBloc>()..add(const LoadInitialData()),
+      child: const _StepperScreenView(),
     );
   }
 }
 
-class _StepperBody extends StatefulWidget {
-  const _StepperBody();
+class _StepperScreenView extends StatefulWidget {
+  const _StepperScreenView();
 
   @override
-  State<_StepperBody> createState() => _StepperBodyState();
+  State<_StepperScreenView> createState() => _StepperScreenViewState();
 }
 
-class _StepperBodyState extends State<_StepperBody> {
-  final PageController _controller = PageController();
-  int _currentPage = 0;
+class _StepperScreenViewState extends State<_StepperScreenView> {
+  final _controller = PageController();
+  int _currentStep = 0;
 
-  void _goToPage(int index) {
+  void _goToStep(int step) {
+    if (step < 0 || step > 2) return;
+    setState(() => _currentStep = step);
     _controller.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
+      step,
+      duration: const Duration(milliseconds: 250),
       curve: Curves.easeInOut,
     );
-    setState(() => _currentPage = index);
+  }
+
+  Future<bool> _handleBack() async {
+    if (_currentStep > 0) {
+      _goToStep(_currentStep - 1);
+      return false;
+    }
+    return true;
+  }
+
+  void _onSubmitted() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const InQueuePage()),
+    );
   }
 
   @override
@@ -50,94 +70,96 @@ class _StepperBodyState extends State<_StepperBody> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<BecomeProfessionalBloc, BecomeProfessionalState>(
-      listener: (context, state) {
-        if (state is BecomeProfessionalSuccess) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const InQueuePage()),
-          );
-        }
-        if (state is BecomeProfessionalError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      },
+    return WillPopScope(
+      onWillPop: _handleBack,
       child: Scaffold(
-        backgroundColor: const Color(0xFF062B4D),
+        backgroundColor: AppColors.background,
         body: SafeArea(
-          child: Column(
-            children: [
-              // Back button
-              Padding(
-                padding: const EdgeInsets.only(left: 16, top: 12),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: GestureDetector(
-                    onTap: () {
-                      if (_currentPage > 0) {
-                        _goToPage(_currentPage - 1);
-                      } else {
-                        Navigator.of(context).pop();
-                      }
-                    },
-                    child: const Icon(
-                      Icons.arrow_back_ios_new,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
+          child: BlocListener<BecomeProfessionalBloc, BecomeProfessionalState>(
+            listenWhen: (prev, curr) =>
+                prev.errorMessage != curr.errorMessage &&
+                curr.errorMessage != null,
+            listener: (context, state) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.errorMessage!),
+                  backgroundColor: AppColors.error,
                 ),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF5F5F5),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(35),
-                      topRight: Radius.circular(35),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      StepIndicator(
-                        currentStep: _currentPage,
-                        onStepTapped: _goToPage,
-                      ),
-                      const SizedBox(height: 20),
-                      Expanded(
-                        child: PageView(
-                          controller: _controller,
-                          physics: const NeverScrollableScrollPhysics(),
-                          onPageChanged: (i) =>
-                              setState(() => _currentPage = i),
-                          children: [
-                            ProfessionalDetails1Page(
-                              onContinue: () => _goToPage(1),
-                            ),
-                            ProfessionalDetails2Page(
-                              onContinue: () => _goToPage(2),
-                            ),
-                            ProfessionalDetails3Page(
-                              onSubmit: () => context
-                                  .read<BecomeProfessionalBloc>()
-                                  .add(SubmitApplication()),
-                            ),
-                          ],
+              );
+            },
+            child: Column(
+              children: [
+                _buildHeader(),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: StepIndicator(currentStep: _currentStep),
+                ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: PageView(
+                      controller: _controller,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        ProfessionalDetailsPage(
+                          onContinue: () => _goToStep(1),
                         ),
-                      ),
-                    ],
+                        ServicesPricingPage(
+                          onContinue: () => _goToStep(2),
+                        ),
+                        VerificationUploadPage(
+                          onSubmitted: _onSubmitted,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 16),
+      decoration: const BoxDecoration(
+        color: AppColors.primaryDark,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new,
+                    color: Colors.white, size: 18),
+                onPressed: () async {
+                  if (await _handleBack()) {
+                    if (mounted) Navigator.of(context).pop();
+                  }
+                },
+              ),
+              const Expanded(
+                child: Text(
+                  'Become a Professional',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 48),
+            ],
+          ),
+        ],
       ),
     );
   }
