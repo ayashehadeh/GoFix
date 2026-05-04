@@ -1,30 +1,51 @@
 import 'package:dartz/dartz.dart';
-import 'package:gp/core/error/failures.dart';
-import '../entities/professional_application.dart';
+import '../../../../core/error/failures.dart';
+import '../entities/category.dart';
+import '../entities/category_service.dart';
+import '../entities/document_type.dart';
+import '../entities/service_area.dart';
+import '../entities/service_pricing.dart';
 
 abstract class BecomeProfessionalRepository {
-  /// Step 1 — create the professional profile (category, bio, experience, city/area)
-  Future<Either<Failure, void>> createProfile({
+  // ── Lookups ─────────────────────────────────────────────────────────────
+
+  /// GET /api/categories
+  Future<Either<Failure, List<Category>>> getCategories();
+
+  /// GET /api/professionals/services?categoryId={id}
+  Future<Either<Failure, List<CategoryService>>> getServicesForCategory(
+    int categoryId,
+  );
+
+  /// GET /api/professionals/service-areas
+  /// Returns all areas; the UI filters by selected city.
+  Future<Either<Failure, List<ServiceArea>>> getServiceAreas();
+
+  // ── Application flow ────────────────────────────────────────────────────
+
+  /// POST /api/professionals/profile  — Step 1
+  /// Creates the draft profile.
+  Future<Either<Failure, Unit>> createProfile({
     required int categoryId,
-    required String bio,
     required int experienceYears,
+    required int cityId,
+    required int serviceAreaId,
+    required String bio,
   });
 
-  /// Step 1b — set the service area the professional covers
-  Future<Either<Failure, void>> setServiceArea(List<int> serviceAreaIds);
+  /// PUT /api/professionals/profile/services  — Step 2
+  Future<Either<Failure, Unit>> setServices(List<ServicePricing> services);
 
-  /// Step 2 — set services with pricing
-  Future<Either<Failure, void>> setServices(List<ServicePricing> services);
+  /// POST /api/auth/profile-picture  — Step 3 (multipart, separate endpoint)
+  Future<Either<Failure, Unit>> uploadProfilePicture(String filePath);
 
-  /// Step 3 — upload profile picture (multipart)
-  Future<Either<Failure, void>> uploadProfilePicture(String filePath);
-
-  /// Step 3 — upload a document (identity / certification / good_conduct)
-  Future<Either<Failure, void>> uploadDocument({
+  /// POST /api/professionals/profile/documents  — Step 3 (multipart)
+  /// Uses documentType: "identity" | "certification" | "good_conduct"
+  Future<Either<Failure, Unit>> uploadDocument({
     required String filePath,
-    required String documentType, // "identity" | "certification" | "good_conduct"
+    required DocumentType documentType,
   });
 
-  /// Final — submit the application for admin review
-  Future<Either<Failure, void>> submitApplication();
+  /// POST /api/professionals/profile/submit  — final
+  Future<Either<Failure, Unit>> submitApplication();
 }

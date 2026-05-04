@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gp/features/home/presentation/bloc/home_bloc.dart';
-import 'package:gp/features/home/presentation/pages/home_page.dart';
-import 'package:gp/injection_container.dart' as di;
+import '../../../../core/constants/app_colors.dart';
 
 class InQueuePage extends StatelessWidget {
   const InQueuePage({super.key});
@@ -10,74 +7,77 @@ class InQueuePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.all(24),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 50),
+              const SizedBox(height: 40),
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryOrange.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.hourglass_top_rounded,
+                  size: 56,
+                  color: AppColors.primaryOrange,
+                ),
+              ),
+              const SizedBox(height: 28),
               const Text(
                 "You're In the Queue!",
                 style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF062B54),
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryDark,
                 ),
               ),
-              const SizedBox(height: 20),
-              const Text(
-                "We've received your application and will review it within "
-                "24 to 48 hours. You'll get a notification once your profile "
-                "is approved and ready to go live.",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Color(0xFF062B54),
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 60),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Image.asset(
-                  'assets/done.png',
-                  height: 280,
-                  fit: BoxFit.contain,
+              const SizedBox(height: 12),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Text(
+                  "Thanks for applying. Our team will review your "
+                  "application within 24-48 hours and notify you "
+                  "as soon as it's approved.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.6,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
               const Spacer(),
               SizedBox(
                 width: double.infinity,
-                height: 56,
+                height: 52,
                 child: ElevatedButton(
+                  onPressed: () {
+                    // Pop to root — back to home.
+                    Navigator.of(context)
+                        .popUntil((route) => route.isFirst);
+                  },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF8C1A),
+                    backgroundColor: AppColors.primaryOrange,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                     elevation: 0,
                   ),
-                  onPressed: () {
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                        builder: (_) => BlocProvider(
-                          create: (_) => di.sl<HomeBloc>(),
-                          child: const HomePage(),
-                        ),
-                      ),
-                      (_) => false,
-                    );
-                  },
                   child: const Text(
                     'Done',
                     style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
             ],
           ),
         ),

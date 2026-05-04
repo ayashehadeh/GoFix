@@ -1,16 +1,25 @@
 import 'package:dio/dio.dart';
-import 'package:gp/features/become_professional/domain/entities/professional_application.dart';
+import '../models/category_model.dart';
+import '../models/category_service_model.dart';
+import '../models/service_area_model.dart';
+import '../models/service_pricing_model.dart';
 
 abstract class BecomeProfessionalRemoteDataSource {
+  // Lookups
+  Future<List<CategoryModel>> getCategories();
+  Future<List<CategoryServiceModel>> getServicesForCategory(int categoryId);
+  Future<List<ServiceAreaModel>> getServiceAreas();
+
+  // Application flow
   Future<void> createProfile({
     required int categoryId,
-    required String bio,
     required int experienceYears,
+    required int cityId,
+    required int serviceAreaId,
+    required String bio,
   });
 
-  Future<void> setServiceArea(List<int> serviceAreaIds);
-
-  Future<void> setServices(List<ServicePricing> services);
+  Future<void> setServices(List<ServicePricingModel> services);
 
   Future<void> uploadProfilePicture(String filePath);
 
@@ -26,58 +35,103 @@ class BecomeProfessionalRemoteDataSourceImpl
     implements BecomeProfessionalRemoteDataSource {
   final Dio dio;
 
-  BecomeProfessionalRemoteDataSourceImpl({required this.dio});
+  const BecomeProfessionalRemoteDataSourceImpl({required this.dio});
 
-  // POST /api/professionals/profile
+  // ── Helper ────────────────────────────────────────────────────────────────
+
+  /// Pulls the list field out of common response envelopes:
+  /// `{ data: [...] }`, `{ data: { items: [...] } }`, or a bare list.
+  List<dynamic> _extractList(dynamic body) {
+    if (body is List) return body;
+    if (body is Map<String, dynamic>) {
+      final data = body['data'];
+      if (data is List) return data;
+      if (data is Map<String, dynamic>) {
+        final items = data['items'] ?? data['results'] ?? data['list'];
+        if (items is List) return items;
+      }
+    }
+    return const [];
+  }
+
+  // ── Lookups ───────────────────────────────────────────────────────────────
+
+  @override
+  Future<List<CategoryModel>> getCategories() async {
+    final response = await dio.get('/categories');
+    final list = _extractList(response.data);
+    return list
+        .map((e) => CategoryModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  @override
+  Future<List<CategoryServiceModel>> getServicesForCategory(
+    int categoryId,
+  ) async {
+    final response = await dio.get(
+      '/professionals/services',
+      queryParameters: {'categoryId': categoryId},
+    );
+    final list = _extractList(response.data);
+    return list
+        .map((e) => CategoryServiceModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  @override
+  Future<List<ServiceAreaModel>> getServiceAreas() async {
+    final response = await dio.get('/professionals/service-areas');
+    final list = _extractList(response.data);
+    return list
+        .map((e) => ServiceAreaModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  // ── Application flow ──────────────────────────────────────────────────────
+
   @override
   Future<void> createProfile({
     required int categoryId,
-    required String bio,
     required int experienceYears,
+    required int cityId,
+    required int serviceAreaId,
+    required String bio,
   }) async {
-    await dio.post('/professionals/profile', data: {
-      'categoryId': categoryId,
-      'bio': bio,
-      'experienceYears': experienceYears,
-    });
+    await dio.post(
+      '/professionals/profile',
+      data: {
+        'categoryId': categoryId,
+        'experienceYears': experienceYears,
+        'cityId': cityId,
+        'serviceAreaId': serviceAreaId,
+        'bio': bio,
+      },
+    );
   }
 
-  // PUT /api/professionals/profile/service-areas
   @override
-  Future<void> setServiceArea(List<int> serviceAreaIds) async {
-    await dio.put('/professionals/profile/service-areas', data: {
-      'serviceAreaIds': serviceAreaIds,
-    });
+  Future<void> setServices(List<ServicePricingModel> services) async {
+    await dio.put(
+      '/professionals/profile/services',
+      data: {
+        'services': services.map((s) => s.toJson()).toList(),
+      },
+    );
   }
 
-  // PUT /api/professionals/profile/services
-  @override
-  Future<void> setServices(List<ServicePricing> services) async {
-    await dio.put('/professionals/profile/services', data: {
-      'services': services
-          .map((s) => {
-                'serviceId': s.serviceId,
-                'minPrice': s.minPrice,
-                if (s.maxPrice != null) 'maxPrice': s.maxPrice,
-              })
-          .toList(),
-    });
-  }
-
-  // POST /api/professionals/profile/picture  (multipart)
   @override
   Future<void> uploadProfilePicture(String filePath) async {
     final formData = FormData.fromMap({
       'file': await MultipartFile.fromFile(filePath),
     });
     await dio.post(
-      '/professionals/profile/picture',
+      '/auth/profile-picture',
       data: formData,
       options: Options(contentType: 'multipart/form-data'),
     );
   }
 
-  // POST /api/professionals/profile/documents  (multipart)
   @override
   Future<void> uploadDocument({
     required String filePath,
@@ -94,7 +148,6 @@ class BecomeProfessionalRemoteDataSourceImpl
     );
   }
 
-  // POST /api/professionals/profile/submit
   @override
   Future<void> submitApplication() async {
     await dio.post('/professionals/profile/submit');

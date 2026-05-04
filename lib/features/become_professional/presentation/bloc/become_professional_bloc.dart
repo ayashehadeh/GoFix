@@ -1,157 +1,401 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gp/features/professionals/domain/entities/city.dart';
-import 'package:gp/features/professionals/domain/entities/service_area.dart';
-import 'package:gp/features/professionals/domain/entities/service_offered.dart';
-import 'package:gp/features/professionals/domain/repositories/professionals_repository.dart';
-import '../../domain/usecases/submit_professional_application.dart';
+import '../../domain/entities/document_type.dart';
+import '../../domain/entities/service_pricing.dart';
+import '../../domain/usecases/create_profile.dart';
+import '../../domain/usecases/get_categories.dart';
+import '../../domain/usecases/get_service_areas.dart';
+import '../../domain/usecases/get_services_for_category.dart';
+import '../../domain/usecases/set_services.dart';
+import '../../domain/usecases/submit_application.dart';
+import '../../domain/usecases/upload_document.dart';
+import '../../domain/usecases/upload_profile_picture.dart';
 import 'become_professional_event.dart';
 import 'become_professional_state.dart';
 
 class BecomeProfessionalBloc
     extends Bloc<BecomeProfessionalEvent, BecomeProfessionalState> {
-  final SubmitProfessionalApplication submitApplicationUseCase;
-  final ProfessionalsRepository professionalsRepository;
-
-  // Cached so pages can read without triggering rebuilds
-  List<City> _cities = [];
-  List<ServiceArea> _areas = [];
-  List<ServiceOffered> _categoryServices = [];
-
-  List<City> get cachedCities => _cities;
-  List<ServiceArea> get cachedAreas => _areas;
-  List<ServiceOffered> get cachedCategoryServices => _categoryServices;
+  final GetCategories getCategories;
+  final GetServiceAreas getServiceAreas;
+  final GetServicesForCategory getServicesForCategory;
+  final CreateProfile createProfile;
+  final SetServices setServices;
+  final UploadProfilePicture uploadProfilePicture;
+  final UploadDocument uploadDocument;
+  final SubmitApplication submitApplication;
 
   BecomeProfessionalBloc({
-    required this.submitApplicationUseCase,
-    required this.professionalsRepository,
-  }) : super(BecomeProfessionalFormState()) {
-    on<LoadCities>(_onLoadCities);
-    on<LoadAreas>(_onLoadAreas);
+    required this.getCategories,
+    required this.getServiceAreas,
+    required this.getServicesForCategory,
+    required this.createProfile,
+    required this.setServices,
+    required this.uploadProfilePicture,
+    required this.uploadDocument,
+    required this.submitApplication,
+  }) : super(const BecomeProfessionalState()) {
+    on<LoadInitialData>(_onLoadInitialData);
     on<LoadServicesForCategory>(_onLoadServicesForCategory);
-    on<UpdateStep1>(_onUpdateStep1);
-    on<UpdateServices>(_onUpdateServices);
-    on<UpdateDocument>(_onUpdateDocument);
-    on<SubmitApplication>(_onSubmit);
+
+    on<CategorySelected>(_onCategorySelected);
+    on<ExperienceYearsSelected>(_onExperienceYearsSelected);
+    on<CitySelected>(_onCitySelected);
+    on<ServiceAreaSelected>(_onServiceAreaSelected);
+    on<BioChanged>(_onBioChanged);
+    on<SubmitStep1>(_onSubmitStep1);
+
+    on<ServiceAdded>(_onServiceAdded);
+    on<ServiceRemoved>(_onServiceRemoved);
+    on<SubmitStep2>(_onSubmitStep2);
+
+    on<ProfilePicturePicked>(_onProfilePicturePicked);
+    on<DocumentPicked>(_onDocumentPicked);
+    on<UploadProfilePictureRequested>(_onUploadProfilePicture);
+    on<UploadDocumentRequested>(_onUploadDocument);
+    on<SubmitApplicationRequested>(_onSubmitApplication);
   }
 
-  // ── Loaders ───────────────────────────────────────────────────────────────
+  // ── Lookups ───────────────────────────────────────────────────────────────
 
-  Future<void> _onLoadCities(
-    LoadCities event,
+  Future<void> _onLoadInitialData(
+    LoadInitialData event,
     Emitter<BecomeProfessionalState> emit,
   ) async {
-    final saved = _formState;
-    emit(CitiesLoading());
-    final result = await professionalsRepository.getCities();
-    result.fold(
-      (failure) {
-        emit(BecomeProfessionalError(failure.message));
-        emit(saved);
-      },
-      (cities) {
-        _cities = cities;
-        emit(CitiesLoaded(cities));
-        emit(saved);
+    emit(state.copyWith(initialDataStatus: ActionStatus.loading));
+
+    // Sequential rather than Future.wait — different Either<Failure, T>
+    // types don't compose into a typed list. Each call is fast.
+    final categoriesResult = await getCategories();
+    final areasResult = await getServiceAreas();
+
+    String? error;
+    var newState = state;
+
+    categoriesResult.fold(
+      (failure) => error = failure.message,
+      (categories) {
+        newState = newState.copyWith(categories: categories);
       },
     );
-  }
 
-  Future<void> _onLoadAreas(
-    LoadAreas event,
-    Emitter<BecomeProfessionalState> emit,
-  ) async {
-    final saved = _formState;
-    emit(AreasLoading());
-    final result =
-        await professionalsRepository.getServiceAreas(cityId: event.cityId);
-    result.fold(
-      (failure) {
-        emit(BecomeProfessionalError(failure.message));
-        emit(saved);
-      },
+    areasResult.fold(
+      (failure) => error ??= failure.message,
       (areas) {
-        _areas = areas;
-        emit(AreasLoaded(areas));
-        emit(saved);
+        newState = newState.copyWith(serviceAreas: areas);
       },
     );
+
+    if (error != null) {
+      emit(newState.copyWith(
+        initialDataStatus: ActionStatus.failure,
+        errorMessage: error,
+      ));
+    } else {
+      emit(newState.copyWith(initialDataStatus: ActionStatus.success));
+    }
   }
 
   Future<void> _onLoadServicesForCategory(
     LoadServicesForCategory event,
     Emitter<BecomeProfessionalState> emit,
   ) async {
-    final saved = _formState;
-    emit(CategoryServicesLoading());
-    // TODO: Implement getServicesByCategory in ProfessionalsRepository once backend endpoint is available
-    // For now, emit empty list
-    _categoryServices = [];
-    emit(CategoryServicesLoaded([]));
-    emit(saved);
-  }
-
-  // ── Form updates ──────────────────────────────────────────────────────────
-
-  void _onUpdateStep1(
-    UpdateStep1 event,
-    Emitter<BecomeProfessionalState> emit,
-  ) {
-    emit(_formState.copyWith(
-      serviceCategory: event.serviceCategory,
-      categoryId: event.categoryId,
-      experienceLevel: event.experienceLevel,
-      workDescription: event.workDescription,
-      cityId: event.cityId,
-      serviceAreaId: event.serviceAreaId,
+    emit(state.copyWith(
+      categoryServicesStatus: ActionStatus.loading,
+      categoryServices: const [],
     ));
-  }
-
-  void _onUpdateServices(
-    UpdateServices event,
-    Emitter<BecomeProfessionalState> emit,
-  ) {
-    emit(_formState.copyWith(services: event.services));
-  }
-
-  void _onUpdateDocument(
-    UpdateDocument event,
-    Emitter<BecomeProfessionalState> emit,
-  ) {
-    final current = _formState;
-    switch (event.type) {
-      case DocumentType.profile:
-        emit(current.copyWith(profileImagePath: event.path));
-        break;
-      case DocumentType.id:
-        emit(current.copyWith(idImagePath: event.path));
-        break;
-      case DocumentType.certification:
-        emit(current.copyWith(certificationImagePath: event.path));
-        break;
-      case DocumentType.conduct:
-        emit(current.copyWith(conductImagePath: event.path));
-        break;
-    }
-  }
-
-  // ── Submit ────────────────────────────────────────────────────────────────
-
-  Future<void> _onSubmit(
-    SubmitApplication event,
-    Emitter<BecomeProfessionalState> emit,
-  ) async {
-    emit(BecomeProfessionalSubmitting());
-    final result = await submitApplicationUseCase(_formState.toEntity());
+    final result = await getServicesForCategory(event.categoryId);
     result.fold(
-      (failure) => emit(BecomeProfessionalError(failure.message)),
-      (_) => emit(BecomeProfessionalSuccess()),
+      (failure) => emit(state.copyWith(
+        categoryServicesStatus: ActionStatus.failure,
+        errorMessage: failure.message,
+      )),
+      (services) => emit(state.copyWith(
+        categoryServicesStatus: ActionStatus.success,
+        categoryServices: services,
+      )),
     );
   }
 
-  // ── Helper ────────────────────────────────────────────────────────────────
+  // ── Step 1 field updates ──────────────────────────────────────────────────
 
-  BecomeProfessionalFormState get _formState {
-    final s = state;
-    return s is BecomeProfessionalFormState ? s : BecomeProfessionalFormState();
+  void _onCategorySelected(
+    CategorySelected event,
+    Emitter<BecomeProfessionalState> emit,
+  ) {
+    // Changing the category invalidates Step 2 services — clear them.
+    emit(state.copyWith(
+      application: state.application.copyWith(
+        categoryId: event.categoryId,
+        categoryName: event.categoryName,
+        services: const [],
+      ),
+      categoryServices: const [],
+    ));
+    add(LoadServicesForCategory(event.categoryId));
+  }
+
+  void _onExperienceYearsSelected(
+    ExperienceYearsSelected event,
+    Emitter<BecomeProfessionalState> emit,
+  ) {
+    emit(state.copyWith(
+      application: state.application.copyWith(
+        experienceYears: event.years,
+      ),
+    ));
+  }
+
+  void _onCitySelected(
+    CitySelected event,
+    Emitter<BecomeProfessionalState> emit,
+  ) {
+    // Changing city invalidates the area selection.
+    emit(state.copyWith(
+      application: state.application.copyWith(
+        cityId: event.cityId,
+        cityName: event.cityName,
+        serviceAreaId: 0, // reset; getter checks for non-zero
+        serviceAreaName: '',
+      ),
+    ));
+  }
+
+  void _onServiceAreaSelected(
+    ServiceAreaSelected event,
+    Emitter<BecomeProfessionalState> emit,
+  ) {
+    emit(state.copyWith(
+      application: state.application.copyWith(
+        serviceAreaId: event.serviceAreaId,
+        serviceAreaName: event.serviceAreaName,
+      ),
+    ));
+  }
+
+  void _onBioChanged(
+    BioChanged event,
+    Emitter<BecomeProfessionalState> emit,
+  ) {
+    emit(state.copyWith(
+      application: state.application.copyWith(bio: event.bio),
+    ));
+  }
+
+  Future<void> _onSubmitStep1(
+    SubmitStep1 event,
+    Emitter<BecomeProfessionalState> emit,
+  ) async {
+    final app = state.application;
+    if (!app.isStep1Valid) {
+      emit(state.copyWith(
+        step1Status: ActionStatus.failure,
+        errorMessage: 'Please fill in all fields.',
+      ));
+      return;
+    }
+
+    emit(state.copyWith(step1Status: ActionStatus.loading, clearError: true));
+    final result = await createProfile(
+      categoryId: app.categoryId!,
+      experienceYears: app.experienceYears!,
+      cityId: app.cityId!,
+      serviceAreaId: app.serviceAreaId!,
+      bio: app.bio.trim(),
+    );
+    result.fold(
+      (failure) => emit(state.copyWith(
+        step1Status: ActionStatus.failure,
+        errorMessage: failure.message,
+      )),
+      (_) => emit(state.copyWith(step1Status: ActionStatus.success)),
+    );
+  }
+
+  // ── Step 2 ────────────────────────────────────────────────────────────────
+
+  void _onServiceAdded(
+    ServiceAdded event,
+    Emitter<BecomeProfessionalState> emit,
+  ) {
+    final updated = List<ServicePricing>.from(state.application.services)
+      ..removeWhere((s) => s.serviceId == event.service.serviceId)
+      ..add(event.service);
+    emit(state.copyWith(
+      application: state.application.copyWith(services: updated),
+    ));
+  }
+
+  void _onServiceRemoved(
+    ServiceRemoved event,
+    Emitter<BecomeProfessionalState> emit,
+  ) {
+    final updated = state.application.services
+        .where((s) => s.serviceId != event.serviceId)
+        .toList();
+    emit(state.copyWith(
+      application: state.application.copyWith(services: updated),
+    ));
+  }
+
+  Future<void> _onSubmitStep2(
+    SubmitStep2 event,
+    Emitter<BecomeProfessionalState> emit,
+  ) async {
+    if (!state.application.isStep2Valid) {
+      emit(state.copyWith(
+        step2Status: ActionStatus.failure,
+        errorMessage: 'Please add at least one service.',
+      ));
+      return;
+    }
+
+    emit(state.copyWith(step2Status: ActionStatus.loading, clearError: true));
+    final result = await setServices(state.application.services);
+    result.fold(
+      (failure) => emit(state.copyWith(
+        step2Status: ActionStatus.failure,
+        errorMessage: failure.message,
+      )),
+      (_) => emit(state.copyWith(step2Status: ActionStatus.success)),
+    );
+  }
+
+  // ── Step 3 ────────────────────────────────────────────────────────────────
+
+  void _onProfilePicturePicked(
+    ProfilePicturePicked event,
+    Emitter<BecomeProfessionalState> emit,
+  ) {
+    emit(state.copyWith(
+      application: state.application.copyWith(
+        profileImagePath: event.filePath,
+      ),
+      // Reset upload status — the user picked a new file.
+      profilePictureUploadStatus: ActionStatus.idle,
+    ));
+  }
+
+  void _onDocumentPicked(
+    DocumentPicked event,
+    Emitter<BecomeProfessionalState> emit,
+  ) {
+    final app = state.application;
+    final updatedApp = switch (event.documentType) {
+      DocumentType.identity =>
+        app.copyWith(identityPath: event.filePath),
+      DocumentType.certification =>
+        app.copyWith(certificationPath: event.filePath),
+      DocumentType.goodConduct =>
+        app.copyWith(goodConductPath: event.filePath),
+    };
+
+    final newDocStatus = Map<DocumentType, ActionStatus>.from(
+      state.documentUploadStatus,
+    )..[event.documentType] = ActionStatus.idle;
+
+    emit(state.copyWith(
+      application: updatedApp,
+      documentUploadStatus: newDocStatus,
+    ));
+  }
+
+  Future<void> _onUploadProfilePicture(
+    UploadProfilePictureRequested event,
+    Emitter<BecomeProfessionalState> emit,
+  ) async {
+    final path = state.application.profileImagePath;
+    if (path == null) {
+      emit(state.copyWith(
+        profilePictureUploadStatus: ActionStatus.failure,
+        errorMessage: 'Please choose a photo first.',
+      ));
+      return;
+    }
+
+    emit(state.copyWith(
+      profilePictureUploadStatus: ActionStatus.loading,
+      clearError: true,
+    ));
+    final result = await uploadProfilePicture(path);
+    result.fold(
+      (failure) => emit(state.copyWith(
+        profilePictureUploadStatus: ActionStatus.failure,
+        errorMessage: failure.message,
+      )),
+      (_) => emit(state.copyWith(
+        profilePictureUploadStatus: ActionStatus.success,
+      )),
+    );
+  }
+
+  Future<void> _onUploadDocument(
+    UploadDocumentRequested event,
+    Emitter<BecomeProfessionalState> emit,
+  ) async {
+    final path = state.application.pathFor(event.documentType);
+    if (path == null) {
+      _setDocStatus(emit, event.documentType, ActionStatus.failure,
+          error: 'Please choose a file first.');
+      return;
+    }
+
+    _setDocStatus(emit, event.documentType, ActionStatus.loading,
+        clearError: true);
+
+    final result = await uploadDocument(
+      filePath: path,
+      documentType: event.documentType,
+    );
+    result.fold(
+      (failure) => _setDocStatus(
+        emit,
+        event.documentType,
+        ActionStatus.failure,
+        error: failure.message,
+      ),
+      (_) => _setDocStatus(emit, event.documentType, ActionStatus.success),
+    );
+  }
+
+  void _setDocStatus(
+    Emitter<BecomeProfessionalState> emit,
+    DocumentType type,
+    ActionStatus status, {
+    String? error,
+    bool clearError = false,
+  }) {
+    final newMap = Map<DocumentType, ActionStatus>.from(
+      state.documentUploadStatus,
+    )..[type] = status;
+    emit(state.copyWith(
+      documentUploadStatus: newMap,
+      errorMessage: error,
+      clearError: clearError,
+    ));
+  }
+
+  // ── Final submit ──────────────────────────────────────────────────────────
+
+  Future<void> _onSubmitApplication(
+    SubmitApplicationRequested event,
+    Emitter<BecomeProfessionalState> emit,
+  ) async {
+    if (!state.application.isStep3Valid) {
+      emit(state.copyWith(
+        submitStatus: ActionStatus.failure,
+        errorMessage:
+            'Please upload a profile picture and your ID before submitting.',
+      ));
+      return;
+    }
+
+    emit(state.copyWith(submitStatus: ActionStatus.loading, clearError: true));
+    final result = await submitApplication();
+    result.fold(
+      (failure) => emit(state.copyWith(
+        submitStatus: ActionStatus.failure,
+        errorMessage: failure.message,
+      )),
+      (_) => emit(state.copyWith(submitStatus: ActionStatus.success)),
+    );
   }
 }

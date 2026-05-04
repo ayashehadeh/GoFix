@@ -94,7 +94,14 @@ import 'package:gp/features/settings/presentation/bloc/set_password_bloc.dart';
 import 'package:gp/features/become_professional/data/datasources/become_professional_remote_datasource.dart';
 import 'package:gp/features/become_professional/data/repositories/become_professional_repository_impl.dart';
 import 'package:gp/features/become_professional/domain/repositories/become_professional_repository.dart';
-import 'package:gp/features/become_professional/domain/usecases/submit_professional_application.dart';
+import 'package:gp/features/become_professional/domain/usecases/get_categories.dart';
+import 'package:gp/features/become_professional/domain/usecases/get_service_areas.dart';
+import 'package:gp/features/become_professional/domain/usecases/get_services_for_category.dart';
+import 'package:gp/features/become_professional/domain/usecases/create_profile.dart';
+import 'package:gp/features/become_professional/domain/usecases/set_services.dart';
+import 'package:gp/features/become_professional/domain/usecases/upload_profile_picture.dart';
+import 'package:gp/features/become_professional/domain/usecases/upload_document.dart';
+import 'package:gp/features/become_professional/domain/usecases/submit_application.dart';
 import 'package:gp/features/become_professional/presentation/bloc/become_professional_bloc.dart';
 
 // ── Search ────────────────────────────────────────────────────────────────────
@@ -176,8 +183,14 @@ Future<void> init() async {
 
   sl.registerFactory(
     () => BecomeProfessionalBloc(
-      submitApplicationUseCase: sl(),
-      professionalsRepository: sl(),
+      getCategories: sl(),
+      getServiceAreas: sl(),
+      getServicesForCategory: sl(),
+      createProfile: sl(),
+      setServices: sl(),
+      uploadProfilePicture: sl(),
+      uploadDocument: sl(),
+      submitApplication: sl(),
     ),
   );
 
@@ -259,7 +272,14 @@ Future<void> init() async {
 
   // ── Use Cases — Become Professional ────────────────────────────────────────
 
-  sl.registerLazySingleton(() => SubmitProfessionalApplication(sl()));
+  sl.registerLazySingleton(() => GetCategories(sl()));
+  sl.registerLazySingleton(() => GetServiceAreas(sl()));
+  sl.registerLazySingleton(() => GetServicesForCategory(sl()));
+  sl.registerLazySingleton(() => CreateProfile(sl()));
+  sl.registerLazySingleton(() => SetServices(sl()));
+  sl.registerLazySingleton(() => UploadProfilePicture(sl()));
+  sl.registerLazySingleton(() => UploadDocument(sl()));
+  sl.registerLazySingleton(() => SubmitApplication(sl()));
 
   // ── Use Cases — Search ─────────────────────────────────────────────────────
 
