@@ -102,7 +102,6 @@ import 'package:gp/features/search/data/datasources/search_remote_datasource.dar
 import 'package:gp/features/search/data/repositories/search_repository_impl.dart';
 import 'package:gp/features/search/domain/repositories/search_repository.dart';
 import 'package:gp/features/search/domain/usecases/search_usecase.dart';
-import 'package:gp/features/search/domain/usecases/get_professionals_by_area.dart';
 import 'package:gp/features/search/presentation/bloc/search_bloc.dart';
 
 final sl = GetIt.instance;
@@ -176,11 +175,22 @@ Future<void> init() async {
   sl.registerFactory(() => SetPasswordBloc(setNewPassword: sl()));
 
   sl.registerFactory(
-    () => BecomeProfessionalBloc(submitApplication: sl()),
+    () => BecomeProfessionalBloc(
+      submitApplicationUseCase: sl(),
+      professionalsRepository: sl(),
+    ),
   );
 
+  // ── Search BLoC now includes the four recent-search use cases ──────────────
   sl.registerFactory(
-    () => SearchBloc(searchUseCase: sl(), getProfessionalsByArea: sl()),
+    () => SearchBloc(
+      searchUseCase: sl(),
+      getProfessionalsByArea: sl(),
+      getRecentSearches: sl(),
+      recordSearch: sl(),
+      deleteRecentSearch: sl(),
+      clearRecentSearches: sl(),
+    ),
   );
 
   sl.registerFactory(
@@ -255,6 +265,10 @@ Future<void> init() async {
 
   sl.registerLazySingleton(() => SearchUseCase(sl()));
   sl.registerLazySingleton(() => GetProfessionalsByArea(sl()));
+  sl.registerLazySingleton(() => GetRecentSearchesUseCase(sl()));
+  sl.registerLazySingleton(() => RecordSearchUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteRecentSearchUseCase(sl()));
+  sl.registerLazySingleton(() => ClearRecentSearchesUseCase(sl()));
 
   // ── Use Cases — Favorites ──────────────────────────────────────────────────
 
@@ -371,8 +385,9 @@ Future<void> init() async {
     () => BecomeProfessionalRemoteDataSourceImpl(dio: sl()),
   );
 
+  // ── Real search datasource (replaces MockSearchDataSource) ────────────────
   sl.registerLazySingleton<SearchRemoteDataSource>(
-    () => MockSearchDataSource(),
+    () => SearchRemoteDataSourceImpl(dio: sl()),
   );
 
   sl.registerLazySingleton<FavoritesRemoteDataSource>(

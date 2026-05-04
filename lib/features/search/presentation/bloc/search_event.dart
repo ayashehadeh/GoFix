@@ -6,7 +6,7 @@ abstract class SearchEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Load recent searches from storage on page open
+/// Load recent searches from the API on page open
 class LoadRecentSearches extends SearchEvent {}
 
 /// User typed in the search field
@@ -20,7 +20,7 @@ class SearchQueryChanged extends SearchEvent {
 /// User cleared the search field — go back to showing recent searches
 class SearchCleared extends SearchEvent {}
 
-/// User tapped a recent search chip — pre-fill and run it immediately
+/// User tapped a recent search pill — pre-fills and runs it immediately
 class RecentSearchTapped extends SearchEvent {
   final String query;
   RecentSearchTapped(this.query);
@@ -28,12 +28,12 @@ class RecentSearchTapped extends SearchEvent {
   List<Object?> get props => [query];
 }
 
-/// User deleted one recent search entry
+/// User deleted one recent search entry (uses server id, not query string)
 class RecentSearchDeleted extends SearchEvent {
-  final String query;
-  RecentSearchDeleted(this.query);
+  final String id;
+  RecentSearchDeleted(this.id);
   @override
-  List<Object?> get props => [query];
+  List<Object?> get props => [id];
 }
 
 /// User tapped "Clear all" recent searches

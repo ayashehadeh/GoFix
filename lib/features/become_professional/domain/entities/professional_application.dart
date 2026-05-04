@@ -4,6 +4,9 @@ class ProfessionalApplication extends Equatable {
   final String serviceCategory;
   final String experienceLevel;
   final String workDescription;
+  final int categoryId;
+  final int cityId;
+  final int serviceAreaId;
   final List<ServicePricing> services;
   final String? profileImagePath;
   final String? idImagePath;
@@ -14,6 +17,9 @@ class ProfessionalApplication extends Equatable {
     required this.serviceCategory,
     required this.experienceLevel,
     required this.workDescription,
+    required this.categoryId,
+    required this.cityId,
+    required this.serviceAreaId,
     required this.services,
     this.profileImagePath,
     this.idImagePath,
@@ -21,34 +27,14 @@ class ProfessionalApplication extends Equatable {
     this.conductImagePath,
   });
 
-  ProfessionalApplication copyWith({
-    String? serviceCategory,
-    String? experienceLevel,
-    String? workDescription,
-    List<ServicePricing>? services,
-    String? profileImagePath,
-    String? idImagePath,
-    String? certificationImagePath,
-    String? conductImagePath,
-  }) {
-    return ProfessionalApplication(
-      serviceCategory: serviceCategory ?? this.serviceCategory,
-      experienceLevel: experienceLevel ?? this.experienceLevel,
-      workDescription: workDescription ?? this.workDescription,
-      services: services ?? this.services,
-      profileImagePath: profileImagePath ?? this.profileImagePath,
-      idImagePath: idImagePath ?? this.idImagePath,
-      certificationImagePath:
-          certificationImagePath ?? this.certificationImagePath,
-      conductImagePath: conductImagePath ?? this.conductImagePath,
-    );
-  }
-
   @override
   List<Object?> get props => [
         serviceCategory,
         experienceLevel,
         workDescription,
+        categoryId,
+        cityId,
+        serviceAreaId,
         services,
         profileImagePath,
         idImagePath,
@@ -57,12 +43,20 @@ class ProfessionalApplication extends Equatable {
       ];
 }
 
+// A single service offering with min/max price (in JD)
 class ServicePricing extends Equatable {
+  final int serviceId;
   final String serviceName;
-  final double price;
+  final double minPrice;
+  final double? maxPrice;
 
-  const ServicePricing({required this.serviceName, required this.price});
+  const ServicePricing({
+    required this.serviceId,
+    required this.serviceName,
+    required this.minPrice,
+    this.maxPrice,
+  });
 
   @override
-  List<Object?> get props => [serviceName, price];
+  List<Object?> get props => [serviceId, serviceName, minPrice, maxPrice];
 }

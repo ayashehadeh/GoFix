@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class StepIndicator extends StatelessWidget {
-  final int currentStep;
+  final int currentStep; // 0-indexed
   final int totalSteps;
   final Function(int) onStepTapped;
 
@@ -15,49 +15,29 @@ class StepIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: List.generate(totalSteps * 2 - 1, (index) {
-        if (index.isEven) {
-          final step = index ~/ 2;
-          final isActive = step == currentStep;
-          return GestureDetector(
-            onTap: () => onStepTapped(step),
-            child: _buildCircle(step, isActive),
-          );
-        } else {
-          return _buildLine();
-        }
+      children: List.generate(totalSteps, (index) {
+        final isActive = index == currentStep;
+        final isDone = index < currentStep;
+
+        return Expanded(
+          child: GestureDetector(
+            onTap: () => onStepTapped(index),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              margin: EdgeInsets.only(right: index < totalSteps - 1 ? 8 : 0),
+              height: 10,
+              decoration: BoxDecoration(
+                color: isActive
+                    ? const Color(0xFFFF8C1A) // orange — current
+                    : isDone
+                        ? const Color(0xFF062B4D) // dark navy — done
+                        : const Color(0xFF062B4D).withOpacity(0.35), // faded — upcoming
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          ),
+        );
       }),
-    );
-  }
-
-  Widget _buildCircle(int step, bool isActive) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      width: 38,
-      height: 38,
-      decoration: BoxDecoration(
-        color: isActive ? const Color(0xFF062B4D) : Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xFF062B4D), width: 2),
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        '${step + 1}',
-        style: TextStyle(
-          color: isActive ? Colors.white : const Color(0xFF062B4D),
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLine() {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 6),
-        height: 2,
-        color: Colors.grey.shade400,
-      ),
     );
   }
 }

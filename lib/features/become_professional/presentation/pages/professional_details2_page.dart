@@ -7,7 +7,6 @@ import '../bloc/become_professional_state.dart';
 
 class ProfessionalDetails2Page extends StatefulWidget {
   final VoidCallback onContinue;
-
   const ProfessionalDetails2Page({super.key, required this.onContinue});
 
   @override
@@ -16,58 +15,68 @@ class ProfessionalDetails2Page extends StatefulWidget {
 }
 
 class _ProfessionalDetails2PageState extends State<ProfessionalDetails2Page> {
-  static const List<String> _availableServices = [
-    'Pipe Installation',
-    'Pipe Repair',
-    'Leak Repairs',
-    'Bathroom Fixtures',
-    'Water Heater Service',
-    'Drain Unclogging',
-    'Faucet Repair',
-  ];
+  // All services fetched from API for this category
+  List<_ServiceOption> _availableServices = [];
 
-  String? _selectedService;
-  final TextEditingController _priceController = TextEditingController();
-  bool _showServiceError = false;
-
-  // Local list of confirmed services for this session
+  // Services user has added with pricing
   final List<ServicePricing> _addedServices = [];
+
+  // Currently selected service chip
+  _ServiceOption? _selectedService;
+
+  // Min/max price controllers
+  final _minPriceCtrl = TextEditingController();
+  final _maxPriceCtrl = TextEditingController();
+
+  bool _showServiceError = false;
+  bool _servicesLoading = false;
 
   @override
   void initState() {
     super.initState();
-    // Pre-fill from BLoC state
-    final state = context.read<BecomeProfessionalBloc>().state;
-    if (state is BecomeProfessionalFormState && state.services.isNotEmpty) {
-      _addedServices.addAll(state.services);
+    // Pre-fill added services from BLoC
+    final s = context.read<BecomeProfessionalBloc>().state;
+    if (s is BecomeProfessionalFormState && s.services.isNotEmpty) {
+      _addedServices.addAll(s.services);
+    }
+    // Use cached services if already loaded
+    final bloc = context.read<BecomeProfessionalBloc>();
+    if (bloc.cachedCategoryServices.isNotEmpty) {
+      _availableServices = bloc.cachedCategoryServices
+          .map((s) => _ServiceOption(id: s.serviceId ?? 0, name: s.name))
+          .toList();
     }
   }
 
   @override
   void dispose() {
-    _priceController.dispose();
+    _minPriceCtrl.dispose();
+    _maxPriceCtrl.dispose();
     super.dispose();
   }
 
   void _addService() {
     if (_selectedService == null) return;
-    final price = double.tryParse(_priceController.text.trim());
-    if (price == null || price <= 0) return;
+    final min = double.tryParse(_minPriceCtrl.text.trim());
+    if (min == null || min <= 0) return;
+    final max = double.tryParse(_maxPriceCtrl.text.trim());
 
     setState(() {
-      // Remove existing entry for same service if present
-      _addedServices.removeWhere((s) => s.serviceName == _selectedService);
+      _addedServices.removeWhere((s) => s.serviceId == _selectedService!.id);
       _addedServices.add(ServicePricing(
-        serviceName: _selectedService!,
-        price: price,
+        serviceId: _selectedService!.id,
+        serviceName: _selectedService!.name,
+        minPrice: min,
+        maxPrice: max,
       ));
       _selectedService = null;
-      _priceController.clear();
+      _minPriceCtrl.clear();
+      _maxPriceCtrl.clear();
     });
   }
 
-  void _removeService(String serviceName) {
-    setState(() => _addedServices.removeWhere((s) => s.serviceName == serviceName));
+  void _removeService(int serviceId) {
+    setState(() => _addedServices.removeWhere((s) => s.serviceId == serviceId));
   }
 
   bool _validate() {
@@ -86,251 +95,250 @@ class _ProfessionalDetails2PageState extends State<ProfessionalDetails2Page> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 16),
-        const Text(
-          'Services & Pricing',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF062B4D),
+    return BlocListener<BecomeProfessionalBloc, BecomeProfessionalState>(
+      listener: (context, state) {
+        if (state is CategoryServicesLoading) {
+          setState(() => _servicesLoading = true);
+        } else if (state is CategoryServicesLoaded) {
+          setState(() {
+            _servicesLoading = false;
+            _availableServices = state.services
+                .map((s) => _ServiceOption(id: s.serviceId ?? 0, name: s.name))
+                .toList();
+          });
+        }
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Services & Pricing',
+            style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF062B4D)),
           ),
-        ),
-        const SizedBox(height: 6),
-        const Text(
-          'Tap a service to select it, enter a price, then tap Add.',
-          style: TextStyle(color: Color(0xFF062B4D), fontSize: 13),
-        ),
-        const SizedBox(height: 20),
-
-        // Service grid
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: _availableServices.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            childAspectRatio: 3.5,
+          const SizedBox(height: 4),
+          const Text(
+            'Tap a service to select it, then set your price range.',
+            style: TextStyle(fontSize: 12, color: Colors.grey),
           ),
-          itemBuilder: (context, index) {
-            final service = _availableServices[index];
-            final isSelected = _selectedService == service;
-            final isAdded = _addedServices.any((s) => s.serviceName == service);
-
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedService = isSelected ? null : service;
-                  _priceController.clear();
-                });
-              },
-              child: Container(
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: isAdded
-                      ? const Color(0xFFE8F5E9)
-                      : Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: isSelected
-                        ? const Color(0xFF062B4D)
-                        : isAdded
-                            ? Colors.green
-                            : Colors.grey.shade300,
-                    width: isSelected ? 2 : 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (isAdded)
-                      const Icon(Icons.check_circle,
-                          size: 14, color: Colors.green),
-                    if (isAdded) const SizedBox(width: 4),
-                    Flexible(
-                      child: Text(
-                        service,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isAdded
-                              ? Colors.green.shade700
-                              : const Color(0xFF062B4D),
-                        ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Service chips ──────────────────────────────────────
+                  if (_servicesLoading)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24),
+                        child: CircularProgressIndicator(
+                            color: Color(0xFF062B4D)),
                       ),
+                    )
+                  else
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _availableServices.map((svc) {
+                        final isSelected = _selectedService?.id == svc.id;
+                        return GestureDetector(
+                          onTap: () =>
+                              setState(() => _selectedService = isSelected ? null : svc),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color(0xFF062B4D)
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                  color: isSelected
+                                      ? const Color(0xFF062B4D)
+                                      : const Color(0xFFDDDDDD)),
+                            ),
+                            child: Text(
+                              svc.name,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: isSelected
+                                    ? Colors.white
+                                    : const Color(0xFF062B4D),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+
+                  // ── Price inputs (show only when service selected) ──────
+                  if (_selectedService != null) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      'Set price for ${_selectedService!.name} (JD)',
+                      style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF062B4D)),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _PriceField(
+                            controller: _minPriceCtrl,
+                            hint: 'Min price',
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _PriceField(
+                            controller: _maxPriceCtrl,
+                            hint: 'Max (optional)',
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: _addService,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFF8C1A),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Text('Add',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600)),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
-                ),
-              ),
-            );
-          },
-        ),
 
-        // Price input row (shown when a service is selected)
-        if (_selectedService != null) ...[
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _selectedService!,
-                    style: const TextStyle(color: Color(0xFF062B4D)),
-                  ),
-                ),
-                SizedBox(
-                  width: 70,
-                  height: 40,
-                  child: TextField(
-                    controller: _priceController,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    textAlign: TextAlign.center,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: const Color(0xffF4F6F8),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                    ),
-                  ),
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 6),
-                  child: Text(
-                    'JD',
-                    style: TextStyle(color: Color(0xFF062B4D), fontSize: 14),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: _addService,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.orange,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Text(
-                      'Add',
+                  // ── Added services list ────────────────────────────────
+                  if (_addedServices.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    Text(
+                      'Your Services',
                       style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: _showServiceError
+                              ? Colors.red
+                              : const Color(0xFF062B4D)),
                     ),
-                  ),
-                ),
-              ],
+                    const SizedBox(height: 8),
+                    ..._addedServices.map((s) => Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFDDDDDD)),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(s.serviceName,
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        color: Color(0xFF062B4D))),
+                              ),
+                              Text(
+                                s.maxPrice != null
+                                    ? '${s.minPrice.toStringAsFixed(0)}-${s.maxPrice!.toStringAsFixed(0)} JD'
+                                    : '${s.minPrice.toStringAsFixed(0)} JD',
+                                style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF062B4D)),
+                              ),
+                              const SizedBox(width: 8),
+                              GestureDetector(
+                                onTap: () => _removeService(s.serviceId),
+                                child: const Icon(Icons.close,
+                                    size: 18, color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        )),
+                  ] else if (_showServiceError)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 8),
+                      child: Text(
+                        'Please add at least one service.',
+                        style: TextStyle(fontSize: 12, color: Colors.red),
+                      ),
+                    ),
+
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
           ),
-        ],
 
-        // Added services list
-        if (_addedServices.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          const Text(
-            'Your Services',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-              color: Color(0xFF062B4D),
+          // Continue
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: _onContinue,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF8C1A),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
+                elevation: 0,
+              ),
+              child: const Text('Continue',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white)),
             ),
           ),
           const SizedBox(height: 8),
-          ..._addedServices.map((s) => _AddedServiceTile(
-                service: s,
-                onRemove: () => _removeService(s.serviceName),
-              )),
         ],
-
-        if (_showServiceError)
-          const Padding(
-            padding: EdgeInsets.only(top: 8, left: 4),
-            child: Text(
-              'Please add at least one service.',
-              style: TextStyle(fontSize: 12, color: Colors.red),
-            ),
-          ),
-
-        const SizedBox(height: 20),
-
-        // Continue button
-        SizedBox(
-          width: double.infinity,
-          height: 55,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15)),
-            ),
-            onPressed: _onContinue,
-            child: const Text(
-              'Continue',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 20),
-      ],
+      ),
     );
   }
 }
 
-class _AddedServiceTile extends StatelessWidget {
-  final ServicePricing service;
-  final VoidCallback onRemove;
+class _ServiceOption {
+  final int id;
+  final String name;
+  _ServiceOption({required this.id, required this.name});
+}
 
-  const _AddedServiceTile({required this.service, required this.onRemove});
+class _PriceField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hint;
+  const _PriceField({required this.controller, required this.hint});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.green.shade200),
+        border: Border.all(color: const Color(0xFFDDDDDD)),
       ),
-      child: Row(
-        children: [
-          const Icon(Icons.check_circle, size: 16, color: Colors.green),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              service.serviceName,
-              style: const TextStyle(color: Color(0xFF062B4D)),
-            ),
-          ),
-          Text(
-            '${service.price.toStringAsFixed(0)} JD',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF062B4D),
-            ),
-          ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: onRemove,
-            child: const Icon(Icons.close, size: 18, color: Colors.grey),
-          ),
-        ],
+      child: TextField(
+        controller: controller,
+        keyboardType: TextInputType.number,
+        style: const TextStyle(fontSize: 13, color: Color(0xFF062B4D)),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: const TextStyle(fontSize: 12, color: Colors.grey),
+          border: InputBorder.none,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        ),
       ),
     );
   }

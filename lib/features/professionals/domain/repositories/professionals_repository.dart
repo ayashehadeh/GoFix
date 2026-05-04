@@ -1,4 +1,6 @@
 import 'package:dartz/dartz.dart';
+import 'package:gp/features/professionals/domain/entities/city.dart';
+import 'package:gp/features/professionals/domain/entities/service_area.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/professional.dart';
 import '../entities/service_category.dart';
@@ -22,4 +24,7 @@ abstract class ProfessionalsRepository {
     double? maxDistanceKm,
     double? minRating,
   });
+
+  Future<Either<Failure, List<City>>> getCities();
+  Future<Either<Failure, List<ServiceArea>>> getServiceAreas({int? cityId});
 }

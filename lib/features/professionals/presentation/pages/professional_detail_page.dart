@@ -75,11 +75,9 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
           }
 
           if (state is ProfessionalDetailLoaded || state is ReviewsLoading) {
-            final professional = state is ProfessionalDetailLoaded
-                ? state.professional
-                : (state as ReviewsLoading).professional;
-            final reviews =
-                state is ProfessionalDetailLoaded ? state.reviews : <Review>[];
+            final professional =
+                state is ProfessionalDetailLoaded ? state.professional : (state as ReviewsLoading).professional;
+            final reviews = state is ProfessionalDetailLoaded ? state.reviews : <Review>[];
 
             return Column(
               children: [
@@ -134,22 +132,16 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                               vertical: 10,
                             ),
                             decoration: BoxDecoration(
-                              color: selected
-                                  ? AppColors.primaryOrange
-                                  : AppColors.white,
+                              color: selected ? AppColors.primaryOrange : AppColors.white,
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: selected
-                                    ? AppColors.primaryOrange
-                                    : AppColors.divider,
+                                color: selected ? AppColors.primaryOrange : AppColors.divider,
                               ),
                             ),
                             child: Text(
                               _tabs[index],
                               style: TextStyle(
-                                color: selected
-                                    ? Colors.white
-                                    : AppColors.textPrimary,
+                                color: selected ? Colors.white : AppColors.textPrimary,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 13,
                               ),
@@ -180,8 +172,7 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                       MaterialPageRoute(
                         builder: (_) => SelectServiceScreen(
                           professionalName: professional.name,
-                          professionalRole:
-                              'Professional ${professional.category.displayName}',
+                          professionalRole: 'Professional ${professional.category.displayName}',
                           professionalId: professional.id,
                         ),
                       ),
@@ -271,9 +262,7 @@ class _DetailHeader extends StatelessWidget {
               GestureDetector(
                 onTap: onFavorite,
                 child: Icon(
-                  professional.isFavorite
-                      ? Icons.favorite
-                      : Icons.favorite_border,
+                  professional.isFavorite ? Icons.favorite : Icons.favorite_border,
                   color: AppColors.primaryOrange,
                   size: 24,
                 ),
@@ -284,9 +273,7 @@ class _DetailHeader extends StatelessWidget {
           CircleAvatar(
             radius: 46,
             backgroundColor: AppColors.surface,
-            backgroundImage: professional.profileImageUrl != null
-                ? NetworkImage(professional.profileImageUrl!)
-                : null,
+            backgroundImage: professional.profileImageUrl != null ? NetworkImage(professional.profileImageUrl!) : null,
             child: professional.profileImageUrl == null
                 ? const Icon(
                     Icons.person,
@@ -320,9 +307,7 @@ class _DetailHeader extends StatelessWidget {
               ),
               _StatItem(
                 icon: Icons.bookmark_border,
-                value: professional.distanceKm != null
-                    ? professional.distanceKm!.toStringAsFixed(1)
-                    : 'N/A',
+                value: professional.distanceKm != null ? professional.distanceKm!.toStringAsFixed(1) : 'N/A',
                 label: 'KM Away',
               ),
               _StatItem(
@@ -419,7 +404,7 @@ class _AboutTab extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: AppColors.divider),
                     ),
-                    child: Text(area, style: AppTextStyles.bodySmall),
+                    child: Text(area.name, style: AppTextStyles.bodySmall),
                   ),
                 )
                 .toList(),
@@ -540,9 +525,7 @@ class _ReviewsTab extends StatelessWidget {
                 child: Column(
                   children: [5, 4, 3, 2, 1].map((star) {
                     final count = professional.ratingBreakdown[star] ?? 0;
-                    final total = professional.reviewCount == 0
-                        ? 1
-                        : professional.reviewCount;
+                    final total = professional.reviewCount == 0 ? 1 : professional.reviewCount;
                     return Row(
                       children: [
                         Text('$star', style: AppTextStyles.bodySmall),
@@ -592,9 +575,7 @@ class _ReviewItem extends StatelessWidget {
             CircleAvatar(
               radius: 18,
               backgroundColor: AppColors.surface,
-              backgroundImage: review.reviewerImageUrl != null
-                  ? NetworkImage(review.reviewerImageUrl!)
-                  : null,
+              backgroundImage: review.reviewerImageUrl != null ? NetworkImage(review.reviewerImageUrl!) : null,
               child: review.reviewerImageUrl == null
                   ? const Icon(
                       Icons.person,

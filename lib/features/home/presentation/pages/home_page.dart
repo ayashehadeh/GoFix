@@ -13,6 +13,8 @@ import '../../../professionals/presentation/pages/category_professionals_page.da
 import '../../domain/entities/category_entity.dart';
 import '../bloc/home_bloc.dart';
 import '../widgets/category_card.dart';
+import 'package:gp/features/search/presentation/bloc/search_bloc.dart';
+import 'package:gp/features/search/presentation/pages/search_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -71,7 +73,15 @@ class _HomePageState extends State<HomePage> {
                 locationName: state is HomeLoaded ? state.locationName : '...',
                 isLoadingLocation: state is HomeLoading,
                 onSearchTap: () {
-                  // TODO: Navigate to search page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider(
+                        create: (_) => sl<SearchBloc>(),
+                        child: const SearchPage(),
+                      ),
+                    ),
+                  );
                 },
                 onNotificationTap: _onNotificationTap,
               ),
@@ -108,8 +118,7 @@ class _HomePageState extends State<HomePage> {
             Text(state.message, style: AppTextStyles.bodyMedium),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () =>
-                  context.read<HomeBloc>().add(HomeLoadRequested()),
+              onPressed: () => context.read<HomeBloc>().add(HomeLoadRequested()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryOrange,
                 shape: RoundedRectangleBorder(
@@ -240,9 +249,7 @@ class _HomeHeader extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
           GestureDetector(
             onTap: onSearchTap,
             child: Container(

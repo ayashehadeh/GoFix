@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'service_category.dart';
+import 'service_area.dart';
 import 'service_offered.dart';
 import 'professional_document.dart';
 import 'working_hours.dart';
@@ -18,10 +19,10 @@ class Professional extends Equatable {
   final String phone;
   final String email;
   final String bio;
-  final List<String> serviceAreas;
+  final List<ServiceArea> serviceAreas;
   final WorkingHours workingHours;
   final List<ServiceOffered> services;
-  final List<ProfessionalDocument> documents; // renamed from certifications
+  final List<ProfessionalDocument> documents;
   final bool isVerified;
   final bool isIdentityVerified;
 
@@ -59,7 +60,15 @@ class Professional extends Equatable {
       ? '${distanceKm!.toStringAsFixed(1)} KM Away'
       : '-- KM Away';
 
-  Professional copyWith({bool? isFavorite, double? distanceKm}) {
+  /// Convenience: just the area names as strings (for display)
+  List<String> get serviceAreaNames => serviceAreas.map((a) => a.name).toList();
+
+  Professional copyWith({
+    bool? isFavorite,
+    double? distanceKm,
+    List<ServiceArea>? serviceAreas,
+    String? profileImageUrl,
+  }) {
     return Professional(
       id: id,
       name: name,
@@ -70,11 +79,11 @@ class Professional extends Equatable {
       experienceYears: experienceYears,
       distanceKm: distanceKm ?? this.distanceKm,
       isFavorite: isFavorite ?? this.isFavorite,
-      profileImageUrl: profileImageUrl,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
       phone: phone,
       email: email,
       bio: bio,
-      serviceAreas: serviceAreas,
+      serviceAreas: serviceAreas ?? this.serviceAreas,
       workingHours: workingHours,
       services: services,
       documents: documents,
