@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/entities/category_service.dart';
+import '../../domain/entities/city.dart';
 import '../../domain/entities/document_type.dart';
 import '../../domain/entities/professional_application.dart';
 import '../../domain/entities/service_area.dart';
@@ -15,6 +16,7 @@ class BecomeProfessionalState extends Equatable {
   // ── Lookups ─────────────────────────────────────────────────────────────
   final ActionStatus initialDataStatus;
   final List<Category> categories;
+  final List<City> cities;
   final List<ServiceArea> serviceAreas; // all areas; UI filters by cityId
   final ActionStatus categoryServicesStatus;
   final List<CategoryService> categoryServices;
@@ -35,6 +37,7 @@ class BecomeProfessionalState extends Equatable {
   const BecomeProfessionalState({
     this.initialDataStatus = ActionStatus.idle,
     this.categories = const [],
+    this.cities = const [],
     this.serviceAreas = const [],
     this.categoryServicesStatus = ActionStatus.idle,
     this.categoryServices = const [],
@@ -54,16 +57,22 @@ class BecomeProfessionalState extends Equatable {
     return serviceAreas.where((a) => a.cityId == cityId).toList();
   }
 
-  /// Unique cities derived from the service areas list. Groups by cityId
-  /// and attempts to use cityName from service areas. Falls back to
-  /// cityId-based mapping if city names aren't in the API response.
+  /// Cities from the API if available, otherwise derived from service areas
+  /// as a fallback.
   List<({int id, String name})> get derivedCities {
+    if (cities.isNotEmpty) {
+      return cities
+          .map((c) => (id: c.id, name: c.name))
+          .toList()
+        ..sort((a, b) => a.name.compareTo(b.name));
+    }
+
+    // Fallback: derive cities from service areas
     final seen = <int>{};
     final result = <({int id, String name})>[];
     for (final area in serviceAreas) {
       if (area.cityId == 0) continue;
       if (seen.add(area.cityId)) {
-        // Use cityName from API if available, otherwise map from cityId
         final name = area.cityName ?? _mapCityIdToName(area.cityId);
         result.add((id: area.cityId, name: name));
       }
@@ -72,8 +81,7 @@ class BecomeProfessionalState extends Equatable {
     return result;
   }
 
-  /// Maps cityId to city name. This is used as a fallback when the API
-  /// doesn't return city names. Update this mapping based on your backend data.
+  /// Fallback mapping when city names are not available from the API.
   String _mapCityIdToName(int cityId) {
     const cityMap = {
       1: 'Amman',
@@ -90,6 +98,7 @@ class BecomeProfessionalState extends Equatable {
   BecomeProfessionalState copyWith({
     ActionStatus? initialDataStatus,
     List<Category>? categories,
+    List<City>? cities,
     List<ServiceArea>? serviceAreas,
     ActionStatus? categoryServicesStatus,
     List<CategoryService>? categoryServices,
@@ -105,6 +114,7 @@ class BecomeProfessionalState extends Equatable {
     return BecomeProfessionalState(
       initialDataStatus: initialDataStatus ?? this.initialDataStatus,
       categories: categories ?? this.categories,
+      cities: cities ?? this.cities,
       serviceAreas: serviceAreas ?? this.serviceAreas,
       categoryServicesStatus:
           categoryServicesStatus ?? this.categoryServicesStatus,
@@ -114,8 +124,7 @@ class BecomeProfessionalState extends Equatable {
       step2Status: step2Status ?? this.step2Status,
       profilePictureUploadStatus:
           profilePictureUploadStatus ?? this.profilePictureUploadStatus,
-      documentUploadStatus:
-          documentUploadStatus ?? this.documentUploadStatus,
+      documentUploadStatus: documentUploadStatus ?? this.documentUploadStatus,
       submitStatus: submitStatus ?? this.submitStatus,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
@@ -125,6 +134,7 @@ class BecomeProfessionalState extends Equatable {
   List<Object?> get props => [
         initialDataStatus,
         categories,
+        cities,
         serviceAreas,
         categoryServicesStatus,
         categoryServices,
@@ -137,17 +147,3 @@ class BecomeProfessionalState extends Equatable {
         errorMessage,
       ];
 }
-  /// Maps cityId to city name. This is used as a fallback when the API
-  /// doesn't return city names. Update this mapping based on your backend data.
-  String _mapCityIdToName(int cityId) {
-    const cityMap = {
-      1: 'Abu Dhabi',
-      2: 'Dubai',
-      3: 'Sharjah',
-      4: 'Ajman',
-      5: 'Ras Al Khaimah',
-      6: 'Fujairah',
-      7: 'Umm Al Quwain',
-    };
-    return cityMap[cityId] ?? 'City $cityId';
-  }

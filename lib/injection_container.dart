@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:gp/core/storage/token_storage.dart';
+import 'package:gp/features/become_professional/domain/usecases/get_cities.dart';
 
 // ── Home ──────────────────────────────────────────────────────────────────────
 import 'package:gp/features/home/data/data_sources/data_remote_datasource.dart';
@@ -35,6 +36,7 @@ import 'package:gp/features/professionals/domain/usecases/profeessional_usecases
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/get_favorites.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/get_professional_by_id.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/get_professionals_by_category.dart';
+import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/get_service_areas_by_professional.dart';
 import 'package:gp/features/professionals/domain/usecases/review_usecases/get_reviews_by_professional.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/search_professionals.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/toggle_favorite.dart';
@@ -92,8 +94,11 @@ import 'package:gp/features/settings/presentation/bloc/set_password_bloc.dart';
 
 // ── Become Professional ───────────────────────────────────────────────────────
 import 'package:gp/features/become_professional/data/datasources/become_professional_remote_datasource.dart';
+import 'package:gp/features/become_professional/data/datasources/application_status_remote_datasource.dart';
 import 'package:gp/features/become_professional/data/repositories/become_professional_repository_impl.dart';
+import 'package:gp/features/become_professional/data/repositories/application_status_repository_impl.dart';
 import 'package:gp/features/become_professional/domain/repositories/become_professional_repository.dart';
+import 'package:gp/features/become_professional/domain/repositories/application_status_repository.dart';
 import 'package:gp/features/become_professional/domain/usecases/get_categories.dart';
 import 'package:gp/features/become_professional/domain/usecases/get_service_areas.dart';
 import 'package:gp/features/become_professional/domain/usecases/get_services_for_category.dart';
@@ -102,7 +107,9 @@ import 'package:gp/features/become_professional/domain/usecases/set_services.dar
 import 'package:gp/features/become_professional/domain/usecases/upload_profile_picture.dart';
 import 'package:gp/features/become_professional/domain/usecases/upload_document.dart';
 import 'package:gp/features/become_professional/domain/usecases/submit_application.dart';
+import 'package:gp/features/become_professional/domain/usecases/get_application_status.dart';
 import 'package:gp/features/become_professional/presentation/bloc/become_professional_bloc.dart';
+import 'package:gp/features/become_professional/presentation/bloc/application_status_bloc.dart';
 
 // ── Search ────────────────────────────────────────────────────────────────────
 import 'package:gp/features/search/data/datasources/search_remote_datasource.dart';
@@ -128,6 +135,7 @@ Future<void> init() async {
     () => ProfessionalsBloc(
       getProfessionalsByCategory: sl(),
       getProfessionalById: sl(),
+      getServiceAreasByProfessional: sl(),
       getReviewsByProfessional: sl(),
       toggleFavorite: sl(),
       filterProfessionals: sl(),
@@ -182,6 +190,10 @@ Future<void> init() async {
   sl.registerFactory(() => SetPasswordBloc(setNewPassword: sl()));
 
   sl.registerFactory(
+    () => ApplicationStatusBloc(getApplicationStatus: sl()),
+  );
+
+  sl.registerFactory(
     () => BecomeProfessionalBloc(
       getCategories: sl(),
       getServiceAreas: sl(),
@@ -191,10 +203,10 @@ Future<void> init() async {
       uploadProfilePicture: sl(),
       uploadDocument: sl(),
       submitApplication: sl(),
+      getCitiesFromProfessional: sl(), // ← added
     ),
   );
 
-  // ── Search BLoC now includes the four recent-search use cases ──────────────
   sl.registerFactory(
     () => SearchBloc(
       searchUseCase: sl(),
@@ -232,6 +244,7 @@ Future<void> init() async {
 
   sl.registerLazySingleton(() => GetProfessionalsByCategory(sl()));
   sl.registerLazySingleton(() => GetProfessionalById(sl()));
+  sl.registerLazySingleton(() => GetServiceAreasByProfessional(sl()));
   sl.registerLazySingleton(() => GetFavorites(sl()));
   sl.registerLazySingleton(() => ToggleFavorite(sl()));
   sl.registerLazySingleton(() => SearchProfessionals(sl()));
@@ -280,6 +293,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => UploadProfilePicture(sl()));
   sl.registerLazySingleton(() => UploadDocument(sl()));
   sl.registerLazySingleton(() => SubmitApplication(sl()));
+  sl.registerLazySingleton(() => GetCitiesFromProfessional(sl()));
+  sl.registerLazySingleton(() => GetApplicationStatus(sl()));
 
   // ── Use Cases — Search ─────────────────────────────────────────────────────
 
@@ -351,6 +366,10 @@ Future<void> init() async {
     () => BecomeProfessionalRepositoryImpl(remoteDataSource: sl()),
   );
 
+  sl.registerLazySingleton<ApplicationStatusRepository>(
+    () => ApplicationStatusRepositoryImpl(remoteDataSource: sl()),
+  );
+
   sl.registerLazySingleton<SearchRepository>(
     () => SearchRepositoryImpl(remoteDataSource: sl()),
   );
@@ -405,7 +424,10 @@ Future<void> init() async {
     () => BecomeProfessionalRemoteDataSourceImpl(dio: sl()),
   );
 
-  // ── Real search datasource (replaces MockSearchDataSource) ────────────────
+  sl.registerLazySingleton<ApplicationStatusRemoteDataSource>(
+    () => ApplicationStatusRemoteDataSourceImpl(dio: sl()),
+  );
+
   sl.registerLazySingleton<SearchRemoteDataSource>(
     () => SearchRemoteDataSourceImpl(dio: sl()),
   );

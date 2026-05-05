@@ -165,6 +165,18 @@ class ProfessionalsRepositoryImpl implements ProfessionalsRepository {
       return Left(_handleDioError(e));
     }
   }
+
+  @override
+  Future<Either<Failure, List<ServiceArea>>> getServiceAreasByProfessional(String professionalId) async {
+    try {
+      final result = await remoteDataSource.getServiceAreasByProfessional(professionalId);
+      return Right(result);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }
 
 class ReviewsRepositoryImpl implements ReviewsRepository {

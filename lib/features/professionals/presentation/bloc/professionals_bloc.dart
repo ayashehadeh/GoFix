@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/features/professionals/domain/entities/professional.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/get_professionals_by_category.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/get_professional_by_id.dart';
+import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/get_service_areas_by_professional.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/toggle_favorite.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/filter_professionals.dart';
 import 'package:gp/features/professionals/domain/usecases/review_usecases/get_reviews_by_professional.dart';
@@ -13,6 +15,7 @@ import 'professionals_state.dart';
 class ProfessionalsBloc extends Bloc<ProfessionalsEvent, ProfessionalsState> {
   final GetProfessionalsByCategory getProfessionalsByCategory;
   final GetProfessionalById getProfessionalById;
+  final GetServiceAreasByProfessional getServiceAreasByProfessional;
   final GetReviewsByProfessional getReviewsByProfessional;
   final ToggleFavorite toggleFavorite;
   final FilterProfessionals filterProfessionals;
@@ -23,6 +26,7 @@ class ProfessionalsBloc extends Bloc<ProfessionalsEvent, ProfessionalsState> {
   ProfessionalsBloc({
     required this.getProfessionalsByCategory,
     required this.getProfessionalById,
+    required this.getServiceAreasByProfessional,
     required this.getReviewsByProfessional,
     required this.toggleFavorite,
     required this.filterProfessionals,
@@ -64,12 +68,27 @@ class ProfessionalsBloc extends Bloc<ProfessionalsEvent, ProfessionalsState> {
     await profResult.fold(
       (failure) async => emit(ProfessionalsError(failure.message)),
       (professional) async {
-        final reviewsResult =
-            await getReviewsByProfessional(event.professionalId);
+        Professional professionalWithAreas = professional;
+        try {
+          final areasResult = await getServiceAreasByProfessional(event.professionalId)
+              .timeout(const Duration(seconds: 4));
+          areasResult.fold(
+            (_) => null,
+            (areas) {
+              if (areas.isNotEmpty) {
+                professionalWithAreas = professional.copyWith(serviceAreas: areas);
+              }
+            },
+          );
+        } catch (_) {
+          // endpoint unavailable — show profile without service areas
+        }
+
+        final reviewsResult = await getReviewsByProfessional(event.professionalId);
         reviewsResult.fold(
           (failure) => emit(ProfessionalsError(failure.message)),
           (reviews) => emit(ProfessionalDetailLoaded(
-            professional: professional,
+            professional: professionalWithAreas,
             reviews: reviews,
           )),
         );

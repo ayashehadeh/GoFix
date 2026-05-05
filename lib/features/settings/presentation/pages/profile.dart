@@ -2,9 +2,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/core/widgets/gofix_bottom_nav_bar.dart';
+import 'package:gp/features/become_professional/domain/entities/application_status_entity.dart';
+import 'package:gp/features/become_professional/domain/usecases/get_application_status.dart';
+import 'package:gp/features/become_professional/presentation/pages/in_queue_page.dart';
 import 'package:gp/features/become_professional/presentation/pages/stepper_screen.dart';
 import 'package:gp/features/settings/presentation/pages/personal_information_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/injection_container.dart' as di;
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 
@@ -152,6 +156,43 @@ class _ProfilePageState extends State<ProfilePage> {
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _openBecomeProfessional(BuildContext context) async {
+    final navigator = Navigator.of(context);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(color: AppColors.primaryOrange),
+      ),
+    );
+
+    final result = await di.sl<GetApplicationStatus>()();
+
+    if (!mounted) return;
+    navigator.pop(); // dismiss loading
+
+    result.fold(
+      (_) {
+        // API error — assume not yet submitted, go to stepper
+        navigator.push(
+          MaterialPageRoute(builder: (_) => const StepperScreen()),
+        );
+      },
+      (status) {
+        if (status.status == ProfessionalStatus.draft) {
+          navigator.push(
+            MaterialPageRoute(builder: (_) => const StepperScreen()),
+          );
+        } else {
+          navigator.push(
+            MaterialPageRoute(builder: (_) => const InQueuePage()),
+          );
+        }
+      },
     );
   }
 
@@ -926,12 +967,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         context,
                         Icons.build,
                         t.becomeAProfessional,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const StepperScreen(),
-                          ),
-                        ),
+                        onTap: () => _openBecomeProfessional(context),
                       ),
                       _menuItem(
                         context,

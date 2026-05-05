@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:gp/features/become_professional/domain/entities/city.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/entities/category_service.dart';
@@ -10,8 +11,7 @@ import '../../domain/repositories/become_professional_repository.dart';
 import '../datasources/become_professional_remote_datasource.dart';
 import '../models/service_pricing_model.dart';
 
-class BecomeProfessionalRepositoryImpl
-    implements BecomeProfessionalRepository {
+class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
   final BecomeProfessionalRemoteDataSource remoteDataSource;
 
   const BecomeProfessionalRepositoryImpl({required this.remoteDataSource});
@@ -43,15 +43,17 @@ class BecomeProfessionalRepositoryImpl
   Future<Either<Failure, Unit>> createProfile({
     required int categoryId,
     required int experienceYears,
-    required int cityId,
-    required int serviceAreaId,
+    int? serviceAreaId,
+    double? latitude,
+    double? longitude,
     required String bio,
   }) {
     return _wrapUnit(() async => await remoteDataSource.createProfile(
           categoryId: categoryId,
           experienceYears: experienceYears,
-          cityId: cityId,
           serviceAreaId: serviceAreaId,
+          latitude: latitude,
+          longitude: longitude,
           bio: bio,
         ));
   }
@@ -60,9 +62,7 @@ class BecomeProfessionalRepositoryImpl
   Future<Either<Failure, Unit>> setServices(
     List<ServicePricing> services,
   ) {
-    final models = services
-        .map((s) => ServicePricingModel.fromEntity(s))
-        .toList();
+    final models = services.map((s) => ServicePricingModel.fromEntity(s)).toList();
     return _wrapUnit(() async => await remoteDataSource.setServices(models));
   }
 
@@ -91,6 +91,10 @@ class BecomeProfessionalRepositoryImpl
     );
   }
 
+  @override
+  Future<Either<Failure, List<City>>> getCities() {
+    return _wrap(() async => (await remoteDataSource.getCities()).cast<City>());
+  }
   // ── Error handling ────────────────────────────────────────────────────────
 
   Future<Either<Failure, T>> _wrap<T>(Future<T> Function() fn) async {
@@ -116,16 +120,54 @@ class BecomeProfessionalRepositoryImpl
   }
 
   Failure _handleDioError(DioException e) {
+    if (e.response?.statusCode == 401) {
+      return const ServerFailure('Your session expired. Please sign in again.');
+    }
     if (e.type == DioExceptionType.connectionError ||
         e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout) {
       return const NetworkFailure();
     }
     final data = e.response?.data;
-    String? message;
-    if (data is Map<String, dynamic>) {
-      message = data['message'] as String? ?? data['error'] as String?;
+    final message =
+        _extractBackendMessage(data) ?? e.response?.statusMessage ?? e.message;
+    return ServerFailure(message?.trim().isNotEmpty == true
+        ? message!.trim()
+        : 'Something went wrong');
+  }
+
+  String? _extractBackendMessage(dynamic data) {
+    if (data == null) return null;
+    if (data is String) {
+      return data.trim().isEmpty ? null : data;
     }
-    return ServerFailure(message ?? 'Something went wrong');
+    if (data is List) {
+      for (final item in data) {
+        final message = _extractBackendMessage(item);
+        if (message != null && message.trim().isNotEmpty) return message;
+      }
+      return null;
+    }
+    if (data is Map) {
+      final dynamic directMessage =
+          data['message'] ?? data['error'] ?? data['detail'] ?? data['title'];
+      if (directMessage is String && directMessage.trim().isNotEmpty) {
+        return directMessage;
+      }
+
+      final dynamic errors = data['errors'] ?? data['validationErrors'];
+      final nestedErrors = _extractBackendMessage(errors);
+      if (nestedErrors != null) return nestedErrors;
+
+      final dynamic innerData = data['data'] ?? data['result'];
+      final nestedDataMessage = _extractBackendMessage(innerData);
+      if (nestedDataMessage != null) return nestedDataMessage;
+
+      for (final value in data.values) {
+        final nested = _extractBackendMessage(value);
+        if (nested != null && nested.trim().isNotEmpty) return nested;
+      }
+    }
+    return null;
   }
 }

@@ -1,21 +1,25 @@
 import 'package:dio/dio.dart';
+import 'package:gp/core/storage/token_storage.dart';
 import '../models/category_model.dart';
 import '../models/category_service_model.dart';
 import '../models/service_area_model.dart';
 import '../models/service_pricing_model.dart';
+import '../models/city_model.dart';
 
 abstract class BecomeProfessionalRemoteDataSource {
   // Lookups
   Future<List<CategoryModel>> getCategories();
   Future<List<CategoryServiceModel>> getServicesForCategory(int categoryId);
   Future<List<ServiceAreaModel>> getServiceAreas();
+  Future<List<CityModel>> getCities();
 
   // Application flow
   Future<void> createProfile({
     required int categoryId,
     required int experienceYears,
-    required int cityId,
-    required int serviceAreaId,
+    int? serviceAreaId,
+    double? latitude,
+    double? longitude,
     required String bio,
   });
 
@@ -38,6 +42,13 @@ class BecomeProfessionalRemoteDataSourceImpl
   const BecomeProfessionalRemoteDataSourceImpl({required this.dio});
 
   // ── Helper ────────────────────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> _authHeaders() async {
+    final token = await TokenStorage.getToken();
+    return {
+      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+    };
+  }
 
   /// Pulls the list field out of common response envelopes:
   /// `{ data: [...] }`, `{ data: { items: [...] } }`, or a bare list.
@@ -94,20 +105,39 @@ class BecomeProfessionalRemoteDataSourceImpl
   Future<void> createProfile({
     required int categoryId,
     required int experienceYears,
-    required int cityId,
-    required int serviceAreaId,
+    int? serviceAreaId,
+    double? latitude,
+    double? longitude,
     required String bio,
   }) async {
-    await dio.post(
-      '/professionals/profile',
-      data: {
-        'categoryId': categoryId,
-        'experienceYears': experienceYears,
-        'cityId': cityId,
-        'serviceAreaId': serviceAreaId,
-        'bio': bio,
-      },
-    );
+    final payload = {
+      'categoryId': categoryId,
+      'experienceYears': experienceYears,
+      if (serviceAreaId != null) 'serviceAreaId': serviceAreaId,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      'bio': bio,
+    };
+
+    try {
+      await dio.post(
+        '/professionals/profile',
+        data: payload,
+        options: Options(headers: await _authHeaders()),
+      );
+    } on DioException catch (e) {
+      // If a profile already exists (or backend only allows update), retry as PUT.
+      final code = e.response?.statusCode;
+      if (code == 405 || code == 409 || code == 422) {
+        await dio.put(
+          '/professionals/profile',
+          data: payload,
+          options: Options(headers: await _authHeaders()),
+        );
+        return;
+      }
+      rethrow;
+    }
   }
 
   @override
@@ -117,6 +147,7 @@ class BecomeProfessionalRemoteDataSourceImpl
       data: {
         'services': services.map((s) => s.toJson()).toList(),
       },
+      options: Options(headers: await _authHeaders()),
     );
   }
 
@@ -128,7 +159,10 @@ class BecomeProfessionalRemoteDataSourceImpl
     await dio.post(
       '/auth/profile-picture',
       data: formData,
-      options: Options(contentType: 'multipart/form-data'),
+      options: Options(
+        contentType: 'multipart/form-data',
+        headers: await _authHeaders(),
+      ),
     );
   }
 
@@ -144,12 +178,27 @@ class BecomeProfessionalRemoteDataSourceImpl
     await dio.post(
       '/professionals/profile/documents',
       data: formData,
-      options: Options(contentType: 'multipart/form-data'),
+      options: Options(
+        contentType: 'multipart/form-data',
+        headers: await _authHeaders(),
+      ),
     );
   }
 
   @override
   Future<void> submitApplication() async {
-    await dio.post('/professionals/profile/submit');
+    await dio.post(
+      '/professionals/profile/submit',
+      options: Options(headers: await _authHeaders()),
+    );
   }
+
+  @override
+Future<List<CityModel>> getCities() async {
+  final response = await dio.get('/professionals/cities');
+  final list = _extractList(response.data);
+  return list
+      .map((e) => CityModel.fromJson(e as Map<String, dynamic>))
+      .toList();
+}
 }
