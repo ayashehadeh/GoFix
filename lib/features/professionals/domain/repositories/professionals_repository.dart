@@ -27,4 +27,5 @@ abstract class ProfessionalsRepository {
 
   Future<Either<Failure, List<City>>> getCities();
   Future<Either<Failure, List<ServiceArea>>> getServiceAreas({int? cityId});
+  Future<Either<Failure, List<ServiceArea>>> getServiceAreasByProfessional(String professionalId);
 }

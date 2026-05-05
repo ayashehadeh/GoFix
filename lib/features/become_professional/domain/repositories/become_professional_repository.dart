@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:gp/features/become_professional/domain/entities/city.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/category.dart';
 import '../entities/category_service.dart';
@@ -28,8 +29,9 @@ abstract class BecomeProfessionalRepository {
   Future<Either<Failure, Unit>> createProfile({
     required int categoryId,
     required int experienceYears,
-    required int cityId,
-    required int serviceAreaId,
+    int? serviceAreaId,
+    double? latitude,
+    double? longitude,
     required String bio,
   });
 
@@ -48,4 +50,7 @@ abstract class BecomeProfessionalRepository {
 
   /// POST /api/professionals/profile/submit  — final
   Future<Either<Failure, Unit>> submitApplication();
+
+  /// GET /api/professionals/cities
+Future<Either<Failure, List<City>>> getCities();
 }

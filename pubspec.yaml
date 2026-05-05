@@ -46,5 +46,8 @@ flutter:
     - assets/done.png
     - assets/email_sent.png
     - assets/successbook.png
+    - assets/approved_balloons.svg
+    - assets/inqueue_phone.svg
+    - assets/notapproved_clock.svg
   uses-material-design: true
   generate: true

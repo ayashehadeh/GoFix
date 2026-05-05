@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../injection_container.dart' as di;
+import '../bloc/application_status_bloc.dart';
+import '../bloc/application_status_event.dart';
+import 'approval_status_screen.dart';
 
 class InQueuePage extends StatelessWidget {
   const InQueuePage({super.key});
@@ -7,60 +13,92 @@ class InQueuePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             children: [
-              const SizedBox(height: 40),
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryOrange.withOpacity(0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.hourglass_top_rounded,
-                  size: 56,
-                  color: AppColors.primaryOrange,
-                ),
+              const SizedBox(height: 48),
+
+              // ── Illustration ───────────────────────────────────────────
+              SvgPicture.asset(
+                'assets/inqueue_phone.svg',
+                height: 220,
               ),
-              const SizedBox(height: 28),
+
+              const SizedBox(height: 32),
+
+              // ── Title ──────────────────────────────────────────────────
               const Text(
                 "You're In the Queue!",
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 22,
+                  fontSize: 24,
                   fontWeight: FontWeight.w700,
                   color: AppColors.primaryDark,
                 ),
               ),
               const SizedBox(height: 12),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Text(
-                  "Thanks for applying. Our team will review your "
-                  "application within 24-48 hours and notify you "
-                  "as soon as it's approved.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.6,
-                    color: AppColors.textSecondary,
+              const Text(
+                "We've received your application and will review it "
+                "within 24-48 hours. You'll get a notification once "
+                "your profile is approved and ready to go live.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  height: 1.7,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+
+              const Spacer(),
+
+              // ── Check Status ───────────────────────────────────────────
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BlocProvider(
+                          create: (_) => di.sl<ApplicationStatusBloc>()
+                            ..add(const LoadApplicationStatus()),
+                          child: const ApprovalStatusScreen(),
+                        ),
+                      ),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primaryOrange,
+                    side: const BorderSide(
+                      color: AppColors.primaryOrange,
+                      width: 1.5,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: const Text(
+                    'Check Status',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(height: 12),
+
+              // ── Done ───────────────────────────────────────────────────
               SizedBox(
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Pop to root — back to home.
-                    Navigator.of(context)
-                        .popUntil((route) => route.isFirst);
-                  },
+                  onPressed: () => Navigator.of(context)
+                      .pushNamedAndRemoveUntil('/home', (_) => false),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryOrange,
                     shape: RoundedRectangleBorder(
@@ -78,6 +116,7 @@ class InQueuePage extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 24),
             ],
           ),
         ),

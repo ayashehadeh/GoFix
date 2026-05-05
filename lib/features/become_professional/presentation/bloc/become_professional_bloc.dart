@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/features/become_professional/domain/usecases/get_cities.dart';
 import '../../domain/entities/document_type.dart';
 import '../../domain/entities/service_pricing.dart';
 import '../../domain/usecases/create_profile.dart';
@@ -14,6 +15,28 @@ import 'become_professional_state.dart';
 
 class BecomeProfessionalBloc
     extends Bloc<BecomeProfessionalEvent, BecomeProfessionalState> {
+  static const Map<String, ({double lat, double lon})> _cityCoordinates = {
+    'amman': (lat: 31.9454, lon: 35.9284),
+    'irbid': (lat: 32.5569, lon: 35.7597),
+    'zarqa': (lat: 32.0544, lon: 36.0998),
+    'aqaba': (lat: 29.5290, lon: 35.0078),
+  };
+
+  static const Map<int, ({double lat, double lon})> _cityCoordinatesById = {
+    1: (lat: 31.9454, lon: 35.9284),
+    2: (lat: 32.5569, lon: 35.7597),
+    3: (lat: 32.0544, lon: 36.0998),
+    4: (lat: 29.5290, lon: 35.0078),
+  };
+
+  static const Map<String, ({double lat, double lon})> _areaOffsets = {
+    'sweifieh': (lat: 0.0200, lon: 0.0300),
+    'khalda': (lat: 0.0150, lon: -0.0200),
+    'alrabiah': (lat: -0.0100, lon: 0.0250),
+    'rabieh': (lat: -0.0100, lon: 0.0250),
+    'rabiah': (lat: -0.0100, lon: 0.0250),
+  };
+
   final GetCategories getCategories;
   final GetServiceAreas getServiceAreas;
   final GetServicesForCategory getServicesForCategory;
@@ -22,6 +45,7 @@ class BecomeProfessionalBloc
   final UploadProfilePicture uploadProfilePicture;
   final UploadDocument uploadDocument;
   final SubmitApplication submitApplication;
+  final GetCitiesFromProfessional getCitiesFromProfessional;
 
   BecomeProfessionalBloc({
     required this.getCategories,
@@ -32,6 +56,7 @@ class BecomeProfessionalBloc
     required this.uploadProfilePicture,
     required this.uploadDocument,
     required this.submitApplication,
+    required this.getCitiesFromProfessional,
   }) : super(const BecomeProfessionalState()) {
     on<LoadInitialData>(_onLoadInitialData);
     on<LoadServicesForCategory>(_onLoadServicesForCategory);
@@ -62,10 +87,9 @@ class BecomeProfessionalBloc
   ) async {
     emit(state.copyWith(initialDataStatus: ActionStatus.loading));
 
-    // Sequential rather than Future.wait — different Either<Failure, T>
-    // types don't compose into a typed list. Each call is fast.
     final categoriesResult = await getCategories();
     final areasResult = await getServiceAreas();
+    final citiesResult = await getCitiesFromProfessional();
 
     String? error;
     var newState = state;
@@ -81,6 +105,13 @@ class BecomeProfessionalBloc
       (failure) => error ??= failure.message,
       (areas) {
         newState = newState.copyWith(serviceAreas: areas);
+      },
+    );
+
+    citiesResult.fold(
+      (failure) => error ??= failure.message,
+      (cities) {
+        newState = newState.copyWith(cities: cities);
       },
     );
 
@@ -121,7 +152,6 @@ class BecomeProfessionalBloc
     CategorySelected event,
     Emitter<BecomeProfessionalState> emit,
   ) {
-    // Changing the category invalidates Step 2 services — clear them.
     emit(state.copyWith(
       application: state.application.copyWith(
         categoryId: event.categoryId,
@@ -148,12 +178,11 @@ class BecomeProfessionalBloc
     CitySelected event,
     Emitter<BecomeProfessionalState> emit,
   ) {
-    // Changing city invalidates the area selection.
     emit(state.copyWith(
       application: state.application.copyWith(
         cityId: event.cityId,
         cityName: event.cityName,
-        serviceAreaId: 0, // reset; getter checks for non-zero
+        serviceAreaId: 0,
         serviceAreaName: '',
       ),
     ));
@@ -193,12 +222,19 @@ class BecomeProfessionalBloc
       return;
     }
 
+    final coordinates = _coordinatesFor(
+      cityId: app.cityId,
+      cityName: app.cityName,
+      areaName: app.serviceAreaName,
+    );
+
     emit(state.copyWith(step1Status: ActionStatus.loading, clearError: true));
     final result = await createProfile(
       categoryId: app.categoryId!,
       experienceYears: app.experienceYears!,
-      cityId: app.cityId!,
-      serviceAreaId: app.serviceAreaId!,
+      serviceAreaId: (app.serviceAreaId ?? 0) > 0 ? app.serviceAreaId : null,
+      latitude: coordinates?.lat,
+      longitude: coordinates?.lon,
       bio: app.bio.trim(),
     );
     result.fold(
@@ -269,7 +305,6 @@ class BecomeProfessionalBloc
       application: state.application.copyWith(
         profileImagePath: event.filePath,
       ),
-      // Reset upload status — the user picked a new file.
       profilePictureUploadStatus: ActionStatus.idle,
     ));
   }
@@ -397,5 +432,31 @@ class BecomeProfessionalBloc
       )),
       (_) => emit(state.copyWith(submitStatus: ActionStatus.success)),
     );
+  }
+
+  ({double lat, double lon})? _coordinatesFor({
+    int? cityId,
+    String? cityName,
+    String? areaName,
+  }) {
+    final cityCenter = cityId != null ? _cityCoordinatesById[cityId] : null;
+    final normalizedCity = cityCenter == null ? _normalizeLocationKey(cityName) : null;
+    final resolvedCity = cityCenter ??
+        (normalizedCity == null ? null : _cityCoordinates[normalizedCity]);
+
+    if (resolvedCity == null) return null;
+
+    final normalizedArea = _normalizeLocationKey(areaName);
+    final offset = normalizedArea == null ? null : _areaOffsets[normalizedArea];
+    return (
+      lat: resolvedCity.lat + (offset?.lat ?? 0),
+      lon: resolvedCity.lon + (offset?.lon ?? 0),
+    );
+  }
+
+  String? _normalizeLocationKey(String? raw) {
+    if (raw == null) return null;
+    final normalized = raw.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+    return normalized.isEmpty ? null : normalized;
   }
 }
