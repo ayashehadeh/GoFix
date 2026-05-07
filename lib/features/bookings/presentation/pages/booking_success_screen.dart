@@ -1,10 +1,6 @@
 // lib/features/bookings/presentation/pages/booking_success_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gp/features/home/presentation/bloc/home_bloc.dart';
-import 'package:gp/features/home/presentation/pages/home_page.dart';
-import 'package:gp/injection_container.dart' as di;
 import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/core/theme/app_text_styles.dart';
 
@@ -79,15 +75,7 @@ class BookingSuccessScreen extends StatelessWidget {
                 height: 52,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                        builder: (_) => BlocProvider(
-                          create: (_) => di.sl<HomeBloc>(),
-                          child: const HomePage(),
-                        ),
-                      ),
-                      (route) => false,
-                    );
+                    Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryOrange,

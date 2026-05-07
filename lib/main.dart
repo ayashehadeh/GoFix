@@ -22,40 +22,39 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Single HomeBloc instance that lives for the entire app lifetime
+    final homeBloc = di.sl<HomeBloc>();
+
     return BlocBuilder<LocaleBloc, LocaleState>(
       builder: (context, localeState) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          locale: localeState.locale,
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [Locale('en'), Locale('ar')],
-          home: BlocProvider(
-            create: (_) => di.sl<HomeBloc>(),
-            child: const HomePage(),
+        return BlocProvider.value(
+          value: homeBloc,
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            locale: localeState.locale,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [Locale('en'), Locale('ar')],
+            home: const HomePage(),
+            routes: {
+              '/home': (_) => const HomePage(),
+              '/bookings': (_) => BlocProvider(
+                    create: (_) => di.sl<BookingsBloc>(),
+                    child: const MyBookingsPage(),
+                  ),
+              '/profile': (_) => const ProfilePage(),
+              '/login': (_) => const StartPage(),
+            },
           ),
-          routes: {
-            '/home': (_) => BlocProvider(
-                  create: (_) => di.sl<HomeBloc>(),
-                  child: const HomePage(),
-                ),
-            '/bookings': (_) => BlocProvider(
-                  create: (_) => di.sl<BookingsBloc>(),
-                  child: const MyBookingsPage(),
-                ),
-            '/profile': (_) => const ProfilePage(),
-            '/login': (_) => const StartPage(),
-          },
         );
       },
     );
   }
 }
-
 
 /*import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

@@ -4,10 +4,6 @@ import 'package:gp/core/theme/app_colors.dart';
 import 'package:gp/features/auth/pages/reset_password.dart';
 import 'package:gp/features/auth/services/auth_service.dart';
 import 'package:gp/l10n/app_localizations.dart';
-import 'package:gp/features/home/presentation/pages/home_page.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gp/injection_container.dart' as di;
-import 'package:gp/features/home/presentation/bloc/home_bloc.dart';
 
 class SigninPage extends StatelessWidget {
   const SigninPage({super.key});
@@ -76,14 +72,8 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
 
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => BlocProvider(
-            create: (_) => di.sl<HomeBloc>(),
-            child: const HomePage(),
-          ),
-        ),
-      );
+      Navigator.of(context).pushReplacementNamed('/home');
+
     } catch (e) {
       _showError(e.toString().replaceAll('Exception: ', ''));
     } finally {

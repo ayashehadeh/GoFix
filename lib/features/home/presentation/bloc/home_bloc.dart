@@ -61,6 +61,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(HomeLoading());
     await _fetchData(emit);
   }
+
   //handles event 2
   Future<void> _onRefresh(HomeRefreshRequested event, Emitter<HomeState> emit) async {
     await _fetchData(emit);
@@ -69,7 +70,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   Future<void> _fetchData(Emitter<HomeState> emit) async {
     // Run separately so types are preserved
     final String locationName = await _getLocationName();
-    final Either<Failure, List<CategoryEntity>> categoriesResult = await getCategoriesUseCase();//calls the usecase.
+    final Either<Failure, List<CategoryEntity>> categoriesResult = await getCategoriesUseCase(); //calls the usecase.
 
     categoriesResult.fold(
       (failure) => emit(HomeError(failure.message)),
@@ -109,9 +110,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       if (placemarks.isEmpty) return 'Unknown location';
 
       final place = placemarks.first;
-      final parts = [place.subLocality, place.locality]
-          .where((p) => p != null && p.isNotEmpty)
-          .toList();
+      final parts = [place.subLocality, place.locality].where((p) => p != null && p.isNotEmpty).toList();
 
       if (parts.isEmpty) return place.country ?? 'Unknown location';
       return parts.join(', ');
