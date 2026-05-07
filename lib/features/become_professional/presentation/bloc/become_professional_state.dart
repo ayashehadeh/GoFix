@@ -6,18 +6,14 @@ import '../../domain/entities/document_type.dart';
 import '../../domain/entities/professional_application.dart';
 import '../../domain/entities/service_area.dart';
 
-/// Per-action status flag for transient operations (network calls).
 enum ActionStatus { idle, loading, success, failure }
 
-/// Single state object covers all 4 screens. Each long-running action has
-/// its own status field so the UI can react granularly without juggling
-/// multiple state classes.
 class BecomeProfessionalState extends Equatable {
   // ── Lookups ─────────────────────────────────────────────────────────────
   final ActionStatus initialDataStatus;
   final List<Category> categories;
   final List<City> cities;
-  final List<ServiceArea> serviceAreas; // all areas; UI filters by cityId
+  final List<ServiceArea> serviceAreas;
   final ActionStatus categoryServicesStatus;
   final List<CategoryService> categoryServices;
 
@@ -31,7 +27,6 @@ class BecomeProfessionalState extends Equatable {
   final Map<DocumentType, ActionStatus> documentUploadStatus;
   final ActionStatus submitStatus;
 
-  /// Last error message — surfaced via SnackBar by the UI listener.
   final String? errorMessage;
 
   const BecomeProfessionalState({
@@ -57,8 +52,10 @@ class BecomeProfessionalState extends Equatable {
     return serviceAreas.where((a) => a.cityId == cityId).toList();
   }
 
-  /// Cities from the API if available, otherwise derived from service areas
-  /// as a fallback.
+  /// All areas — used as fallback when no city is selected.
+  List<ServiceArea> get allAreas => serviceAreas;
+
+  /// Cities from API if available, otherwise derived from service areas.
   List<({int id, String name})> get derivedCities {
     if (cities.isNotEmpty) {
       return cities
@@ -66,29 +63,20 @@ class BecomeProfessionalState extends Equatable {
           .toList()
         ..sort((a, b) => a.name.compareTo(b.name));
     }
-
-    // Fallback: derive cities from service areas
     final seen = <int>{};
     final result = <({int id, String name})>[];
     for (final area in serviceAreas) {
       if (area.cityId == 0) continue;
       if (seen.add(area.cityId)) {
-        final name = area.cityName ?? _mapCityIdToName(area.cityId);
-        result.add((id: area.cityId, name: name));
+        result.add((id: area.cityId, name: _mapCityIdToName(area.cityId)));
       }
     }
     result.sort((a, b) => a.name.compareTo(b.name));
     return result;
   }
 
-  /// Fallback mapping when city names are not available from the API.
   String _mapCityIdToName(int cityId) {
-    const cityMap = {
-      1: 'Amman',
-      2: 'Irbid',
-      3: 'Zarqa',
-      4: 'Aqaba',
-    };
+    const cityMap = {1: 'Amman', 2: 'Irbid', 3: 'Zarqa', 4: 'Aqaba'};
     return cityMap[cityId] ?? 'City $cityId';
   }
 

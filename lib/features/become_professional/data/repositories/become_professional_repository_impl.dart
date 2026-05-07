@@ -7,9 +7,11 @@ import '../../domain/entities/category_service.dart';
 import '../../domain/entities/document_type.dart';
 import '../../domain/entities/service_area.dart';
 import '../../domain/entities/service_pricing.dart';
+import '../../domain/entities/working_hours_schedule.dart';
 import '../../domain/repositories/become_professional_repository.dart';
 import '../datasources/become_professional_remote_datasource.dart';
 import '../models/service_pricing_model.dart';
+import '../models/working_hours_model.dart';
 
 class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
   final BecomeProfessionalRemoteDataSource remoteDataSource;
@@ -20,21 +22,29 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
 
   @override
   Future<Either<Failure, List<Category>>> getCategories() {
-    return _wrap(() async => (await remoteDataSource.getCategories()).cast<Category>());
+    return _wrap(() async =>
+        (await remoteDataSource.getCategories()).cast<Category>());
   }
 
   @override
   Future<Either<Failure, List<CategoryService>>> getServicesForCategory(
     int categoryId,
   ) {
-    return _wrap(
-      () async => (await remoteDataSource.getServicesForCategory(categoryId)).cast<CategoryService>(),
-    );
+    return _wrap(() async =>
+        (await remoteDataSource.getServicesForCategory(categoryId))
+            .cast<CategoryService>());
   }
 
   @override
   Future<Either<Failure, List<ServiceArea>>> getServiceAreas() {
-    return _wrap(() async => (await remoteDataSource.getServiceAreas()).cast<ServiceArea>());
+    return _wrap(() async =>
+        (await remoteDataSource.getServiceAreas()).cast<ServiceArea>());
+  }
+
+  @override
+  Future<Either<Failure, List<City>>> getCities() {
+    return _wrap(
+        () async => (await remoteDataSource.getCities()).cast<City>());
   }
 
   // ── Application flow ──────────────────────────────────────────────────────
@@ -43,7 +53,6 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
   Future<Either<Failure, Unit>> createProfile({
     required int categoryId,
     required int experienceYears,
-    int? serviceAreaId,
     double? latitude,
     double? longitude,
     required String bio,
@@ -51,7 +60,6 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
     return _wrapUnit(() async => await remoteDataSource.createProfile(
           categoryId: categoryId,
           experienceYears: experienceYears,
-          serviceAreaId: serviceAreaId,
           latitude: latitude,
           longitude: longitude,
           bio: bio,
@@ -62,8 +70,30 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
   Future<Either<Failure, Unit>> setServices(
     List<ServicePricing> services,
   ) {
-    final models = services.map((s) => ServicePricingModel.fromEntity(s)).toList();
+    final models =
+        services.map((s) => ServicePricingModel.fromEntity(s)).toList();
     return _wrapUnit(() async => await remoteDataSource.setServices(models));
+  }
+
+  @override
+  Future<Either<Failure, Unit>> setServiceAreas(
+      List<int> serviceAreaIds) {
+    return _wrapUnit(
+        () async => await remoteDataSource.setServiceAreas(serviceAreaIds));
+  }
+
+  @override
+  Future<Either<Failure, Unit>> setWorkingHours(
+      List<WorkingHoursSchedule> schedules) {
+    final models = schedules
+        .map((s) => WorkingHoursModel(
+              dayLabel: s.dayLabel,
+              openTime: s.openTime,
+              closeTime: s.closeTime,
+            ))
+        .toList();
+    return _wrapUnit(
+        () async => await remoteDataSource.setWorkingHours(models));
   }
 
   @override
@@ -77,10 +107,17 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
   Future<Either<Failure, Unit>> uploadDocument({
     required String filePath,
     required DocumentType documentType,
+    String? name,
+    String? issuedBy,
+    int? issuedYear,
   }) {
+    
     return _wrapUnit(() async => await remoteDataSource.uploadDocument(
           filePath: filePath,
           documentType: documentType.apiValue,
+          name: name,
+          issuedBy: issuedBy,
+          issuedYear: issuedYear,
         ));
   }
 
@@ -91,10 +128,6 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
     );
   }
 
-  @override
-  Future<Either<Failure, List<City>>> getCities() {
-    return _wrap(() async => (await remoteDataSource.getCities()).cast<City>());
-  }
   // ── Error handling ────────────────────────────────────────────────────────
 
   Future<Either<Failure, T>> _wrap<T>(Future<T> Function() fn) async {
@@ -109,15 +142,18 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
   }
 
   Future<Either<Failure, Unit>> _wrapUnit(Future<void> Function() fn) async {
-    try {
-      await fn();
-      return const Right(unit);
-    } on DioException catch (e) {
-      return Left(_handleDioError(e));
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
+  try {
+    await fn();
+    return const Right(unit);
+  } on DioException catch (e) {
+    print('_wrapUnit DioException: ${e.response?.statusCode} ${e.response?.data}');
+    return Left(_handleDioError(e));
+  } catch (e, st) {
+    print('_wrapUnit UNKNOWN ERROR: $e');
+    print('_wrapUnit STACKTRACE: $st');
+    return Left(ServerFailure(e.toString()));
   }
+}
 
   Failure _handleDioError(DioException e) {
     if (e.response?.statusCode == 401) {
@@ -138,9 +174,7 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
 
   String? _extractBackendMessage(dynamic data) {
     if (data == null) return null;
-    if (data is String) {
-      return data.trim().isEmpty ? null : data;
-    }
+    if (data is String) return data.trim().isEmpty ? null : data;
     if (data is List) {
       for (final item in data) {
         final message = _extractBackendMessage(item);
@@ -154,15 +188,12 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
       if (directMessage is String && directMessage.trim().isNotEmpty) {
         return directMessage;
       }
-
       final dynamic errors = data['errors'] ?? data['validationErrors'];
       final nestedErrors = _extractBackendMessage(errors);
       if (nestedErrors != null) return nestedErrors;
-
       final dynamic innerData = data['data'] ?? data['result'];
       final nestedDataMessage = _extractBackendMessage(innerData);
       if (nestedDataMessage != null) return nestedDataMessage;
-
       for (final value in data.values) {
         final nested = _extractBackendMessage(value);
         if (nested != null && nested.trim().isNotEmpty) return nested;

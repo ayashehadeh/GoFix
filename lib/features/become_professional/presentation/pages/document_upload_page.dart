@@ -9,11 +9,6 @@ import '../bloc/become_professional_event.dart';
 import '../bloc/become_professional_state.dart';
 import '../widgets/step_continue_button.dart';
 
-/// Generic dedicated upload page used by all 4 verification rows
-/// (Profile Picture, ID, Certification, Good Conduct).
-///
-/// When [documentType] is null, the page uploads to the profile-picture
-/// endpoint. Otherwise it uploads as the given document type.
 class DocumentUploadPage extends StatefulWidget {
   final String title;
   final DocumentType? documentType;
@@ -129,9 +124,13 @@ class _DocumentUploadPageState extends State<DocumentUploadPage> {
 
     final bloc = context.read<BecomeProfessionalBloc>();
     if (widget.documentType == null) {
-      bloc.add(const UploadProfilePictureRequested());
+      // Path carried directly — no race condition
+      bloc.add(UploadProfilePictureWithPathRequested(path));
     } else {
-      bloc.add(UploadDocumentRequested(widget.documentType!));
+      bloc.add(UploadDocumentWithPathRequested(
+        documentType: widget.documentType!,
+        filePath: path,
+      ));
     }
   }
 
@@ -300,8 +299,7 @@ class _DocumentUploadPageState extends State<DocumentUploadPage> {
           child: GestureDetector(
             onTap: _pickPhoto,
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 10, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: Colors.black.withOpacity(0.55),
                 borderRadius: BorderRadius.circular(20),

@@ -5,43 +5,42 @@ import '../models/category_service_model.dart';
 import '../models/service_area_model.dart';
 import '../models/service_pricing_model.dart';
 import '../models/city_model.dart';
+import '../models/working_hours_model.dart';
 
 abstract class BecomeProfessionalRemoteDataSource {
-  // Lookups
   Future<List<CategoryModel>> getCategories();
   Future<List<CategoryServiceModel>> getServicesForCategory(int categoryId);
   Future<List<ServiceAreaModel>> getServiceAreas();
   Future<List<CityModel>> getCities();
 
-  // Application flow
   Future<void> createProfile({
     required int categoryId,
     required int experienceYears,
-    int? serviceAreaId,
     double? latitude,
     double? longitude,
     required String bio,
   });
 
   Future<void> setServices(List<ServicePricingModel> services);
-
+  Future<void> setServiceAreas(List<int> serviceAreaIds);
+  Future<void> setWorkingHours(List<WorkingHoursModel> schedules);
   Future<void> uploadProfilePicture(String filePath);
 
   Future<void> uploadDocument({
     required String filePath,
     required String documentType,
+    String? name,
+    String? issuedBy,
+    int? issuedYear,
   });
 
   Future<void> submitApplication();
 }
 
-class BecomeProfessionalRemoteDataSourceImpl
-    implements BecomeProfessionalRemoteDataSource {
+class BecomeProfessionalRemoteDataSourceImpl implements BecomeProfessionalRemoteDataSource {
   final Dio dio;
 
   const BecomeProfessionalRemoteDataSourceImpl({required this.dio});
-
-  // ── Helper ────────────────────────────────────────────────────────────────
 
   Future<Map<String, dynamic>> _authHeaders() async {
     final token = await TokenStorage.getToken();
@@ -50,8 +49,6 @@ class BecomeProfessionalRemoteDataSourceImpl
     };
   }
 
-  /// Pulls the list field out of common response envelopes:
-  /// `{ data: [...] }`, `{ data: { items: [...] } }`, or a bare list.
   List<dynamic> _extractList(dynamic body) {
     if (body is List) return body;
     if (body is Map<String, dynamic>) {
@@ -65,47 +62,60 @@ class BecomeProfessionalRemoteDataSourceImpl
     return const [];
   }
 
-  // ── Lookups ───────────────────────────────────────────────────────────────
+  /// Returns a MIME type string for a given file extension.
+  String _mimeType(String ext) {
+    switch (ext.toLowerCase()) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'pdf':
+        return 'application/pdf';
+      case 'heic':
+        return 'image/heic';
+      case 'webp':
+        return 'image/webp';
+      default:
+        return 'image/jpeg';
+    }
+  }
 
   @override
   Future<List<CategoryModel>> getCategories() async {
     final response = await dio.get('/categories');
     final list = _extractList(response.data);
-    return list
-        .map((e) => CategoryModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return list.map((e) => CategoryModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   @override
-  Future<List<CategoryServiceModel>> getServicesForCategory(
-    int categoryId,
-  ) async {
+  Future<List<CategoryServiceModel>> getServicesForCategory(int categoryId) async {
     final response = await dio.get(
       '/professionals/services',
       queryParameters: {'categoryId': categoryId},
     );
     final list = _extractList(response.data);
-    return list
-        .map((e) => CategoryServiceModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return list.map((e) => CategoryServiceModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   @override
   Future<List<ServiceAreaModel>> getServiceAreas() async {
     final response = await dio.get('/professionals/service-areas');
     final list = _extractList(response.data);
-    return list
-        .map((e) => ServiceAreaModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return list.map((e) => ServiceAreaModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 
-  // ── Application flow ──────────────────────────────────────────────────────
+  @override
+  Future<List<CityModel>> getCities() async {
+    final response = await dio.get('/professionals/cities');
+    final list = _extractList(response.data);
+    return list.map((e) => CityModel.fromJson(e as Map<String, dynamic>)).toList();
+  }
 
   @override
   Future<void> createProfile({
     required int categoryId,
     required int experienceYears,
-    int? serviceAreaId,
     double? latitude,
     double? longitude,
     required String bio,
@@ -113,7 +123,6 @@ class BecomeProfessionalRemoteDataSourceImpl
     final payload = {
       'categoryId': categoryId,
       'experienceYears': experienceYears,
-      if (serviceAreaId != null) 'serviceAreaId': serviceAreaId,
       if (latitude != null) 'latitude': latitude,
       if (longitude != null) 'longitude': longitude,
       'bio': bio,
@@ -126,7 +135,6 @@ class BecomeProfessionalRemoteDataSourceImpl
         options: Options(headers: await _authHeaders()),
       );
     } on DioException catch (e) {
-      // If a profile already exists (or backend only allows update), retry as PUT.
       final code = e.response?.statusCode;
       if (code == 405 || code == 409 || code == 422) {
         await dio.put(
@@ -144,18 +152,42 @@ class BecomeProfessionalRemoteDataSourceImpl
   Future<void> setServices(List<ServicePricingModel> services) async {
     await dio.put(
       '/professionals/profile/services',
-      data: {
-        'services': services.map((s) => s.toJson()).toList(),
-      },
+      data: {'services': services.map((s) => s.toJson()).toList()},
+      options: Options(headers: await _authHeaders()),
+    );
+  }
+
+  @override
+  Future<void> setServiceAreas(List<int> serviceAreaIds) async {
+    await dio.put(
+      '/professionals/profile/service-areas',
+      data: {'serviceAreaIds': serviceAreaIds},
+      options: Options(headers: await _authHeaders()),
+    );
+  }
+
+  @override
+  Future<void> setWorkingHours(List<WorkingHoursModel> schedules) async {
+    await dio.put(
+      '/professionals/profile/working-hours',
+      data: {'schedules': schedules.map((s) => s.toJson()).toList()},
       options: Options(headers: await _authHeaders()),
     );
   }
 
   @override
   Future<void> uploadProfilePicture(String filePath) async {
+    final fileName = filePath.split('/').last;
+    final ext = fileName.contains('.') ? fileName.split('.').last.toLowerCase() : 'jpg';
+
     final formData = FormData.fromMap({
-      'file': await MultipartFile.fromFile(filePath),
+      'File': await MultipartFile.fromFile(
+        filePath,
+        filename: fileName,
+        contentType: DioMediaType.parse(_mimeType(ext)),
+      ),
     });
+
     await dio.post(
       '/auth/profile-picture',
       data: formData,
@@ -170,11 +202,27 @@ class BecomeProfessionalRemoteDataSourceImpl
   Future<void> uploadDocument({
     required String filePath,
     required String documentType,
+    String? name,
+    String? issuedBy,
+    int? issuedYear,
   }) async {
+    final fileName = filePath.split('/').last;
+    final ext = fileName.contains('.') ? fileName.split('.').last.toLowerCase() : 'jpg';
+
+    print('UPLOAD DOC: type=$documentType file=$filePath filename=$fileName mime=${_mimeType(ext)}');
+
     final formData = FormData.fromMap({
-      'file': await MultipartFile.fromFile(filePath),
-      'documentType': documentType,
+      'File': await MultipartFile.fromFile(
+        filePath,
+        filename: fileName,
+        contentType: DioMediaType.parse(_mimeType(ext)),
+      ),
+      'DocumentType': documentType,
+      if (name != null) 'Name': name,
+      if (issuedBy != null) 'IssuedBy': issuedBy,
+      if (issuedYear != null) 'IssuedYear': issuedYear,
     });
+
     await dio.post(
       '/professionals/profile/documents',
       data: formData,
@@ -192,13 +240,4 @@ class BecomeProfessionalRemoteDataSourceImpl
       options: Options(headers: await _authHeaders()),
     );
   }
-
-  @override
-Future<List<CityModel>> getCities() async {
-  final response = await dio.get('/professionals/cities');
-  final list = _extractList(response.data);
-  return list
-      .map((e) => CityModel.fromJson(e as Map<String, dynamic>))
-      .toList();
-}
 }

@@ -6,6 +6,7 @@ import '../entities/category_service.dart';
 import '../entities/document_type.dart';
 import '../entities/service_area.dart';
 import '../entities/service_pricing.dart';
+import '../entities/working_hours_schedule.dart';
 
 abstract class BecomeProfessionalRepository {
   // ── Lookups ─────────────────────────────────────────────────────────────
@@ -19,17 +20,18 @@ abstract class BecomeProfessionalRepository {
   );
 
   /// GET /api/professionals/service-areas
-  /// Returns all areas; the UI filters by selected city.
   Future<Either<Failure, List<ServiceArea>>> getServiceAreas();
+
+  /// GET /api/professionals/cities
+  Future<Either<Failure, List<City>>> getCities();
 
   // ── Application flow ────────────────────────────────────────────────────
 
   /// POST /api/professionals/profile  — Step 1
-  /// Creates the draft profile.
+  /// NOTE: serviceAreaId removed — service areas are set separately in Step 3a.
   Future<Either<Failure, Unit>> createProfile({
     required int categoryId,
     required int experienceYears,
-    int? serviceAreaId,
     double? latitude,
     double? longitude,
     required String bio,
@@ -38,7 +40,15 @@ abstract class BecomeProfessionalRepository {
   /// PUT /api/professionals/profile/services  — Step 2
   Future<Either<Failure, Unit>> setServices(List<ServicePricing> services);
 
-  /// POST /api/auth/profile-picture  — Step 3 (multipart, separate endpoint)
+  /// PUT /api/professionals/profile/service-areas  — Step 3a
+  /// Sends the full list of selected service area IDs (supports multiple).
+  Future<Either<Failure, Unit>> setServiceAreas(List<int> serviceAreaIds);
+
+  /// PUT /api/professionals/profile/working-hours  — Step 3b
+  Future<Either<Failure, Unit>> setWorkingHours(
+      List<WorkingHoursSchedule> schedules);
+
+  /// POST /api/professionals/profile/picture  — Step 3 (multipart)
   Future<Either<Failure, Unit>> uploadProfilePicture(String filePath);
 
   /// POST /api/professionals/profile/documents  — Step 3 (multipart)
@@ -46,11 +56,11 @@ abstract class BecomeProfessionalRepository {
   Future<Either<Failure, Unit>> uploadDocument({
     required String filePath,
     required DocumentType documentType,
+    String? name,
+    String? issuedBy,
+    int? issuedYear,
   });
 
   /// POST /api/professionals/profile/submit  — final
   Future<Either<Failure, Unit>> submitApplication();
-
-  /// GET /api/professionals/cities
-Future<Either<Failure, List<City>>> getCities();
 }

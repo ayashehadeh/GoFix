@@ -9,8 +9,10 @@ import 'package:gp/features/professionals/domain/entities/service_category.dart'
 abstract class ProfessionalsRemoteDataSource {
   Future<List<CityModel>> getCities();
   Future<List<ServiceAreaModel>> getServiceAreas({int? cityId});
-  Future<List<ServiceAreaModel>> getServiceAreasByProfessional(String professionalId);
-  Future<List<ProfessionalModel>> getProfessionalsByCategory(ServiceCategory category);
+  Future<List<ServiceAreaModel>> getServiceAreasByProfessional(
+      String professionalId);
+  Future<List<ProfessionalModel>> getProfessionalsByCategory(
+      ServiceCategory category);
   Future<ProfessionalModel> getProfessionalById(String id);
   Future<List<ProfessionalModel>> getFavorites();
   Future<void> toggleFavorite(String professionalId);
@@ -36,18 +38,19 @@ abstract class ProfessionalsRemoteDataSource {
   Future<void> deleteReview(String reviewId);
 }
 
-class ProfessionalsRemoteDataSourceImpl implements ProfessionalsRemoteDataSource {
+class ProfessionalsRemoteDataSourceImpl
+    implements ProfessionalsRemoteDataSource {
   final Dio dio;
 
   ProfessionalsRemoteDataSourceImpl({required this.dio});
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
-  // Get user's current location for distance calculation
   Future<Position?> _getUserLocation() async {
     try {
       final permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
         return null;
       }
       return await Geolocator.getCurrentPosition();
@@ -56,7 +59,6 @@ class ProfessionalsRemoteDataSourceImpl implements ProfessionalsRemoteDataSource
     }
   }
 
-  // Maps ServiceCategory enum to backend categoryId
   int _categoryId(ServiceCategory category) {
     switch (category) {
       case ServiceCategory.plumbing:
@@ -78,12 +80,46 @@ class ProfessionalsRemoteDataSourceImpl implements ProfessionalsRemoteDataSource
     }
   }
 
+  // ── City & area lookups ───────────────────────────────────────────────────
+
+  @override
+  Future<List<CityModel>> getCities() async {
+    // FIXED: was /cities, must be /professionals/cities per backend guide
+    final response = await dio.get('/professionals/cities');
+    final data = response.data['data'] as List;
+    return data.map((e) => CityModel.fromJson(e)).toList();
+  }
+
+  @override
+  Future<List<ServiceAreaModel>> getServiceAreas({int? cityId}) async {
+    final response = await dio.get(
+      '/professionals/service-areas',
+      queryParameters: {
+        if (cityId != null) 'cityId': cityId,
+      },
+    );
+    final data = response.data['data'] as List;
+    return data.map((e) => ServiceAreaModel.fromJson(e)).toList();
+  }
+
+  @override
+  Future<List<ServiceAreaModel>> getServiceAreasByProfessional(
+      String professionalId) async {
+    final response =
+        await dio.get('/professionals/$professionalId/service-areas');
+    final data = response.data['data'] as List;
+    return data
+        .map((e) =>
+            ServiceAreaModel.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   // ── Professionals ─────────────────────────────────────────────────────────
 
   @override
-  Future<List<ProfessionalModel>> getProfessionalsByCategory(ServiceCategory category) async {
+  Future<List<ProfessionalModel>> getProfessionalsByCategory(
+      ServiceCategory category) async {
     final position = await _getUserLocation();
-
     final response = await dio.get(
       '/professionals',
       queryParameters: {
@@ -92,7 +128,6 @@ class ProfessionalsRemoteDataSourceImpl implements ProfessionalsRemoteDataSource
         if (position != null) 'lon': position.longitude,
       },
     );
-
     final data = response.data['data'] as List;
     return data.map((e) => ProfessionalModel.fromJson(e)).toList();
   }
@@ -100,7 +135,6 @@ class ProfessionalsRemoteDataSourceImpl implements ProfessionalsRemoteDataSource
   @override
   Future<ProfessionalModel> getProfessionalById(String id) async {
     final position = await _getUserLocation();
-
     final response = await dio.get(
       '/professionals/$id',
       queryParameters: {
@@ -108,7 +142,6 @@ class ProfessionalsRemoteDataSourceImpl implements ProfessionalsRemoteDataSource
         if (position != null) 'lon': position.longitude,
       },
     );
-
     return ProfessionalModel.fromJson(response.data['data']);
   }
 
@@ -127,7 +160,6 @@ class ProfessionalsRemoteDataSourceImpl implements ProfessionalsRemoteDataSource
   @override
   Future<List<ProfessionalModel>> searchProfessionals(String query) async {
     final position = await _getUserLocation();
-
     final response = await dio.get(
       '/professionals/search',
       queryParameters: {
@@ -136,7 +168,6 @@ class ProfessionalsRemoteDataSourceImpl implements ProfessionalsRemoteDataSource
         if (position != null) 'lon': position.longitude,
       },
     );
-
     final data = response.data['data'] as List;
     return data.map((e) => ProfessionalModel.fromJson(e)).toList();
   }
@@ -149,7 +180,6 @@ class ProfessionalsRemoteDataSourceImpl implements ProfessionalsRemoteDataSource
     double? minRating,
   }) async {
     final position = await _getUserLocation();
-
     final response = await dio.get(
       '/professionals/filter',
       queryParameters: {
@@ -161,7 +191,6 @@ class ProfessionalsRemoteDataSourceImpl implements ProfessionalsRemoteDataSource
         if (position != null) 'lon': position.longitude,
       },
     );
-
     final data = response.data['data'] as List;
     return data.map((e) => ProfessionalModel.fromJson(e)).toList();
   }
@@ -169,12 +198,12 @@ class ProfessionalsRemoteDataSourceImpl implements ProfessionalsRemoteDataSource
   // ── Reviews ───────────────────────────────────────────────────────────────
 
   @override
-  Future<List<ReviewModel>> getReviewsByProfessional(String professionalId) async {
+  Future<List<ReviewModel>> getReviewsByProfessional(
+      String professionalId) async {
     final response = await dio.get(
       '/reviews',
       queryParameters: {'professionalId': professionalId},
     );
-
     final data = response.data['data'] as List;
     return data.map((e) => ReviewModel.fromJson(e)).toList();
   }
@@ -195,7 +224,6 @@ class ProfessionalsRemoteDataSourceImpl implements ProfessionalsRemoteDataSource
         'comment': comment,
       },
     );
-
     return ReviewModel.fromJson(response.data['data']);
   }
 
@@ -207,12 +235,8 @@ class ProfessionalsRemoteDataSourceImpl implements ProfessionalsRemoteDataSource
   }) async {
     final response = await dio.put(
       '/reviews/$reviewId',
-      data: {
-        'rating': rating,
-        'comment': comment,
-      },
+      data: {'rating': rating, 'comment': comment},
     );
-
     return ReviewModel.fromJson(response.data['data']);
   }
 
@@ -220,30 +244,4 @@ class ProfessionalsRemoteDataSourceImpl implements ProfessionalsRemoteDataSource
   Future<void> deleteReview(String reviewId) async {
     await dio.delete('/reviews/$reviewId');
   }
-
-  @override
-Future<List<CityModel>> getCities() async {
-  final response = await dio.get('/cities');
-  final data = response.data['data'] as List;
-  return data.map((e) => CityModel.fromJson(e)).toList();
-}
-
-@override
-Future<List<ServiceAreaModel>> getServiceAreas({int? cityId}) async {
-  final response = await dio.get(
-    '/professionals/service-areas',
-    queryParameters: {
-      if (cityId != null) 'cityId': cityId,
-    },
-  );
-  final data = response.data['data'] as List;
-  return data.map((e) => ServiceAreaModel.fromJson(e)).toList();
-}
-
-@override
-Future<List<ServiceAreaModel>> getServiceAreasByProfessional(String professionalId) async {
-  final response = await dio.get('/professionals/$professionalId/service-areas');
-  final data = response.data['data'] as List;
-  return data.map((e) => ServiceAreaModel.fromJson(e as Map<String, dynamic>)).toList();
-}
 }
