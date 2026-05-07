@@ -6,6 +6,7 @@ import '../../domain/usecases/create_profile.dart';
 import '../../domain/usecases/get_categories.dart';
 import '../../domain/usecases/get_service_areas.dart';
 import '../../domain/usecases/get_services_for_category.dart';
+import '../../domain/usecases/set_service_areas.dart';
 import '../../domain/usecases/set_services.dart';
 import '../../domain/usecases/submit_application.dart';
 import '../../domain/usecases/upload_document.dart';
@@ -15,26 +16,11 @@ import 'become_professional_state.dart';
 
 class BecomeProfessionalBloc
     extends Bloc<BecomeProfessionalEvent, BecomeProfessionalState> {
-  static const Map<String, ({double lat, double lon})> _cityCoordinates = {
-    'amman': (lat: 31.9454, lon: 35.9284),
-    'irbid': (lat: 32.5569, lon: 35.7597),
-    'zarqa': (lat: 32.0544, lon: 36.0998),
-    'aqaba': (lat: 29.5290, lon: 35.0078),
-  };
-
   static const Map<int, ({double lat, double lon})> _cityCoordinatesById = {
-    1: (lat: 31.9454, lon: 35.9284),
-    2: (lat: 32.5569, lon: 35.7597),
-    3: (lat: 32.0544, lon: 36.0998),
-    4: (lat: 29.5290, lon: 35.0078),
-  };
-
-  static const Map<String, ({double lat, double lon})> _areaOffsets = {
-    'sweifieh': (lat: 0.0200, lon: 0.0300),
-    'khalda': (lat: 0.0150, lon: -0.0200),
-    'alrabiah': (lat: -0.0100, lon: 0.0250),
-    'rabieh': (lat: -0.0100, lon: 0.0250),
-    'rabiah': (lat: -0.0100, lon: 0.0250),
+    1: (lat: 31.9454, lon: 35.9284), // Amman
+    2: (lat: 32.5569, lon: 35.7597), // Irbid
+    3: (lat: 32.0544, lon: 36.0998), // Zarqa
+    4: (lat: 29.5290, lon: 35.0078), // Aqaba
   };
 
   final GetCategories getCategories;
@@ -42,6 +28,7 @@ class BecomeProfessionalBloc
   final GetServicesForCategory getServicesForCategory;
   final CreateProfile createProfile;
   final SetServices setServices;
+  final SetServiceAreas setServiceAreas;
   final UploadProfilePicture uploadProfilePicture;
   final UploadDocument uploadDocument;
   final SubmitApplication submitApplication;
@@ -53,6 +40,7 @@ class BecomeProfessionalBloc
     required this.getServicesForCategory,
     required this.createProfile,
     required this.setServices,
+    required this.setServiceAreas,
     required this.uploadProfilePicture,
     required this.uploadDocument,
     required this.submitApplication,
@@ -64,7 +52,7 @@ class BecomeProfessionalBloc
     on<CategorySelected>(_onCategorySelected);
     on<ExperienceYearsSelected>(_onExperienceYearsSelected);
     on<CitySelected>(_onCitySelected);
-    on<ServiceAreaSelected>(_onServiceAreaSelected);
+    on<ServiceAreaToggled>(_onServiceAreaToggled);
     on<BioChanged>(_onBioChanged);
     on<SubmitStep1>(_onSubmitStep1);
 
@@ -74,8 +62,9 @@ class BecomeProfessionalBloc
 
     on<ProfilePicturePicked>(_onProfilePicturePicked);
     on<DocumentPicked>(_onDocumentPicked);
-    on<UploadProfilePictureRequested>(_onUploadProfilePicture);
-    on<UploadDocumentRequested>(_onUploadDocument);
+    // ↓ New path-carrying events — no race condition
+    on<UploadProfilePictureWithPathRequested>(_onUploadProfilePicture);
+    on<UploadDocumentWithPathRequested>(_onUploadDocument);
     on<SubmitApplicationRequested>(_onSubmitApplication);
   }
 
@@ -95,24 +84,16 @@ class BecomeProfessionalBloc
     var newState = state;
 
     categoriesResult.fold(
-      (failure) => error = failure.message,
-      (categories) {
-        newState = newState.copyWith(categories: categories);
-      },
+      (f) => error = f.message,
+      (cats) => newState = newState.copyWith(categories: cats),
     );
-
     areasResult.fold(
-      (failure) => error ??= failure.message,
-      (areas) {
-        newState = newState.copyWith(serviceAreas: areas);
-      },
+      (f) => error ??= f.message,
+      (areas) => newState = newState.copyWith(serviceAreas: areas),
     );
-
     citiesResult.fold(
-      (failure) => error ??= failure.message,
-      (cities) {
-        newState = newState.copyWith(cities: cities);
-      },
+      (f) => error ??= f.message,
+      (cities) => newState = newState.copyWith(cities: cities),
     );
 
     if (error != null) {
@@ -135,9 +116,9 @@ class BecomeProfessionalBloc
     ));
     final result = await getServicesForCategory(event.categoryId);
     result.fold(
-      (failure) => emit(state.copyWith(
+      (f) => emit(state.copyWith(
         categoryServicesStatus: ActionStatus.failure,
-        errorMessage: failure.message,
+        errorMessage: f.message,
       )),
       (services) => emit(state.copyWith(
         categoryServicesStatus: ActionStatus.success,
@@ -168,9 +149,7 @@ class BecomeProfessionalBloc
     Emitter<BecomeProfessionalState> emit,
   ) {
     emit(state.copyWith(
-      application: state.application.copyWith(
-        experienceYears: event.years,
-      ),
+      application: state.application.copyWith(experienceYears: event.years),
     ));
   }
 
@@ -182,20 +161,32 @@ class BecomeProfessionalBloc
       application: state.application.copyWith(
         cityId: event.cityId,
         cityName: event.cityName,
-        serviceAreaId: 0,
-        serviceAreaName: '',
+        selectedServiceAreaIds: const [],
+        selectedServiceAreaNames: const [],
       ),
     ));
   }
 
-  void _onServiceAreaSelected(
-    ServiceAreaSelected event,
+  void _onServiceAreaToggled(
+    ServiceAreaToggled event,
     Emitter<BecomeProfessionalState> emit,
   ) {
+    final ids = List<int>.from(state.application.selectedServiceAreaIds);
+    final names = List<String>.from(state.application.selectedServiceAreaNames);
+
+    if (ids.contains(event.serviceAreaId)) {
+      final idx = ids.indexOf(event.serviceAreaId);
+      ids.removeAt(idx);
+      names.removeAt(idx);
+    } else {
+      ids.add(event.serviceAreaId);
+      names.add(event.serviceAreaName);
+    }
+
     emit(state.copyWith(
       application: state.application.copyWith(
-        serviceAreaId: event.serviceAreaId,
-        serviceAreaName: event.serviceAreaName,
+        selectedServiceAreaIds: ids,
+        selectedServiceAreaNames: names,
       ),
     ));
   }
@@ -217,30 +208,40 @@ class BecomeProfessionalBloc
     if (!app.isStep1Valid) {
       emit(state.copyWith(
         step1Status: ActionStatus.failure,
-        errorMessage: 'Please fill in all fields.',
+        errorMessage: 'Please fill in all required fields.',
       ));
       return;
     }
 
-    final coordinates = _coordinatesFor(
-      cityId: app.cityId,
-      cityName: app.cityName,
-      areaName: app.serviceAreaName,
-    );
+    final coords = app.cityId != null ? _cityCoordinatesById[app.cityId] : null;
 
     emit(state.copyWith(step1Status: ActionStatus.loading, clearError: true));
-    final result = await createProfile(
+
+    final profileResult = await createProfile(
       categoryId: app.categoryId!,
       experienceYears: app.experienceYears!,
-      serviceAreaId: (app.serviceAreaId ?? 0) > 0 ? app.serviceAreaId : null,
-      latitude: coordinates?.lat,
-      longitude: coordinates?.lon,
+      latitude: coords?.lat,
+      longitude: coords?.lon,
       bio: app.bio.trim(),
     );
-    result.fold(
-      (failure) => emit(state.copyWith(
+
+    if (profileResult.isLeft()) {
+      profileResult.fold(
+        (f) => emit(state.copyWith(
+          step1Status: ActionStatus.failure,
+          errorMessage: f.message,
+        )),
+        (_) => null,
+      );
+      return;
+    }
+
+    final areasResult = await setServiceAreas(app.selectedServiceAreaIds);
+
+    areasResult.fold(
+      (f) => emit(state.copyWith(
         step1Status: ActionStatus.failure,
-        errorMessage: failure.message,
+        errorMessage: f.message,
       )),
       (_) => emit(state.copyWith(step1Status: ActionStatus.success)),
     );
@@ -283,28 +284,25 @@ class BecomeProfessionalBloc
       ));
       return;
     }
-
     emit(state.copyWith(step2Status: ActionStatus.loading, clearError: true));
     final result = await setServices(state.application.services);
     result.fold(
-      (failure) => emit(state.copyWith(
+      (f) => emit(state.copyWith(
         step2Status: ActionStatus.failure,
-        errorMessage: failure.message,
+        errorMessage: f.message,
       )),
       (_) => emit(state.copyWith(step2Status: ActionStatus.success)),
     );
   }
 
-  // ── Step 3 ────────────────────────────────────────────────────────────────
+  // ── Step 3 – Documents ────────────────────────────────────────────────────
 
   void _onProfilePicturePicked(
     ProfilePicturePicked event,
     Emitter<BecomeProfessionalState> emit,
   ) {
     emit(state.copyWith(
-      application: state.application.copyWith(
-        profileImagePath: event.filePath,
-      ),
+      application: state.application.copyWith(profileImagePath: event.filePath),
       profilePictureUploadStatus: ActionStatus.idle,
     ));
   }
@@ -315,18 +313,13 @@ class BecomeProfessionalBloc
   ) {
     final app = state.application;
     final updatedApp = switch (event.documentType) {
-      DocumentType.identity =>
-        app.copyWith(identityPath: event.filePath),
-      DocumentType.certification =>
-        app.copyWith(certificationPath: event.filePath),
-      DocumentType.goodConduct =>
-        app.copyWith(goodConductPath: event.filePath),
+      DocumentType.identity => app.copyWith(identityPath: event.filePath),
+      DocumentType.certification => app.copyWith(certificationPath: event.filePath),
+      DocumentType.goodConduct => app.copyWith(goodConductPath: event.filePath),
     };
-
-    final newDocStatus = Map<DocumentType, ActionStatus>.from(
-      state.documentUploadStatus,
-    )..[event.documentType] = ActionStatus.idle;
-
+    final newDocStatus =
+        Map<DocumentType, ActionStatus>.from(state.documentUploadStatus)
+          ..[event.documentType] = ActionStatus.idle;
     emit(state.copyWith(
       application: updatedApp,
       documentUploadStatus: newDocStatus,
@@ -334,59 +327,35 @@ class BecomeProfessionalBloc
   }
 
   Future<void> _onUploadProfilePicture(
-    UploadProfilePictureRequested event,
+    UploadProfilePictureWithPathRequested event,
     Emitter<BecomeProfessionalState> emit,
   ) async {
-    final path = state.application.profileImagePath;
-    if (path == null) {
-      emit(state.copyWith(
-        profilePictureUploadStatus: ActionStatus.failure,
-        errorMessage: 'Please choose a photo first.',
-      ));
-      return;
-    }
-
     emit(state.copyWith(
       profilePictureUploadStatus: ActionStatus.loading,
       clearError: true,
     ));
-    final result = await uploadProfilePicture(path);
+    final result = await uploadProfilePicture(event.filePath);
     result.fold(
-      (failure) => emit(state.copyWith(
+      (f) => emit(state.copyWith(
         profilePictureUploadStatus: ActionStatus.failure,
-        errorMessage: failure.message,
+        errorMessage: f.message,
       )),
-      (_) => emit(state.copyWith(
-        profilePictureUploadStatus: ActionStatus.success,
-      )),
+      (_) => emit(state.copyWith(profilePictureUploadStatus: ActionStatus.success)),
     );
   }
 
   Future<void> _onUploadDocument(
-    UploadDocumentRequested event,
+    UploadDocumentWithPathRequested event,
     Emitter<BecomeProfessionalState> emit,
   ) async {
-    final path = state.application.pathFor(event.documentType);
-    if (path == null) {
-      _setDocStatus(emit, event.documentType, ActionStatus.failure,
-          error: 'Please choose a file first.');
-      return;
-    }
-
-    _setDocStatus(emit, event.documentType, ActionStatus.loading,
-        clearError: true);
-
+    _setDocStatus(emit, event.documentType, ActionStatus.loading, clearError: true);
     final result = await uploadDocument(
-      filePath: path,
+      filePath: event.filePath,
       documentType: event.documentType,
     );
     result.fold(
-      (failure) => _setDocStatus(
-        emit,
-        event.documentType,
-        ActionStatus.failure,
-        error: failure.message,
-      ),
+      (f) => _setDocStatus(emit, event.documentType, ActionStatus.failure,
+          error: f.message),
       (_) => _setDocStatus(emit, event.documentType, ActionStatus.success),
     );
   }
@@ -398,9 +367,9 @@ class BecomeProfessionalBloc
     String? error,
     bool clearError = false,
   }) {
-    final newMap = Map<DocumentType, ActionStatus>.from(
-      state.documentUploadStatus,
-    )..[type] = status;
+    final newMap =
+        Map<DocumentType, ActionStatus>.from(state.documentUploadStatus)
+          ..[type] = status;
     emit(state.copyWith(
       documentUploadStatus: newMap,
       errorMessage: error,
@@ -414,7 +383,7 @@ class BecomeProfessionalBloc
     SubmitApplicationRequested event,
     Emitter<BecomeProfessionalState> emit,
   ) async {
-    if (!state.application.isStep3Valid) {
+    if (!state.application.isStep4Valid) {
       emit(state.copyWith(
         submitStatus: ActionStatus.failure,
         errorMessage:
@@ -422,41 +391,14 @@ class BecomeProfessionalBloc
       ));
       return;
     }
-
     emit(state.copyWith(submitStatus: ActionStatus.loading, clearError: true));
     final result = await submitApplication();
     result.fold(
-      (failure) => emit(state.copyWith(
+      (f) => emit(state.copyWith(
         submitStatus: ActionStatus.failure,
-        errorMessage: failure.message,
+        errorMessage: f.message,
       )),
       (_) => emit(state.copyWith(submitStatus: ActionStatus.success)),
     );
-  }
-
-  ({double lat, double lon})? _coordinatesFor({
-    int? cityId,
-    String? cityName,
-    String? areaName,
-  }) {
-    final cityCenter = cityId != null ? _cityCoordinatesById[cityId] : null;
-    final normalizedCity = cityCenter == null ? _normalizeLocationKey(cityName) : null;
-    final resolvedCity = cityCenter ??
-        (normalizedCity == null ? null : _cityCoordinates[normalizedCity]);
-
-    if (resolvedCity == null) return null;
-
-    final normalizedArea = _normalizeLocationKey(areaName);
-    final offset = normalizedArea == null ? null : _areaOffsets[normalizedArea];
-    return (
-      lat: resolvedCity.lat + (offset?.lat ?? 0),
-      lon: resolvedCity.lon + (offset?.lon ?? 0),
-    );
-  }
-
-  String? _normalizeLocationKey(String? raw) {
-    if (raw == null) return null;
-    final normalized = raw.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
-    return normalized.isEmpty ? null : normalized;
   }
 }

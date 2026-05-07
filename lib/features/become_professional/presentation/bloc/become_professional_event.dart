@@ -10,13 +10,10 @@ abstract class BecomeProfessionalEvent extends Equatable {
 
 // ── Lookups ───────────────────────────────────────────────────────────────────
 
-/// Fired when the flow opens — fetches categories + service areas in parallel.
 class LoadInitialData extends BecomeProfessionalEvent {
   const LoadInitialData();
 }
 
-/// Fired when the user picks a category on Step 1 — preloads its services
-/// so Step 2 has them ready.
 class LoadServicesForCategory extends BecomeProfessionalEvent {
   final int categoryId;
   const LoadServicesForCategory(this.categoryId);
@@ -26,8 +23,6 @@ class LoadServicesForCategory extends BecomeProfessionalEvent {
 
 // ── Step 1 ────────────────────────────────────────────────────────────────────
 
-/// Each Step 1 field has its own update event so we can refresh dependent UI
-/// (e.g. selecting a city resets the area).
 class CategorySelected extends BecomeProfessionalEvent {
   final int categoryId;
   final String categoryName;
@@ -54,10 +49,10 @@ class CitySelected extends BecomeProfessionalEvent {
   List<Object?> get props => [cityId, cityName];
 }
 
-class ServiceAreaSelected extends BecomeProfessionalEvent {
+class ServiceAreaToggled extends BecomeProfessionalEvent {
   final int serviceAreaId;
   final String serviceAreaName;
-  const ServiceAreaSelected({
+  const ServiceAreaToggled({
     required this.serviceAreaId,
     required this.serviceAreaName,
   });
@@ -72,7 +67,6 @@ class BioChanged extends BecomeProfessionalEvent {
   List<Object?> get props => [bio];
 }
 
-/// Submit Step 1 — calls POST /api/professionals/profile and advances on success.
 class SubmitStep1 extends BecomeProfessionalEvent {
   const SubmitStep1();
 }
@@ -93,14 +87,12 @@ class ServiceRemoved extends BecomeProfessionalEvent {
   List<Object?> get props => [serviceId];
 }
 
-/// Submit Step 2 — calls PUT /api/professionals/profile/services.
 class SubmitStep2 extends BecomeProfessionalEvent {
   const SubmitStep2();
 }
 
-// ── Step 3 ────────────────────────────────────────────────────────────────────
+// ── Step 3 – Documents ────────────────────────────────────────────────────────
 
-/// Stores the locally-picked file path. Upload happens on its dedicated page.
 class ProfilePicturePicked extends BecomeProfessionalEvent {
   final String filePath;
   const ProfilePicturePicked(this.filePath);
@@ -119,17 +111,24 @@ class DocumentPicked extends BecomeProfessionalEvent {
   List<Object?> get props => [documentType, filePath];
 }
 
-/// Uploads the profile picture file (POST /api/auth/profile-picture).
-class UploadProfilePictureRequested extends BecomeProfessionalEvent {
-  const UploadProfilePictureRequested();
+/// Upload profile picture — carries the path directly to avoid race condition.
+class UploadProfilePictureWithPathRequested extends BecomeProfessionalEvent {
+  final String filePath;
+  const UploadProfilePictureWithPathRequested(this.filePath);
+  @override
+  List<Object?> get props => [filePath];
 }
 
-/// Uploads a single document (POST /api/professionals/profile/documents).
-class UploadDocumentRequested extends BecomeProfessionalEvent {
+/// Upload a document — carries the path directly to avoid race condition.
+class UploadDocumentWithPathRequested extends BecomeProfessionalEvent {
   final DocumentType documentType;
-  const UploadDocumentRequested(this.documentType);
+  final String filePath;
+  const UploadDocumentWithPathRequested({
+    required this.documentType,
+    required this.filePath,
+  });
   @override
-  List<Object?> get props => [documentType];
+  List<Object?> get props => [documentType, filePath];
 }
 
 /// Final submission — calls POST /api/professionals/profile/submit.

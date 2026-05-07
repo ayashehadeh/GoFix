@@ -12,8 +12,10 @@ import 'services_pricing_page.dart';
 import 'verification_upload_page.dart';
 
 /// Entry page for the Become Professional flow.
-/// Holds the BLoC, the step indicator, and a PageView that swaps between
-/// the 3 step pages.
+/// Steps:
+///   0 – Professional Details (category, experience, city, service areas, bio)
+///   1 – Services & Pricing
+///   2 – Verification / Documents
 class StepperScreen extends StatelessWidget {
   const StepperScreen({super.key});
 
@@ -103,12 +105,15 @@ class _StepperScreenViewState extends State<_StepperScreenView> {
                       controller: _controller,
                       physics: const NeverScrollableScrollPhysics(),
                       children: [
+                        // Step 0 – details + service areas
                         ProfessionalDetailsPage(
                           onContinue: () => _goToStep(1),
                         ),
+                        // Step 1 – services & pricing
                         ServicesPricingPage(
                           onContinue: () => _goToStep(2),
                         ),
+                        // Step 2 – documents & submit
                         VerificationUploadPage(
                           onSubmitted: _onSubmitted,
                         ),

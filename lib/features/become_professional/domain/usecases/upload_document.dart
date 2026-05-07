@@ -10,9 +10,15 @@ class UploadDocument {
   Future<Either<Failure, Unit>> call({
     required String filePath,
     required DocumentType documentType,
+    String? name,
+    String? issuedBy,
+    int? issuedYear,
   }) =>
       repository.uploadDocument(
         filePath: filePath,
         documentType: documentType,
+        name: name,
+        issuedBy: issuedBy,
+        issuedYear: issuedYear,
       );
 }

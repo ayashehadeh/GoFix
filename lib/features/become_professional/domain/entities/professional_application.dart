@@ -1,24 +1,29 @@
 import 'package:equatable/equatable.dart';
 import 'document_type.dart';
 import 'service_pricing.dart';
+import 'working_hours_schedule.dart';
 
 /// In-memory snapshot of the application as the user works through the steps.
-/// This is held by the BLoC and used to drive validation + submission.
 class ProfessionalApplication extends Equatable {
-  // Step 1
+  // Step 1 – basic profile
   final int? categoryId;
   final String? categoryName;
   final int? experienceYears;
   final int? cityId;
   final String? cityName;
-  final int? serviceAreaId;
-  final String? serviceAreaName;
   final String bio;
 
-  // Step 2
+  // Step 2 – services & pricing
   final List<ServicePricing> services;
 
-  // Step 3 — local file paths (only used until upload succeeds)
+  // Step 3a – service areas (multiple supported)
+  final List<int> selectedServiceAreaIds;
+  final List<String> selectedServiceAreaNames;
+
+  // Step 3b – working hours
+  final List<WorkingHoursSchedule> workingHours;
+
+  // Step 3c – documents (local file paths until upload)
   final String? profileImagePath;
   final String? identityPath;
   final String? certificationPath;
@@ -30,10 +35,11 @@ class ProfessionalApplication extends Equatable {
     this.experienceYears,
     this.cityId,
     this.cityName,
-    this.serviceAreaId,
-    this.serviceAreaName,
     this.bio = '',
     this.services = const [],
+    this.selectedServiceAreaIds = const [],
+    this.selectedServiceAreaNames = const [],
+    this.workingHours = const [],
     this.profileImagePath,
     this.identityPath,
     this.certificationPath,
@@ -44,16 +50,18 @@ class ProfessionalApplication extends Equatable {
       categoryId != null &&
       categoryId! > 0 &&
       experienceYears != null &&
-      cityId != null &&
-      cityId! > 0 &&
-      serviceAreaId != null &&
-      serviceAreaId! > 0 &&
       bio.trim().isNotEmpty;
 
   bool get isStep2Valid => services.isNotEmpty;
 
-  /// Profile picture and identity are required, certification & good conduct optional.
-  bool get isStep3Valid =>
+  /// At least one service area must be selected.
+  bool get isStep3aValid => selectedServiceAreaIds.isNotEmpty;
+
+  /// At least one working day must be set.
+  bool get isStep3bValid => workingHours.isNotEmpty;
+
+  /// Profile picture and identity are required for final submission.
+  bool get isStep4Valid =>
       profileImagePath != null && identityPath != null;
 
   String? pathFor(DocumentType type) {
@@ -73,10 +81,11 @@ class ProfessionalApplication extends Equatable {
     int? experienceYears,
     int? cityId,
     String? cityName,
-    int? serviceAreaId,
-    String? serviceAreaName,
     String? bio,
     List<ServicePricing>? services,
+    List<int>? selectedServiceAreaIds,
+    List<String>? selectedServiceAreaNames,
+    List<WorkingHoursSchedule>? workingHours,
     String? profileImagePath,
     String? identityPath,
     String? certificationPath,
@@ -88,10 +97,13 @@ class ProfessionalApplication extends Equatable {
       experienceYears: experienceYears ?? this.experienceYears,
       cityId: cityId ?? this.cityId,
       cityName: cityName ?? this.cityName,
-      serviceAreaId: serviceAreaId ?? this.serviceAreaId,
-      serviceAreaName: serviceAreaName ?? this.serviceAreaName,
       bio: bio ?? this.bio,
       services: services ?? this.services,
+      selectedServiceAreaIds:
+          selectedServiceAreaIds ?? this.selectedServiceAreaIds,
+      selectedServiceAreaNames:
+          selectedServiceAreaNames ?? this.selectedServiceAreaNames,
+      workingHours: workingHours ?? this.workingHours,
       profileImagePath: profileImagePath ?? this.profileImagePath,
       identityPath: identityPath ?? this.identityPath,
       certificationPath: certificationPath ?? this.certificationPath,
@@ -106,10 +118,11 @@ class ProfessionalApplication extends Equatable {
         experienceYears,
         cityId,
         cityName,
-        serviceAreaId,
-        serviceAreaName,
         bio,
         services,
+        selectedServiceAreaIds,
+        selectedServiceAreaNames,
+        workingHours,
         profileImagePath,
         identityPath,
         certificationPath,

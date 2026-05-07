@@ -9,7 +9,6 @@ class CreateProfile {
   Future<Either<Failure, Unit>> call({
     required int categoryId,
     required int experienceYears,
-    int? serviceAreaId,
     double? latitude,
     double? longitude,
     required String bio,
@@ -17,7 +16,6 @@ class CreateProfile {
       repository.createProfile(
         categoryId: categoryId,
         experienceYears: experienceYears,
-        serviceAreaId: serviceAreaId,
         latitude: latitude,
         longitude: longitude,
         bio: bio,
