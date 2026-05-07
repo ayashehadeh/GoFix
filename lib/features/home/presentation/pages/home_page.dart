@@ -29,7 +29,10 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    context.read<HomeBloc>().add(HomeLoadRequested());
+    final currentState = context.read<HomeBloc>().state;
+    if (currentState is! HomeLoaded) {
+      context.read<HomeBloc>().add(HomeLoadRequested());
+    }
   }
 
   void _onCategoryTap(CategoryEntity category) {

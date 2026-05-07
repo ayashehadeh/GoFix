@@ -128,8 +128,7 @@ const bool _useMockChat = true;
 
 Future<void> init() async {
   // ── BLoC ──────────────────────────────────────────────────────────────────
-
-  sl.registerFactory(() => HomeBloc(getCategoriesUseCase: sl()));
+  sl.registerLazySingleton(() => HomeBloc(getCategoriesUseCase: sl()));
 
   sl.registerFactory(
     () => ProfessionalsBloc(
@@ -393,15 +392,11 @@ Future<void> init() async {
   );
 
   sl.registerLazySingleton<BookingsRemoteDataSource>(
-    () => _useMockBookings
-        ? MockBookingsDataSource()
-        : BookingsRemoteDataSourceImpl(dio: sl()),
+    () => _useMockBookings ? MockBookingsDataSource() : BookingsRemoteDataSourceImpl(dio: sl()),
   );
 
   sl.registerLazySingleton<NotificationsRemoteDataSource>(
-    () => _useMockNotifications
-        ? MockNotificationsDataSource()
-        : NotificationsRemoteDataSourceImpl(dio: sl()),
+    () => _useMockNotifications ? MockNotificationsDataSource() : NotificationsRemoteDataSourceImpl(dio: sl()),
   );
 
   sl.registerLazySingleton<AccountRemoteDataSource>(
@@ -433,15 +428,11 @@ Future<void> init() async {
   );
 
   sl.registerLazySingleton<FavoritesRemoteDataSource>(
-    () => _useMockFavorites
-        ? MockFavoritesDataSource()
-        : FavoritesRemoteDataSourceImpl(dio: sl()),
+    () => _useMockFavorites ? MockFavoritesDataSource() : FavoritesRemoteDataSourceImpl(dio: sl()),
   );
 
   sl.registerLazySingleton<ChatRemoteDataSource>(
-    () => _useMockChat
-        ? MockChatDataSource()
-        : ChatRemoteDataSourceImpl(dio: sl()),
+    () => _useMockChat ? MockChatDataSource() : ChatRemoteDataSourceImpl(dio: sl()),
   );
 
   // ── External ──────────────────────────────────────────────────────────────
@@ -449,8 +440,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() {
     final dio = Dio(
       BaseOptions(
-        baseUrl:
-            'https://gofix-api-ceaaewf7hua0ghez.uaenorth-01.azurewebsites.net/api',
+        baseUrl: 'https://gofix-api-ceaaewf7hua0ghez.uaenorth-01.azurewebsites.net/api',
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
         headers: {'Content-Type': 'application/json'},
