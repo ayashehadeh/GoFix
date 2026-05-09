@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:gp/core/utils/statuschecker.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/gofix_bottom_nav_bar.dart';
@@ -15,6 +16,7 @@ import '../bloc/home_bloc.dart';
 import '../widgets/category_card.dart';
 import 'package:gp/features/search/presentation/bloc/search_bloc.dart';
 import 'package:gp/features/search/presentation/pages/search_page.dart';
+import '../../../core/utils/statuschecker.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,6 +34,27 @@ class _HomePageState extends State<HomePage> {
     final currentState = context.read<HomeBloc>().state;
     if (currentState is! HomeLoaded) {
       context.read<HomeBloc>().add(HomeLoadRequested());
+    }
+
+    // Check if user is professional and redirect to dashboard
+    _checkAndRedirectIfProfessional();
+  }
+
+  Future<void> _checkAndRedirectIfProfessional() async {
+    final checker = ProfessionalStatusChecker(sl()); // ← FIXED: Added sl()
+    final status = await checker.checkStatus();
+
+    print('🔍 AUTO-CHECK: isProfessional = ${status['isProfessional']}');
+    print('🔍 AUTO-CHECK: name = ${status['name']}');
+
+    if (status['isProfessional'] == true) {
+      // User is professional, redirect to dashboard
+      if (mounted) {
+        print('✅ Redirecting to dashboard...');
+        Navigator.of(context).pushReplacementNamed('/dashboard');
+      }
+    } else {
+      print('❌ Not a professional, staying on home');
     }
   }
 
@@ -101,6 +124,32 @@ class _HomePageState extends State<HomePage> {
           if (index == 2) Navigator.pushReplacementNamed(context, '/profile');
         },
       ),
+      // DEBUG TEST BUTTON
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final checker =
+              ProfessionalStatusChecker(sl()); // ← FIXED: Added sl()
+          final status = await checker.checkStatus();
+
+          print('🧪 MANUAL TEST: isProfessional = ${status['isProfessional']}');
+          print('🧪 MANUAL TEST: name = ${status['name']}');
+
+          if (status['isProfessional'] == true) {
+            print('✅ TEST: Going to dashboard...');
+            Navigator.of(context).pushReplacementNamed('/dashboard');
+          } else {
+            print('❌ TEST: Not a professional');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Not a professional. Check console for details.'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        backgroundColor: Colors.red,
+        child: const Icon(Icons.bug_report, color: Colors.white),
+      ),
     );
   }
 
@@ -121,7 +170,8 @@ class _HomePageState extends State<HomePage> {
             Text(state.message, style: AppTextStyles.bodyMedium),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => context.read<HomeBloc>().add(HomeLoadRequested()),
+              onPressed: () =>
+                  context.read<HomeBloc>().add(HomeLoadRequested()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryOrange,
                 shape: RoundedRectangleBorder(

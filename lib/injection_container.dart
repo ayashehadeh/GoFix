@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gp/core/storage/token_storage.dart';
 import 'package:gp/features/become_professional/domain/usecases/get_cities.dart';
 import 'package:gp/features/become_professional/domain/usecases/set_service_areas.dart';
@@ -120,12 +121,29 @@ import 'package:gp/features/search/domain/repositories/search_repository.dart';
 import 'package:gp/features/search/domain/usecases/search_usecase.dart';
 import 'package:gp/features/search/presentation/bloc/search_bloc.dart';
 
+// ── Professional Dashboard ────────────────────────────────────────────────────
+import 'package:gp/features/professional_dashboard/data/datasources/professional_dashboard_remote_datasource.dart';
+import 'package:gp/features/professional_dashboard/data/datasources/mock_professional_dashboard_datasource.dart';
+import 'package:gp/features/professional_dashboard/data/repositories/professional_dashboard_repository_impl.dart';
+import 'package:gp/features/professional_dashboard/domain/repositories/professional_dashboard_repository.dart';
+import 'package:gp/features/professional_dashboard/domain/usecases/dashboard_usecases.dart';
+import 'package:gp/features/professional_dashboard/presentation/bloc/professional_dashboard_bloc.dart';
+
+// ── Professional Availability ─────────────────────────────────────────────────
+import 'package:gp/features/professional_availability/data/datasources/availability_local_datasource.dart';
+import 'package:gp/features/professional_availability/data/repositories/availability_repository_impl.dart';
+import 'package:gp/features/professional_availability/domain/repositories/availability_repository.dart';
+import 'package:gp/features/professional_availability/domain/usecases/get_availability.dart';
+import 'package:gp/features/professional_availability/domain/usecases/save_availability.dart';
+import 'package:gp/features/professional_availability/presentation/bloc/availability_bloc.dart';
+
 final sl = GetIt.instance;
 
 const bool _useMockBookings = true;
 const bool _useMockNotifications = true;
 const bool _useMockFavorites = true;
 const bool _useMockChat = true;
+const bool _useMockProfessionalDashboard = true;
 
 Future<void> init() async {
   // ── BLoC ──────────────────────────────────────────────────────────────────
@@ -233,6 +251,24 @@ Future<void> init() async {
     ),
   );
 
+  sl.registerFactory(
+    () => ProfessionalDashboardBloc(
+      getDashboardStats: sl(),
+      getIncomingRequests: sl(),
+      getScheduledJobs: sl(),
+      acceptJobRequest: sl(),
+      declineJobRequest: sl(),
+      updateJobStatus: sl(),
+    ),
+  );
+
+  sl.registerFactory(
+    () => AvailabilityBloc(
+      getAvailability: sl(),
+      saveAvailability: sl(),
+    ),
+  );
+
   // ── Use Cases — Home ───────────────────────────────────────────────────────
   sl.registerLazySingleton(() => GetCategoriesUseCase(sl()));
 
@@ -282,7 +318,6 @@ Future<void> init() async {
   sl.registerLazySingleton(() => CreateProfile(sl()));
   sl.registerLazySingleton(() => SetServices(sl()));
   sl.registerLazySingleton(() => SetServiceAreas(sl()));
-  // SetWorkingHours registered for use by post-approval dashboard
   sl.registerLazySingleton(() => SetWorkingHours(sl()));
   sl.registerLazySingleton(() => UploadProfilePicture(sl()));
   sl.registerLazySingleton(() => UploadDocument(sl()));
@@ -310,6 +345,18 @@ Future<void> init() async {
   sl.registerLazySingleton(() => SendMessage(sl()));
   sl.registerLazySingleton(() => DeleteChat(sl()));
   sl.registerLazySingleton(() => GetOrCreateChat(sl()));
+
+  // ── Use Cases — Professional Dashboard ─────────────────────────────────────
+  sl.registerLazySingleton(() => GetDashboardStats(sl()));
+  sl.registerLazySingleton(() => GetIncomingRequests(sl()));
+  sl.registerLazySingleton(() => GetScheduledJobs(sl()));
+  sl.registerLazySingleton(() => AcceptJobRequest(sl()));
+  sl.registerLazySingleton(() => DeclineJobRequest(sl()));
+  sl.registerLazySingleton(() => UpdateJobStatus(sl()));
+
+  // ── Use Cases — Professional Availability ──────────────────────────────────
+  sl.registerLazySingleton(() => GetAvailability(sl()));
+  sl.registerLazySingleton(() => SaveAvailability(sl()));
 
   // ── Repositories ──────────────────────────────────────────────────────────
   sl.registerLazySingleton<HomeRepository>(
@@ -342,6 +389,10 @@ Future<void> init() async {
       () => FavoritesRepositoryImpl(dataSource: sl()));
   sl.registerLazySingleton<ChatRepository>(
       () => ChatRepositoryImpl(dataSource: sl()));
+  sl.registerLazySingleton<ProfessionalDashboardRepository>(
+      () => ProfessionalDashboardRepositoryImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton<AvailabilityRepository>(
+      () => AvailabilityRepositoryImpl(localDataSource: sl()));
 
   // ── Data Sources ──────────────────────────────────────────────────────────
   sl.registerLazySingleton<HomeRemoteDataSource>(
@@ -382,8 +433,20 @@ Future<void> init() async {
         ? MockChatDataSource()
         : ChatRemoteDataSourceImpl(dio: sl()),
   );
+  sl.registerLazySingleton<ProfessionalDashboardRemoteDataSource>(
+    () => _useMockProfessionalDashboard
+        ? MockProfessionalDashboardDataSource()
+        : ProfessionalDashboardRemoteDataSourceImpl(dio: sl()),
+  );
+  sl.registerLazySingleton<AvailabilityLocalDataSource>(
+      () => AvailabilityLocalDataSourceImpl(sharedPreferences: sl()));
 
   // ── External ──────────────────────────────────────────────────────────────
+  // SharedPreferences
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerLazySingleton(() => sharedPreferences);
+
+  // Dio
   sl.registerLazySingleton(() {
     final dio = Dio(
       BaseOptions(
