@@ -7,6 +7,7 @@ import '../bloc/application_status_event.dart';
 import '../bloc/application_status_state.dart';
 import '../../domain/entities/application_status_entity.dart';
 import '../widgets/approval_checklist_item.dart';
+import 'set_availabilityscreen.dart';
 
 /// Entry point — reads the BLoC and delegates to the correct sub-screen.
 class ApprovalStatusScreen extends StatelessWidget {
@@ -42,8 +43,7 @@ class ApprovalStatusScreen extends StatelessWidget {
                     Text(
                       state.message,
                       textAlign: TextAlign.center,
-                      style:
-                          const TextStyle(color: AppColors.textSecondary),
+                      style: const TextStyle(color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
@@ -87,7 +87,6 @@ class ApprovalStatusScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       elevation: 0,
       leading: const BackButton(color: AppColors.primaryDark),
-      
       centerTitle: false,
     );
   }
@@ -107,7 +106,6 @@ class _ApprovedScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: const BackButton(color: AppColors.primaryDark),
-        
       ),
       body: RefreshIndicator(
         color: AppColors.primaryOrange,
@@ -172,7 +170,11 @@ class _ApprovedScreen extends StatelessWidget {
                 height: 52,
                 child: ElevatedButton(
                   onPressed: () {
-                    // TODO: Navigator.push to SetAvailabilityScreen
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const SetAvailabilityScreen(),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryOrange,
@@ -214,7 +216,6 @@ class _NotApprovedScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: const BackButton(color: AppColors.primaryDark),
-        
       ),
       body: RefreshIndicator(
         color: AppColors.primaryOrange,
@@ -319,7 +320,6 @@ class _IncompleteScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: const BackButton(color: AppColors.primaryDark),
-       
       ),
       body: Center(
         child: Padding(
