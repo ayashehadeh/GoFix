@@ -46,14 +46,37 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
   static const Color errorRed = Color(0xFFD32F2F);
   static const Color lightGrey = Color(0xFFF5F5F5);
 
-  final List<Map<String, String>> dates = const [
-    {'day': 'Sun', 'date': '8', 'month': 'Feb'},
-    {'day': 'Mon', 'date': '9', 'month': 'Feb'},
-    {'day': 'Tue', 'date': '10', 'month': 'Feb'},
-    {'day': 'Wed', 'date': '11', 'month': 'Feb'},
-    {'day': 'Thu', 'date': '12', 'month': 'Feb'},
-    {'day': 'Fri', 'date': '13', 'month': 'Feb'},
-    {'day': 'Sat', 'date': '14', 'month': 'Feb'},
+  late final List<DateTime> dates = List.generate(
+    7,
+    (index) {
+      final now = DateTime.now();
+      return DateTime(now.year, now.month, now.day).add(Duration(days: index));
+    },
+  );
+
+  static const List<String> _dayLabels = [
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+    'Sun',
+  ];
+
+  static const List<String> _monthLabels = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
 
   @override
@@ -190,7 +213,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     if (_validate()) {
       final selectedDate = dates[selectedDateIndex];
       final dateStr =
-          '${selectedDate['day']}, ${selectedDate['date']} ${selectedDate['month']} 2025';
+          '${_dayLabels[selectedDate.weekday - 1]}, ${selectedDate.day} ${_monthLabels[selectedDate.month - 1]} ${selectedDate.year}';
       final hour = selectedHour % 12 == 0 ? 12 : selectedHour % 12;
       final amPm = selectedHour < 12 ? 'AM' : 'PM';
       final timeStr =
@@ -211,23 +234,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
               address: _addressController.text.trim(),
               workerName: widget.workerName,
               professionalId: widget.professionalId, // ADD
-              scheduledDate: DateTime(
-                  2025,
-                  {
-                    'Jan': 1,
-                    'Feb': 2,
-                    'Mar': 3,
-                    'Apr': 4,
-                    'May': 5,
-                    'Jun': 6,
-                    'Jul': 7,
-                    'Aug': 8,
-                    'Sep': 9,
-                    'Oct': 10,
-                    'Nov': 11,
-                    'Dec': 12
-                  }[selectedDate['month']]!,
-                  int.parse(selectedDate['date']!)),
+              scheduledDate: selectedDate,
             ),
           ),
         ),
@@ -383,7 +390,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        dates[index]['day']!,
+                                        _dayLabels[dates[index].weekday - 1],
                                         style: TextStyle(
                                           color: isSelected
                                               ? Colors.white70
@@ -393,7 +400,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        dates[index]['date']!,
+                                        dates[index].day.toString(),
                                         style: TextStyle(
                                           color: isSelected
                                               ? Colors.white
@@ -404,7 +411,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        dates[index]['month']!,
+                                        _monthLabels[dates[index].month - 1],
                                         style: TextStyle(
                                           color: isSelected
                                               ? Colors.white70

@@ -10,7 +10,6 @@ import 'package:gp/features/professionals/domain/entities/review.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
 import 'package:gp/features/professionals/presentation/widgets/star_rating.dart';
 import 'package:gp/features/bookings/presentation/pages/select_service_screen.dart';
-import 'package:gp/features/chat/domain/usecases/chat_usecases.dart';
 import 'package:gp/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:gp/features/chat/presentation/pages/chat_page.dart';
 import 'package:gp/injection_container.dart' as di;
@@ -18,7 +17,8 @@ import 'package:gp/injection_container.dart' as di;
 class ProfessionalDetailPage extends StatefulWidget {
   final String professionalId;
 
-  const ProfessionalDetailPage({super.key, required this.professionalId, required String id});
+  const ProfessionalDetailPage(
+      {super.key, required this.professionalId, required String id});
 
   @override
   State<ProfessionalDetailPage> createState() => _ProfessionalDetailPageState();
@@ -45,124 +45,161 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: BlocConsumer<ProfessionalsBloc, ProfessionalsState>(
+    return BlocProvider(
+      create: (_) => di.sl<ChatBloc>(),
+      child: BlocListener<ChatBloc, ChatState>(
         listener: (context, state) {
-          if (state is ReviewActionSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.primaryOrange,
+          if (state is ChatReady) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BlocProvider(
+                  create: (_) => di.sl<ChatBloc>(),
+                  child: ChatPage(
+                    chatId: state.chat.id,
+                    professionalName: state.chat.name,
+                  ),
+                ),
               ),
             );
-            context.read<ProfessionalsBloc>().add(
-                  LoadProfessionalDetail(widget.professionalId),
-                );
-          }
-        },
-        builder: (context, state) {
-          if (state is ProfessionalsLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryOrange),
+          } else if (state is ChatError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
             );
           }
-
-          if (state is ProfessionalsError) {
-            return Center(child: Text(state.message));
-          }
-
-          if (state is ProfessionalDetailLoaded || state is ReviewsLoading) {
-            final professional =
-                state is ProfessionalDetailLoaded ? state.professional : (state as ReviewsLoading).professional;
-            final reviews = state is ProfessionalDetailLoaded ? state.reviews : <Review>[];
-
-            return Column(
-              children: [
-                _DetailHeader(
-                  professional: professional,
-                  onCall: () => _callProfessional(professional.phone),
-                  onFavorite: () {
-                    context.read<ProfessionalsBloc>().add(
-                          ToggleFavoriteEvent(professional.id),
-                        );
-                  },
-                ),
-                // ── Tabs ────────────────────────────────────────
-                Container(
-                  color: AppColors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+        },
+        child: Scaffold(
+          backgroundColor: AppColors.background,
+          body: BlocConsumer<ProfessionalsBloc, ProfessionalsState>(
+            listener: (context, state) {
+              if (state is ReviewActionSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: AppColors.primaryOrange,
                   ),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: List.generate(_tabs.length, (index) {
-                        final selected = _selectedTab == index;
-                        return GestureDetector(
-                          onTap: () => setState(() => _selectedTab = index),
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 10),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 18,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              color: selected ? AppColors.primaryOrange : AppColors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: selected ? AppColors.primaryOrange : AppColors.divider,
+                );
+                context.read<ProfessionalsBloc>().add(
+                      LoadProfessionalDetail(widget.professionalId),
+                    );
+              }
+            },
+            builder: (context, state) {
+              if (state is ProfessionalsLoading) {
+                return const Center(
+                  child:
+                      CircularProgressIndicator(color: AppColors.primaryOrange),
+                );
+              }
+
+              if (state is ProfessionalsError) {
+                return Center(child: Text(state.message));
+              }
+
+              if (state is ProfessionalDetailLoaded ||
+                  state is ReviewsLoading) {
+                final professional = state is ProfessionalDetailLoaded
+                    ? state.professional
+                    : (state as ReviewsLoading).professional;
+                final reviews = state is ProfessionalDetailLoaded
+                    ? state.reviews
+                    : <Review>[];
+
+                return Column(
+                  children: [
+                    _DetailHeader(
+                      professional: professional,
+                      onCall: () => _callProfessional(professional.phone),
+                      onFavorite: () {
+                        context.read<ProfessionalsBloc>().add(
+                              ToggleFavoriteEvent(professional.id),
+                            );
+                      },
+                    ),
+                    // ── Tabs ────────────────────────────────────────
+                    Container(
+                      color: AppColors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: List.generate(_tabs.length, (index) {
+                            final selected = _selectedTab == index;
+                            return GestureDetector(
+                              onTap: () => setState(() => _selectedTab = index),
+                              child: Container(
+                                margin: const EdgeInsets.only(right: 10),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: selected
+                                      ? AppColors.primaryOrange
+                                      : AppColors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: selected
+                                        ? AppColors.primaryOrange
+                                        : AppColors.divider,
+                                  ),
+                                ),
+                                child: Text(
+                                  _tabs[index],
+                                  style: TextStyle(
+                                    color: selected
+                                        ? Colors.white
+                                        : AppColors.textPrimary,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13,
+                                  ),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              _tabs[index],
-                              style: TextStyle(
-                                color: selected ? Colors.white : AppColors.textPrimary,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                    ),
+                    // ── Tab Content ──────────────────────────────────
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(16),
+                        child: _buildTabContent(
+                          professional,
+                          reviews,
+                          state is ReviewsLoading,
+                        ),
+                      ),
+                    ),
+                    // ── Bottom Actions ───────────────────────────────
+                    _BottomActions(
+                      professional: professional,
+                      onBookNow: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => SelectServiceScreen(
+                              professionalName: professional.name,
+                              professionalRole:
+                                  'Professional ${professional.category.displayName}',
+                              professionalId: professional.id,
                             ),
                           ),
                         );
-                      }),
+                      },
+                      onCall: () => _callProfessional(professional.phone),
                     ),
-                  ),
-                ),
-                // ── Tab Content ──────────────────────────────────
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: _buildTabContent(
-                      professional,
-                      reviews,
-                      state is ReviewsLoading,
-                    ),
-                  ),
-                ),
-                // ── Bottom Actions ───────────────────────────────
-                _BottomActions(
-                  professional: professional,
-                  onBookNow: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => SelectServiceScreen(
-                          professionalName: professional.name,
-                          professionalRole: 'Professional ${professional.category.displayName}',
-                          professionalId: professional.id,
-                        ),
-                      ),
-                    );
-                  },
-                  onCall: () => _callProfessional(professional.phone),
-                ),
-              ],
-            );
-          }
+                  ],
+                );
+              }
 
-          return const SizedBox.shrink();
-        },
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
       ),
     );
   }
@@ -239,7 +276,9 @@ class _DetailHeader extends StatelessWidget {
               GestureDetector(
                 onTap: onFavorite,
                 child: Icon(
-                  professional.isFavorite ? Icons.favorite : Icons.favorite_border,
+                  professional.isFavorite
+                      ? Icons.favorite
+                      : Icons.favorite_border,
                   color: AppColors.primaryOrange,
                   size: 24,
                 ),
@@ -250,7 +289,9 @@ class _DetailHeader extends StatelessWidget {
           CircleAvatar(
             radius: 46,
             backgroundColor: AppColors.surface,
-            backgroundImage: professional.profileImageUrl != null ? NetworkImage(professional.profileImageUrl!) : null,
+            backgroundImage: professional.profileImageUrl != null
+                ? NetworkImage(professional.profileImageUrl!)
+                : null,
             child: professional.profileImageUrl == null
                 ? const Icon(
                     Icons.person,
@@ -284,7 +325,9 @@ class _DetailHeader extends StatelessWidget {
               ),
               _StatItem(
                 icon: Icons.bookmark_border,
-                value: professional.distanceKm != null ? professional.distanceKm!.toStringAsFixed(1) : 'N/A',
+                value: professional.distanceKm != null
+                    ? professional.distanceKm!.toStringAsFixed(1)
+                    : 'N/A',
                 label: 'KM Away',
               ),
               _StatItem(
@@ -502,7 +545,9 @@ class _ReviewsTab extends StatelessWidget {
                 child: Column(
                   children: [5, 4, 3, 2, 1].map((star) {
                     final count = professional.ratingBreakdown[star] ?? 0;
-                    final total = professional.reviewCount == 0 ? 1 : professional.reviewCount;
+                    final total = professional.reviewCount == 0
+                        ? 1
+                        : professional.reviewCount;
                     return Row(
                       children: [
                         Text('$star', style: AppTextStyles.bodySmall),
@@ -552,7 +597,9 @@ class _ReviewItem extends StatelessWidget {
             CircleAvatar(
               radius: 18,
               backgroundColor: AppColors.surface,
-              backgroundImage: review.reviewerImageUrl != null ? NetworkImage(review.reviewerImageUrl!) : null,
+              backgroundImage: review.reviewerImageUrl != null
+                  ? NetworkImage(review.reviewerImageUrl!)
+                  : null,
               child: review.reviewerImageUrl == null
                   ? const Icon(
                       Icons.person,
@@ -780,33 +827,13 @@ class _BottomActions extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           GestureDetector(
-            onTap: () async {
-              final result = await di.sl<GetOrCreateChat>()(
-                professionalId: professional.id,
-                professionalName: professional.name,
-              );
-
-              result.fold(
-                (failure) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Failed to open chat')),
-                  );
-                },
-                (chat) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BlocProvider(
-                        create: (_) => di.sl<ChatBloc>(),
-                        child: ChatPage(
-                          chatId: chat.id,
-                          professionalName: chat.name,
-                        ),
-                      ),
+            onTap: () {
+              context.read<ChatBloc>().add(
+                    GetOrCreateChatEvent(
+                      professionalId: professional.id.toString(),
+                      professionalName: professional.name,
                     ),
                   );
-                },
-              );
             },
             child: Container(
               width: 50,

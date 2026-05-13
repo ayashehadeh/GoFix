@@ -7,6 +7,7 @@ class BookingModel extends Booking {
     required super.professionalName,
     required super.professionalRole,
     super.professionalImageUrl,
+    super.clientName,
     required super.serviceName,
     required super.servicePrice,
     required super.scheduledDate,
@@ -19,26 +20,27 @@ class BookingModel extends Booking {
   });
 
   factory BookingModel.fromJson(Map<String, dynamic> json) {
-  return BookingModel(
-    id: (json['id'] as Object).toString(),
-    professionalId: (json['professionalId'] as Object).toString(),
-    professionalName: json['professionalName'] as String? ?? '',
-    professionalRole: json['professionalRole'] as String? ?? '',
-    professionalImageUrl: json['professionalImageUrl'] as String?,
-    serviceName: json['serviceName'] as String? ?? '',
-    servicePrice: json['servicePrice'] as String? ?? '',
-    scheduledDate: DateTime.parse(
-      json['scheduledDate'] as String? ?? DateTime.now().toIso8601String(),
-    ),
-    scheduledTime: json['scheduledTime'] as String? ?? '',
-    address: json['address'] as String? ?? '',
-    description: json['description'] as String? ?? '',
-    imageUrls: List<String>.from(json['imageUrls'] as List? ?? []),
-    status: BookingStatus.fromString(json['status'] as String? ?? 'pending'),
-    createdAt: DateTime.parse(
-      json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
-    ),
-  );
+    return BookingModel(
+      id: (json['id'] as Object).toString(),
+      professionalId: (json['professionalId'] as Object).toString(),
+      professionalName: json['professionalName'] as String? ?? '',
+      professionalRole: json['professionalRole'] as String? ?? '',
+      professionalImageUrl: json['professionalImageUrl'] as String?,
+      clientName: json['clientName'] as String? ?? '',
+      serviceName: json['serviceName'] as String? ?? '',
+      servicePrice: json['servicePrice'] as String? ?? '',
+      scheduledDate: DateTime.parse(
+        json['scheduledDate'] as String? ?? DateTime.now().toIso8601String(),
+      ),
+      scheduledTime: json['scheduledTime'] as String? ?? '',
+      address: json['address'] as String? ?? '',
+      description: json['description'] as String? ?? '',
+      imageUrls: List<String>.from(json['imageUrls'] as List? ?? []),
+      status: BookingStatus.fromString(json['status'] as String? ?? 'pending'),
+      createdAt: DateTime.parse(
+        json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
+      ),
+    );
   }
 
   Map<String, dynamic> toJson() => {
@@ -47,6 +49,7 @@ class BookingModel extends Booking {
         'professional_name': professionalName,
         'professional_role': professionalRole,
         'professional_image_url': professionalImageUrl,
+        'client_name': clientName,
         'service_name': serviceName,
         'service_price': servicePrice,
         'scheduled_date': scheduledDate.toIso8601String(),

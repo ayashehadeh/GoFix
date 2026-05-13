@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/features/bookings/presentation/pages/booking_success_screen.dart';
 import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
+import '../bloc/bookings_state.dart';
 
 class BookDetailsScreen extends StatelessWidget {
   final String serviceName;
@@ -39,23 +40,46 @@ class BookDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: lightGrey,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: const BackButton(color: darkBlue),
-        title: const Text(
-          'Book a Service',
-          style: TextStyle(
-            color: darkBlue,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
+    return BlocConsumer<BookingsBloc, BookingsState>(
+      listener: (context, state) {
+        if (state is BookingActionSuccess) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const BookingSuccessScreen(),
+            ),
+          );
+        }
+
+        if (state is BookingsError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state is BookingActionLoading;
+
+        return Scaffold(
+          backgroundColor: lightGrey,
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: const BackButton(color: darkBlue),
+            title: const Text(
+              'Book a Service',
+              style: TextStyle(
+                color: darkBlue,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
           ),
-        ),
-      ),
-      body: Column(
-        children: [
+          body: Column(
+            children: [
           // Step 3 active
           Container(
             color: Colors.white,
@@ -248,48 +272,62 @@ class BookDetailsScreen extends StatelessWidget {
           ),
 
           // Send Booking Request Button
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            child: SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: () {
-                  context.read<BookingsBloc>().add(
-                        CreateBookingEvent(
-                          professionalId: professionalId,
-                          serviceName: serviceName,
-                          servicePrice: servicePrice,
-                          scheduledDate: scheduledDate,
-                          scheduledTime: time,
-                          address: address,
-                          description: description,
-                          imageUrls: const [], // images are local Files, not uploaded URLs yet
-                        ),
-                      );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: orange,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  'Send Booking Request',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
+              Container(
+                color: Colors.white,
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: isLoading
+                        ? null
+                        : () {
+                            context.read<BookingsBloc>().add(
+                                  CreateBookingEvent(
+                                    professionalId: professionalId,
+                                    serviceName: serviceName,
+                                    servicePrice: servicePrice,
+                                    scheduledDate: scheduledDate,
+                                    scheduledTime: time,
+                                    address: address,
+                                    description: description,
+                                    imageUrls: const [],
+                                  ),
+                                );
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: orange,
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: orange.withOpacity(0.6),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Send Booking Request',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

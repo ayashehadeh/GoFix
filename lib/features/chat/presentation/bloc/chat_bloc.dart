@@ -44,6 +44,17 @@ class DeleteChatEvent extends ChatEvent {
   List<Object?> get props => [chatId];
 }
 
+class GetOrCreateChatEvent extends ChatEvent {
+  final String professionalId;
+  final String professionalName;
+  const GetOrCreateChatEvent({
+    required this.professionalId,
+    required this.professionalName,
+  });
+  @override
+  List<Object?> get props => [professionalId, professionalName];
+}
+
 // ── States ────────────────────────────────────────────────────────────────────
 
 abstract class ChatState extends Equatable {
@@ -71,6 +82,13 @@ class MessagesLoaded extends ChatState {
   List<Object?> get props => [chatId, messages];
 }
 
+class ChatReady extends ChatState {
+  final ChatPreviewEntity chat;
+  const ChatReady(this.chat);
+  @override
+  List<Object?> get props => [chat];
+}
+
 class ChatError extends ChatState {
   final String message;
   const ChatError(this.message);
@@ -85,21 +103,23 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final GetMessages getMessages;
   final SendMessage sendMessage;
   final DeleteChat deleteChat;
+  final GetOrCreateChat getOrCreateChat;
 
   ChatBloc({
     required this.getChats,
     required this.getMessages,
     required this.sendMessage,
     required this.deleteChat,
+    required this.getOrCreateChat,
   }) : super(ChatInitial()) {
     on<LoadChats>(_onLoadChats);
     on<LoadMessages>(_onLoadMessages);
     on<SendMessageEvent>(_onSendMessage);
     on<DeleteChatEvent>(_onDeleteChat);
+    on<GetOrCreateChatEvent>(_onGetOrCreateChat);
   }
 
-  Future<void> _onLoadChats(
-      LoadChats event, Emitter<ChatState> emit) async {
+  Future<void> _onLoadChats(LoadChats event, Emitter<ChatState> emit) async {
     emit(ChatLoading());
     final result = await getChats();
     result.fold(
@@ -145,6 +165,19 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     result.fold(
       (failure) => emit(ChatError(failure.message)),
       (chats) => emit(ChatsLoaded(chats)),
+    );
+  }
+
+  Future<void> _onGetOrCreateChat(
+      GetOrCreateChatEvent event, Emitter<ChatState> emit) async {
+    emit(ChatLoading());
+    final result = await getOrCreateChat(
+      professionalId: event.professionalId,
+      professionalName: event.professionalName,
+    );
+    result.fold(
+      (failure) => emit(ChatError(failure.message)),
+      (chat) => emit(ChatReady(chat)),
     );
   }
 }

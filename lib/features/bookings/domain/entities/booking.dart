@@ -51,6 +51,7 @@ class Booking extends Equatable {
   final String professionalName;
   final String professionalRole;
   final String? professionalImageUrl;
+  final String clientName;
   final String serviceName;
   final String servicePrice;
   final DateTime scheduledDate;
@@ -67,6 +68,7 @@ class Booking extends Equatable {
     required this.professionalName,
     required this.professionalRole,
     this.professionalImageUrl,
+    this.clientName = '',
     required this.serviceName,
     required this.servicePrice,
     required this.scheduledDate,
@@ -101,6 +103,7 @@ class Booking extends Equatable {
         professionalName,
         professionalRole,
         professionalImageUrl,
+        clientName,
         serviceName,
         servicePrice,
         scheduledDate,

@@ -143,7 +143,7 @@ final sl = GetIt.instance;
 const bool _useMockBookings = false;
 const bool _useMockNotifications = true;
 const bool _useMockFavorites = false;
-const bool _useMockChat = true;
+const bool _useMockChat = false;
 const bool _useMockProfessionalDashboard = false;
 
 Future<void> init() async {
@@ -248,6 +248,7 @@ sl.registerFactory(() => HomeBloc(getCategoriesUseCase: sl()));
       getMessages: sl(),
       sendMessage: sl(),
       deleteChat: sl(),
+      getOrCreateChat: sl(),
     ),
   );
 
