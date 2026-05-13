@@ -17,90 +17,83 @@ class ProfessionalDashboardRemoteDataSourceImpl
 
   ProfessionalDashboardRemoteDataSourceImpl({required this.dio});
 
+  // GET /professionals/dashboard/stats
+  // Response: { success, message, data: { requests, scheduled, completed } }
   @override
   Future<DashboardStatsModel> getDashboardStats() async {
-    try {
-      final response = await dio.get('/api/professional/dashboard/stats');
-      if (response.statusCode == 200) {
-        return DashboardStatsModel.fromJson(response.data);
-      } else {
-        throw Exception('Failed to load dashboard stats');
-      }
-    } catch (e) {
-      throw Exception('Error fetching dashboard stats: $e');
-    }
+    final response = await dio.get('/professionals/dashboard/stats');
+    final data = response.data['data'] as Map<String, dynamic>;
+    return DashboardStatsModel.fromJson(data);
   }
 
+  // GET /bookings/professional?status=Pending
+  // Response: { success, message, data: [ ...BookingDto ] }
   @override
   Future<List<JobModel>> getIncomingRequests() async {
-    try {
-      final response = await dio.get('/api/professional/requests/incoming');
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data['requests'] ?? response.data;
-        return data.map((json) => JobModel.fromJson(json)).toList();
-      } else {
-        throw Exception('Failed to load incoming requests');
-      }
-    } catch (e) {
-      throw Exception('Error fetching incoming requests: $e');
-    }
+    final response = await dio.get(
+      '/bookings/professional',
+      queryParameters: {'status': 'Pending'},
+    );
+    final List<dynamic> data = response.data['data'] as List;
+    return data
+        .map((json) => JobModel.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 
+  // GET /bookings/professional?status=Accepted  (fetch each scheduled status separately
+  // then combine, since the backend filters by a single status at a time)
+  // Response: { success, message, data: [ ...BookingDto ] }
   @override
   Future<List<JobModel>> getScheduledJobs() async {
-    try {
-      final response = await dio.get('/api/professional/jobs/scheduled');
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data['jobs'] ?? response.data;
-        return data.map((json) => JobModel.fromJson(json)).toList();
-      } else {
-        throw Exception('Failed to load scheduled jobs');
-      }
-    } catch (e) {
-      throw Exception('Error fetching scheduled jobs: $e');
+    final statuses = ['Accepted', 'OnTheWay', 'InProgress'];
+
+    final results = await Future.wait(
+      statuses.map(
+        (status) => dio.get(
+          '/bookings/professional',
+          queryParameters: {'status': status},
+        ),
+      ),
+    );
+
+    final jobs = <JobModel>[];
+    for (final response in results) {
+      final List<dynamic> data = response.data['data'] as List;
+      jobs.addAll(
+        data.map((json) => JobModel.fromJson(json as Map<String, dynamic>)),
+      );
     }
+    return jobs;
   }
 
+  // POST /bookings/{id}/respond   body: { "accept": true }
+  // Response: { success, message, data: BookingDto }
   @override
   Future<void> acceptJobRequest(String jobId) async {
-    try {
-      final response = await dio.post(
-        '/api/professional/requests/$jobId/accept',
-      );
-      if (response.statusCode != 200) {
-        throw Exception('Failed to accept job request');
-      }
-    } catch (e) {
-      throw Exception('Error accepting job request: $e');
-    }
+    await dio.post(
+      '/bookings/$jobId/respond',
+      data: {'accept': true},
+    );
   }
 
+  // POST /bookings/{id}/respond   body: { "accept": false }
+  // Response: { success, message, data: BookingDto }
   @override
   Future<void> declineJobRequest(String jobId) async {
-    try {
-      final response = await dio.post(
-        '/api/professional/requests/$jobId/decline',
-      );
-      if (response.statusCode != 200) {
-        throw Exception('Failed to decline job request');
-      }
-    } catch (e) {
-      throw Exception('Error declining job request: $e');
-    }
+    await dio.post(
+      '/bookings/$jobId/respond',
+      data: {'accept': false},
+    );
   }
 
+  // PUT /bookings/{id}/job-status   body: { "status": "OnTheWay"|"InProgress"|"Completed" }
+  // Progression enforced by backend: Accepted → OnTheWay → InProgress → Completed
+  // Response: { success, message, data: BookingDto }
   @override
   Future<void> updateJobStatus(String jobId, String status) async {
-    try {
-      final response = await dio.patch(
-        '/api/professional/jobs/$jobId/status',
-        data: {'status': status},
-      );
-      if (response.statusCode != 200) {
-        throw Exception('Failed to update job status');
-      }
-    } catch (e) {
-      throw Exception('Error updating job status: $e');
-    }
+    await dio.put(
+      '/bookings/$jobId/job-status',
+      data: {'status': status},
+    );
   }
 }

@@ -32,8 +32,7 @@ class AreaProfessionalsPage extends StatelessWidget {
                 ),
                 const Expanded(
                   child: Center(
-                    child: CircularProgressIndicator(
-                        color: AppColors.primaryOrange),
+                    child: CircularProgressIndicator(color: AppColors.primaryOrange),
                   ),
                 ),
               ],
@@ -104,12 +103,10 @@ class _AreaHeader extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () => Navigator.pop(context),
-                child: const Icon(Icons.arrow_back_ios_new,
-                    color: Colors.white, size: 20),
+                child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
               ),
               const SizedBox(width: 10),
-              const Icon(Icons.location_on_outlined,
-                  color: Colors.white, size: 16),
+              const Icon(Icons.location_on_outlined, color: Colors.white, size: 16),
               const SizedBox(width: 4),
               Text(
                 areaName,
@@ -178,21 +175,15 @@ class _CategoryChips extends StatelessWidget {
           final label = cat == null ? 'All' : cat.displayName;
 
           return GestureDetector(
-            onTap: () => context
-                .read<SearchBloc>()
-                .add(AreaCategoryFilterChanged(cat)),
+            onTap: () => context.read<SearchBloc>().add(AreaCategoryFilterChanged(cat)),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
-                color: isActive
-                    ? AppColors.primaryOrange
-                    : Colors.white,
+                color: isActive ? AppColors.primaryOrange : Colors.white,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: isActive
-                      ? AppColors.primaryOrange
-                      : const Color(0xFFDDDDDD),
+                  color: isActive ? AppColors.primaryOrange : const Color(0xFFDDDDDD),
                 ),
               ),
               child: Center(
@@ -235,7 +226,7 @@ class _ProList extends StatelessWidget {
             MaterialPageRoute(
               builder: (_) => BlocProvider(
                 create: (_) => di.sl<ProfessionalsBloc>(),
-                child: ProfessionalDetailPage(professionalId: pro.id),
+                child: ProfessionalDetailPage(professionalId: pro.id, id: pro.id),
               ),
             ),
           ),
@@ -259,8 +250,7 @@ class _EmptyArea extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.location_off_outlined,
-              size: 52, color: AppColors.divider),
+          const Icon(Icons.location_off_outlined, size: 52, color: AppColors.divider),
           const SizedBox(height: 16),
           Text(
             'No professionals found in $areaName',

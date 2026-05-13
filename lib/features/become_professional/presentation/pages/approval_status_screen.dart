@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:gp/features/professional_availability/presentation/bloc/availability_bloc.dart';
+import 'package:gp/features/professional_availability/presentation/pages/my_availability_screen.dart';
+import 'package:gp/injection_container.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../bloc/application_status_bloc.dart';
 import '../bloc/application_status_event.dart';
 import '../bloc/application_status_state.dart';
 import '../../domain/entities/application_status_entity.dart';
 import '../widgets/approval_checklist_item.dart';
-import 'set_availabilityscreen.dart';
 
 /// Entry point — reads the BLoC and delegates to the correct sub-screen.
 class ApprovalStatusScreen extends StatelessWidget {
@@ -17,8 +19,7 @@ class ApprovalStatusScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ApplicationStatusBloc, ApplicationStatusState>(
       builder: (context, state) {
-        if (state is ApplicationStatusLoading ||
-            state is ApplicationStatusInitial) {
+        if (state is ApplicationStatusLoading || state is ApplicationStatusInitial) {
           return const Scaffold(
             backgroundColor: Colors.white,
             body: Center(
@@ -37,8 +38,7 @@ class ApprovalStatusScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline,
-                        color: AppColors.error, size: 48),
+                    const Icon(Icons.error_outline, color: AppColors.error, size: 48),
                     const SizedBox(height: 12),
                     Text(
                       state.message,
@@ -47,16 +47,12 @@ class ApprovalStatusScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: () => context
-                          .read<ApplicationStatusBloc>()
-                          .add(const LoadApplicationStatus()),
+                      onPressed: () => context.read<ApplicationStatusBloc>().add(const LoadApplicationStatus()),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryOrange,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text('Retry',
-                          style: TextStyle(color: Colors.white)),
+                      child: const Text('Retry', style: TextStyle(color: Colors.white)),
                     ),
                   ],
                 ),
@@ -109,9 +105,7 @@ class _ApprovedScreen extends StatelessWidget {
       ),
       body: RefreshIndicator(
         color: AppColors.primaryOrange,
-        onRefresh: () async => context
-            .read<ApplicationStatusBloc>()
-            .add(const RefreshApplicationStatus()),
+        onRefresh: () async => context.read<ApplicationStatusBloc>().add(const RefreshApplicationStatus()),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -172,7 +166,10 @@ class _ApprovedScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => const SetAvailabilityScreen(),
+                        builder: (_) => BlocProvider(
+                          create: (_) => sl<AvailabilityBloc>(),
+                          child: const MyAvailabilityScreen(),
+                        ),
                       ),
                     );
                   },
@@ -219,9 +216,7 @@ class _NotApprovedScreen extends StatelessWidget {
       ),
       body: RefreshIndicator(
         color: AppColors.primaryOrange,
-        onRefresh: () async => context
-            .read<ApplicationStatusBloc>()
-            .add(const RefreshApplicationStatus()),
+        onRefresh: () async => context.read<ApplicationStatusBloc>().add(const RefreshApplicationStatus()),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -250,8 +245,7 @@ class _NotApprovedScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                status.rejectionReason ??
-                    'Your application is currently under review.',
+                status.rejectionReason ?? 'Your application is currently under review.',
                 style: const TextStyle(
                   fontSize: 14,
                   height: 1.6,

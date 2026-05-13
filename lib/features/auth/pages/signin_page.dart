@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gp/core/storage/token_storage.dart';
 import 'package:gp/core/theme/app_colors.dart';
+import 'package:gp/core/utils/login_helper.dart';
 import 'package:gp/features/auth/pages/reset_password.dart';
 import 'package:gp/features/auth/services/auth_service.dart';
 import 'package:gp/l10n/app_localizations.dart';
@@ -71,8 +72,7 @@ class _LoginPageState extends State<LoginPage> {
           backgroundColor: Colors.green,
         ),
       );
-
-      Navigator.of(context).pushReplacementNamed('/home');
+      await LoginHelper.navigateAfterLogin(context);
 
     } catch (e) {
       _showError(e.toString().replaceAll('Exception: ', ''));

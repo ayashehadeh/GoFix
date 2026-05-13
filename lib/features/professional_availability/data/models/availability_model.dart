@@ -3,46 +3,49 @@ import '../../domain/entities/availability_entity.dart';
 class AvailabilityModel extends AvailabilityEntity {
   const AvailabilityModel({
     required super.isAvailable,
-    required super.workingDays,
-    required super.fromHour,
-    required super.fromMinute,
-    required super.toHour,
-    required super.toMinute,
+    required super.schedules,
   });
 
+  // Maps from backend GET /professionals/profile/working-hours response:
+  // {
+  //   "isAvailable": true,
+  //   "schedules": [
+  //     { "day": "Monday", "openTime": "08:00", "closeTime": "17:00" },
+  //     ...
+  //   ]
+  // }
   factory AvailabilityModel.fromJson(Map<String, dynamic> json) {
+    final rawSchedules = json['schedules'] as List? ?? [];
     return AvailabilityModel(
-      isAvailable: json['isAvailable'] as bool? ?? true,
-      workingDays: (json['workingDays'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          [],
-      fromHour: json['fromHour'] as int? ?? 7,
-      fromMinute: json['fromMinute'] as int? ?? 0,
-      toHour: json['toHour'] as int? ?? 13,
-      toMinute: json['toMinute'] as int? ?? 0,
+      isAvailable: json['isAvailable'] as bool? ?? false,
+      schedules: rawSchedules
+          .map((e) => DaySchedule(
+                day: e['day'] as String? ?? e['dayLabel'] as String? ?? '',
+                openTime: e['openTime'] as String? ?? '',
+                closeTime: e['closeTime'] as String? ?? '',
+              ))
+          .toList(),
     );
   }
 
+  // Used for local cache (SharedPreferences) — same shape as backend for consistency
   Map<String, dynamic> toJson() {
     return {
       'isAvailable': isAvailable,
-      'workingDays': workingDays,
-      'fromHour': fromHour,
-      'fromMinute': fromMinute,
-      'toHour': toHour,
-      'toMinute': toMinute,
+      'schedules': schedules
+          .map((s) => {
+                'day': s.day,
+                'openTime': s.openTime,
+                'closeTime': s.closeTime,
+              })
+          .toList(),
     };
   }
 
   factory AvailabilityModel.fromEntity(AvailabilityEntity entity) {
     return AvailabilityModel(
       isAvailable: entity.isAvailable,
-      workingDays: entity.workingDays,
-      fromHour: entity.fromHour,
-      fromMinute: entity.fromMinute,
-      toHour: entity.toHour,
-      toMinute: entity.toMinute,
+      schedules: entity.schedules,
     );
   }
 }

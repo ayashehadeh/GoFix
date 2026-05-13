@@ -10,8 +10,6 @@ import 'package:gp/features/professionals/domain/entities/review.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
 import 'package:gp/features/professionals/presentation/widgets/star_rating.dart';
 import 'package:gp/features/bookings/presentation/pages/select_service_screen.dart';
-import 'package:gp/features/favorites/domain/entities/favorite_entity.dart';
-import 'package:gp/features/favorites/domain/usecases/favorites_usecases.dart';
 import 'package:gp/features/chat/domain/usecases/chat_usecases.dart';
 import 'package:gp/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:gp/features/chat/presentation/pages/chat_page.dart';
@@ -20,7 +18,7 @@ import 'package:gp/injection_container.dart' as di;
 class ProfessionalDetailPage extends StatefulWidget {
   final String professionalId;
 
-  const ProfessionalDetailPage({super.key, required this.professionalId});
+  const ProfessionalDetailPage({super.key, required this.professionalId, required String id});
 
   @override
   State<ProfessionalDetailPage> createState() => _ProfessionalDetailPageState();
@@ -84,31 +82,10 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                 _DetailHeader(
                   professional: professional,
                   onCall: () => _callProfessional(professional.phone),
-                  onFavorite: () async {
-                    // Capture state BEFORE toggling
-                    final wasFavorite = professional.isFavorite;
-
-                    // Toggle in ProfessionalsBloc (updates UI)
+                  onFavorite: () {
                     context.read<ProfessionalsBloc>().add(
                           ToggleFavoriteEvent(professional.id),
                         );
-
-                    // Add/remove from favorites datasource
-                    if (!wasFavorite) {
-                      // Was NOT favorite → add it
-                      await di.sl<AddFavorite>()(
-                        FavoriteEntity(
-                          id: professional.id,
-                          name: professional.name,
-                          role: professional.category.displayName,
-                          yearsExperience: professional.experienceYears,
-                          imageUrl: professional.profileImageUrl,
-                        ),
-                      );
-                    } else {
-                      // WAS favorite → remove it
-                      await di.sl<RemoveFavorite>()(professional.id);
-                    }
                   },
                 ),
                 // ── Tabs ────────────────────────────────────────

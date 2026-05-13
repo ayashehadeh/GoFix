@@ -13,17 +13,20 @@ class JobModel extends JobEntity {
 
   factory JobModel.fromJson(Map<String, dynamic> json) {
     return JobModel(
-      id: json['id'] ?? '',
-      clientName: json['clientName'] ?? json['client_name'] ?? '',
-      serviceType: json['serviceType'] ?? json['service_type'] ?? '',
-      location: json['location'] ?? '',
-      scheduledTime: json['scheduledTime'] != null
-          ? DateTime.parse(json['scheduledTime'])
-          : (json['scheduled_time'] != null
-              ? DateTime.parse(json['scheduled_time'])
-              : DateTime.now()),
+      // Backend sends a UUID — no client name in BookingDto,
+      // so we use userId as the identifier until the backend exposes it.
+      id: json['id']?.toString() ?? '',
+      clientName: json['clientName'] as String? ?? '',
+      serviceType: json['serviceName'] as String? ?? '',
+      location: json['address'] as String? ?? '',
+      // Backend sends scheduledDate (DateTime) + scheduledTime (String e.g. "09:00 AM")
+      // We parse scheduledDate for the DateTime, scheduledTime is display-only in the UI
+      scheduledTime: DateTime.tryParse(
+            json['scheduledDate'] as String? ?? '',
+          ) ??
+          DateTime.now(),
       status: _parseStatus(json['status']),
-      clientImage: json['clientImage'] ?? json['client_image'],
+      clientImage: json['professionalImageUrl'] as String?,
     );
   }
 
@@ -43,7 +46,9 @@ class JobModel extends JobEntity {
     switch (status?.toLowerCase()) {
       case 'pending':
         return JobStatus.pending;
-      case 'scheduled':
+      case 'accepted':
+      case 'ontheway':
+      case 'inprogress':
         return JobStatus.scheduled;
       case 'completed':
         return JobStatus.completed;
