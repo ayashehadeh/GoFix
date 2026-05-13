@@ -8,6 +8,7 @@ class PasswordField extends StatelessWidget {
   final bool obscure;
   final VoidCallback onToggle;
   final String? Function(String?)? validator;
+  final void Function(String)? onChanged;
 
   const PasswordField({
     super.key,
@@ -16,6 +17,7 @@ class PasswordField extends StatelessWidget {
     required this.obscure,
     required this.onToggle,
     this.validator,
+    this.onChanged,
   });
 
   @override
@@ -24,6 +26,7 @@ class PasswordField extends StatelessWidget {
       controller: controller,
       obscureText: obscure,
       validator: validator,
+      onChanged: onChanged,
       style: AppTextStyles.bodyMedium,
       decoration: InputDecoration(
         labelText: label,

@@ -11,17 +11,26 @@ abstract class SetPasswordEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class VerifyCurrentPasswordEvent extends SetPasswordEvent {
+  final String currentPassword;
+  const VerifyCurrentPasswordEvent(this.currentPassword);
+  @override
+  List<Object?> get props => [currentPassword];
+}
+
 class SetNewPasswordSubmitEvent extends SetPasswordEvent {
+  final String currentPassword;
   final String newPassword;
   final String confirmPassword;
 
   const SetNewPasswordSubmitEvent({
+    required this.currentPassword,
     required this.newPassword,
     required this.confirmPassword,
   });
 
   @override
-  List<Object?> get props => [newPassword, confirmPassword];
+  List<Object?> get props => [currentPassword, newPassword, confirmPassword];
 }
 
 // ─── States ───────────────────────────────────────────────────────────────────
@@ -40,6 +49,10 @@ class SetPasswordLoading extends SetPasswordState {
   const SetPasswordLoading();
 }
 
+class VerifyPasswordSuccess extends SetPasswordState {
+  const VerifyPasswordSuccess();
+}
+
 class SetPasswordSuccess extends SetPasswordState {
   const SetPasswordSuccess();
 }
@@ -54,11 +67,27 @@ class SetPasswordError extends SetPasswordState {
 // ─── BLoC ─────────────────────────────────────────────────────────────────────
 
 class SetPasswordBloc extends Bloc<SetPasswordEvent, SetPasswordState> {
+  final VerifyCurrentPasswordUseCase verifyCurrentPassword;
   final SetNewPasswordUseCase setNewPassword;
 
-  SetPasswordBloc({required this.setNewPassword})
-      : super(const SetPasswordInitial()) {
+  SetPasswordBloc({
+    required this.verifyCurrentPassword,
+    required this.setNewPassword,
+  }) : super(const SetPasswordInitial()) {
+    on<VerifyCurrentPasswordEvent>(_onVerify);
     on<SetNewPasswordSubmitEvent>(_onSubmit);
+  }
+
+  Future<void> _onVerify(
+    VerifyCurrentPasswordEvent event,
+    Emitter<SetPasswordState> emit,
+  ) async {
+    emit(const SetPasswordLoading());
+    final result = await verifyCurrentPassword(event.currentPassword);
+    result.fold(
+      (_) => emit(const SetPasswordError('Incorrect current password.')),
+      (_) => emit(const VerifyPasswordSuccess()),
+    );
   }
 
   Future<void> _onSubmit(
@@ -68,15 +97,14 @@ class SetPasswordBloc extends Bloc<SetPasswordEvent, SetPasswordState> {
     emit(const SetPasswordLoading());
 
     final entity = SetPasswordEntity(
+      currentPassword: event.currentPassword,
       newPassword: event.newPassword,
       confirmPassword: event.confirmPassword,
     );
 
     final result = await setNewPassword(entity);
     result.fold(
-      (failure) => emit(
-        const SetPasswordError('Failed to reset password. Please try again.'),
-      ),
+      (failure) => emit(SetPasswordError(failure.message)),
       (_) => emit(const SetPasswordSuccess()),
     );
   }

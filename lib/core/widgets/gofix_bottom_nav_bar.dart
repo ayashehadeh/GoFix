@@ -6,11 +6,13 @@ import '../../../../core/theme/app_text_styles.dart';
 class GoFixBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
+  final bool showDashboard;
 
   const GoFixBottomNavBar({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    this.showDashboard = false,
   });
 
   @override
@@ -51,11 +53,19 @@ class GoFixBottomNavBar extends StatelessWidget {
             iconAsset: 'assets/home_screen/person.svg',
             onTap: onTap,
           ),
+          if (showDashboard)
+            _DashboardNavItem(
+              index: 3,
+              currentIndex: currentIndex,
+              onTap: onTap,
+            ),
         ],
       ),
     );
   }
 }
+
+// ── SVG nav item (existing 3 tabs) ────────────────────────────────────────────
 
 class _NavItem extends StatelessWidget {
   final int index;
@@ -85,7 +95,6 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Active orange indicator line at bottom
             if (isSelected)
               Container(
                 height: 3,
@@ -98,7 +107,6 @@ class _NavItem extends StatelessWidget {
               )
             else
               const SizedBox(height: 9),
-
             SvgPicture.asset(
               iconAsset,
               width: 24,
@@ -108,6 +116,57 @@ class _NavItem extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
+              style: AppTextStyles.bottomNavLabel.copyWith(color: color),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Dashboard tab (uses Icons.handyman, no SVG needed) ────────────────────────
+
+class _DashboardNavItem extends StatelessWidget {
+  final int index;
+  final int currentIndex;
+  final ValueChanged<int> onTap;
+
+  const _DashboardNavItem({
+    required this.index,
+    required this.currentIndex,
+    required this.onTap,
+  });
+
+  bool get isSelected => index == currentIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isSelected ? AppColors.primaryOrange : AppColors.primaryDark;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => onTap(index),
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (isSelected)
+              Container(
+                height: 3,
+                width: 40,
+                margin: const EdgeInsets.only(bottom: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryOrange,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              )
+            else
+              const SizedBox(height: 9),
+            Icon(Icons.handyman, size: 24, color: color),
+            const SizedBox(height: 4),
+            Text(
+              'Dashboard',
               style: AppTextStyles.bottomNavLabel.copyWith(color: color),
             ),
           ],

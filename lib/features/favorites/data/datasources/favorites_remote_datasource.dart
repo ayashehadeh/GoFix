@@ -27,13 +27,13 @@ class FavoritesRemoteDataSourceImpl implements FavoritesRemoteDataSource {
 
   @override
   Future<void> removeFavorite(String professionalId) async {
-    await dio.delete('/professionals/$professionalId/favorite');
+    await dio.post('/professionals/$professionalId/favorite');
   }
 
   @override
   Future<bool> isFavorite(String professionalId) async {
-    final response = await dio.get('/professionals/$professionalId');
-    return response.data['data']['isFavorite'] as bool? ?? false;
+    final favorites = await getFavorites();
+    return favorites.any((f) => f.id == professionalId);
   }
 }
 
@@ -41,37 +41,16 @@ class FavoritesRemoteDataSourceImpl implements FavoritesRemoteDataSource {
 /// Toggle a heart in the professionals screen → it immediately appears in
 /// favorites.
 class MockFavoritesDataSource implements FavoritesRemoteDataSource {
-  static final MockFavoritesDataSource _instance =
-      MockFavoritesDataSource._internal();
+  static final MockFavoritesDataSource _instance = MockFavoritesDataSource._internal();
   factory MockFavoritesDataSource() => _instance;
   MockFavoritesDataSource._internal();
 
   final List<FavoriteModel> _favorites = [
-    const FavoriteModel(
-        id: '1',
-        name: 'Mohammed Hassan',
-        role: 'Plumber',
-        yearsExperience: 10),
-    const FavoriteModel(
-        id: '2',
-        name: 'Ali Emad',
-        role: 'Ac repairer',
-        yearsExperience: 10),
-    const FavoriteModel(
-        id: '3',
-        name: 'Abdullah Zaid',
-        role: 'Carpenter',
-        yearsExperience: 5),
-    const FavoriteModel(
-        id: '4',
-        name: 'Sara Mohammad',
-        role: 'Cleaner',
-        yearsExperience: 9),
-    const FavoriteModel(
-        id: '5',
-        name: "Ra'ed Mahmood",
-        role: 'Electrician',
-        yearsExperience: 3),
+    const FavoriteModel(id: '1', name: 'Mohammed Hassan', role: 'Plumber', yearsExperience: 10),
+    const FavoriteModel(id: '2', name: 'Ali Emad', role: 'Ac repairer', yearsExperience: 10),
+    const FavoriteModel(id: '3', name: 'Abdullah Zaid', role: 'Carpenter', yearsExperience: 5),
+    const FavoriteModel(id: '4', name: 'Sara Mohammad', role: 'Cleaner', yearsExperience: 9),
+    const FavoriteModel(id: '5', name: "Ra'ed Mahmood", role: 'Electrician', yearsExperience: 3),
   ];
 
   @override

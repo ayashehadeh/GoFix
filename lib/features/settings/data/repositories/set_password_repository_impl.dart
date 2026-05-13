@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:gp/core/error/failures.dart';
 import 'package:gp/features/settings/data/datasources/set_password_remote_datasource.dart';
 import 'package:gp/features/settings/data/models/set_password_model.dart';
@@ -11,6 +12,16 @@ class SetPasswordRepositoryImpl implements SetPasswordRepository {
   SetPasswordRepositoryImpl(this.remoteDataSource);
 
   @override
+  Future<Either<Failure, Unit>> verifyCurrentPassword(String password) async {
+    try {
+      await remoteDataSource.verifyCurrentPassword(password);
+      return const Right(unit);
+    } catch (e) {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
   Future<Either<Failure, Unit>> setNewPassword(
     SetPasswordEntity entity,
   ) async {
@@ -18,8 +29,11 @@ class SetPasswordRepositoryImpl implements SetPasswordRepository {
       final model = SetPasswordModel.fromEntity(entity);
       await remoteDataSource.setNewPassword(model);
       return const Right(unit);
+    } on DioException catch (e) {
+      final message = e.response?.data?['message'] as String?;
+      return Left(ServerFailure(message ?? 'Failed to change password.'));
     } catch (e) {
-      return Left(ServerFailure());
+      return Left(ServerFailure('Failed to change password.'));
     }
   }
 }

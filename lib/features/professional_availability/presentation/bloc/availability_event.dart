@@ -1,56 +1,51 @@
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/availability_entity.dart';
 
 abstract class AvailabilityEvent extends Equatable {
   const AvailabilityEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
+// Load working hours + isAvailable from API
 class LoadAvailability extends AvailabilityEvent {}
 
-class SaveAvailabilityEvent extends AvailabilityEvent {
-  final AvailabilityEntity availability;
-
-  const SaveAvailabilityEvent({required this.availability});
-
-  @override
-  List<Object> get props => [availability];
-}
-
-class UpdateAvailabilityToggle extends AvailabilityEvent {
+// Toggle the isAvailable switch — fires API immediately
+class ToggleAvailabilityEvent extends AvailabilityEvent {
   final bool isAvailable;
 
-  const UpdateAvailabilityToggle({required this.isAvailable});
+  const ToggleAvailabilityEvent({required this.isAvailable});
 
   @override
-  List<Object> get props => [isAvailable];
+  List<Object?> get props => [isAvailable];
 }
 
-class UpdateWorkingDay extends AvailabilityEvent {
-  final String day;
-  final bool isSelected;
+// Toggle a day on/off — if turning on, adds a default schedule for that day
+//                       if turning off, removes that day's schedule entirely
+class ToggleWorkingDay extends AvailabilityEvent {
+  final String day; // Full name: "Monday", "Tuesday", etc.
 
-  const UpdateWorkingDay({required this.day, required this.isSelected});
+  const ToggleWorkingDay({required this.day});
 
   @override
-  List<Object> get props => [day, isSelected];
+  List<Object?> get props => [day];
 }
 
-class UpdateWorkingHours extends AvailabilityEvent {
-  final int fromHour;
-  final int fromMinute;
-  final int toHour;
-  final int toMinute;
+// Update open/close time for a specific day
+class UpdateDaySchedule extends AvailabilityEvent {
+  final String day;       // Full name: "Monday", etc.
+  final String openTime;  // "HH:mm"
+  final String closeTime; // "HH:mm"
 
-  const UpdateWorkingHours({
-    required this.fromHour,
-    required this.fromMinute,
-    required this.toHour,
-    required this.toMinute,
+  const UpdateDaySchedule({
+    required this.day,
+    required this.openTime,
+    required this.closeTime,
   });
 
   @override
-  List<Object> get props => [fromHour, fromMinute, toHour, toMinute];
+  List<Object?> get props => [day, openTime, closeTime];
 }
+
+// Save all schedules to API
+class SaveWorkingHoursEvent extends AvailabilityEvent {}

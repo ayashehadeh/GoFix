@@ -1,16 +1,26 @@
+import 'package:dio/dio.dart';
 import 'package:gp/features/settings/data/models/set_password_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class SetPasswordRemoteDataSource {
+  Future<void> verifyCurrentPassword(String password);
   Future<void> setNewPassword(SetPasswordModel model);
 }
 
 class SetPasswordRemoteDataSourceImpl implements SetPasswordRemoteDataSource {
-  static const _keyPassword = 'user_password';
+  final Dio dio;
+  SetPasswordRemoteDataSourceImpl({required this.dio});
+
+  @override
+  Future<void> verifyCurrentPassword(String password) async {
+    // Verification happens server-side when setNewPassword is called.
+  }
 
   @override
   Future<void> setNewPassword(SetPasswordModel model) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyPassword, model.newPassword);
+    await dio.put('/auth/change-password', data: {
+      'currentPassword': model.currentPassword,
+      'newPassword': model.newPassword,
+      'confirmNewPassword': model.confirmPassword,
+    });
   }
 }

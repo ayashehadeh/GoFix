@@ -9,9 +9,10 @@ class DashboardStatsModel extends DashboardStatsEntity {
 
   factory DashboardStatsModel.fromJson(Map<String, dynamic> json) {
     return DashboardStatsModel(
-      requestsCount: json['requestsCount'] ?? json['requests_count'] ?? 0,
-      scheduledCount: json['scheduledCount'] ?? json['scheduled_count'] ?? 0,
-      completedCount: json['completedCount'] ?? json['completed_count'] ?? 0,
+      // Backend returns: { "requests": int, "scheduled": int, "completed": int }
+      requestsCount: json['requests'] as int? ?? 0,
+      scheduledCount: json['scheduled'] as int? ?? 0,
+      completedCount: json['completed'] as int? ?? 0,
     );
   }
 

@@ -447,7 +447,7 @@ class _ResultsList extends StatelessWidget {
                     builder: (_) => BlocProvider(
                       create: (_) => di.sl<ProfessionalsBloc>(),
                       child: ProfessionalDetailPage(
-                          professionalId: pro.id),
+                          professionalId: pro.id, id: pro.id),
                     ),
                   ),
                 ),

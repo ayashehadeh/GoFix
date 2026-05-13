@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/professional_nav_mixin.dart';
 import '../../../../core/widgets/gofix_bottom_nav_bar.dart';
 import '../../../../injection_container.dart' as di;
-import '../../../home/presentation/bloc/home_bloc.dart';
-import '../../../home/presentation/pages/home_page.dart';
 import '../../../favorites/presentation/bloc/favorites_bloc.dart';
 import '../../../favorites/presentation/pages/favorites_page.dart';
 import '../../../chat/presentation/bloc/chat_bloc.dart';
@@ -15,10 +14,6 @@ import '../bloc/bookings_state.dart';
 import '../widgets/booking_list_card.dart';
 import 'booking_info_page.dart';
 import 'upcoming_booking_info_page.dart';
-import 'package:gp/features/favorites/presentation/bloc/favorites_bloc.dart';
-import 'package:gp/features/favorites/presentation/pages/favorites_page.dart';
-import 'package:gp/features/chat/presentation/bloc/chat_bloc.dart';
-import 'package:gp/features/chat/presentation/pages/all_chats_page.dart';
 
 class MyBookingsPage extends StatefulWidget {
   const MyBookingsPage({super.key});
@@ -27,10 +22,12 @@ class MyBookingsPage extends StatefulWidget {
   State<MyBookingsPage> createState() => _MyBookingsPageState();
 }
 
-class _MyBookingsPageState extends State<MyBookingsPage> {
+class _MyBookingsPageState extends State<MyBookingsPage>
+    with ProfessionalNavMixin<MyBookingsPage> {
   @override
   void initState() {
     super.initState();
+    loadProfessionalStatus();
     context.read<BookingsBloc>().add(LoadUpcomingBookings());
   }
 
@@ -74,8 +71,7 @@ class _MyBookingsPageState extends State<MyBookingsPage> {
                       return _EmptyBody(isUpcoming: state.isUpcomingTab);
                     }
                     return ListView.builder(
-                      padding:
-                          const EdgeInsets.only(top: 12, bottom: 20),
+                      padding: const EdgeInsets.only(top: 12, bottom: 20),
                       itemCount: bookings.length,
                       itemBuilder: (context, index) {
                         final booking = bookings[index];
@@ -111,21 +107,11 @@ class _MyBookingsPageState extends State<MyBookingsPage> {
       ),
       bottomNavigationBar: GoFixBottomNavBar(
         currentIndex: 1,
+        showDashboard: isProfessional,
         onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => BlocProvider(
-                  create: (_) => di.sl<HomeBloc>(),
-                  child: const HomePage(),
-                ),
-              ),
-            );
-          }
-          if (index == 2) {
-            Navigator.pushReplacementNamed(context, '/profile');
-          }
+          if (index == 0) Navigator.pushReplacementNamed(context, '/home');
+          if (index == 2) Navigator.pushReplacementNamed(context, '/profile');
+          if (index == 3) Navigator.pushReplacementNamed(context, '/dashboard');
         },
       ),
     );
@@ -156,38 +142,37 @@ class _BookingsHeader extends StatelessWidget {
               ),
               Row(
                 children: [
-               GestureDetector(
-  onTap: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => BlocProvider(
-          create: (_) => di.sl<FavoritesBloc>(),
-          child: const FavoritesPage(),
-        ),
-      ),
-    );
-  },
-  child: const Icon(Icons.favorite_border,
-      color: AppColors.primaryDark, size: 24),
-),
-const SizedBox(width: 14),
-// Chat icon
-GestureDetector(
-  onTap: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => BlocProvider(
-          create: (_) => di.sl<ChatBloc>(),
-          child: const AllChatsPage(),
-        ),
-      ),
-    );
-  },
-  child: const Icon(Icons.chat_bubble_outline,
-      color: AppColors.primaryDark, size: 24),
-),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider(
+                            create: (_) => di.sl<FavoritesBloc>(),
+                            child: const FavoritesPage(),
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Icon(Icons.favorite_border,
+                        color: AppColors.primaryDark, size: 24),
+                  ),
+                  const SizedBox(width: 14),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider(
+                            create: (_) => di.sl<ChatBloc>(),
+                            child: const AllChatsPage(),
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Icon(Icons.chat_bubble_outline,
+                        color: AppColors.primaryDark, size: 24),
+                  ),
                 ],
               ),
             ],
@@ -211,8 +196,7 @@ GestureDetector(
 class _TabToggle extends StatelessWidget {
   final bool isUpcoming;
   final void Function(bool) onSwitchTab;
-  const _TabToggle(
-      {required this.isUpcoming, required this.onSwitchTab});
+  const _TabToggle({required this.isUpcoming, required this.onSwitchTab});
 
   @override
   Widget build(BuildContext context) {
@@ -237,9 +221,7 @@ class _TabButton extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
   const _TabButton(
-      {required this.label,
-      required this.isSelected,
-      required this.onTap});
+      {required this.label, required this.isSelected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -247,12 +229,10 @@ class _TabButton extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primaryOrange
-              : Colors.transparent,
+          color:
+              isSelected ? AppColors.primaryOrange : Colors.transparent,
           borderRadius: BorderRadius.circular(50),
           border: Border.all(
               color: isSelected
@@ -264,9 +244,8 @@ class _TabButton extends StatelessWidget {
           style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: isSelected
-                  ? Colors.white
-                  : AppColors.textSecondary),
+              color:
+                  isSelected ? Colors.white : AppColors.textSecondary),
         ),
       ),
     );
@@ -315,13 +294,11 @@ class _ErrorBody extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline,
-              color: AppColors.error, size: 48),
+          const Icon(Icons.error_outline, color: AppColors.error, size: 48),
           const SizedBox(height: 12),
           Text(message,
               textAlign: TextAlign.center,
-              style:
-                  const TextStyle(color: AppColors.textSecondary)),
+              style: const TextStyle(color: AppColors.textSecondary)),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: onRetry,
@@ -329,8 +306,8 @@ class _ErrorBody extends StatelessWidget {
                 backgroundColor: AppColors.primaryOrange,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12))),
-            child: const Text('Retry',
-                style: TextStyle(color: Colors.white)),
+            child:
+                const Text('Retry', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
