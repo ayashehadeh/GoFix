@@ -95,6 +95,7 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
             images: List.from(_pickedImages),
             workerName: widget.professionalName,
             workerRole: widget.professionalRole,
+            professionalId: widget.professionalId, 
           ),
         ),
       );

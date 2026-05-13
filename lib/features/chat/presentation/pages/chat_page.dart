@@ -138,21 +138,15 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _pickFile() async {
     try {
       final result = await FilePicker.pickFiles();
-
       if (!mounted) return;
-
       if (result != null && result.files.single.path != null) {
         final file = result.files.single;
-
-        context.read<ChatBloc>().add(
-              SendMessageEvent(
-                chatId: widget.chatId,
-                text: file.name,
-                type: 'file',
-                attachmentPath: file.path!,
-              ),
-            );
-
+        context.read<ChatBloc>().add(SendMessageEvent(
+              chatId: widget.chatId,
+              text: file.name,
+              type: 'file',
+              attachmentPath: file.path!,
+            ));
         _scrollToBottom();
       }
     } catch (e) {
@@ -290,6 +284,12 @@ class _MessageBubble extends StatelessWidget {
   final ChatMessageEntity message;
   const _MessageBubble({required this.message});
 
+  /// Returns true when the path looks like a remote URL rather than a local file.
+  bool get _isRemoteUrl =>
+      message.attachmentPath != null &&
+      (message.attachmentPath!.startsWith('http://') ||
+          message.attachmentPath!.startsWith('https://'));
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -349,11 +349,19 @@ class _MessageBubble extends StatelessWidget {
         if (message.attachmentPath != null) {
           return ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.file(
-              File(message.attachmentPath!),
-              width: 200,
-              fit: BoxFit.cover,
-            ),
+            child: _isRemoteUrl
+                ? Image.network(
+                    message.attachmentPath!,
+                    width: 200,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Icon(Icons.broken_image,
+                        color: AppColors.primaryDark),
+                  )
+                : Image.file(
+                    File(message.attachmentPath!),
+                    width: 200,
+                    fit: BoxFit.cover,
+                  ),
           );
         }
         return _textWidget();
