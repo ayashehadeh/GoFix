@@ -1,10 +1,12 @@
 import 'package:equatable/equatable.dart';
 
 enum JobStatus {
-  pending,    // Incoming request
-  scheduled,  // Accepted and scheduled
-  completed,  // Job done
-  declined    // Rejected
+  pending,
+  scheduled,   // Accepted
+  onTheWay,    // OnTheWay
+  inProgress,  // InProgress
+  completed,
+  declined,
 }
 
 class JobEntity extends Equatable {

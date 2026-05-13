@@ -43,19 +43,14 @@ class JobModel extends JobEntity {
   }
 
   static JobStatus _parseStatus(String? status) {
-    switch (status?.toLowerCase()) {
-      case 'pending':
-        return JobStatus.pending;
-      case 'accepted':
-      case 'ontheway':
-      case 'inprogress':
-        return JobStatus.scheduled;
-      case 'completed':
-        return JobStatus.completed;
-      case 'declined':
-        return JobStatus.declined;
-      default:
-        return JobStatus.pending;
-    }
+  switch (status?.toLowerCase()) {
+    case 'pending':      return JobStatus.pending;
+    case 'accepted':     return JobStatus.scheduled;
+    case 'ontheway':     return JobStatus.onTheWay;
+    case 'inprogress':   return JobStatus.inProgress;
+    case 'completed':    return JobStatus.completed;
+    case 'declined':     return JobStatus.declined;
+    default:             return JobStatus.pending;
   }
+}
 }

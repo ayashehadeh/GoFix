@@ -39,6 +39,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
         child: BlocConsumer<ProfessionalDashboardBloc, ProfessionalDashboardState>(
+          listenWhen: (_, current) => current is RequestActionSuccess || current is RequestActionError,
           listener: (context, state) {
             if (state is RequestActionSuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -56,6 +57,8 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
               );
             }
           },
+          buildWhen: (_, current) =>
+              current is DashboardLoading || current is DashboardLoaded || current is DashboardError,
           builder: (context, state) {
             if (state is DashboardLoading) {
               return const Center(child: CircularProgressIndicator());
@@ -151,10 +154,6 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.notifications, color: Colors.white),
                   ),
                 ],
               ),
@@ -482,34 +481,26 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
 
   // Status dialog — uses correct backend status values
   void _showStatusUpdateDialog(String jobId, JobStatus currentStatus) {
-    // Build options based on current status progression
-    // Accepted → OnTheWay → InProgress → Completed
-    final options = <String, String>{};
-    if (currentStatus == JobStatus.scheduled) {
-      options['OnTheWay'] = 'On The Way';
-      options['InProgress'] = 'In Progress';
-      options['Completed'] = 'Completed';
-    }
+    final next = {
+      JobStatus.scheduled: MapEntry('OnTheWay', 'On The Way'),
+      JobStatus.onTheWay: MapEntry('InProgress', 'In Progress'),
+      JobStatus.inProgress: MapEntry('Completed', 'Completed'),
+    }[currentStatus];
 
-    if (options.isEmpty) return;
+    if (next == null) return;
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Update Job Status'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: options.entries
-              .map((entry) => ListTile(
-                    title: Text(entry.value),
-                    onTap: () {
-                      this.context.read<ProfessionalDashboardBloc>().add(
-                            UpdateStatus(jobId, entry.key),
-                          );
-                      Navigator.pop(context);
-                    },
-                  ))
-              .toList(),
+        content: ListTile(
+          title: Text(next.value),
+          onTap: () {
+            this.context.read<ProfessionalDashboardBloc>().add(
+                  UpdateStatus(jobId, next.key),
+                );
+            Navigator.pop(context);
+          },
         ),
       ),
     );
