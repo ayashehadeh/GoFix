@@ -24,16 +24,20 @@ enum BookingStatus {
 
   static BookingStatus fromString(String value) {
     switch (value.toLowerCase()) {
+      case 'accepted':
       case 'confirmed':
         return BookingStatus.confirmed;
       case 'inprogress':
       case 'in_progress':
       case 'in progress':
+      case 'ontheway':
+      case 'on_the_way':
         return BookingStatus.inProgress;
       case 'completed':
         return BookingStatus.completed;
       case 'cancelled':
       case 'canceled':
+      case 'declined':
         return BookingStatus.cancelled;
       default:
         return BookingStatus.pending;

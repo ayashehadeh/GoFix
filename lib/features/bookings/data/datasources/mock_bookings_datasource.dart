@@ -226,7 +226,7 @@ class MockBookingsDataSource implements BookingsRemoteDataSource {
 
   /// Removes from upcoming and moves to past list with status = cancelled.
   @override
-  Future<void> cancelBooking(String bookingId) async {
+  Future<void> cancelBooking(String bookingId, {String? reason}) async {
     await Future.delayed(const Duration(milliseconds: 600));
     final index = _upcoming.indexWhere((b) => b.id == bookingId);
     if (index == -1) return;
@@ -255,6 +255,11 @@ class MockBookingsDataSource implements BookingsRemoteDataSource {
   }
 
   /// No-op — simulates a successful report submission.
+  @override
+  Future<void> confirmPayment(String id) async {
+    await Future.delayed(const Duration(milliseconds: 400));
+  }
+
   @override
   Future<void> submitReport({
     required String bookingId,

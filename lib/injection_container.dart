@@ -122,7 +122,7 @@ import 'package:gp/features/search/presentation/bloc/search_bloc.dart';
 
 final sl = GetIt.instance;
 
-const bool _useMockBookings = true;
+const bool _useMockBookings = false;
 const bool _useMockNotifications = true;
 const bool _useMockFavorites = true;
 const bool _useMockChat = true;

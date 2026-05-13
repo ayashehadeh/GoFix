@@ -2,7 +2,10 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/features/bookings/presentation/pages/booking_success_screen.dart';
+import '../bloc/bookings_bloc.dart';
+import '../bloc/bookings_event.dart';
 
 class BookDetailsScreen extends StatelessWidget {
   final String serviceName;
@@ -13,6 +16,8 @@ class BookDetailsScreen extends StatelessWidget {
   final String time;
   final String address;
   final String workerName;
+  final String professionalId;
+  final DateTime scheduledDate;
 
   const BookDetailsScreen({
     super.key,
@@ -24,6 +29,8 @@ class BookDetailsScreen extends StatelessWidget {
     required this.time,
     required this.address,
     required this.workerName,
+    required this.professionalId,
+    required this.scheduledDate,
   });
 
   static const Color darkBlue = Color(0xFF1A2B4A);
@@ -249,12 +256,18 @@ class BookDetailsScreen extends StatelessWidget {
               height: 52,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const BookingSuccessScreen(),
-                    ),
-                  );
+                  context.read<BookingsBloc>().add(
+                        CreateBookingEvent(
+                          professionalId: professionalId,
+                          serviceName: serviceName,
+                          servicePrice: servicePrice,
+                          scheduledDate: scheduledDate,
+                          scheduledTime: time,
+                          address: address,
+                          description: description,
+                          imageUrls: const [], // images are local Files, not uploaded URLs yet
+                        ),
+                      );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: orange,

@@ -3,7 +3,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/features/bookings/presentation/bloc/bookings_bloc.dart';
 import 'package:gp/features/bookings/presentation/pages/book_details_screen.dart';
+import 'package:gp/injection_container.dart' as di;
 
 class BookServiceScreen extends StatefulWidget {
   final String serviceName;
@@ -12,6 +15,8 @@ class BookServiceScreen extends StatefulWidget {
   final List<File> images;
   final String workerName;
   final String workerRole;
+  final String professionalId;
+
 
   const BookServiceScreen({
     super.key,
@@ -21,6 +26,7 @@ class BookServiceScreen extends StatefulWidget {
     required this.images,
     required this.workerName,
     required this.workerRole,
+    required this.professionalId,
   });
 
   @override
@@ -31,6 +37,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
   int selectedDateIndex = 1;
   int selectedHour = 7;
   int selectedMinute = 0;
+
   final TextEditingController _addressController = TextEditingController();
   bool _showAddressError = false;
 
@@ -192,15 +199,36 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => BookDetailsScreen(
-            serviceName: widget.serviceName,
-            servicePrice: widget.servicePrice,
-            description: widget.description,
-            images: widget.images,
-            date: dateStr,
-            time: timeStr,
-            address: _addressController.text.trim(),
-            workerName: widget.workerName,
+          builder: (context) => BlocProvider(
+            create: (_) => di.sl<BookingsBloc>(),
+            child: BookDetailsScreen(
+              serviceName: widget.serviceName,
+              servicePrice: widget.servicePrice,
+              description: widget.description,
+              images: widget.images,
+              date: dateStr,
+              time: timeStr,
+              address: _addressController.text.trim(),
+              workerName: widget.workerName,
+              professionalId: widget.professionalId, // ADD
+              scheduledDate: DateTime(
+                  2025,
+                  {
+                    'Jan': 1,
+                    'Feb': 2,
+                    'Mar': 3,
+                    'Apr': 4,
+                    'May': 5,
+                    'Jun': 6,
+                    'Jul': 7,
+                    'Aug': 8,
+                    'Sep': 9,
+                    'Oct': 10,
+                    'Nov': 11,
+                    'Dec': 12
+                  }[selectedDate['month']]!,
+                  int.parse(selectedDate['date']!)),
+            ),
           ),
         ),
       );

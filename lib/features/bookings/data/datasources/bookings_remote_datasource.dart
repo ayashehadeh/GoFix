@@ -4,8 +4,7 @@ import '../models/booking_model.dart';
 abstract class BookingsRemoteDataSource {
   Future<List<BookingModel>> getUpcomingBookings();
   Future<List<BookingModel>> getPastBookings();
-  Future<BookingModel> getBookingById(String bookingId);
-
+  Future<BookingModel> getBookingById(String id);
   Future<BookingModel> createBooking({
     required String professionalId,
     required String serviceName,
@@ -16,7 +15,6 @@ abstract class BookingsRemoteDataSource {
     required String description,
     required List<String> imageUrls,
   });
-
   Future<BookingModel> modifyBooking({
     required String bookingId,
     required String serviceName,
@@ -26,9 +24,8 @@ abstract class BookingsRemoteDataSource {
     required String address,
     required String description,
   });
-
-  Future<void> cancelBooking(String bookingId);
-
+  Future<void> cancelBooking(String id, {String? reason});
+  Future<void> confirmPayment(String id);
   Future<void> submitReport({
     required String bookingId,
     required String description,
@@ -42,27 +39,21 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
 
   @override
   Future<List<BookingModel>> getUpcomingBookings() async {
-    final response = await dio.get(
-      '/bookings',
-      queryParameters: {'filter': 'upcoming'},
-    );
+    final response = await dio.get('/bookings/upcoming');
     final data = response.data['data'] as List;
     return data.map((e) => BookingModel.fromJson(e)).toList();
   }
 
   @override
   Future<List<BookingModel>> getPastBookings() async {
-    final response = await dio.get(
-      '/bookings',
-      queryParameters: {'filter': 'past'},
-    );
+    final response = await dio.get('/bookings/past');
     final data = response.data['data'] as List;
     return data.map((e) => BookingModel.fromJson(e)).toList();
   }
 
   @override
-  Future<BookingModel> getBookingById(String bookingId) async {
-    final response = await dio.get('/bookings/$bookingId');
+  Future<BookingModel> getBookingById(String id) async {
+    final response = await dio.get('/bookings/$id');
     return BookingModel.fromJson(response.data['data']);
   }
 
@@ -118,8 +109,13 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   }
 
   @override
-  Future<void> cancelBooking(String bookingId) async {
-    await dio.patch('/bookings/$bookingId/cancel');
+  Future<void> cancelBooking(String id, {String? reason}) async {
+    await dio.delete('/bookings/$id', data: {'reason': reason ?? ''});
+  }
+
+  @override
+  Future<void> confirmPayment(String id) async {
+    await dio.post('/bookings/$id/confirm-payment');
   }
 
   @override
