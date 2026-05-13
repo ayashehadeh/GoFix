@@ -9,17 +9,26 @@ enum NotificationType {
 
   static NotificationType fromString(String value) {
     switch (value.toLowerCase()) {
+      // ── Backend types ──────────────────────────────────────────────────────
+      case 'booking_confirmation':
       case 'booking_confirmed':
       case 'bookingconfirmed':
         return NotificationType.bookingConfirmed;
+
+      case 'modifications_cancellations':
       case 'booking_declined':
       case 'bookingdeclined':
         return NotificationType.bookingDeclined;
+
       case 'booking_reminder':
       case 'bookingeminder':
         return NotificationType.bookingReminder;
+
+      case 'chat_messages':
       case 'message':
         return NotificationType.message;
+
+      // support_complaints, app_feedback → general
       default:
         return NotificationType.general;
     }

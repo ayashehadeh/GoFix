@@ -5,7 +5,13 @@ abstract class NotificationsEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadNotifications extends NotificationsEvent {}
+class LoadNotifications extends NotificationsEvent {
+  final String role;
+  LoadNotifications({this.role = 'customer'});
+
+  @override
+  List<Object?> get props => [role];
+}
 
 class SwitchNotificationsFilter extends NotificationsEvent {
   /// true = show all, false = show unread only
@@ -24,4 +30,10 @@ class MarkAsReadEvent extends NotificationsEvent {
   List<Object?> get props => [notificationId];
 }
 
-class MarkAllAsReadEvent extends NotificationsEvent {}
+class MarkAllAsReadEvent extends NotificationsEvent {
+  final String role;
+  MarkAllAsReadEvent({this.role = 'customer'});
+
+  @override
+  List<Object?> get props => [role];
+}

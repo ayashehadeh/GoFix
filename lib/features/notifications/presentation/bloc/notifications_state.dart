@@ -13,10 +13,12 @@ class NotificationsLoading extends NotificationsState {}
 class NotificationsLoaded extends NotificationsState {
   final List<NotificationItem> allNotifications;
   final bool showAll;
+  final String role;
 
   NotificationsLoaded({
     required this.allNotifications,
     required this.showAll,
+    this.role = 'customer',
   });
 
   /// Items shown in the list based on current tab filter
@@ -28,14 +30,16 @@ class NotificationsLoaded extends NotificationsState {
   NotificationsLoaded copyWith({
     List<NotificationItem>? allNotifications,
     bool? showAll,
+    String? role,
   }) =>
       NotificationsLoaded(
         allNotifications: allNotifications ?? this.allNotifications,
         showAll: showAll ?? this.showAll,
+        role: role ?? this.role,
       );
 
   @override
-  List<Object?> get props => [allNotifications, showAll];
+  List<Object?> get props => [allNotifications, showAll, role];
 }
 
 class NotificationsError extends NotificationsState {

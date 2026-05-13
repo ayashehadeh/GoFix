@@ -11,9 +11,11 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   const NotificationsRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<Either<Failure, List<NotificationItem>>> getNotifications() async {
+  Future<Either<Failure, List<NotificationItem>>> getNotifications({
+    String role = 'customer',
+  }) async {
     try {
-      final result = await remoteDataSource.getNotifications();
+      final result = await remoteDataSource.getNotifications(role: role);
       return Right(result);
     } on DioException catch (e) {
       return Left(_handleDioError(e));
@@ -35,9 +37,11 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   }
 
   @override
-  Future<Either<Failure, void>> markAllAsRead() async {
+  Future<Either<Failure, void>> markAllAsRead({
+    String role = 'customer',
+  }) async {
     try {
-      await remoteDataSource.markAllAsRead();
+      await remoteDataSource.markAllAsRead(role: role);
       return const Right(null);
     } on DioException catch (e) {
       return Left(_handleDioError(e));

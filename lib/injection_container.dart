@@ -141,7 +141,7 @@ import 'package:gp/features/professional_availability/data/datasources/availabil
 final sl = GetIt.instance;
 
 const bool _useMockBookings = true;
-const bool _useMockNotifications = true;
+const bool _useMockNotifications = false;
 const bool _useMockFavorites = false;
 const bool _useMockChat = true;
 const bool _useMockProfessionalDashboard = false;
@@ -395,8 +395,8 @@ sl.registerFactory(() => HomeBloc(getCategoriesUseCase: sl()));
     () => _useMockBookings ? MockBookingsDataSource() : BookingsRemoteDataSourceImpl(dio: sl()),
   );
   sl.registerLazySingleton<NotificationsRemoteDataSource>(
-    () => _useMockNotifications ? MockNotificationsDataSource() : NotificationsRemoteDataSourceImpl(dio: sl()),
-  );
+  () => NotificationsRemoteDataSourceImpl(dio: sl()),
+);
   sl.registerLazySingleton<AccountRemoteDataSource>(() => AccountRemoteDataSourceImpl(dio: sl()));
   sl.registerLazySingleton<AddressRemoteDataSource>(() => AddressRemoteDataSourceImpl(dio: sl()));
   sl.registerLazySingleton<NotificationSettingsRemoteDataSource>(
