@@ -16,7 +16,6 @@ import '../bloc/home_bloc.dart';
 import '../widgets/category_card.dart';
 import 'package:gp/features/search/presentation/bloc/search_bloc.dart';
 import 'package:gp/features/search/presentation/pages/search_page.dart';
-import '../../../core/utils/statuschecker.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

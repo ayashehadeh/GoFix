@@ -1,13 +1,17 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../injection_container.dart' as di;
 import '../../domain/entities/booking.dart';
-import 'booking_report_page.dart';
-import 'booking_review_page.dart';
+import '../bloc/bookings_bloc.dart';
+import '../bloc/bookings_event.dart';
+import '../bloc/bookings_state.dart';
+
+enum _Sheet { choose, review, report }
 
 class BookingFeedbackPage extends StatefulWidget {
   final Booking booking;
-
   const BookingFeedbackPage({super.key, required this.booking});
 
   @override
@@ -15,166 +19,100 @@ class BookingFeedbackPage extends StatefulWidget {
 }
 
 class _BookingFeedbackPageState extends State<BookingFeedbackPage> {
+  bool _sheetOpen = false;
+
+  // BookingsBloc reused across sheets
+  late final BookingsBloc _bookingsBloc = context.read<BookingsBloc>();
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
-    // Show the sheet automatically after the first frame so the blurred
-    // background (this page) is already visible when it opens.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _showFeedbackSheet());
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _openSheet(_Sheet.choose));
   }
 
-  void _showFeedbackSheet() {
+  void _goBackWithSnackbar(String message) {
+    // Pop BookingFeedbackPage → BookingInfoPage → land on MyBookingsPage
+    Navigator.of(context).pop();
+    Navigator.of(context).pop();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: const Color(0xFFFF8C1A),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    });
+  }
+
+  void _openSheet(_Sheet sheet) {
+    if (_sheetOpen) return;
+    _sheetOpen = true;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      isDismissible: true,
-      // When dismissed without choosing, go back
-      builder: (sheetContext) {
-        return Stack(
-          children: [
-            // ── Blurred + dimmed backdrop ─────────────────────────────────
-            BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-              child: Container(color: Colors.black.withOpacity(0.25)),
-            ),
-
-            // ── Sheet ─────────────────────────────────────────────────────
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(24, 28, 24, 40),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Drag handle
-                    Container(
-                      width: 40,
-                      height: 4,
-                      margin: const EdgeInsets.only(bottom: 24),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE0E0E0),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-
-                    const Text(
-                      'Leave Feedback',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primaryDark,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'What would you like to do?',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-
-                    // Write a Review
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(sheetContext);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  BookingReviewPage(booking: widget.booking),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryOrange,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: const Text(
-                          'Write a Review',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-
-                    // Report an Issue
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.pop(sheetContext);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  BookingReportPage(booking: widget.booking),
-                            ),
-                          );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primaryDark,
-                          side: const BorderSide(
-                            color: AppColors.primaryDark,
-                            width: 1.5,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        child: const Text(
-                          'Report an Issue',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+      isDismissible: sheet == _Sheet.choose,
+      enableDrag: sheet == _Sheet.choose,
+      builder: (sheetCtx) {
+        switch (sheet) {
+          case _Sheet.choose:
+            return _ChooseSheet(
+              onReviewChosen: () => Navigator.of(sheetCtx).pop('review'),
+              onReportChosen: () => Navigator.of(sheetCtx).pop('report'),
+            );
+          case _Sheet.review:
+            return _ReviewSheet(
+              booking: widget.booking,
+              onSuccess: () => Navigator.of(sheetCtx).pop('review_done'),
+            );
+          case _Sheet.report:
+            return BlocProvider.value(
+              value: _bookingsBloc,
+              child: _ReportSheet(
+                booking: widget.booking,
+                onSuccess: () => Navigator.of(sheetCtx).pop('report_done'),
               ),
-            ),
-          ],
-        );
+            );
+        }
       },
-    ).then((_) {
-      // If user dismisses the sheet by tapping the backdrop, go back
-      if (mounted) Navigator.of(context).maybePop();
+    ).then((result) {
+      _sheetOpen = false;
+      if (!mounted) return;
+
+      if (result == 'review') {
+        _openSheet(_Sheet.review);
+      } else if (result == 'report') {
+        _openSheet(_Sheet.report);
+      } else if (result == 'review_done') {
+        _goBackWithSnackbar('Review submitted successfully');
+      } else if (result == 'report_done') {
+        _goBackWithSnackbar('Report submitted successfully');
+      } else {
+        Navigator.of(context).maybePop();
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This page is the blurred background — shows booking details underneath
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: const BackButton(color: AppColors.primaryDark),
+        leading: const BackButton(color: Color(0xFF062B4D)),
         title: const Text(
           'Booking Information',
           style: TextStyle(
-            color: AppColors.primaryDark,
+            color: Color(0xFF062B4D),
             fontSize: 18,
             fontWeight: FontWeight.w700,
           ),
@@ -188,7 +126,6 @@ class _BookingFeedbackPageState extends State<BookingFeedbackPage> {
             _ProfessionalMiniCard(booking: widget.booking),
             const SizedBox(height: 16),
             _BookingDetailsSummary(booking: widget.booking),
-            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -196,69 +133,516 @@ class _BookingFeedbackPageState extends State<BookingFeedbackPage> {
   }
 }
 
-// ─── Sub-widgets ──────────────────────────────────────────────────────────────
+// ─── Sheet 1 — Choose ─────────────────────────────────────────────────────────
+
+class _ChooseSheet extends StatelessWidget {
+  final VoidCallback onReviewChosen;
+  final VoidCallback onReportChosen;
+  const _ChooseSheet(
+      {required this.onReviewChosen, required this.onReportChosen});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+          child: Container(color: Colors.black.withOpacity(0.25)),
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(24, 28, 24, 48),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _Handle(),
+                const Text('Leave Feedback',
+                    style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF062B4D))),
+                const SizedBox(height: 8),
+                const Text('What would you like to do?',
+                    style: TextStyle(fontSize: 14, color: Colors.grey)),
+                const SizedBox(height: 32),
+                _PrimaryBtn(label: 'Write a Review', onTap: onReviewChosen),
+                const SizedBox(height: 14),
+                _OutlineBtn(label: 'Report an Issue', onTap: onReportChosen),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Sheet 2 — Write a Review ─────────────────────────────────────────────────
+
+class _ReviewSheet extends StatefulWidget {
+  final Booking booking;
+  final VoidCallback onSuccess;
+  const _ReviewSheet({required this.booking, required this.onSuccess});
+
+  @override
+  State<_ReviewSheet> createState() => _ReviewSheetState();
+}
+
+class _ReviewSheetState extends State<_ReviewSheet> {
+  int _stars = 0;
+  bool _starError = false;
+  final _ctrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  bool _submitting = false;
+
+  Future<void> _submit(BuildContext context) async {
+    if (_stars == 0) {
+      setState(() => _starError = true);
+      return;
+    }
+    setState(() => _submitting = true);
+    // Small delay to show loading state, then call onSuccess
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (mounted) widget.onSuccess();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loading = _submitting;
+    return Stack(
+      children: [
+        BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+          child: Container(color: Colors.black.withOpacity(0.25)),
+        ),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.only(
+              left: 24,
+              right: 24,
+              top: 28,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 40,
+            ),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _Handle(),
+                  const Text('Write a Review',
+                      style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF062B4D))),
+                  const SizedBox(height: 6),
+                  const Text('How was the service?',
+                      style: TextStyle(fontSize: 14, color: Colors.grey)),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: List.generate(5, (i) {
+                      final s = i + 1;
+                      return GestureDetector(
+                        onTap: () => setState(() {
+                          _stars = s;
+                          _starError = false;
+                        }),
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: Icon(
+                            s <= _stars
+                                ? Icons.star_rounded
+                                : Icons.star_outline_rounded,
+                            color: const Color(0xFFFF8C1A),
+                            size: 38,
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                  if (_starError) ...[
+                    const SizedBox(height: 6),
+                    const Text('Please select a rating',
+                        style: TextStyle(fontSize: 12, color: Colors.red)),
+                  ],
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: _ctrl,
+                    maxLines: 4,
+                    decoration: InputDecoration(
+                      prefixIcon: const Padding(
+                        padding: EdgeInsets.only(left: 12, right: 8, top: 12),
+                        child: Icon(Icons.edit_outlined,
+                            color: Color(0xFFFF8C1A), size: 18),
+                      ),
+                      prefixIconConstraints: const BoxConstraints(),
+                      hintText: 'Write your feedback (optional)',
+                      hintStyle:
+                          const TextStyle(fontSize: 13, color: Colors.grey),
+                      filled: true,
+                      fillColor: const Color(0xFFF8F9FA),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.all(14),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  _PrimaryBtn(
+                    label: 'Submit Review',
+                    loading: loading,
+                    onTap: () => _submit(context),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Sheet 3 — Report an Issue ────────────────────────────────────────────────
+
+class _ReportSheet extends StatefulWidget {
+  final Booking booking;
+  final VoidCallback onSuccess;
+  const _ReportSheet({required this.booking, required this.onSuccess});
+
+  @override
+  State<_ReportSheet> createState() => _ReportSheetState();
+}
+
+class _ReportSheetState extends State<_ReportSheet> {
+  final _title = TextEditingController();
+  final _details = TextEditingController();
+  bool _titleErr = false;
+  bool _detailsErr = false;
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _details.dispose();
+    super.dispose();
+  }
+
+  bool _validate() {
+    setState(() {
+      _titleErr = _title.text.trim().isEmpty;
+      _detailsErr = _details.text.trim().isEmpty;
+    });
+    return !_titleErr && !_detailsErr;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<BookingsBloc, BookingsState>(
+      listener: (ctx, state) {
+        if (state is BookingActionSuccess) widget.onSuccess();
+        if (state is BookingsError) {
+          ScaffoldMessenger.of(ctx).showSnackBar(
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+          );
+        }
+      },
+      builder: (ctx, state) {
+        final loading = state is BookingActionLoading;
+        return Stack(
+          children: [
+            BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+              child: Container(color: Colors.black.withOpacity(0.25)),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.only(
+                  left: 24,
+                  right: 24,
+                  top: 28,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 40,
+                ),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _Handle(),
+                      const Text('Report an Issue',
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF062B4D))),
+                      const SizedBox(height: 6),
+                      const Text('Help us improve by reporting problems',
+                          style: TextStyle(fontSize: 14, color: Colors.grey)),
+                      const SizedBox(height: 24),
+                      _FieldLabel('Describe the issue'),
+                      const SizedBox(height: 8),
+                      _ReportField(
+                        ctrl: _title,
+                        hint: 'e.g. Technician arrived late',
+                        maxLines: 1,
+                        hasError: _titleErr,
+                        errText: 'Please describe the issue',
+                        onChange: (_) {
+                          if (_titleErr) setState(() => _titleErr = false);
+                        },
+                      ),
+                      const SizedBox(height: 18),
+                      _FieldLabel('Provide details'),
+                      const SizedBox(height: 8),
+                      _ReportField(
+                        ctrl: _details,
+                        hint: 'Provide details so our team can investigate.',
+                        maxLines: 4,
+                        hasError: _detailsErr,
+                        errText: 'Please provide details',
+                        onChange: (_) {
+                          if (_detailsErr) setState(() => _detailsErr = false);
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      _PrimaryBtn(
+                        label: 'Submit Report',
+                        loading: loading,
+                        onTap: () {
+                          if (_validate()) {
+                            ctx.read<BookingsBloc>().add(SubmitReportEvent(
+                                  bookingId: widget.booking.id,
+                                  description:
+                                      '${_title.text.trim()}\n\n${_details.text.trim()}',
+                                ));
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+// ─── Shared helpers ───────────────────────────────────────────────────────────
+
+class _Handle extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Center(
+        child: Container(
+          width: 40,
+          height: 4,
+          margin: const EdgeInsets.only(bottom: 24),
+          decoration: BoxDecoration(
+            color: const Color(0xFFE0E0E0),
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+      );
+}
+
+class _PrimaryBtn extends StatelessWidget {
+  final String label;
+  final bool loading;
+  final VoidCallback onTap;
+  const _PrimaryBtn(
+      {required this.label, required this.onTap, this.loading = false});
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: double.infinity,
+        height: 52,
+        child: ElevatedButton(
+          onPressed: loading ? null : onTap,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFFF8C1A),
+            foregroundColor: Colors.white,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            elevation: 0,
+          ),
+          child: loading
+              ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                      color: Colors.white, strokeWidth: 2))
+              : Text(label,
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w700)),
+        ),
+      );
+}
+
+class _OutlineBtn extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  const _OutlineBtn({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: double.infinity,
+        height: 52,
+        child: OutlinedButton(
+          onPressed: onTap,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFF062B4D),
+            side: const BorderSide(color: Color(0xFF062B4D), width: 1.5),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          ),
+          child: Text(label,
+              style:
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        ),
+      );
+}
+
+class _FieldLabel extends StatelessWidget {
+  final String label;
+  const _FieldLabel(this.label);
+
+  @override
+  Widget build(BuildContext context) => Row(
+        children: [
+          const Icon(Icons.edit_outlined, color: Color(0xFFFF8C1A), size: 16),
+          const SizedBox(width: 6),
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF062B4D))),
+        ],
+      );
+}
+
+class _ReportField extends StatelessWidget {
+  final TextEditingController ctrl;
+  final String hint;
+  final int maxLines;
+  final bool hasError;
+  final String errText;
+  final ValueChanged<String> onChange;
+  const _ReportField({
+    required this.ctrl,
+    required this.hint,
+    required this.maxLines,
+    required this.hasError,
+    required this.errText,
+    required this.onChange,
+  });
+
+  @override
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: ctrl,
+            maxLines: maxLines,
+            onChanged: onChange,
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: const TextStyle(fontSize: 13, color: Colors.grey),
+              filled: true,
+              fillColor:
+                  hasError ? const Color(0xFFFFF3F3) : const Color(0xFFF8F9FA),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: hasError
+                    ? const BorderSide(color: Colors.red, width: 1.5)
+                    : BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: hasError
+                    ? const BorderSide(color: Colors.red, width: 1.5)
+                    : BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.all(14),
+            ),
+          ),
+          if (hasError) ...[
+            const SizedBox(height: 4),
+            Text(errText,
+                style: const TextStyle(fontSize: 12, color: Colors.red)),
+          ],
+        ],
+      );
+}
+
+// ─── Background page widgets ──────────────────────────────────────────────────
 
 class _ProfessionalMiniCard extends StatelessWidget {
   final Booking booking;
   const _ProfessionalMiniCard({required this.booking});
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 26,
-            backgroundColor: const Color(0xFFE0E8F0),
-            backgroundImage: booking.professionalImageUrl != null
-                ? NetworkImage(booking.professionalImageUrl!)
-                : null,
-            child: booking.professionalImageUrl == null
-                ? const Icon(
-                    Icons.person,
-                    color: AppColors.primaryDark,
-                    size: 26,
-                  )
-                : null,
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                booking.professionalName,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primaryDark,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                booking.professionalRole,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8)
+          ],
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 26,
+              backgroundColor: const Color(0xFFE0E8F0),
+              backgroundImage: booking.professionalImageUrl != null
+                  ? NetworkImage(booking.professionalImageUrl!)
+                  : null,
+              child: booking.professionalImageUrl == null
+                  ? const Icon(Icons.person, color: Color(0xFF062B4D), size: 26)
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(booking.professionalName,
+                    style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF062B4D))),
+                const SizedBox(height: 2),
+                Text(booking.professionalRole,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              ],
+            ),
+          ],
+        ),
+      );
 }
 
 class _BookingDetailsSummary extends StatelessWidget {
@@ -266,88 +650,62 @@ class _BookingDetailsSummary extends StatelessWidget {
   const _BookingDetailsSummary({required this.booking});
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Booking Details',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: AppColors.primaryDark,
-            ),
-          ),
-          const SizedBox(height: 12),
-          _SummaryRow(icon: Icons.settings, text: booking.serviceName),
-          _SummaryRow(
-            icon: Icons.calendar_month_outlined,
-            text: booking.formattedDate,
-          ),
-          _SummaryRow(
-            icon: Icons.access_time_outlined,
-            text: booking.scheduledTime,
-          ),
-          _SummaryRow(
-            icon: Icons.location_on_outlined,
-            text: booking.address,
-            isLast: true,
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8)
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Booking Details',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF062B4D))),
+            const SizedBox(height: 12),
+            _DR(icon: Icons.settings, text: booking.serviceName),
+            _DR(
+                icon: Icons.calendar_month_outlined,
+                text: booking.formattedDate),
+            _DR(icon: Icons.access_time_outlined, text: booking.scheduledTime),
+            _DR(
+                icon: Icons.location_on_outlined,
+                text: booking.address,
+                isLast: true),
+          ],
+        ),
+      );
 }
 
-class _SummaryRow extends StatelessWidget {
+class _DR extends StatelessWidget {
   final IconData icon;
   final String text;
   final bool isLast;
-
-  const _SummaryRow({
-    required this.icon,
-    required this.text,
-    this.isLast = false,
-  });
+  const _DR({required this.icon, required this.text, this.isLast = false});
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            children: [
-              Icon(icon, color: AppColors.primaryOrange, size: 18),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  text,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: AppColors.primaryDark,
-                  ),
-                ),
-              ),
-            ],
+  Widget build(BuildContext context) => Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                Icon(icon, color: const Color(0xFFFF8C1A), size: 18),
+                const SizedBox(width: 12),
+                Expanded(
+                    child: Text(text,
+                        style: const TextStyle(
+                            fontSize: 13, color: Color(0xFF062B4D)))),
+              ],
+            ),
           ),
-        ),
-        if (!isLast) const Divider(height: 1, color: Color(0xFFF0F0F0)),
-      ],
-    );
-  }
+          if (!isLast) const Divider(height: 1, color: Color(0xFFF0F0F0)),
+        ],
+      );
 }

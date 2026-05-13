@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/usecases/usecase.dart';
-import '../../domain/entities/availability_entity.dart';
 import '../../domain/usecases/get_availability.dart';
 import '../../domain/usecases/save_availability.dart';
 import 'availability_event.dart';

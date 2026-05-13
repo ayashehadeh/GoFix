@@ -130,7 +130,7 @@ class _AvailabilityForm extends StatelessWidget {
                         UpdateAvailabilityToggle(isAvailable: value),
                       );
                 },
-                activeColor: AppColors.primaryOrange,
+                activeThumbColor: AppColors.primaryOrange,
               ),
             ],
           ),

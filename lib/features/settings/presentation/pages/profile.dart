@@ -41,7 +41,7 @@ import 'package:gp/features/settings/data/repositories/account_repository_impl.d
 import 'package:gp/features/settings/data/datasources/account_remote_datasource.dart';
 
 // Auth + Locale
-import 'package:gp/features/auth/pages/start_page.dart';
+import 'package:gp/features/auth/presentation/pages/start_page.dart';
 import 'package:gp/core/bloc/locale_bloc.dart';
 
 final _dio = GetIt.instance<Dio>();

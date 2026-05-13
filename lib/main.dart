@@ -11,7 +11,9 @@ import 'package:gp/features/professional_dashboard/presentation/bloc/professiona
 import 'package:gp/features/professional_dashboard/presentation/pages/professional_dashboard_screen.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/injection_container.dart' as di;
-import 'package:gp/features/auth/pages/start_page.dart';
+import 'package:gp/features/auth/presentation/pages/start_page.dart';
+import 'package:gp/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:gp/features/professional_jobs/presentation/pages/my_jobs_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +43,15 @@ class MainApp extends StatelessWidget {
             ],
             supportedLocales: const [Locale('en'), Locale('ar')],
             // EVERYONE starts at StartPage (login)
-            home: const StartPage(),
+/*
+
+            home: BlocProvider(
+              create: (_) => di.sl<AuthBloc>(),
+              child: const StartPage(),
+            ),
+            
+*/
+            home: const HomePage(),
             routes: {
               '/home': (_) => const HomePage(),
               '/bookings': (_) => BlocProvider(
@@ -49,7 +59,10 @@ class MainApp extends StatelessWidget {
                     child: const MyBookingsPage(),
                   ),
               '/profile': (_) => const ProfilePage(),
-              '/login': (_) => const StartPage(),
+              '/login': (_) => BlocProvider(
+                    create: (_) => di.sl<AuthBloc>(),
+                    child: const StartPage(),
+                  ),
               '/dashboard': (_) => BlocProvider(
                     create: (_) => di.sl<ProfessionalDashboardBloc>(),
                     child: const ProfessionalDashboardScreen(

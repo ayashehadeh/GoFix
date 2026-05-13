@@ -13,7 +13,7 @@ class ProfessionalStatusChecker {
     try {
       final token = await TokenStorage.getToken();
 
-      print('🔍 DEBUG: Token exists: ${token != null && token!.isNotEmpty}');
+      print('🔍 DEBUG: Token exists: ${token != null && token.isNotEmpty}');
 
       // If no token, user is not logged in
       if (token == null || token.isEmpty) {

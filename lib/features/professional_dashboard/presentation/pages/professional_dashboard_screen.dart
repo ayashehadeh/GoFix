@@ -8,14 +8,16 @@ import '../bloc/professional_dashboard_state.dart';
 import '../../../professional_availability/presentation/bloc/availability_bloc.dart';
 import '../../../professional_availability/presentation/pages/my_availability_screen.dart';
 import '../../../../injection_container.dart' as di;
+import 'package:gp/features/professional_jobs/presentation/pages/my_jobs_page.dart';
+import 'package:gp/features/professional_jobs/presentation/bloc/professional_jobs_bloc.dart';
 
 class ProfessionalDashboardScreen extends StatefulWidget {
   final String professionalName;
 
   const ProfessionalDashboardScreen({
-    Key? key,
+    super.key,
     this.professionalName = 'Hazim',
-  }) : super(key: key);
+  });
 
   @override
   State<ProfessionalDashboardScreen> createState() =>
@@ -601,13 +603,17 @@ class _ProfessionalDashboardScreenState
               );
             },
           ),
-          _buildMenuItem(
-            'My Jobs',
-            Icons.work_outline,
-            () {
-              // Navigate to jobs
-            },
-          ),
+          _buildMenuItem('My Jobs', Icons.work_outline, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BlocProvider(
+                  create: (_) => di.sl<ProfessionalJobsBloc>(),
+                  child: const MyJobsPage(),
+                ),
+              ),
+            );
+          }),
           _buildMenuItem(
             'My Profile',
             Icons.person_outline,
