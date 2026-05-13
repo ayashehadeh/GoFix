@@ -1,4 +1,4 @@
-import '../models/notification_model.dart';
+/* import '../models/notification_model.dart';
 import '../../domain/entities/notification_item.dart';
 import 'notifications_remote_datasource.dart';
 
@@ -86,12 +86,12 @@ class MockNotificationsDataSource implements NotificationsRemoteDataSource {
     ),
   ];
 
-  @override
+  /* @override
   Future<List<NotificationModel>> getNotifications() async {
     // Simulate a brief network delay so loading states are visible.
     await Future.delayed(const Duration(milliseconds: 600));
     return List.unmodifiable(_items);
-  }
+  } */
 
   @override
   Future<void> markAsRead(String notificationId) async {
@@ -108,7 +108,7 @@ class MockNotificationsDataSource implements NotificationsRemoteDataSource {
       );
     }
   }
-
+/* 
   @override
   Future<void> markAllAsRead() async {
     await Future.delayed(const Duration(milliseconds: 200));
@@ -122,5 +122,6 @@ class MockNotificationsDataSource implements NotificationsRemoteDataSource {
         createdAt: _items[i].createdAt,
       );
     }
-  }
+  } */
 }
+ */

@@ -6,5 +6,6 @@ class MarkAllNotificationsAsRead {
   final NotificationsRepository repository;
   const MarkAllNotificationsAsRead(this.repository);
 
-  Future<Either<Failure, void>> call() => repository.markAllAsRead();
+  Future<Either<Failure, void>> call({String role = 'customer'}) =>
+      repository.markAllAsRead(role: role);
 }

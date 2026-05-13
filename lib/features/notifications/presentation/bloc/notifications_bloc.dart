@@ -27,12 +27,13 @@ class NotificationsBloc
     Emitter<NotificationsState> emit,
   ) async {
     emit(NotificationsLoading());
-    final result = await getNotifications();
+    final result = await getNotifications(role: event.role);
     result.fold(
       (failure) => emit(NotificationsError(failure.message)),
       (items) => emit(NotificationsLoaded(
         allNotifications: items,
         showAll: true,
+        role: event.role,
       )),
     );
   }
@@ -80,7 +81,7 @@ class NotificationsBloc
     emit(current.copyWith(allNotifications: updated));
 
     // API call; revert on failure
-    final result = await markAllNotificationsAsRead();
+    final result = await markAllNotificationsAsRead(role: event.role);
     result.fold(
       (_) => emit(current),
       (_) => null,

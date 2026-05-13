@@ -1,23 +1,43 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:gp/core/bloc/locale_bloc.dart';
-import 'package:gp/features/home/presentation/bloc/home_bloc.dart';
-import 'package:gp/features/home/presentation/pages/home_page.dart';
-import 'package:gp/features/settings/presentation/pages/profile.dart';
-import 'package:gp/features/bookings/presentation/bloc/bookings_bloc.dart';
-import 'package:gp/features/bookings/presentation/pages/my_bookings_page.dart';
-import 'package:gp/features/professional_dashboard/presentation/bloc/professional_dashboard_bloc.dart';
-import 'package:gp/features/professional_dashboard/presentation/pages/professional_dashboard_screen.dart';
-import 'package:gp/l10n/app_localizations.dart';
-import 'package:gp/injection_container.dart' as di;
-import 'package:gp/features/auth/pages/start_page.dart';
 import 'package:gp/core/storage/token_storage.dart';
 import 'package:gp/core/storage/user_type_storage.dart';
+import 'package:gp/features/bookings/presentation/bloc/bookings_bloc.dart';
+import 'package:gp/features/bookings/presentation/pages/my_bookings_page.dart';
+import 'package:gp/features/home/presentation/bloc/home_bloc.dart';
+import 'package:gp/features/home/presentation/pages/home_page.dart';
+import 'package:gp/features/professional_dashboard/presentation/bloc/professional_dashboard_bloc.dart';
+import 'package:gp/features/professional_dashboard/presentation/pages/professional_dashboard_screen.dart';
+import 'package:gp/features/settings/presentation/pages/profile.dart';
+import 'package:gp/injection_container.dart' as di;
+import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/features/auth/pages/start_page.dart';
+import 'package:dio/dio.dart';
+
+// Handle background messages (must be top-level function)
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
+  await Firebase.initializeApp();
+
+  // Handle background messages
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   await di.init();
+
+  // Send FCM token to backend if user is logged in
+  await _registerFcmToken();
+
   runApp(
     MultiBlocProvider(
       providers: [
@@ -27,6 +47,32 @@ Future<void> main() async {
       child: const MainApp(),
     ),
   );
+}
+
+/// Gets the FCM token and sends it to the backend.
+Future<void> _registerFcmToken() async {
+  try {
+    final isLoggedIn = await TokenStorage.isLoggedIn();
+    if (!isLoggedIn) return;
+
+    final token = await TokenStorage.getToken();
+    if (token == null) return;
+
+    final fcmToken = await FirebaseMessaging.instance.getToken();
+    if (fcmToken == null) return;
+
+    final dio = Dio(BaseOptions(
+      baseUrl: 'https://gofix-api-ceaaewf7hua0ghez.uaenorth-01.azurewebsites.net/api',
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    ));
+
+    await dio.put('/auth/fcm-token', data: {'fcmToken': fcmToken});
+  } catch (_) {
+    // Don't crash the app if FCM token registration fails
+  }
 }
 
 class MainApp extends StatelessWidget {
