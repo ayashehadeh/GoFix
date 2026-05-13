@@ -13,7 +13,6 @@ import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/injection_container.dart' as di;
 import 'package:gp/features/auth/presentation/pages/start_page.dart';
 import 'package:gp/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:gp/features/professional_jobs/presentation/pages/my_jobs_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

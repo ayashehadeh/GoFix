@@ -1,8 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../injection_container.dart' as di;
 import '../../domain/entities/booking.dart';
 import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
