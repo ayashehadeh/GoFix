@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,7 +15,7 @@ abstract class ChatRemoteDataSource {
       String professionalId, String professionalName);
 }
 
-/// Real implementation — swap to this when backend is ready.
+/// Real implementation — connected to GoFix backend.
 class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   final Dio dio;
   ChatRemoteDataSourceImpl({required this.dio});
@@ -36,15 +37,36 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   @override
   Future<ChatMessageModel> sendMessage(
       String chatId, String text, String type, String? attachmentPath) async {
+    String? attachmentUrl;
+
+    // For image/file messages, upload the attachment first
+    if ((type == 'image' || type == 'file') && attachmentPath != null) {
+      attachmentUrl = await _uploadAttachment(chatId, attachmentPath);
+    }
+
     final response = await dio.post(
       '/chats/$chatId/messages',
       data: {
         'text': text,
         'type': type,
-        'attachmentPath': attachmentPath,
+        if (attachmentUrl != null) 'attachmentUrl': attachmentUrl,
       },
     );
     return ChatMessageModel.fromJson(response.data['data']);
+  }
+
+  /// Uploads a file to /chats/{chatId}/attachments and returns its public URL.
+  Future<String> _uploadAttachment(String chatId, String filePath) async {
+    final file = File(filePath);
+    final fileName = file.path.split('/').last;
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(filePath, filename: fileName),
+    });
+    final response = await dio.post(
+      '/chats/$chatId/attachments',
+      data: formData,
+    );
+    return response.data['data']['url'] as String;
   }
 
   @override
@@ -63,8 +85,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }
 }
 
-/// Mock that persists to SharedPreferences so messages survive
-/// between sessions. Singleton ensures the same data across screens.
+/// Mock that persists to SharedPreferences — kept intact for offline dev.
 class MockChatDataSource implements ChatRemoteDataSource {
   static final MockChatDataSource _instance = MockChatDataSource._internal();
   factory MockChatDataSource() => _instance;
@@ -152,17 +173,16 @@ class MockChatDataSource implements ChatRemoteDataSource {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
-
     if (difference.inDays == 0) {
       return DateFormat('h:mm a').format(date);
     } else if (difference.inDays == 1) {
       return 'Yesterday';
     } else if (difference.inDays < 7) {
-      return DateFormat('EEEE').format(date); // Day name
+      return DateFormat('EEEE').format(date);
     } else if (difference.inDays < 365) {
-      return DateFormat('MMM d').format(date); // Jan 15
+      return DateFormat('MMM d').format(date);
     } else {
-      return DateFormat('MMM d, yyyy').format(date); // Jan 15, 2024
+      return DateFormat('MMM d, yyyy').format(date);
     }
   }
 
@@ -218,10 +238,7 @@ class MockChatDataSource implements ChatRemoteDataSource {
     final updated = [...messages, newMsg];
     await prefs.setString(
         key, jsonEncode(updated.map((m) => m.toJson()).toList()));
-
-    // Update chat preview timestamp
     await _updateChatTimestamp(chatId);
-
     return newMsg;
   }
 
@@ -260,24 +277,16 @@ class MockChatDataSource implements ChatRemoteDataSource {
     await Future.delayed(const Duration(milliseconds: 200));
     final prefs = await SharedPreferences.getInstance();
     final chats = await getChats();
-
-    // Check if chat already exists
     final existing = chats.where((c) => c.id == professionalId).toList();
-    if (existing.isNotEmpty) {
-      return existing.first;
-    }
-
-    // Create new chat
+    if (existing.isNotEmpty) return existing.first;
     final newChat = ChatPreviewModel(
       id: professionalId,
       name: professionalName,
       timeAgo: _formatDate(DateTime.now()),
     );
-
     final updatedChats = [newChat, ...chats];
     await prefs.setString(
         _chatsKey, jsonEncode(updatedChats.map((c) => c.toJson()).toList()));
-
     return newChat;
   }
 

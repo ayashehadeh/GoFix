@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/chat_entity.dart';
 import '../../domain/repositories/chat_repository.dart';
@@ -14,7 +15,7 @@ class ChatRepositoryImpl implements ChatRepository {
       final result = await dataSource.getChats();
       return Right(result);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(_mapFailure(e));
     }
   }
 
@@ -25,7 +26,7 @@ class ChatRepositoryImpl implements ChatRepository {
       final result = await dataSource.getMessages(chatId);
       return Right(result);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(_mapFailure(e));
     }
   }
 
@@ -41,7 +42,7 @@ class ChatRepositoryImpl implements ChatRepository {
           await dataSource.sendMessage(chatId, text, type, attachmentPath);
       return Right(result);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(_mapFailure(e));
     }
   }
 
@@ -51,7 +52,7 @@ class ChatRepositoryImpl implements ChatRepository {
       await dataSource.deleteChat(chatId);
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(_mapFailure(e));
     }
   }
 
@@ -67,7 +68,24 @@ class ChatRepositoryImpl implements ChatRepository {
       );
       return Right(result);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(_mapFailure(e));
     }
+  }
+
+  Failure _mapFailure(Object error) {
+    if (error is DioException) {
+      final data = error.response?.data;
+      final message = data is Map<String, dynamic> ? data['message'] : null;
+      if (message is String && message.trim().isNotEmpty) {
+        return ServerFailure(message);
+      }
+
+      if (error.response?.statusCode != null) {
+        return const ServerFailure(
+            'Unable to open chat. Please try again later.');
+      }
+    }
+
+    return ServerFailure(error.toString());
   }
 }
