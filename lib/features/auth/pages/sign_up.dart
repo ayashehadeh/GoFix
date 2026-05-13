@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gp/core/storage/token_storage.dart';
+import 'package:gp/core/storage/user_type_storage.dart';
 import 'package:gp/features/auth/services/auth_service.dart';
 import 'package:gp/core/theme/app_colors.dart';
 import 'package:gp/l10n/app_localizations.dart';
@@ -84,6 +85,7 @@ class _SignupFormState extends State<_SignupForm> {
       );
 
       // Navigate to home
+      await UserTypeStorage.clear(); // ADD THIS
       Navigator.of(context).pushReplacementNamed('/home');
     } catch (e) {
       _showError(e.toString().replaceAll('Exception: ', ''));

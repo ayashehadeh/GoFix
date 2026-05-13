@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
+import 'package:gp/features/professionals/presentation/pages/professional_detail_page.dart';
+import 'package:gp/injection_container.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../bloc/favorites_bloc.dart';
 import '../../domain/entities/favorite_entity.dart';
@@ -34,12 +37,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
             fontSize: 20,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.menu, color: AppColors.primaryDark),
-            onPressed: () {},
-          ),
-        ],
+        
       ),
       body: BlocBuilder<FavoritesBloc, FavoritesState>(
         builder: (context, state) {
@@ -90,7 +88,16 @@ class _FavoriteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+        return GestureDetector(                          // ADD THIS
+      onTap: () => Navigator.push(                  // ADD THIS
+        context,                                    // ADD THIS
+        MaterialPageRoute(                          // ADD THIS
+          builder: (_) => BlocProvider(             // ADD THIS
+            create: (_) => sl<ProfessionalsBloc>(), // ADD THIS
+child: ProfessionalDetailPage(id: item.id, professionalId: item.id),          ),                                        // ADD THIS
+        ),                                          // ADD THIS
+      ),                                            // ADD THIS
+    child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -158,6 +165,6 @@ class _FavoriteCard extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }

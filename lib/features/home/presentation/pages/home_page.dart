@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:gp/core/utils/professional_nav_mixin.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/gofix_bottom_nav_bar.dart';
@@ -23,18 +24,23 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with ProfessionalNavMixin<HomePage> {
   final int _currentNavIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    loadProfessionalStatus();
     final currentState = context.read<HomeBloc>().state;
     if (currentState is! HomeLoaded) {
       context.read<HomeBloc>().add(HomeLoadRequested());
     }
+
+    
   }
 
+ 
   void _onCategoryTap(CategoryEntity category) {
     final serviceCategory = ServiceCategory.values.firstWhere(
       (e) => e.displayName == category.name,
@@ -95,10 +101,12 @@ class _HomePageState extends State<HomePage> {
       ),
       bottomNavigationBar: GoFixBottomNavBar(
         currentIndex: _currentNavIndex,
+        showDashboard: isProfessional,
         onTap: (index) {
           if (index == 0) return;
           if (index == 1) Navigator.pushReplacementNamed(context, '/bookings');
           if (index == 2) Navigator.pushReplacementNamed(context, '/profile');
+          if (index == 3) Navigator.pushReplacementNamed(context, '/dashboard');
         },
       ),
     );
@@ -121,7 +129,8 @@ class _HomePageState extends State<HomePage> {
             Text(state.message, style: AppTextStyles.bodyMedium),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => context.read<HomeBloc>().add(HomeLoadRequested()),
+              onPressed: () =>
+                  context.read<HomeBloc>().add(HomeLoadRequested()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryOrange,
                 shape: RoundedRectangleBorder(
@@ -237,7 +246,6 @@ class _HomeHeader extends StatelessWidget {
                   ),
                 ],
               ),
-              // Notification bell — navigates to NotificationsPage
               GestureDetector(
                 onTap: onNotificationTap,
                 child: SvgPicture.asset(

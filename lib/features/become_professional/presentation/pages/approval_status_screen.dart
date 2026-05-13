@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:gp/features/professional_availability/presentation/bloc/availability_bloc.dart';
+import 'package:gp/features/professional_availability/presentation/pages/my_availability_screen.dart';
+import 'package:gp/injection_container.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../bloc/application_status_bloc.dart';
 import '../bloc/application_status_event.dart';
@@ -16,8 +19,7 @@ class ApprovalStatusScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ApplicationStatusBloc, ApplicationStatusState>(
       builder: (context, state) {
-        if (state is ApplicationStatusLoading ||
-            state is ApplicationStatusInitial) {
+        if (state is ApplicationStatusLoading || state is ApplicationStatusInitial) {
           return const Scaffold(
             backgroundColor: Colors.white,
             body: Center(
@@ -36,27 +38,21 @@ class ApprovalStatusScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline,
-                        color: AppColors.error, size: 48),
+                    const Icon(Icons.error_outline, color: AppColors.error, size: 48),
                     const SizedBox(height: 12),
                     Text(
                       state.message,
                       textAlign: TextAlign.center,
-                      style:
-                          const TextStyle(color: AppColors.textSecondary),
+                      style: const TextStyle(color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: () => context
-                          .read<ApplicationStatusBloc>()
-                          .add(const LoadApplicationStatus()),
+                      onPressed: () => context.read<ApplicationStatusBloc>().add(const LoadApplicationStatus()),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryOrange,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text('Retry',
-                          style: TextStyle(color: Colors.white)),
+                      child: const Text('Retry', style: TextStyle(color: Colors.white)),
                     ),
                   ],
                 ),
@@ -87,7 +83,6 @@ class ApprovalStatusScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       elevation: 0,
       leading: const BackButton(color: AppColors.primaryDark),
-      
       centerTitle: false,
     );
   }
@@ -107,13 +102,10 @@ class _ApprovedScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: const BackButton(color: AppColors.primaryDark),
-        
       ),
       body: RefreshIndicator(
         color: AppColors.primaryOrange,
-        onRefresh: () async => context
-            .read<ApplicationStatusBloc>()
-            .add(const RefreshApplicationStatus()),
+        onRefresh: () async => context.read<ApplicationStatusBloc>().add(const RefreshApplicationStatus()),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -172,7 +164,14 @@ class _ApprovedScreen extends StatelessWidget {
                 height: 52,
                 child: ElevatedButton(
                   onPressed: () {
-                    // TODO: Navigator.push to SetAvailabilityScreen
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => BlocProvider(
+                          create: (_) => sl<AvailabilityBloc>(),
+                          child: const MyAvailabilityScreen(),
+                        ),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryOrange,
@@ -214,13 +213,10 @@ class _NotApprovedScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: const BackButton(color: AppColors.primaryDark),
-        
       ),
       body: RefreshIndicator(
         color: AppColors.primaryOrange,
-        onRefresh: () async => context
-            .read<ApplicationStatusBloc>()
-            .add(const RefreshApplicationStatus()),
+        onRefresh: () async => context.read<ApplicationStatusBloc>().add(const RefreshApplicationStatus()),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -249,8 +245,7 @@ class _NotApprovedScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                status.rejectionReason ??
-                    'Your application is currently under review.',
+                status.rejectionReason ?? 'Your application is currently under review.',
                 style: const TextStyle(
                   fontSize: 14,
                   height: 1.6,
@@ -319,7 +314,6 @@ class _IncompleteScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: const BackButton(color: AppColors.primaryDark),
-       
       ),
       body: Center(
         child: Padding(
