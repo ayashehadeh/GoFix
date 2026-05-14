@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/storage/user_type_storage.dart';
 import '../../domain/entities/notification_item.dart';
 import '../bloc/notifications_bloc.dart';
 import '../bloc/notifications_event.dart';
@@ -15,10 +16,26 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
+  bool _isProfessional = false;
+  String _selectedRole = 'customer';
+
   @override
   void initState() {
     super.initState();
-    context.read<NotificationsBloc>().add(LoadNotifications());
+    _init();
+  }
+
+  Future<void> _init() async {
+    final isPro = await UserTypeStorage.isProfessional();
+    if (!mounted) return;
+    setState(() => _isProfessional = isPro);
+    context.read<NotificationsBloc>().add(LoadNotifications(role: 'customer'));
+  }
+
+  void _switchRole(String role) {
+    if (_selectedRole == role) return;
+    setState(() => _selectedRole = role);
+    context.read<NotificationsBloc>().add(LoadNotifications(role: role));
   }
 
   @override
@@ -27,7 +44,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
       backgroundColor: const Color(0xFFF5F6FA),
       body: Column(
         children: [
-          const _NotificationsHeader(),
+          _NotificationsHeader(
+            isProfessional: _isProfessional,
+            selectedRole: _selectedRole,
+            onRoleSwitch: _switchRole,
+          ),
           Expanded(
             child: BlocBuilder<NotificationsBloc, NotificationsState>(
               builder: (context, state) {
@@ -43,7 +64,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   return _ErrorBody(
                     message: state.message,
                     onRetry: () => context.read<NotificationsBloc>().add(
-                      LoadNotifications(),
+                      LoadNotifications(role: _selectedRole),
                     ),
                   );
                 }
@@ -65,7 +86,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
 // ─── Header ───────────────────────────────────────────────────────────────────
 
 class _NotificationsHeader extends StatelessWidget {
-  const _NotificationsHeader();
+  final bool isProfessional;
+  final String selectedRole;
+  final void Function(String) onRoleSwitch;
+
+  const _NotificationsHeader({
+    required this.isProfessional,
+    required this.selectedRole,
+    required this.onRoleSwitch,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -81,66 +110,138 @@ class _NotificationsHeader extends StatelessWidget {
         top: MediaQuery.of(context).padding.top + 12,
         left: 8,
         right: 16,
-        bottom: 20,
+        bottom: isProfessional ? 16 : 20,
       ),
-      child: Row(
+      child: Column(
         children: [
-          // Back button
-          IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.white,
-              size: 20,
-            ),
-            onPressed: () => Navigator.pop(context),
+          Row(
+            children: [
+              // Back button
+              IconButton(
+                icon: const Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                onPressed: () => Navigator.pop(context),
+              ),
+
+              // Title
+              const Expanded(
+                child: Text(
+                  'Notifications',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+
+              // Mark all button
+              BlocBuilder<NotificationsBloc, NotificationsState>(
+                builder: (context, state) {
+                  final hasUnread =
+                      state is NotificationsLoaded && state.unreadCount > 0;
+                  return GestureDetector(
+                    onTap: hasUnread
+                        ? () => context.read<NotificationsBloc>().add(
+                              MarkAllAsReadEvent(role: selectedRole),
+                            )
+                        : null,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.check,
+                          color: hasUnread ? Colors.white : Colors.white38,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Mark all',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: hasUnread ? Colors.white : Colors.white38,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
 
-          // Title
-          const Expanded(
-            child: Text(
-              'Notifications',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
+          // ── Customer / Professional role tabs (only for professionals) ──
+          if (isProfessional) ...[
+            const SizedBox(height: 12),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  _RoleTab(
+                    label: 'Customer',
+                    isSelected: selectedRole == 'customer',
+                    onTap: () => onRoleSwitch('customer'),
+                  ),
+                  _RoleTab(
+                    label: 'Professional',
+                    isSelected: selectedRole == 'professional',
+                    onTap: () => onRoleSwitch('professional'),
+                  ),
+                ],
               ),
             ),
-          ),
-
-          // Mark all button
-          BlocBuilder<NotificationsBloc, NotificationsState>(
-            builder: (context, state) {
-              final hasUnread =
-                  state is NotificationsLoaded && state.unreadCount > 0;
-              return GestureDetector(
-                onTap: hasUnread
-                    ? () => context.read<NotificationsBloc>().add(
-                        MarkAllAsReadEvent(),
-                      )
-                    : null,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.check,
-                      color: hasUnread ? Colors.white : Colors.white38,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Mark all',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: hasUnread ? Colors.white : Colors.white38,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+            const SizedBox(height: 4),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+// ─── Role tab (Customer / Professional) ──────────────────────────────────────
+
+class _RoleTab extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _RoleTab({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: isSelected ? AppColors.primaryDark : Colors.white70,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -159,7 +260,7 @@ class _NotificationsBody extends StatelessWidget {
 
     return Column(
       children: [
-        // Filter tabs
+        // All / Unread filter tabs
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
           child: _FilterTabRow(showAll: state.showAll),
@@ -190,17 +291,17 @@ class _FilterTabRow extends StatelessWidget {
         _FilterTab(
           label: 'All',
           isSelected: showAll,
-          onTap: () => context.read<NotificationsBloc>().add(
-            SwitchNotificationsFilter(true),
-          ),
+          onTap: () => context
+              .read<NotificationsBloc>()
+              .add(SwitchNotificationsFilter(true)),
         ),
         const SizedBox(width: 8),
         _FilterTab(
           label: 'Unread',
           isSelected: !showAll,
-          onTap: () => context.read<NotificationsBloc>().add(
-            SwitchNotificationsFilter(false),
-          ),
+          onTap: () => context
+              .read<NotificationsBloc>()
+              .add(SwitchNotificationsFilter(false)),
         ),
       ],
     );
@@ -245,14 +346,13 @@ class _FilterTab extends StatelessWidget {
   }
 }
 
-// ─── Grouped list (Yesterday / Earlier) ──────────────────────────────────────
+// ─── Grouped list (Today / Yesterday / Earlier) ───────────────────────────────
 
 class _GroupedList extends StatelessWidget {
   final List<NotificationItem> notifications;
 
   const _GroupedList({required this.notifications});
 
-  /// Groups notifications by date label: "Today", "Yesterday", "Earlier"
   Map<String, List<NotificationItem>> _group(List<NotificationItem> items) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -285,13 +385,9 @@ class _GroupedList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final groups = _group(notifications);
-
-    // Maintain display order: Today → Yesterday → Earlier
-    final orderedKeys = [
-      'Today',
-      'Yesterday',
-      'Earlier',
-    ].where((k) => groups.containsKey(k)).toList();
+    final orderedKeys = ['Today', 'Yesterday', 'Earlier']
+        .where((k) => groups.containsKey(k))
+        .toList();
 
     return ListView.builder(
       padding: const EdgeInsets.only(top: 8, bottom: 24),
@@ -300,12 +396,10 @@ class _GroupedList extends StatelessWidget {
         (sum, key) => sum + 1 + (groups[key]?.length ?? 0),
       ),
       itemBuilder: (context, index) {
-        // Flatten groups into a single index space
         int cursor = 0;
         for (final key in orderedKeys) {
           final items = groups[key]!;
           if (index == cursor) {
-            // Section header
             return _SectionHeader(label: key);
           }
           cursor++;
@@ -315,9 +409,9 @@ class _GroupedList extends StatelessWidget {
               notification: item,
               onTap: () {
                 if (!item.isRead) {
-                  context.read<NotificationsBloc>().add(
-                    MarkAsReadEvent(item.id),
-                  );
+                  context
+                      .read<NotificationsBloc>()
+                      .add(MarkAsReadEvent(item.id));
                 }
               },
             );

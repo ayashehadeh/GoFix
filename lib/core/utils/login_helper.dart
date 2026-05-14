@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gp/core/utils/statuschecker.dart';
+import 'package:gp/core/storage/user_type_storage.dart'; // add this
 import 'package:gp/injection_container.dart' as di;
 
 class LoginHelper {
-  /// After successful login, navigate to correct screen based on user role
   static Future<void> navigateAfterLogin(BuildContext context) async {
-    // Check if user is professional from backend API
     final checker = ProfessionalStatusChecker(di.sl());
     final status = await checker.checkStatus();
 
@@ -15,10 +14,10 @@ class LoginHelper {
     if (!context.mounted) return;
 
     if (isProfessional) {
-      // Professional user → Go to Dashboard
+      await UserTypeStorage.setAsProfessional(name); // ADD THIS
       Navigator.of(context).pushReplacementNamed('/dashboard');
     } else {
-      // Regular user → Go to Home
+      await UserTypeStorage.clear(); // ADD THIS — clears if they were previously professional
       Navigator.of(context).pushReplacementNamed('/home');
     }
   }

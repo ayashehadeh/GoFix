@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "699151262779",
+    "project_id": "gofix-d9b1f",
+    "storage_bucket": "gofix-d9b1f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:699151262779:android:cd609484581888265e281e",
+        "android_client_info": {
+          "package_name": "com.example.gp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqgc-adVtp87AOJhvUhMXgsT3N_4NW1_Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

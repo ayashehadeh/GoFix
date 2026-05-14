@@ -7,17 +7,13 @@ import '../bloc/professional_dashboard_event.dart';
 import '../bloc/professional_dashboard_state.dart';
 import '../../../professional_availability/presentation/bloc/availability_bloc.dart';
 import '../../../professional_availability/presentation/pages/my_availability_screen.dart';
+import '../../../../core/widgets/gofix_bottom_nav_bar.dart';
 import '../../../../injection_container.dart' as di;
-import 'package:gp/features/professional_jobs/presentation/pages/my_jobs_page.dart';
-import 'package:gp/features/professional_jobs/presentation/bloc/professional_jobs_bloc.dart';
+import 'package:gp/core/utils/user_info_helper.dart';
 
 class ProfessionalDashboardScreen extends StatefulWidget {
-  final String professionalName;
-
-  const ProfessionalDashboardScreen({
-    super.key,
-    this.professionalName = 'Hazim',
-  });
+  const ProfessionalDashboardScreen({Key? key})
+      : super(key: key); // remove professionalName param
 
   @override
   State<ProfessionalDashboardScreen> createState() =>
@@ -26,10 +22,18 @@ class ProfessionalDashboardScreen extends StatefulWidget {
 
 class _ProfessionalDashboardScreenState
     extends State<ProfessionalDashboardScreen> {
+  String _userName = '';
   @override
   void initState() {
     super.initState();
     context.read<ProfessionalDashboardBloc>().add(LoadDashboard());
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    // ADD THIS
+    final name = await UserInfoHelper.getFullName();
+    if (mounted) setState(() => _userName = name);
   }
 
   @override
@@ -39,6 +43,8 @@ class _ProfessionalDashboardScreenState
       body: SafeArea(
         child:
             BlocConsumer<ProfessionalDashboardBloc, ProfessionalDashboardState>(
+          listenWhen: (_, current) =>
+              current is RequestActionSuccess || current is RequestActionError,
           listener: (context, state) {
             if (state is RequestActionSuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -56,6 +62,10 @@ class _ProfessionalDashboardScreenState
               );
             }
           },
+          buildWhen: (_, current) =>
+              current is DashboardLoading ||
+              current is DashboardLoaded ||
+              current is DashboardError,
           builder: (context, state) {
             if (state is DashboardLoading) {
               return const Center(child: CircularProgressIndicator());
@@ -66,17 +76,13 @@ class _ProfessionalDashboardScreenState
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'Error: ${state.message}',
-                      style: const TextStyle(color: Colors.red),
-                    ),
+                    Text('Error: ${state.message}',
+                        style: const TextStyle(color: Colors.red)),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () {
-                        context
-                            .read<ProfessionalDashboardBloc>()
-                            .add(RefreshDashboard());
-                      },
+                      onPressed: () => context
+                          .read<ProfessionalDashboardBloc>()
+                          .add(RefreshDashboard()),
                       child: const Text('Retry'),
                     ),
                   ],
@@ -114,7 +120,18 @@ class _ProfessionalDashboardScreenState
           },
         ),
       ),
-      bottomNavigationBar: _buildBottomNav(context),
+      bottomNavigationBar: GoFixBottomNavBar(
+        currentIndex: 3,
+        showDashboard: true,
+        onTap: (index) {
+          if (index == 0) Navigator.of(context).pushReplacementNamed('/home');
+          if (index == 1)
+            Navigator.of(context).pushReplacementNamed('/bookings');
+          if (index == 2)
+            Navigator.of(context).pushReplacementNamed('/profile');
+          if (index == 3) return; // already here
+        },
+      ),
     );
   }
 
@@ -135,7 +152,6 @@ class _ProfessionalDashboardScreenState
         ),
         child: Column(
           children: [
-            // Header part
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
               child: Row(
@@ -143,7 +159,7 @@ class _ProfessionalDashboardScreenState
                 children: [
                   Expanded(
                     child: Text(
-                      'Good ${_getTimeOfDay()}, ${widget.professionalName}',
+                      'Good ${_getTimeOfDay()}, $_userName',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -153,14 +169,9 @@ class _ProfessionalDashboardScreenState
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.notifications, color: Colors.white),
-                  ),
                 ],
               ),
             ),
-            // Stats part
             Container(
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
               decoration: const BoxDecoration(
@@ -173,28 +184,17 @@ class _ProfessionalDashboardScreenState
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStatCard(
-                    '${state.stats.requestsCount}',
-                    'Requests',
-                  ),
+                  _buildStatCard('${state.stats.requestsCount}', 'Requests'),
                   Container(
-                    width: 1,
-                    height: 40,
-                    color: Colors.white.withOpacity(0.2),
-                  ),
-                  _buildStatCard(
-                    '${state.stats.scheduledCount}',
-                    'Scheduled',
-                  ),
+                      width: 1,
+                      height: 40,
+                      color: Colors.white.withOpacity(0.2)),
+                  _buildStatCard('${state.stats.scheduledCount}', 'Scheduled'),
                   Container(
-                    width: 1,
-                    height: 40,
-                    color: Colors.white.withOpacity(0.2),
-                  ),
-                  _buildStatCard(
-                    '${state.stats.completedCount}',
-                    'Completed',
-                  ),
+                      width: 1,
+                      height: 40,
+                      color: Colors.white.withOpacity(0.2)),
+                  _buildStatCard('${state.stats.completedCount}', 'Completed'),
                 ],
               ),
             ),
@@ -216,25 +216,18 @@ class _ProfessionalDashboardScreenState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            count,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          Text(count,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
-              fontSize: 11,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+          Text(label,
+              style:
+                  TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 11),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis),
         ],
       ),
     );
@@ -249,21 +242,13 @@ class _ProfessionalDashboardScreenState
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Scheduled Jobs',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A3A5C),
-                ),
-              ),
+              const Text('Scheduled Jobs',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1A3A5C))),
               if (state.scheduledJobs.isNotEmpty)
-                TextButton(
-                  onPressed: () {
-                    // Navigate to all scheduled jobs
-                  },
-                  child: const Text('See All'),
-                ),
+                TextButton(onPressed: () {}, child: const Text('See All')),
             ],
           ),
         ),
@@ -274,22 +259,17 @@ class _ProfessionalDashboardScreenState
               ? Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      'No scheduled jobs yet',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 16,
-                      ),
-                    ),
+                    child: Text('No scheduled jobs yet',
+                        style:
+                            TextStyle(color: Colors.grey[600], fontSize: 16)),
                   ),
                 )
               : ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   itemCount: state.scheduledJobs.length,
-                  itemBuilder: (context, index) {
-                    return _buildScheduledJobCard(state.scheduledJobs[index]);
-                  },
+                  itemBuilder: (context, index) =>
+                      _buildScheduledJobCard(state.scheduledJobs[index]),
                 ),
         ),
       ],
@@ -306,10 +286,9 @@ class _ProfessionalDashboardScreenState
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2))
         ],
       ),
       child: Column(
@@ -321,29 +300,22 @@ class _ProfessionalDashboardScreenState
                 radius: 20,
                 backgroundColor: const Color(0xFF1A3A5C),
                 child: Text(
-                  job.clientName[0].toUpperCase(),
-                  style: const TextStyle(color: Colors.white),
-                ),
+                    job.clientName.isNotEmpty
+                        ? job.clientName[0].toUpperCase()
+                        : '?',
+                    style: const TextStyle(color: Colors.white)),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      job.clientName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      job.serviceType,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 14,
-                      ),
-                    ),
+                    Text(job.clientName,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(job.serviceType,
+                        style:
+                            TextStyle(color: Colors.grey[600], fontSize: 14)),
                   ],
                 ),
               ),
@@ -356,11 +328,9 @@ class _ProfessionalDashboardScreenState
                   size: 16, color: Colors.grey[600]),
               const SizedBox(width: 4),
               Expanded(
-                child: Text(
-                  job.location,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                  overflow: TextOverflow.ellipsis,
-                ),
+                child: Text(job.location,
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                    overflow: TextOverflow.ellipsis),
               ),
             ],
           ),
@@ -369,29 +339,22 @@ class _ProfessionalDashboardScreenState
             children: [
               Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
               const SizedBox(width: 4),
-              Text(
-                DateFormat('MMM d, h:mm a').format(job.scheduledTime),
-                style: TextStyle(color: Colors.grey[600], fontSize: 14),
-              ),
+              Text(DateFormat('MMM d, h:mm a').format(job.scheduledTime),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 14)),
             ],
           ),
           const Spacer(),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                _showStatusUpdateDialog(job.id);
-              },
+              onPressed: () => _showStatusUpdateDialog(job.id, job.status),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFE87722),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                    borderRadius: BorderRadius.circular(8)),
               ),
-              child: const Text(
-                'Update Status',
-                style: TextStyle(color: Colors.white),
-              ),
+              child: const Text('Update Status',
+                  style: TextStyle(color: Colors.white)),
             ),
           ),
         ],
@@ -408,21 +371,13 @@ class _ProfessionalDashboardScreenState
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Incoming Requests',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1A3A5C),
-                ),
-              ),
+              const Text('Incoming Requests',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1A3A5C))),
               if (state.incomingRequests.isNotEmpty)
-                TextButton(
-                  onPressed: () {
-                    // Navigate to all requests
-                  },
-                  child: const Text('See All'),
-                ),
+                TextButton(onPressed: () {}, child: const Text('See All')),
             ],
           ),
         ),
@@ -433,22 +388,17 @@ class _ProfessionalDashboardScreenState
               ? Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      'No incoming requests',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 16,
-                      ),
-                    ),
+                    child: Text('No incoming requests',
+                        style:
+                            TextStyle(color: Colors.grey[600], fontSize: 16)),
                   ),
                 )
               : ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   itemCount: state.incomingRequests.length,
-                  itemBuilder: (context, index) {
-                    return _buildRequestCard(state.incomingRequests[index]);
-                  },
+                  itemBuilder: (context, index) =>
+                      _buildRequestCard(state.incomingRequests[index]),
                 ),
         ),
       ],
@@ -465,10 +415,9 @@ class _ProfessionalDashboardScreenState
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2))
         ],
       ),
       child: Column(
@@ -480,29 +429,22 @@ class _ProfessionalDashboardScreenState
                 radius: 20,
                 backgroundColor: const Color(0xFF1A3A5C),
                 child: Text(
-                  request.clientName[0].toUpperCase(),
-                  style: const TextStyle(color: Colors.white),
-                ),
+                    request.clientName.isNotEmpty
+                        ? request.clientName[0].toUpperCase()
+                        : '?',
+                    style: const TextStyle(color: Colors.white)),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      request.clientName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      request.serviceType,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 14,
-                      ),
-                    ),
+                    Text(request.clientName,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(request.serviceType,
+                        style:
+                            TextStyle(color: Colors.grey[600], fontSize: 14)),
                   ],
                 ),
               ),
@@ -515,11 +457,9 @@ class _ProfessionalDashboardScreenState
                   size: 16, color: Colors.grey[600]),
               const SizedBox(width: 4),
               Expanded(
-                child: Text(
-                  request.location,
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                  overflow: TextOverflow.ellipsis,
-                ),
+                child: Text(request.location,
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                    overflow: TextOverflow.ellipsis),
               ),
             ],
           ),
@@ -528,10 +468,8 @@ class _ProfessionalDashboardScreenState
             children: [
               Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
               const SizedBox(width: 4),
-              Text(
-                DateFormat('MMM d, h:mm a').format(request.scheduledTime),
-                style: TextStyle(color: Colors.grey[600], fontSize: 14),
-              ),
+              Text(DateFormat('MMM d, h:mm a').format(request.scheduledTime),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 14)),
             ],
           ),
           const Spacer(),
@@ -539,41 +477,31 @@ class _ProfessionalDashboardScreenState
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () {
-                    context
-                        .read<ProfessionalDashboardBloc>()
-                        .add(DeclineRequest(request.id));
-                  },
+                  onPressed: () => context
+                      .read<ProfessionalDashboardBloc>()
+                      .add(DeclineRequest(request.id)),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.red),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                        borderRadius: BorderRadius.circular(8)),
                   ),
-                  child: const Text(
-                    'Decline',
-                    style: TextStyle(color: Colors.red),
-                  ),
+                  child: const Text('Decline',
+                      style: TextStyle(color: Colors.red)),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {
-                    context
-                        .read<ProfessionalDashboardBloc>()
-                        .add(AcceptRequest(request.id));
-                  },
+                  onPressed: () => context
+                      .read<ProfessionalDashboardBloc>()
+                      .add(AcceptRequest(request.id)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE87722),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                        borderRadius: BorderRadius.circular(8)),
                   ),
-                  child: const Text(
-                    'Accept',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  child: const Text('Accept',
+                      style: TextStyle(color: Colors.white)),
                 ),
               ),
             ],
@@ -588,46 +516,20 @@ class _ProfessionalDashboardScreenState
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
-          _buildMenuItem(
-            'My Availability',
-            Icons.schedule,
-            () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => BlocProvider(
-                    create: (_) => di.sl<AvailabilityBloc>(),
-                    child: const MyAvailabilityScreen(),
-                  ),
-                ),
-              );
-            },
-          ),
-          _buildMenuItem('My Jobs', Icons.work_outline, () {
+          _buildMenuItem('My Availability', Icons.schedule, () {
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => BlocProvider(
-                  create: (_) => di.sl<ProfessionalJobsBloc>(),
-                  child: const MyJobsPage(),
+                  create: (_) => di.sl<AvailabilityBloc>(),
+                  child: const MyAvailabilityScreen(),
                 ),
               ),
             );
           }),
-          _buildMenuItem(
-            'My Profile',
-            Icons.person_outline,
-            () {
-              // Navigate to profile
-            },
-          ),
-          _buildMenuItem(
-            'My Earnings',
-            Icons.attach_money,
-            () {
-              // Navigate to earnings
-            },
-          ),
+          _buildMenuItem('My Jobs', Icons.work_outline, () {}),
+          _buildMenuItem('My Profile', Icons.person_outline, () {}),
+          _buildMenuItem('My Earnings', Icons.attach_money, () {}),
         ],
       ),
     );
@@ -639,21 +541,15 @@ class _ProfessionalDashboardScreenState
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: Colors.grey[300]!),
-          ),
+          border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
         ),
         child: Row(
           children: [
             Icon(icon, color: const Color(0xFF1A3A5C)),
             const SizedBox(width: 16),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            Text(title,
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             const Spacer(),
             const Icon(Icons.chevron_right, color: Colors.grey),
           ],
@@ -662,105 +558,28 @@ class _ProfessionalDashboardScreenState
     );
   }
 
-  Widget _buildBottomNav(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(Icons.home, 'Home', false, () {
-                Navigator.of(context).pushReplacementNamed('/home');
-              }),
-              _buildNavItem(Icons.calendar_today, 'Bookings', false, () {
-                Navigator.of(context).pushReplacementNamed('/bookings');
-              }),
-              _buildNavItem(Icons.person, 'Profile', false, () {
-                Navigator.of(context).pushReplacementNamed('/profile');
-              }),
-              _buildNavItem(Icons.handyman, 'Dashboard', true, () {
-                // Already on dashboard
-              }),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // Status dialog — uses correct backend status values
+  void _showStatusUpdateDialog(String jobId, JobStatus currentStatus) {
+    final next = {
+      JobStatus.scheduled: MapEntry('OnTheWay', 'On The Way'),
+      JobStatus.onTheWay: MapEntry('InProgress', 'In Progress'),
+      JobStatus.inProgress: MapEntry('Completed', 'Completed'),
+    }[currentStatus];
 
-  Widget _buildNavItem(
-      IconData icon, String label, bool isActive, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            color: isActive ? const Color(0xFFE87722) : Colors.grey,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: isActive ? const Color(0xFFE87722) : Colors.grey,
-              fontSize: 12,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-            ),
-          ),
-          if (isActive)
-            Container(
-              margin: const EdgeInsets.only(top: 4),
-              height: 3,
-              width: 20,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE87722),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+    if (next == null) return;
 
-  void _showStatusUpdateDialog(String jobId) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Update Job Status'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: const Text('In Progress'),
-              onTap: () {
-                this.context.read<ProfessionalDashboardBloc>().add(
-                      UpdateStatus(jobId, 'in_progress'),
-                    );
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text('Completed'),
-              onTap: () {
-                this.context.read<ProfessionalDashboardBloc>().add(
-                      UpdateStatus(jobId, 'completed'),
-                    );
-                Navigator.pop(context);
-              },
-            ),
-          ],
+        content: ListTile(
+          title: Text(next.value),
+          onTap: () {
+            this.context.read<ProfessionalDashboardBloc>().add(
+                  UpdateStatus(jobId, next.key),
+                );
+            Navigator.pop(context);
+          },
         ),
       ),
     );

@@ -3,39 +3,36 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/availability_model.dart';
 
 abstract class AvailabilityLocalDataSource {
-  Future<AvailabilityModel> getAvailability();
-  Future<void> saveAvailability(AvailabilityModel availability);
+  Future<AvailabilityModel?> getCachedAvailability();
+  Future<void> cacheAvailability(AvailabilityModel availability);
+  Future<void> clearCache();
 }
 
 class AvailabilityLocalDataSourceImpl implements AvailabilityLocalDataSource {
   final SharedPreferences sharedPreferences;
-  static const String _availabilityKey = 'professional_availability';
+  static const String _cacheKey = 'professional_availability';
 
   AvailabilityLocalDataSourceImpl({required this.sharedPreferences});
 
+  // Returns null if nothing cached yet — caller decides the default.
   @override
-  Future<AvailabilityModel> getAvailability() async {
-    final jsonString = sharedPreferences.getString(_availabilityKey);
-
-    if (jsonString == null) {
-      // Return default availability if nothing saved
-      return const AvailabilityModel(
-        isAvailable: true,
-        workingDays: [],
-        fromHour: 7,
-        fromMinute: 0,
-        toHour: 13,
-        toMinute: 0,
-      );
-    }
-
+  Future<AvailabilityModel?> getCachedAvailability() async {
+    final jsonString = sharedPreferences.getString(_cacheKey);
+    if (jsonString == null) return null;
     final jsonMap = jsonDecode(jsonString) as Map<String, dynamic>;
     return AvailabilityModel.fromJson(jsonMap);
   }
 
   @override
-  Future<void> saveAvailability(AvailabilityModel availability) async {
-    final jsonString = jsonEncode(availability.toJson());
-    await sharedPreferences.setString(_availabilityKey, jsonString);
+  Future<void> cacheAvailability(AvailabilityModel availability) async {
+    await sharedPreferences.setString(
+      _cacheKey,
+      jsonEncode(availability.toJson()),
+    );
+  }
+
+  @override
+  Future<void> clearCache() async {
+    await sharedPreferences.remove(_cacheKey);
   }
 }

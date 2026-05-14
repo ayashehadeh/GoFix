@@ -44,7 +44,7 @@ class ProfessionalStatusChecker {
 
       try {
         final response = await _dio.get(
-          '/professional/application-status',
+          '/professionals/profile/application-status', // FIXED: correct endpoint
           options: Options(
             headers: {'Authorization': 'Bearer $token'},
           ),
@@ -52,7 +52,8 @@ class ProfessionalStatusChecker {
 
         print('📋 DEBUG: Application Status API Response: ${response.data}');
 
-        final data = response.data;
+        // FIXED: unwrap ApiResponse wrapper → { success, message, data: { status, ... } }
+        final data = response.data['data'] as Map<String, dynamic>;
 
         // Check if status is "approved"
         final status = data['status']?.toString().toLowerCase();

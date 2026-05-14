@@ -1,26 +1,52 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/features/professional_availability/domain/usecases/get_availability.dart';
 import '../../../../core/usecases/usecase.dart';
-import '../../domain/usecases/get_availability.dart';
+import '../../domain/entities/availability_entity.dart';
 import '../../domain/usecases/save_availability.dart';
 import 'availability_event.dart';
 import 'availability_state.dart';
 
 class AvailabilityBloc extends Bloc<AvailabilityEvent, AvailabilityState> {
   final GetAvailability getAvailability;
-  final SaveAvailability saveAvailability;
+  final SaveWorkingHours saveWorkingHours;
+  final ToggleAvailability toggleAvailability;
 
   AvailabilityBloc({
     required this.getAvailability,
-    required this.saveAvailability,
+    required this.saveWorkingHours,
+    required this.toggleAvailability,
   }) : super(AvailabilityInitial()) {
-    on<LoadAvailability>(_onLoadAvailability);
-    on<SaveAvailabilityEvent>(_onSaveAvailability);
-    on<UpdateAvailabilityToggle>(_onUpdateToggle);
-    on<UpdateWorkingDay>(_onUpdateWorkingDay);
-    on<UpdateWorkingHours>(_onUpdateWorkingHours);
+    on<LoadAvailability>(_onLoad);
+    on<ToggleAvailabilityEvent>(_onToggleAvailability);
+    on<ToggleWorkingDay>(_onToggleWorkingDay);
+    on<UpdateDaySchedule>(_onUpdateDaySchedule);
+    on<SaveWorkingHoursEvent>(_onSaveWorkingHours);
   }
 
-  Future<void> _onLoadAvailability(
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  /// Builds a full 7-day map from a list of DaySchedule.
+  /// Days not in the list get null (= day off).
+  Map<String, DaySchedule?> _buildScheduleMap(List<DaySchedule> schedules) {
+    final map = <String, DaySchedule?>{
+      for (final day in AvailabilityEntity.orderedDays) day: null,
+    };
+    for (final s in schedules) {
+      map[s.day] = s;
+    }
+    return map;
+  }
+
+  /// Default schedule applied when a day is toggled on for the first time.
+  DaySchedule _defaultSchedule(String day) => DaySchedule(
+        day: day,
+        openTime: '08:00',
+        closeTime: '17:00',
+      );
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
+
+  Future<void> _onLoad(
     LoadAvailability event,
     Emitter<AvailabilityState> emit,
   ) async {
@@ -29,89 +55,106 @@ class AvailabilityBloc extends Bloc<AvailabilityEvent, AvailabilityState> {
     final result = await getAvailability(NoParams());
 
     result.fold(
-      (failure) =>
-          emit(const AvailabilityError(message: 'Failed to load availability')),
-      (availability) {
-        // Convert workingDays list to Map
-        final selectedDays = {
-          'Sun': false,
-          'Mon': false,
-          'Tue': false,
-          'Wed': false,
-          'Thu': false,
-          'Fri': false,
-          'Sat': false,
-        };
-
-        for (var day in availability.workingDays) {
-          if (selectedDays.containsKey(day)) {
-            selectedDays[day] = true;
-          }
-        }
-
-        emit(AvailabilityLoaded(
-          isAvailable: availability.isAvailable,
-          selectedDays: selectedDays,
-          fromHour: availability.fromHour,
-          fromMinute: availability.fromMinute,
-          toHour: availability.toHour,
-          toMinute: availability.toMinute,
-        ));
-      },
+      (failure) => emit(AvailabilityError(message: failure.message)),
+      (entity) => emit(AvailabilityLoaded(
+        isAvailable: entity.isAvailable,
+        schedules: _buildScheduleMap(entity.schedules),
+      )),
     );
   }
 
-  Future<void> _onSaveAvailability(
-    SaveAvailabilityEvent event,
+  Future<void> _onToggleAvailability(
+    ToggleAvailabilityEvent event,
     Emitter<AvailabilityState> emit,
   ) async {
-    emit(AvailabilitySaving());
+    if (state is! AvailabilityLoaded) return;
+    final current = state as AvailabilityLoaded;
 
-    final result = await saveAvailability(
-      SaveAvailabilityParams(availability: event.availability),
+    // Optimistic UI — update toggle immediately, show subtle loading state
+    emit(AvailabilityTogglingAvailability(
+      isAvailable: event.isAvailable,
+      schedules: current.schedules,
+    ));
+
+    final result = await toggleAvailability(
+      ToggleAvailabilityParams(isAvailable: event.isAvailable),
     );
 
     result.fold(
-      (failure) =>
-          emit(const AvailabilityError(message: 'Failed to save availability')),
-      (_) => emit(AvailabilitySaved()),
+      (failure) {
+        // Revert on failure
+        emit(current);
+        emit(AvailabilityError(message: failure.message));
+      },
+      (_) => emit(AvailabilityLoaded(
+        isAvailable: event.isAvailable,
+        schedules: current.schedules,
+      )),
     );
   }
 
-  void _onUpdateToggle(
-    UpdateAvailabilityToggle event,
+  void _onToggleWorkingDay(
+    ToggleWorkingDay event,
     Emitter<AvailabilityState> emit,
   ) {
-    if (state is AvailabilityLoaded) {
-      final currentState = state as AvailabilityLoaded;
-      emit(currentState.copyWith(isAvailable: event.isAvailable));
+    if (state is! AvailabilityLoaded) return;
+    final current = state as AvailabilityLoaded;
+
+    final updatedSchedules = Map<String, DaySchedule?>.from(current.schedules);
+
+    if (current.isWorkingDay(event.day)) {
+      // Day is on → turn it off
+      updatedSchedules[event.day] = null;
+    } else {
+      // Day is off → turn it on with default hours
+      updatedSchedules[event.day] = _defaultSchedule(event.day);
     }
+
+    emit(current.copyWith(schedules: updatedSchedules));
   }
 
-  void _onUpdateWorkingDay(
-    UpdateWorkingDay event,
+  void _onUpdateDaySchedule(
+    UpdateDaySchedule event,
     Emitter<AvailabilityState> emit,
   ) {
-    if (state is AvailabilityLoaded) {
-      final currentState = state as AvailabilityLoaded;
-      final updatedDays = Map<String, bool>.from(currentState.selectedDays);
-      updatedDays[event.day] = event.isSelected;
-      emit(currentState.copyWith(selectedDays: updatedDays));
-    }
+    if (state is! AvailabilityLoaded) return;
+    final current = state as AvailabilityLoaded;
+
+    final updatedSchedules = Map<String, DaySchedule?>.from(current.schedules);
+    updatedSchedules[event.day] = DaySchedule(
+      day: event.day,
+      openTime: event.openTime,
+      closeTime: event.closeTime,
+    );
+
+    emit(current.copyWith(schedules: updatedSchedules));
   }
 
-  void _onUpdateWorkingHours(
-    UpdateWorkingHours event,
+  Future<void> _onSaveWorkingHours(
+    SaveWorkingHoursEvent event,
     Emitter<AvailabilityState> emit,
-  ) {
-    if (state is AvailabilityLoaded) {
-      final currentState = state as AvailabilityLoaded;
-      emit(currentState.copyWith(
-        fromHour: event.fromHour,
-        fromMinute: event.fromMinute,
-        toHour: event.toHour,
-        toMinute: event.toMinute,
-      ));
-    }
+  ) async {
+    if (state is! AvailabilityLoaded) return;
+    final current = state as AvailabilityLoaded;
+
+    emit(AvailabilitySaving(
+      isAvailable: current.isAvailable,
+      schedules: current.schedules,
+    ));
+
+    final result = await saveWorkingHours(
+      SaveWorkingHoursParams(schedules: current.workingSchedules),
+    );
+
+    result.fold(
+      (failure) {
+        emit(current);
+        emit(AvailabilityError(message: failure.message));
+      },
+      (_) => emit(AvailabilitySaved(
+        isAvailable: current.isAvailable,
+        schedules: current.schedules,
+      )),
+    );
   }
 }

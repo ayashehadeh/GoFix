@@ -7,6 +7,8 @@ class GetNotifications {
   final NotificationsRepository repository;
   const GetNotifications(this.repository);
 
-  Future<Either<Failure, List<NotificationItem>>> call() =>
-      repository.getNotifications();
+  Future<Either<Failure, List<NotificationItem>>> call({
+    String role = 'customer',
+  }) =>
+      repository.getNotifications(role: role);
 }

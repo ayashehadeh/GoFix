@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:gp/core/constants/app_colors.dart';
+import 'package:gp/core/utils/professional_nav_mixin.dart';
 import 'package:gp/core/widgets/gofix_bottom_nav_bar.dart';
 import 'package:gp/features/become_professional/domain/entities/application_status_entity.dart';
 import 'package:gp/features/become_professional/domain/usecases/get_application_status.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/injection_container.dart' as di;
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
+import 'package:gp/core/utils/user_info_helper.dart';
 
 // Notifications
 import 'package:gp/features/settings/presentation/bloc/notification_settings_bloc.dart';
@@ -22,10 +24,7 @@ import 'package:gp/features/settings/data/datasources/notification_settings_remo
 
 // Set Password
 import 'package:gp/features/settings/presentation/bloc/set_password_bloc.dart';
-import 'package:gp/features/settings/presentation/pages/set_new_password_screen.dart';
-import 'package:gp/features/settings/domain/usecases/set_new_password_usecase.dart';
-import 'package:gp/features/settings/data/repositories/set_password_repository_impl.dart';
-import 'package:gp/features/settings/data/datasources/set_password_remote_datasource.dart';
+import 'package:gp/features/settings/presentation/pages/verify_current_password_screen.dart';
 
 // Addresses
 import 'package:gp/features/settings/presentation/bloc/address_bloc.dart';
@@ -53,7 +52,21 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage> with ProfessionalNavMixin<ProfilePage> {
+  String _userName = '';
+  @override
+  void initState() {
+    super.initState();
+    loadProfessionalStatus();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    // ADD THIS METHOD
+    final name = await UserInfoHelper.getFullName();
+    if (mounted) setState(() => _userName = name);
+  }
+
   AccountBloc _createAccountBloc() => AccountBloc(
         logout: LogoutUseCase(
           AccountRepositoryImpl(AccountRemoteDataSourceImpl(dio: _dio)),
@@ -125,31 +138,17 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(height: 8),
             Row(
               children: const [
-                Icon(
-                  Icons.email_outlined,
-                  color: AppColors.primaryOrange,
-                  size: 18,
-                ),
+                Icon(Icons.email_outlined, color: AppColors.primaryOrange, size: 18),
                 SizedBox(width: 8),
-                Text(
-                  'support@gofix.com',
-                  style: TextStyle(color: AppColors.primaryDark),
-                ),
+                Text('support@gofix.com', style: TextStyle(color: AppColors.primaryDark)),
               ],
             ),
             const SizedBox(height: 8),
             Row(
               children: const [
-                Icon(
-                  Icons.phone_outlined,
-                  color: AppColors.primaryOrange,
-                  size: 18,
-                ),
+                Icon(Icons.phone_outlined, color: AppColors.primaryOrange, size: 18),
                 SizedBox(width: 8),
-                Text(
-                  '+962 79 000 0000',
-                  style: TextStyle(color: AppColors.primaryDark),
-                ),
+                Text('+962 79 000 0000', style: TextStyle(color: AppColors.primaryDark)),
               ],
             ),
             const SizedBox(height: 24),
@@ -173,11 +172,10 @@ class _ProfilePageState extends State<ProfilePage> {
     final result = await di.sl<GetApplicationStatus>()();
 
     if (!mounted) return;
-    navigator.pop(); // dismiss loading
+    navigator.pop();
 
     result.fold(
       (_) {
-        // API error — assume not yet submitted, go to stepper
         navigator.push(
           MaterialPageRoute(builder: (_) => const StepperScreen()),
         );
@@ -202,21 +200,9 @@ class _ProfilePageState extends State<ProfilePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            question,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              color: AppColors.primaryDark,
-            ),
-          ),
+          Text(question, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.primaryDark)),
           const SizedBox(height: 4),
-          Text(
-            answer,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 13,
-            ),
-          ),
+          Text(answer, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
         ],
       ),
     );
@@ -238,8 +224,7 @@ class _ProfilePageState extends State<ProfilePage> {
       builder: (sheetContext) => BlocProvider(
         create: (_) => _createAccountBloc(),
         child: StatefulBuilder(
-          builder: (context, setState) =>
-              BlocConsumer<AccountBloc, AccountState>(
+          builder: (context, setState) => BlocConsumer<AccountBloc, AccountState>(
             listener: (context, state) {
               if (state is FeedbackSuccess) {
                 Navigator.pop(context);
@@ -280,33 +265,19 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Text(
-                      t.rateExperience,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primaryDark,
-                      ),
-                    ),
+                    Text(t.rateExperience,
+                        style:
+                            const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primaryDark)),
                     const SizedBox(height: 4),
-                    Text(
-                      t.feedbackHelps,
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 13,
-                      ),
-                    ),
+                    Text(t.feedbackHelps, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(5, (index) {
                         return GestureDetector(
-                          onTap: () =>
-                              setState(() => selectedStars = index + 1),
+                          onTap: () => setState(() => selectedStars = index + 1),
                           child: Icon(
-                            index < selectedStars
-                                ? Icons.star
-                                : Icons.star_border,
+                            index < selectedStars ? Icons.star : Icons.star_border,
                             color: AppColors.primaryOrange,
                             size: 36,
                           ),
@@ -319,10 +290,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       maxLines: 4,
                       decoration: InputDecoration(
                         hintText: t.shareFeedback,
-                        hintStyle: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 13,
-                        ),
+                        hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
                         filled: true,
                         fillColor: Colors.grey[100],
                         border: OutlineInputBorder(
@@ -348,30 +316,18 @@ class _ProfilePageState extends State<ProfilePage> {
                               },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryOrange,
-                          disabledBackgroundColor:
-                              AppColors.primaryOrange.withOpacity(0.6),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
+                          disabledBackgroundColor: AppColors.primaryOrange.withOpacity(0.6),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                           elevation: 0,
                         ),
                         child: isLoading
                             ? const SizedBox(
                                 height: 22,
                                 width: 22,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2.5,
-                                ),
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
                               )
-                            : Text(
-                                t.submit,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
+                            : Text(t.submit,
+                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                       ),
                     ),
                   ],
@@ -403,10 +359,7 @@ class _ProfilePageState extends State<ProfilePage> {
             }
             if (state is AccountError) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: AppColors.error,
-                ),
+                SnackBar(content: Text(state.message), backgroundColor: AppColors.error),
               );
             }
           },
@@ -420,65 +373,34 @@ class _ProfilePageState extends State<ProfilePage> {
                   Container(
                     width: 40,
                     height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+                    decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
                   ),
                   const SizedBox(height: 24),
-                  Text(
-                    t.deleteAccountTitle,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryDark,
-                    ),
-                  ),
+                  Text(t.deleteAccountTitle,
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.primaryDark)),
                   const SizedBox(height: 8),
-                  Text(
-                    t.deleteAccountMessage,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
-                    ),
-                  ),
+                  Text(t.deleteAccountMessage,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
                   const SizedBox(height: 28),
                   SizedBox(
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: isLoading
-                          ? null
-                          : () => context.read<AccountBloc>().add(
-                                const DeleteAccountEvent(),
-                              ),
+                      onPressed: isLoading ? null : () => context.read<AccountBloc>().add(const DeleteAccountEvent()),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryOrange,
-                        disabledBackgroundColor:
-                            AppColors.primaryOrange.withOpacity(0.6),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
+                        disabledBackgroundColor: AppColors.primaryOrange.withOpacity(0.6),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                         elevation: 0,
                       ),
                       child: isLoading
                           ? const SizedBox(
                               height: 22,
                               width: 22,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.5,
-                              ),
-                            )
-                          : Text(
-                              t.yesDelete,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+                          : Text(t.yesDelete,
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -489,18 +411,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: Colors.grey[300]!),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       ),
-                      child: Text(
-                        t.noKeep,
-                        style: const TextStyle(
-                          color: AppColors.primaryDark,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
+                      child: Text(t.noKeep,
+                          style:
+                              const TextStyle(color: AppColors.primaryDark, fontWeight: FontWeight.bold, fontSize: 16)),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -535,28 +450,13 @@ class _ProfilePageState extends State<ProfilePage> {
               Container(
                 width: 40,
                 height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
+                decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
               ),
               const SizedBox(height: 24),
-              Text(
-                t.selectLanguage,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryDark,
-                ),
-              ),
+              Text(t.selectLanguage,
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.primaryDark)),
               const SizedBox(height: 4),
-              Text(
-                t.chooseLanguage,
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 13,
-                ),
-              ),
+              Text(t.chooseLanguage, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
               const SizedBox(height: 24),
               Row(
                 children: ['English', 'Arabic'].map((lang) {
@@ -572,23 +472,17 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.primaryOrange
-                              : Colors.white,
+                          color: isSelected ? AppColors.primaryOrange : Colors.white,
                           borderRadius: BorderRadius.circular(30),
                           border: Border.all(
-                            color: isSelected
-                                ? AppColors.primaryOrange
-                                : Colors.grey[300]!,
+                            color: isSelected ? AppColors.primaryOrange : Colors.grey[300]!,
                           ),
                         ),
                         child: Text(
                           label,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: isSelected
-                                ? Colors.white
-                                : AppColors.primaryDark,
+                            color: isSelected ? Colors.white : AppColors.primaryDark,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -603,27 +497,17 @@ class _ProfilePageState extends State<ProfilePage> {
                 height: 52,
                 child: ElevatedButton(
                   onPressed: () {
-                    final locale = selected == 'Arabic'
-                        ? const Locale('ar')
-                        : const Locale('en');
+                    final locale = selected == 'Arabic' ? const Locale('ar') : const Locale('en');
                     localeBloc.add(ChangeLocaleEvent(locale));
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryOrange,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                     elevation: 0,
                   ),
-                  child: Text(
-                    t.done,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
+                  child: Text(t.done,
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
               ),
               const SizedBox(height: 8),
@@ -653,10 +537,7 @@ class _ProfilePageState extends State<ProfilePage> {
             }
             if (state is AccountError) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: AppColors.error,
-                ),
+                SnackBar(content: Text(state.message), backgroundColor: AppColors.error),
               );
             }
           },
@@ -670,65 +551,34 @@ class _ProfilePageState extends State<ProfilePage> {
                   Container(
                     width: 40,
                     height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+                    decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)),
                   ),
                   const SizedBox(height: 24),
-                  Text(
-                    t.logOutTitle,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryDark,
-                    ),
-                  ),
+                  Text(t.logOutTitle,
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.primaryDark)),
                   const SizedBox(height: 8),
-                  Text(
-                    t.logOutMessage,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
-                    ),
-                  ),
+                  Text(t.logOutMessage,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
                   const SizedBox(height: 28),
                   SizedBox(
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: isLoading
-                          ? null
-                          : () => context.read<AccountBloc>().add(
-                                const LogoutEvent(),
-                              ),
+                      onPressed: isLoading ? null : () => context.read<AccountBloc>().add(const LogoutEvent()),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryOrange,
-                        disabledBackgroundColor:
-                            AppColors.primaryOrange.withOpacity(0.6),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
+                        disabledBackgroundColor: AppColors.primaryOrange.withOpacity(0.6),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                         elevation: 0,
                       ),
                       child: isLoading
                           ? const SizedBox(
                               height: 22,
                               width: 22,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.5,
-                              ),
-                            )
-                          : Text(
-                              t.logOut,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+                          : Text(t.logOut,
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -739,18 +589,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: Colors.grey[300]!),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       ),
-                      child: Text(
-                        t.cancel,
-                        style: const TextStyle(
-                          color: AppColors.primaryDark,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
+                      child: Text(t.cancel,
+                          style:
+                              const TextStyle(color: AppColors.primaryDark, fontWeight: FontWeight.bold, fontSize: 16)),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -780,24 +623,11 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             Icon(icon, color: const Color(0xFF062B4D)),
             const SizedBox(width: 15),
-            Text(
-              text,
-              style: const TextStyle(fontSize: 16, color: Color(0xFF062B4D)),
-            ),
+            Text(text, style: const TextStyle(fontSize: 16, color: Color(0xFF062B4D))),
             const Spacer(),
             trailing != null
-                ? Text(
-                    trailing,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF062B4D),
-                    ),
-                  )
-                : const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: Color(0xFF062B4D),
-                  ),
+                ? Text(trailing, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF062B4D)))
+                : const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFF062B4D)),
           ],
         ),
       ),
@@ -809,11 +639,7 @@ class _ProfilePageState extends State<ProfilePage> {
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Text(
         title,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: Color(0xFF062B4D),
-        ),
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF062B4D)),
       ),
     );
   }
@@ -845,9 +671,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Hazim Amir',
-                        style: TextStyle(
+                      Text(
+                        _userName.isNotEmpty ? _userName : '...',
+                        style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF062B4D),
@@ -856,134 +682,74 @@ class _ProfilePageState extends State<ProfilePage> {
                       const SizedBox(height: 20),
                       const Divider(),
                       _sectionTitle(t.yourAccount),
-                      _menuItem(
-                        context,
-                        Icons.person,
-                        t.personalInformation,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const PersonalInformationPage(),
-                          ),
-                        ),
-                      ),
-                      _menuItem(
-                        context,
-                        Icons.notifications,
-                        t.notifications,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => BlocProvider(
-                              create: (_) => NotificationSettingsBloc(
-                                getNotificationSettings:
-                                    GetNotificationSettingsUseCase(
-                                  NotificationSettingsRepositoryImpl(
-                                    NotificationSettingsRemoteDataSourceImpl(
-                                        dio: _dio),
+                      _menuItem(context, Icons.person, t.personalInformation,
+                          onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const PersonalInformationPage()),
+                              )),
+                      _menuItem(context, Icons.notifications, t.notifications,
+                          onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BlocProvider(
+                                    create: (_) => NotificationSettingsBloc(
+                                      getNotificationSettings: GetNotificationSettingsUseCase(
+                                        NotificationSettingsRepositoryImpl(
+                                          NotificationSettingsRemoteDataSourceImpl(dio: _dio),
+                                        ),
+                                      ),
+                                      updateNotificationSettings: UpdateNotificationSettingsUseCase(
+                                        NotificationSettingsRepositoryImpl(
+                                          NotificationSettingsRemoteDataSourceImpl(dio: _dio),
+                                        ),
+                                      ),
+                                    )..add(const GetNotificationSettingsEvent()),
+                                    child: const NotificationSettingsScreen(),
                                   ),
                                 ),
-                                updateNotificationSettings:
-                                    UpdateNotificationSettingsUseCase(
-                                  NotificationSettingsRepositoryImpl(
-                                    NotificationSettingsRemoteDataSourceImpl(
-                                        dio: _dio),
+                              )),
+                      _menuItem(context, Icons.key, t.password,
+                          onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BlocProvider(
+                                    create: (_) => di.sl<SetPasswordBloc>(),
+                                    child: const VerifyCurrentPasswordScreen(),
                                   ),
                                 ),
-                              )..add(const GetNotificationSettingsEvent()),
-                              child: const NotificationSettingsScreen(),
-                            ),
-                          ),
-                        ),
-                      ),
-                      _menuItem(
-                        context,
-                        Icons.key,
-                        t.password,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => BlocProvider(
-                              create: (_) => SetPasswordBloc(
-                                setNewPassword: SetNewPasswordUseCase(
-                                  SetPasswordRepositoryImpl(
-                                    SetPasswordRemoteDataSourceImpl(),
+                              )),
+                      _menuItem(context, Icons.location_on, t.yourAddresses,
+                          onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BlocProvider(
+                                    create: (_) {
+                                      final addressRepo = AddressRepositoryImpl(
+                                        AddressRemoteDataSourceImpl(dio: _dio),
+                                      );
+                                      return AddressBloc(
+                                        getAddresses: GetAddressesUseCase(addressRepo),
+                                        addAddress: AddAddressUseCase(addressRepo),
+                                        updateAddress: UpdateAddressUseCase(addressRepo),
+                                        deleteAddress: DeleteAddressUseCase(addressRepo),
+                                      )..add(const GetAddressesEvent());
+                                    },
+                                    child: const AddressesScreen(),
                                   ),
                                 ),
-                              ),
-                              child: const SetNewPasswordScreen(),
-                            ),
-                          ),
-                        ),
-                      ),
-                      _menuItem(
-                        context,
-                        Icons.location_on,
-                        t.yourAddresses,
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => BlocProvider(
-                              create: (_) {
-                                final addressRepo = AddressRepositoryImpl(
-                                  AddressRemoteDataSourceImpl(dio: _dio),
-                                );
-                                return AddressBloc(
-                                  getAddresses:
-                                      GetAddressesUseCase(addressRepo),
-                                  addAddress: AddAddressUseCase(addressRepo),
-                                  updateAddress:
-                                      UpdateAddressUseCase(addressRepo),
-                                  deleteAddress:
-                                      DeleteAddressUseCase(addressRepo),
-                                )..add(const GetAddressesEvent());
-                              },
-                              child: const AddressesScreen(),
-                            ),
-                          ),
-                        ),
-                      ),
-                      _menuItem(
-                        context,
-                        Icons.cancel,
-                        t.deleteAccount,
-                        onTap: () => _showDeleteAccount(context),
-                      ),
-                      _menuItem(
-                        context,
-                        Icons.logout,
-                        t.logOut,
-                        onTap: () => _showLogOut(context),
-                      ),
+                              )),
+                      _menuItem(context, Icons.cancel, t.deleteAccount, onTap: () => _showDeleteAccount(context)),
+                      _menuItem(context, Icons.logout, t.logOut, onTap: () => _showLogOut(context)),
                       const Divider(),
                       _sectionTitle(t.support),
-                      _menuItem(
-                        context,
-                        Icons.help_outline,
-                        t.helpAndSupport,
-                        onTap: () => _showHelpSupport(context),
-                      ),
-                      _menuItem(
-                        context,
-                        Icons.build,
-                        t.becomeAProfessional,
-                        onTap: () => _openBecomeProfessional(context),
-                      ),
-                      _menuItem(
-                        context,
-                        Icons.feedback,
-                        t.sendFeedback,
-                        onTap: () => _showSendFeedback(context),
-                      ),
+                      _menuItem(context, Icons.help_outline, t.helpAndSupport, onTap: () => _showHelpSupport(context)),
+                      _menuItem(context, Icons.build, t.becomeAProfessional,
+                          onTap: () => _openBecomeProfessional(context)),
+                      _menuItem(context, Icons.feedback, t.sendFeedback, onTap: () => _showSendFeedback(context)),
                       const Divider(),
                       _sectionTitle(t.preferences),
-                      _menuItem(
-                        context,
-                        Icons.language,
-                        t.language,
-                        trailing: _currentLocaleLabel(),
-                        onTap: () => _showLanguageSelector(context),
-                      ),
+                      _menuItem(context, Icons.language, t.language,
+                          trailing: _currentLocaleLabel(), onTap: () => _showLanguageSelector(context)),
                     ],
                   ),
                 ),
@@ -992,12 +758,12 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           bottomNavigationBar: GoFixBottomNavBar(
             currentIndex: 2,
+            showDashboard: isProfessional,
             onTap: (index) {
               if (index == 0) Navigator.pushReplacementNamed(context, '/home');
-              if (index == 1) {
-                Navigator.pushReplacementNamed(context, '/bookings');
-              }
+              if (index == 1) Navigator.pushReplacementNamed(context, '/bookings');
               if (index == 2) return;
+              if (index == 3) Navigator.pushReplacementNamed(context, '/dashboard');
             },
           ),
         );

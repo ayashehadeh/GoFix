@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/professional_nav_mixin.dart';
 import '../../../../core/widgets/gofix_bottom_nav_bar.dart';
 import '../../../../injection_container.dart' as di;
-import '../../../home/presentation/bloc/home_bloc.dart';
-import '../../../home/presentation/pages/home_page.dart';
 import '../../../favorites/presentation/bloc/favorites_bloc.dart';
 import '../../../favorites/presentation/pages/favorites_page.dart';
 import '../../../chat/presentation/bloc/chat_bloc.dart';
@@ -23,10 +22,12 @@ class MyBookingsPage extends StatefulWidget {
   State<MyBookingsPage> createState() => _MyBookingsPageState();
 }
 
-class _MyBookingsPageState extends State<MyBookingsPage> {
+class _MyBookingsPageState extends State<MyBookingsPage>
+    with ProfessionalNavMixin<MyBookingsPage> {
   @override
   void initState() {
     super.initState();
+    loadProfessionalStatus();
     context.read<BookingsBloc>().add(LoadUpcomingBookings());
   }
 
@@ -106,21 +107,11 @@ class _MyBookingsPageState extends State<MyBookingsPage> {
       ),
       bottomNavigationBar: GoFixBottomNavBar(
         currentIndex: 1,
+        showDashboard: isProfessional,
         onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => BlocProvider(
-                  create: (_) => di.sl<HomeBloc>(),
-                  child: const HomePage(),
-                ),
-              ),
-            );
-          }
-          if (index == 2) {
-            Navigator.pushReplacementNamed(context, '/profile');
-          }
+          if (index == 0) Navigator.pushReplacementNamed(context, '/home');
+          if (index == 2) Navigator.pushReplacementNamed(context, '/profile');
+          if (index == 3) Navigator.pushReplacementNamed(context, '/dashboard');
         },
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/storage/user_type_storage.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/availability_entity.dart';
 import '../bloc/availability_bloc.dart';
@@ -11,9 +12,7 @@ class MyAvailabilityScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Trigger load when screen opens
     context.read<AvailabilityBloc>().add(LoadAvailability());
-
     return const _MyAvailabilityView();
   }
 }
@@ -24,7 +23,7 @@ class _MyAvailabilityView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.primaryDark,
         leading: IconButton(
@@ -42,7 +41,7 @@ class _MyAvailabilityView extends StatelessWidget {
         elevation: 0,
       ),
       body: BlocConsumer<AvailabilityBloc, AvailabilityState>(
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state is AvailabilitySaved) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -51,8 +50,11 @@ class _MyAvailabilityView extends StatelessWidget {
                 duration: Duration(seconds: 2),
               ),
             );
+            await UserTypeStorage.setAsProfessional('');
             Future.delayed(const Duration(milliseconds: 500), () {
-              if (context.mounted) Navigator.pop(context);
+              if (context.mounted)
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil('/dashboard', (_) => false);
             });
           } else if (state is AvailabilityError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -69,11 +71,9 @@ class _MyAvailabilityView extends StatelessWidget {
               child: CircularProgressIndicator(color: AppColors.primaryOrange),
             );
           }
-
           if (state is AvailabilityLoaded) {
             return _AvailabilityForm(state: state);
           }
-
           return const SizedBox.shrink();
         },
       ),
@@ -88,309 +88,179 @@ class _AvailabilityForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Icon
-          Center(
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.calendar_month,
-                size: 60,
-                color: AppColors.primaryOrange,
-              ),
-            ),
-          ),
-          const SizedBox(height: 32),
+    final isSaving = state is AvailabilitySaving;
 
-          // Current Availability Toggle
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Current Availability',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primaryDark,
-                ),
-              ),
-              Switch(
-                value: state.isAvailable,
-                onChanged: (value) {
-                  context.read<AvailabilityBloc>().add(
-                        UpdateAvailabilityToggle(isAvailable: value),
-                      );
-                },
-                activeThumbColor: AppColors.primaryOrange,
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // Working Days
-          Row(
-            children: [
-              const Icon(Icons.event, color: AppColors.primaryOrange, size: 20),
-              const SizedBox(width: 8),
-              const Text(
-                'Working Days',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primaryDark,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: state.selectedDays.keys.map((day) {
-              final isSelected = state.selectedDays[day]!;
-              return GestureDetector(
-                onTap: () {
-                  context.read<AvailabilityBloc>().add(
-                        UpdateWorkingDay(day: day, isSelected: !isSelected),
-                      );
-                },
-                child: Container(
-                  width: 45,
-                  height: 45,
-                  decoration: BoxDecoration(
-                    color:
-                        isSelected ? AppColors.primaryOrange : Colors.grey[200],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    day,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: isSelected ? Colors.white : Colors.grey[600],
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Icon
+                Center(
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryOrange.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.calendar_month,
+                      size: 50,
+                      color: AppColors.primaryOrange,
                     ),
                   ),
                 ),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 24),
+                const SizedBox(height: 28),
 
-          // Working Hours
-          Row(
-            children: [
-              const Icon(Icons.access_time,
-                  color: AppColors.primaryOrange, size: 20),
-              const SizedBox(width: 8),
-              const Text(
-                'Working Hours',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primaryDark,
+                // ── Availability Toggle ───────────────────────────────────
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.divider),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Available for bookings',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primaryDark,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            state.isAvailable
+                                ? 'Clients can book you'
+                                : 'Clients cannot book you',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      state is AvailabilityTogglingAvailability
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.primaryOrange,
+                              ),
+                            )
+                          : Switch(
+                              value: state.isAvailable,
+                              onChanged: (value) {
+                                context.read<AvailabilityBloc>().add(
+                                      ToggleAvailabilityEvent(
+                                          isAvailable: value),
+                                    );
+                              },
+                              activeColor: AppColors.primaryOrange,
+                            ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
+                const SizedBox(height: 28),
 
-          // From
-          Row(
-            children: [
-              const SizedBox(
-                width: 60,
-                child: Text(
-                  'from',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                // ── Working Days + Per-Day Hours ──────────────────────────
+                Row(
+                  children: const [
+                    Icon(Icons.event, color: AppColors.primaryOrange, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      'Working Schedule',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryDark,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              _TimePicker(
-                hour: state.fromHour,
-                minute: state.fromMinute,
-                onChanged: (hour, minute) {
-                  context.read<AvailabilityBloc>().add(
-                        UpdateWorkingHours(
-                          fromHour: hour,
-                          fromMinute: minute,
-                          toHour: state.toHour,
-                          toMinute: state.toMinute,
-                        ),
-                      );
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // To
-          Row(
-            children: [
-              const SizedBox(
-                width: 60,
-                child: Text(
-                  'to',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                const SizedBox(height: 6),
+                const Text(
+                  'Tap a day to enable it, then set your hours.',
+                  style:
+                      TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
-              ),
-              _TimePicker(
-                hour: state.toHour,
-                minute: state.toMinute,
-                onChanged: (hour, minute) {
-                  context.read<AvailabilityBloc>().add(
-                        UpdateWorkingHours(
-                          fromHour: state.fromHour,
-                          fromMinute: state.fromMinute,
-                          toHour: hour,
-                          toMinute: minute,
-                        ),
-                      );
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 40),
+                const SizedBox(height: 16),
 
-          // Save Button
-          SizedBox(
+                // One row per day
+                ...AvailabilityEntity.orderedDays.map((day) {
+                  final isWorking = state.isWorkingDay(day);
+                  final schedule = state.scheduleFor(day);
+                  final shortLabel = AvailabilityEntity.shortDayLabels[
+                      AvailabilityEntity.orderedDays.indexOf(day)];
+
+                  return _DayRow(
+                    day: day,
+                    shortLabel: shortLabel,
+                    isWorking: isWorking,
+                    schedule: schedule,
+                    onToggle: () => context
+                        .read<AvailabilityBloc>()
+                        .add(ToggleWorkingDay(day: day)),
+                    onTimeChanged: (open, close) =>
+                        context.read<AvailabilityBloc>().add(UpdateDaySchedule(
+                              day: day,
+                              openTime: open,
+                              closeTime: close,
+                            )),
+                  );
+                }),
+              ],
+            ),
+          ),
+        ),
+
+        // ── Save Button ───────────────────────────────────────────────────
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+          child: SizedBox(
             width: double.infinity,
-            height: 50,
+            height: 52,
             child: ElevatedButton(
-              onPressed: () {
-                // Get selected days as list
-                final selectedDaysList = state.selectedDays.entries
-                    .where((entry) => entry.value)
-                    .map((entry) => entry.key)
-                    .toList();
-
-                final availability = AvailabilityEntity(
-                  isAvailable: state.isAvailable,
-                  workingDays: selectedDaysList,
-                  fromHour: state.fromHour,
-                  fromMinute: state.fromMinute,
-                  toHour: state.toHour,
-                  toMinute: state.toMinute,
-                );
-
-                context.read<AvailabilityBloc>().add(
-                      SaveAvailabilityEvent(availability: availability),
-                    );
-              },
+              onPressed: isSaving
+                  ? null
+                  : () => context
+                      .read<AvailabilityBloc>()
+                      .add(SaveWorkingHoursEvent()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryOrange,
+                disabledBackgroundColor:
+                    AppColors.primaryOrange.withOpacity(0.6),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                    borderRadius: BorderRadius.circular(14)),
                 elevation: 0,
               ),
-              child: const Text(
-                'Save',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TimePicker extends StatelessWidget {
-  final int hour;
-  final int minute;
-  final Function(int, int) onChanged;
-
-  const _TimePicker({
-    required this.hour,
-    required this.minute,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // Hour
-        GestureDetector(
-          onTap: () async {
-            final selected = await showDialog<int>(
-              context: context,
-              builder: (context) => _TimePickerDialog(
-                initialValue: hour,
-                maxValue: 23,
-                label: 'Hour',
-              ),
-            );
-            if (selected != null) {
-              onChanged(selected, minute);
-            }
-          },
-          child: Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              hour.toString().padLeft(2, '0'),
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primaryDark,
-              ),
-            ),
-          ),
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8),
-          child: Text(':',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        ),
-        // Minute
-        GestureDetector(
-          onTap: () async {
-            final selected = await showDialog<int>(
-              context: context,
-              builder: (context) => _TimePickerDialog(
-                initialValue: minute,
-                maxValue: 59,
-                label: 'Minute',
-              ),
-            );
-            if (selected != null) {
-              onChanged(hour, selected);
-            }
-          },
-          child: Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              minute.toString().padLeft(2, '0'),
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primaryDark,
-              ),
+              child: isSaving
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Text(
+                      'Save Schedule',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
             ),
           ),
         ),
@@ -399,43 +269,230 @@ class _TimePicker extends StatelessWidget {
   }
 }
 
-class _TimePickerDialog extends StatelessWidget {
-  final int initialValue;
-  final int maxValue;
-  final String label;
+// ── Day Row ───────────────────────────────────────────────────────────────────
 
-  const _TimePickerDialog({
-    required this.initialValue,
-    required this.maxValue,
-    required this.label,
+class _DayRow extends StatelessWidget {
+  final String day;
+  final String shortLabel;
+  final bool isWorking;
+  final DaySchedule? schedule;
+  final VoidCallback onToggle;
+  final void Function(String openTime, String closeTime) onTimeChanged;
+
+  const _DayRow({
+    required this.day,
+    required this.shortLabel,
+    required this.isWorking,
+    required this.schedule,
+    required this.onToggle,
+    required this.onTimeChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Select $label'),
-      content: SizedBox(
-        width: 200,
-        height: 300,
-        child: ListView.builder(
-          itemCount: maxValue + 1,
-          itemBuilder: (context, index) {
-            return ListTile(
-              title: Text(
-                index.toString().padLeft(2, '0'),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontWeight: index == initialValue
-                      ? FontWeight.bold
-                      : FontWeight.normal,
-                  color: index == initialValue
-                      ? AppColors.primaryOrange
-                      : Colors.black,
-                ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isWorking ? AppColors.primaryOrange : AppColors.divider,
+          width: isWorking ? 1.5 : 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          // Day toggle row
+          InkWell(
+            onTap: onToggle,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  // Day chip
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: isWorking
+                          ? AppColors.primaryOrange
+                          : AppColors.surface,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      shortLabel,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color:
+                            isWorking ? Colors.white : AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  // Day name + time summary
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          day,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: isWorking
+                                ? AppColors.primaryDark
+                                : AppColors.textSecondary,
+                          ),
+                        ),
+                        if (isWorking && schedule != null)
+                          Text(
+                            '${schedule!.openTime} – ${schedule!.closeTime}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        if (!isWorking)
+                          const Text(
+                            'Day off',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    isWorking
+                        ? Icons.check_circle
+                        : Icons.radio_button_unchecked,
+                    color: isWorking
+                        ? AppColors.primaryOrange
+                        : AppColors.textSecondary,
+                    size: 22,
+                  ),
+                ],
               ),
-              onTap: () => Navigator.pop(context, index),
-            );
-          },
+            ),
+          ),
+
+          // Time pickers — only shown when day is enabled
+          if (isWorking && schedule != null) ...[
+            const Divider(height: 1, color: AppColors.divider),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  const Icon(Icons.access_time,
+                      size: 16, color: AppColors.primaryOrange),
+                  const SizedBox(width: 8),
+                  _TimeButton(
+                    label: 'From',
+                    time: schedule!.openTime,
+                    onTap: () async {
+                      final picked =
+                          await _pickTime(context, schedule!.openTime);
+                      if (picked != null) {
+                        onTimeChanged(picked, schedule!.closeTime);
+                      }
+                    },
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: Text('–',
+                        style: TextStyle(
+                            color: AppColors.textSecondary, fontSize: 16)),
+                  ),
+                  _TimeButton(
+                    label: 'To',
+                    time: schedule!.closeTime,
+                    onTap: () async {
+                      final picked =
+                          await _pickTime(context, schedule!.closeTime);
+                      if (picked != null) {
+                        onTimeChanged(schedule!.openTime, picked);
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Opens Flutter's time picker and returns "HH:mm" string or null.
+  Future<String?> _pickTime(BuildContext context, String currentTime) async {
+    final parts = currentTime.split(':');
+    final initial = TimeOfDay(
+      hour: int.tryParse(parts[0]) ?? 8,
+      minute: int.tryParse(parts[1]) ?? 0,
+    );
+
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+        child: child!,
+      ),
+    );
+
+    if (picked == null) return null;
+    final h = picked.hour.toString().padLeft(2, '0');
+    final m = picked.minute.toString().padLeft(2, '0');
+    return '$h:$m';
+  }
+}
+
+// ── Time Button ───────────────────────────────────────────────────────────────
+
+class _TimeButton extends StatelessWidget {
+  final String label;
+  final String time;
+  final VoidCallback onTap;
+
+  const _TimeButton({
+    required this.label,
+    required this.time,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.primaryOrange.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.primaryOrange.withOpacity(0.3)),
+        ),
+        child: Column(
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 10,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            Text(
+              time,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryDark,
+              ),
+            ),
+          ],
         ),
       ),
     );
