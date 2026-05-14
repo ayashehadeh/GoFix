@@ -15,8 +15,8 @@ import 'package:gp/features/professional_dashboard/presentation/pages/profession
 import 'package:gp/features/settings/presentation/pages/profile.dart';
 import 'package:gp/injection_container.dart' as di;
 import 'package:gp/l10n/app_localizations.dart';
-import 'package:gp/features/auth/pages/start_page.dart';
 import 'package:dio/dio.dart';
+import 'package:gp/features/auth/presentation/pages/start_page.dart';
 
 // Handle background messages (must be top-level function)
 @pragma('vm:entry-point')
@@ -62,7 +62,8 @@ Future<void> _registerFcmToken() async {
     if (fcmToken == null) return;
 
     final dio = Dio(BaseOptions(
-      baseUrl: 'https://gofix-api-ceaaewf7hua0ghez.uaenorth-01.azurewebsites.net/api',
+      baseUrl:
+          'https://gofix-api-ceaaewf7hua0ghez.uaenorth-01.azurewebsites.net/api',
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',

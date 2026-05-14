@@ -45,8 +45,7 @@ class _BookingInfoPageState extends State<BookingInfoPage> {
         builder: (context, state) {
           if (state is BookingsLoading) {
             return const Center(
-              child:
-                  CircularProgressIndicator(color: AppColors.primaryOrange),
+              child: CircularProgressIndicator(color: AppColors.primaryOrange),
             );
           }
 
@@ -59,8 +58,7 @@ class _BookingInfoPageState extends State<BookingInfoPage> {
                       color: AppColors.error, size: 48),
                   const SizedBox(height: 12),
                   Text(state.message,
-                      style: const TextStyle(
-                          color: AppColors.textSecondary)),
+                      style: const TextStyle(color: AppColors.textSecondary)),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => context
@@ -362,8 +360,7 @@ class _DetailRow extends StatelessWidget {
             ],
           ),
         ),
-        if (!isLast)
-          const Divider(height: 1, color: Color(0xFFF0F0F0)),
+        if (!isLast) const Divider(height: 1, color: Color(0xFFF0F0F0)),
       ],
     );
   }
@@ -400,8 +397,7 @@ class _BottomActions extends StatelessWidget {
               ),
               child: const Text(
                 'Book Again',
-                style: TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.w700),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
               ),
             ),
           ),
@@ -412,7 +408,10 @@ class _BottomActions extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => BookingFeedbackPage(booking: booking),
+                    builder: (_) => BlocProvider.value(
+                      value: context.read<BookingsBloc>(),
+                      child: BookingFeedbackPage(booking: booking),
+                    ),
                   ),
                 );
               },
@@ -425,8 +424,7 @@ class _BottomActions extends StatelessWidget {
               ),
               child: const Text(
                 'Feedback',
-                style: TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.w700),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
               ),
             ),
           ),

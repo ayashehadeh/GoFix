@@ -1,0 +1,149 @@
+import '../models/pro_job_model.dart';
+import '../../domain/entities/pro_job.dart';
+
+abstract class ProfessionalJobsRemoteDataSource {
+  Future<List<ProJobModel>> getUpcomingJobs();
+  Future<List<ProJobModel>> getPastJobs();
+  Future<ProJobModel> updateJobStatus({
+    required String jobId,
+    required ProJobStatus newStatus,
+  });
+}
+
+/// Mock implementation — all data matches the design exactly.
+/// Completed / Cancelled jobs are automatically moved from upcoming → past.
+class MockProfessionalJobsDataSource
+    implements ProfessionalJobsRemoteDataSource {
+
+  // ── In-memory mutable lists ─────────────────────────────────────────────────
+
+  final List<ProJobModel> _upcoming = [
+    ProJobModel(
+      id: 'j1',
+      clientName: 'Farouq Ahmad',
+      clientImageUrl: '',
+      serviceType: 'Pipe Installation',
+      location: 'AlJubaiha',
+      scheduledTime: DateTime(2025, 2, 5, 15, 0),
+      price: '30 JD',
+      description:
+          'Pipe under the kitchen sink has been leaking for 2 days. '
+          'Water is dripping onto the cabinet floor. Need it fixed as soon as possible.',
+      pictureCount: 1,
+      status: ProJobStatus.pending,
+    ),
+    ProJobModel(
+      id: 'j2',
+      clientName: 'Alaa Qasem',
+      clientImageUrl: '',
+      serviceType: 'Leak Repair',
+      location: 'Sweifieh',
+      scheduledTime: DateTime(2025, 2, 2, 10, 0),
+      price: '20 JD',
+      description: 'Water leak from the bathroom ceiling.',
+      pictureCount: 0,
+      status: ProJobStatus.confirmed,
+    ),
+    ProJobModel(
+      id: 'j3',
+      clientName: 'Omar Amer',
+      clientImageUrl: '',
+      serviceType: 'Water Heater Service',
+      location: 'Khalda',
+      scheduledTime: DateTime(2025, 1, 2, 11, 0),
+      price: '50 JD',
+      description: 'Water heater is not working properly.',
+      pictureCount: 0,
+      status: ProJobStatus.inProgress,
+    ),
+  ];
+
+  final List<ProJobModel> _past = [
+    ProJobModel(
+      id: 'j4',
+      clientName: 'Yousef Amjad',
+      clientImageUrl: '',
+      serviceType: 'Pipe Installation',
+      location: 'AlJubaiha',
+      scheduledTime: DateTime(2025, 2, 5, 15, 0),
+      price: '30 JD',
+      description: 'Full pipe replacement in kitchen.',
+      pictureCount: 1,
+      status: ProJobStatus.completed,
+    ),
+    ProJobModel(
+      id: 'j5',
+      clientName: 'Sara Ghassan',
+      clientImageUrl: '',
+      serviceType: 'Leak Repair',
+      location: 'Sweifieh',
+      scheduledTime: DateTime(2025, 2, 2, 9, 0),
+      price: '20 JD',
+      description: 'Leak under bathroom sink.',
+      pictureCount: 0,
+      status: ProJobStatus.cancelled,
+    ),
+    ProJobModel(
+      id: 'j6',
+      clientName: 'Basel Omar',
+      clientImageUrl: '',
+      serviceType: 'Water Heater Service',
+      location: 'Khalda',
+      scheduledTime: DateTime(2025, 1, 2, 14, 0),
+      price: '50 JD',
+      description: 'Water heater annual maintenance.',
+      pictureCount: 0,
+      status: ProJobStatus.completed,
+    ),
+  ];
+
+  // ── Interface ───────────────────────────────────────────────────────────────
+
+  @override
+  Future<List<ProJobModel>> getUpcomingJobs() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    return List.unmodifiable(_upcoming);
+  }
+
+  @override
+  Future<List<ProJobModel>> getPastJobs() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    return List.unmodifiable(_past);
+  }
+
+  @override
+  Future<ProJobModel> updateJobStatus({
+    required String jobId,
+    required ProJobStatus newStatus,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 600));
+
+    final index = _upcoming.indexWhere((j) => j.id == jobId);
+    if (index == -1) throw Exception('Job $jobId not found');
+
+    final existing = _upcoming[index];
+    final updated = ProJobModel(
+      id: existing.id,
+      clientName: existing.clientName,
+      clientImageUrl: existing.clientImageUrl,
+      serviceType: existing.serviceType,
+      location: existing.location,
+      scheduledTime: existing.scheduledTime,
+      price: existing.price,
+      description: existing.description,
+      pictureCount: existing.pictureCount,
+      status: newStatus,
+    );
+
+    if (!newStatus.isActive) {
+      // Completed or Cancelled → move to past list
+      _upcoming.removeAt(index);
+      _past.insert(0, updated);
+    } else {
+      // Just update status in upcoming
+      _upcoming[index] = updated;
+    }
+
+    return updated;
+  }
+}
