@@ -14,6 +14,15 @@ import 'package:gp/features/professional_dashboard/presentation/bloc/professiona
 import 'package:gp/features/professional_dashboard/presentation/pages/professional_dashboard_screen.dart';
 import 'package:gp/features/settings/presentation/pages/profile.dart';
 import 'package:gp/injection_container.dart' as di;
+import 'package:gp/l10n/app_localizations.dart';
+import 'package:dio/dio.dart';
+import 'package:gp/features/auth/presentation/pages/start_page.dart';
+
+// Handle background messages (must be top-level function)
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -74,36 +83,30 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<LocaleBloc, LocaleState>(
       builder: (context, localeState) {
-        return BlocProvider.value(
-          value: homeBloc,
-          child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            locale: localeState.locale,
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [Locale('en'), Locale('ar')],
-            // EVERYONE starts at StartPage (login)
-            home: const StartPage(),
-            routes: {
-              '/home': (_) => const HomePage(),
-              '/bookings': (_) => BlocProvider(
-                    create: (_) => di.sl<BookingsBloc>(),
-                    child: const MyBookingsPage(),
-                  ),
-              '/profile': (_) => const ProfilePage(),
-              '/login': (_) => const StartPage(),
-              '/dashboard': (_) => BlocProvider(
-                    create: (_) => di.sl<ProfessionalDashboardBloc>(),
-                    child: const ProfessionalDashboardScreen(
-                      professionalName: 'Hazim',
-                    ),
-                  ),
-            },
-          ),
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          locale: localeState.locale,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en'), Locale('ar')],
+          home: const _SplashRouter(),
+          routes: {
+            '/home': (_) => const HomePage(),
+            '/bookings': (_) => BlocProvider(
+                  create: (_) => di.sl<BookingsBloc>(),
+                  child: const MyBookingsPage(),
+                ),
+            '/profile': (_) => const ProfilePage(),
+            '/login': (_) => const StartPage(),
+            '/dashboard': (_) => BlocProvider(
+                  create: (_) => di.sl<ProfessionalDashboardBloc>(),
+                  child: const ProfessionalDashboardScreen(),
+                ),
+          },
         );
       },
     );
