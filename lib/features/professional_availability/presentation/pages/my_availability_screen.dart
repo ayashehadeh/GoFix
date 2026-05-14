@@ -52,7 +52,9 @@ class _MyAvailabilityView extends StatelessWidget {
             );
             await UserTypeStorage.setAsProfessional('');
             Future.delayed(const Duration(milliseconds: 500), () {
-              if (context.mounted) Navigator.of(context).pushNamedAndRemoveUntil('/dashboard', (_) => false);
+              if (context.mounted)
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil('/dashboard', (_) => false);
             });
           } else if (state is AvailabilityError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -116,7 +118,8 @@ class _AvailabilityForm extends StatelessWidget {
 
                 // ── Availability Toggle ───────────────────────────────────
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -138,7 +141,9 @@ class _AvailabilityForm extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            state.isAvailable ? 'Clients can book you' : 'Clients cannot book you',
+                            state.isAvailable
+                                ? 'Clients can book you'
+                                : 'Clients cannot book you',
                             style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.textSecondary,
@@ -159,7 +164,8 @@ class _AvailabilityForm extends StatelessWidget {
                               value: state.isAvailable,
                               onChanged: (value) {
                                 context.read<AvailabilityBloc>().add(
-                                      ToggleAvailabilityEvent(isAvailable: value),
+                                      ToggleAvailabilityEvent(
+                                          isAvailable: value),
                                     );
                               },
                               activeColor: AppColors.primaryOrange,
@@ -187,7 +193,8 @@ class _AvailabilityForm extends StatelessWidget {
                 const SizedBox(height: 6),
                 const Text(
                   'Tap a day to enable it, then set your hours.',
-                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style:
+                      TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 16),
 
@@ -195,19 +202,23 @@ class _AvailabilityForm extends StatelessWidget {
                 ...AvailabilityEntity.orderedDays.map((day) {
                   final isWorking = state.isWorkingDay(day);
                   final schedule = state.scheduleFor(day);
-                  final shortLabel = AvailabilityEntity.shortDayLabels[AvailabilityEntity.orderedDays.indexOf(day)];
+                  final shortLabel = AvailabilityEntity.shortDayLabels[
+                      AvailabilityEntity.orderedDays.indexOf(day)];
 
                   return _DayRow(
                     day: day,
                     shortLabel: shortLabel,
                     isWorking: isWorking,
                     schedule: schedule,
-                    onToggle: () => context.read<AvailabilityBloc>().add(ToggleWorkingDay(day: day)),
-                    onTimeChanged: (open, close) => context.read<AvailabilityBloc>().add(UpdateDaySchedule(
-                          day: day,
-                          openTime: open,
-                          closeTime: close,
-                        )),
+                    onToggle: () => context
+                        .read<AvailabilityBloc>()
+                        .add(ToggleWorkingDay(day: day)),
+                    onTimeChanged: (open, close) =>
+                        context.read<AvailabilityBloc>().add(UpdateDaySchedule(
+                              day: day,
+                              openTime: open,
+                              closeTime: close,
+                            )),
                   );
                 }),
               ],
@@ -222,18 +233,25 @@ class _AvailabilityForm extends StatelessWidget {
             width: double.infinity,
             height: 52,
             child: ElevatedButton(
-              onPressed: isSaving ? null : () => context.read<AvailabilityBloc>().add(SaveWorkingHoursEvent()),
+              onPressed: isSaving
+                  ? null
+                  : () => context
+                      .read<AvailabilityBloc>()
+                      .add(SaveWorkingHoursEvent()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryOrange,
-                disabledBackgroundColor: AppColors.primaryOrange.withOpacity(0.6),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                disabledBackgroundColor:
+                    AppColors.primaryOrange.withOpacity(0.6),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
                 elevation: 0,
               ),
               child: isSaving
                   ? const SizedBox(
                       width: 22,
                       height: 22,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
                     )
                   : const Text(
                       'Save Schedule',
@@ -297,7 +315,9 @@ class _DayRow extends StatelessWidget {
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      color: isWorking ? AppColors.primaryOrange : AppColors.surface,
+                      color: isWorking
+                          ? AppColors.primaryOrange
+                          : AppColors.surface,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     alignment: Alignment.center,
@@ -306,7 +326,8 @@ class _DayRow extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: isWorking ? Colors.white : AppColors.textSecondary,
+                        color:
+                            isWorking ? Colors.white : AppColors.textSecondary,
                       ),
                     ),
                   ),
@@ -321,7 +342,9 @@ class _DayRow extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: isWorking ? AppColors.primaryDark : AppColors.textSecondary,
+                            color: isWorking
+                                ? AppColors.primaryDark
+                                : AppColors.textSecondary,
                           ),
                         ),
                         if (isWorking && schedule != null)
@@ -344,8 +367,12 @@ class _DayRow extends StatelessWidget {
                     ),
                   ),
                   Icon(
-                    isWorking ? Icons.check_circle : Icons.radio_button_unchecked,
-                    color: isWorking ? AppColors.primaryOrange : AppColors.textSecondary,
+                    isWorking
+                        ? Icons.check_circle
+                        : Icons.radio_button_unchecked,
+                    color: isWorking
+                        ? AppColors.primaryOrange
+                        : AppColors.textSecondary,
                     size: 22,
                   ),
                 ],
@@ -360,13 +387,15 @@ class _DayRow extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
-                  const Icon(Icons.access_time, size: 16, color: AppColors.primaryOrange),
+                  const Icon(Icons.access_time,
+                      size: 16, color: AppColors.primaryOrange),
                   const SizedBox(width: 8),
                   _TimeButton(
                     label: 'From',
                     time: schedule!.openTime,
                     onTap: () async {
-                      final picked = await _pickTime(context, schedule!.openTime);
+                      final picked =
+                          await _pickTime(context, schedule!.openTime);
                       if (picked != null) {
                         onTimeChanged(picked, schedule!.closeTime);
                       }
@@ -374,13 +403,16 @@ class _DayRow extends StatelessWidget {
                   ),
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: Text('–', style: TextStyle(color: AppColors.textSecondary, fontSize: 16)),
+                    child: Text('–',
+                        style: TextStyle(
+                            color: AppColors.textSecondary, fontSize: 16)),
                   ),
                   _TimeButton(
                     label: 'To',
                     time: schedule!.closeTime,
                     onTap: () async {
-                      final picked = await _pickTime(context, schedule!.closeTime);
+                      final picked =
+                          await _pickTime(context, schedule!.closeTime);
                       if (picked != null) {
                         onTimeChanged(schedule!.openTime, picked);
                       }

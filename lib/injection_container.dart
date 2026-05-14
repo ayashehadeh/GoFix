@@ -138,6 +138,20 @@ import 'package:gp/features/professional_availability/domain/usecases/save_avail
 import 'package:gp/features/professional_availability/presentation/bloc/availability_bloc.dart';
 import 'package:gp/features/professional_availability/data/datasources/availability_remote_datasource.dart';
 
+//auth
+import 'package:gp/features/auth/data/datasources/auth_remote_datasource.dart';
+import 'package:gp/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:gp/features/auth/domain/repositories/auth_repository.dart';
+import 'package:gp/features/auth/domain/usecases/auth_usecases.dart';
+import 'package:gp/features/auth/presentation/bloc/auth_bloc.dart';
+
+//prof jobs
+import 'package:gp/features/professional_jobs/data/datasources/professional_jobs_datasource.dart';
+import 'package:gp/features/professional_jobs/data/repositories/professional_jobs_repository_impl.dart';
+import 'package:gp/features/professional_jobs/domain/repositories/professional_jobs_repository.dart';
+import 'package:gp/features/professional_jobs/domain/usecases/professional_jobs_usecases.dart';
+import 'package:gp/features/professional_jobs/presentation/bloc/professional_jobs_bloc.dart';
+
 final sl = GetIt.instance;
 
 const bool _useMockBookings = false;
@@ -147,6 +161,27 @@ const bool _useMockChat = false;
 const bool _useMockProfessionalDashboard = false;
 
 Future<void> init() async {
+  sl.registerFactory(() => AuthBloc(
+        login: sl(),
+        register: sl(),
+        verifyEmail: sl(),
+        resendCode: sl(),
+        forgotPassword: sl(),
+        resetPassword: sl(),
+      ));
+  sl.registerLazySingleton(() => LoginUseCase(sl()));
+  sl.registerLazySingleton(() => RegisterUseCase(sl()));
+  sl.registerLazySingleton(() => VerifyEmailUseCase(sl()));
+  sl.registerLazySingleton(() => ResendVerificationCodeUseCase(sl()));
+  sl.registerLazySingleton(() => ForgotPasswordUseCase(sl()));
+  sl.registerLazySingleton(() => ResetPasswordUseCase(sl()));
+  sl.registerLazySingleton<AuthRepository>(
+    () => AuthRepositoryImpl(remoteDataSource: sl()),
+  );
+  sl.registerLazySingleton<AuthRemoteDataSource>(
+    () => AuthRemoteDataSourceImpl(dio: sl()),
+  );
+
   // ── BLoC ──────────────────────────────────────────────────────────────────
 sl.registerFactory(() => HomeBloc(getCategoriesUseCase: sl()));
   sl.registerFactory(
@@ -418,6 +453,44 @@ sl.registerFactory(() => HomeBloc(getCategoriesUseCase: sl()));
         : ProfessionalDashboardRemoteDataSourceImpl(dio: sl()),
   );
   sl.registerLazySingleton<AvailabilityLocalDataSource>(() => AvailabilityLocalDataSourceImpl(sharedPreferences: sl()));
+
+  sl.registerFactory(() => ProfessionalJobsBloc(
+        getUpcomingJobs: sl(),
+        getPastJobs: sl(),
+        updateJobStatus: sl(),
+      ));
+  sl.registerLazySingleton(() => GetUpcomingJobs(sl()));
+  sl.registerLazySingleton(() => GetPastJobs(sl()));
+  sl.registerLazySingleton(() => UpdateProJobStatus(sl()));
+  sl.registerLazySingleton<ProfessionalJobsRepository>(
+    () => ProfessionalJobsRepositoryImpl(remoteDataSource: sl()),
+  );
+  sl.registerLazySingleton<ProfessionalJobsRemoteDataSource>(
+    () => MockProfessionalJobsDataSource(),
+  );
+
+/*
+  sl.registerFactory(() => ProfessionalJobsBloc(
+        getUpcomingJobs: sl(),
+        getPastJobs: sl(),
+        updateJobStatus: sl(),
+      ));
+  sl.registerLazySingleton(() => GetUpcomingJobs(sl()));
+  sl.registerLazySingleton(() => GetPastJobs(sl()));
+  sl.registerLazySingleton(() => UpdateProJobStatus(sl()));
+  sl.registerFactory(() => ProfessionalJobsBloc(
+        getUpcomingJobs: sl(),
+        getPastJobs: sl(),
+        updateJobStatus:
+            sl<UpdateProJobStatus>(), // ← explicit type to avoid ambiguity
+      ));
+
+  sl.registerLazySingleton<ProfessionalJobsRepository>(
+    () => ProfessionalJobsRepositoryImpl(remoteDataSource: sl()),
+  );
+  sl.registerLazySingleton<ProfessionalJobsRemoteDataSource>(
+    () => MockProfessionalJobsDataSource(),
+  );*/
 
   // ── External ──────────────────────────────────────────────────────────────
   // SharedPreferences

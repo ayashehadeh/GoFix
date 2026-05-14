@@ -158,6 +158,7 @@ class _BookingsHeader extends StatelessWidget {
                         color: AppColors.primaryDark, size: 24),
                   ),
                   const SizedBox(width: 14),
+// Chat icon
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -231,21 +232,17 @@ class _TabButton extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
         decoration: BoxDecoration(
-          color:
-              isSelected ? AppColors.primaryOrange : Colors.transparent,
+          color: isSelected ? AppColors.primaryOrange : Colors.transparent,
           borderRadius: BorderRadius.circular(50),
           border: Border.all(
-              color: isSelected
-                  ? AppColors.primaryOrange
-                  : AppColors.divider),
+              color: isSelected ? AppColors.primaryOrange : AppColors.divider),
         ),
         child: Text(
           label,
           style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color:
-                  isSelected ? Colors.white : AppColors.textSecondary),
+              color: isSelected ? Colors.white : AppColors.textSecondary),
         ),
       ),
     );
@@ -262,17 +259,10 @@ class _EmptyBody extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-              isUpcoming
-                  ? Icons.calendar_today_outlined
-                  : Icons.history,
-              size: 56,
-              color: AppColors.divider),
+          Icon(isUpcoming ? Icons.calendar_today_outlined : Icons.history,
+              size: 56, color: AppColors.divider),
           const SizedBox(height: 16),
-          Text(
-              isUpcoming
-                  ? 'No upcoming bookings'
-                  : 'No past bookings yet',
+          Text(isUpcoming ? 'No upcoming bookings' : 'No past bookings yet',
               style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -306,8 +296,7 @@ class _ErrorBody extends StatelessWidget {
                 backgroundColor: AppColors.primaryOrange,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12))),
-            child:
-                const Text('Retry', style: TextStyle(color: Colors.white)),
+            child: const Text('Retry', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

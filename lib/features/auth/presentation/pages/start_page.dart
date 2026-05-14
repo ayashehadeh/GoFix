@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:gp/features/auth/pages/sign_up.dart';
-import 'signin_page.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/core/theme/app_colors.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import '../bloc/auth_bloc.dart';
+import 'sign_up.dart';
+import 'signin_page.dart';
 
 class StartPage extends StatelessWidget {
   const StartPage({super.key});
@@ -39,13 +41,13 @@ class StartPage extends StatelessWidget {
                           children: [
                             Text(
                               t.hello,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 50,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(height: 8),
+                            const SizedBox(height: 8),
                             Text(
                               t.startSubtitle,
                               style: TextStyle(
@@ -59,7 +61,6 @@ class StartPage extends StatelessWidget {
                         ),
                       ),
                     ),
-
                     Positioned(
                       bottom: -110,
                       left: 0,
@@ -71,7 +72,7 @@ class StartPage extends StatelessWidget {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.white,
-                            boxShadow: [
+                            boxShadow: const [
                               BoxShadow(
                                 color: Colors.black26,
                                 blurRadius: 15,
@@ -97,19 +98,21 @@ class StartPage extends StatelessWidget {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 160),
-
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // ── Sign In ──────────────────────────────────────────
                       ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => const SigninPage(),
+                              builder: (_) => BlocProvider.value(
+                                value: context.read<AuthBloc>(),
+                                child: const SigninPage(),
+                              ),
                             ),
                           );
                         },
@@ -122,7 +125,7 @@ class StartPage extends StatelessWidget {
                         ),
                         child: Text(
                           t.signIn,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -130,11 +133,16 @@ class StartPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
+
+                      // ── Sign Up ──────────────────────────────────────────
                       ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => const Signup(),
+                              builder: (_) => BlocProvider.value(
+                                value: context.read<AuthBloc>(),
+                                child: const Signup(),
+                              ),
                             ),
                           );
                         },
@@ -147,7 +155,7 @@ class StartPage extends StatelessWidget {
                         ),
                         child: Text(
                           t.signUp,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
