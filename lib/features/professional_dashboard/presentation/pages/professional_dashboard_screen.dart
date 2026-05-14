@@ -41,10 +41,8 @@ class _ProfessionalDashboardScreenState
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
-        child:
-            BlocConsumer<ProfessionalDashboardBloc, ProfessionalDashboardState>(
-          listenWhen: (_, current) =>
-              current is RequestActionSuccess || current is RequestActionError,
+        child: BlocConsumer<ProfessionalDashboardBloc, ProfessionalDashboardState>(
+          listenWhen: (_, current) => current is RequestActionSuccess || current is RequestActionError,
           listener: (context, state) {
             if (state is RequestActionSuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -63,9 +61,7 @@ class _ProfessionalDashboardScreenState
             }
           },
           buildWhen: (_, current) =>
-              current is DashboardLoading ||
-              current is DashboardLoaded ||
-              current is DashboardError,
+              current is DashboardLoading || current is DashboardLoaded || current is DashboardError,
           builder: (context, state) {
             if (state is DashboardLoading) {
               return const Center(child: CircularProgressIndicator());
