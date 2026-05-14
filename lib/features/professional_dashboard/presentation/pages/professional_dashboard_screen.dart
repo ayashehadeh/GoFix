@@ -523,7 +523,17 @@ class _ProfessionalDashboardScreenState
               ),
             );
           }),
-          _buildMenuItem('My Jobs', Icons.work_outline, () {}),
+          _buildMenuItem('My Jobs', Icons.work_outline, () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => BlocProvider(
+        create: (_) => di.sl<ProfessionalJobsBloc>(),
+        child: const MyJobsPage(),
+      ),
+    ),
+  );
+}),
           _buildMenuItem('My Profile', Icons.person_outline, () {}),
           _buildMenuItem('My Earnings', Icons.attach_money, () {}),
         ],
