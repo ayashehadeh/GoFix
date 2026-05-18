@@ -61,7 +61,6 @@ import 'package:gp/features/bookings/presentation/bloc/bookings_bloc.dart';
 
 // ── Notifications ─────────────────────────────────────────────────────────────
 import 'package:gp/features/notifications/data/datasources/notifications_remote_datasource.dart';
-import 'package:gp/features/notifications/data/datasources/mock_notifications_datasource.dart';
 import 'package:gp/features/notifications/data/repositories/notifications_repository_impl.dart';
 import 'package:gp/features/notifications/domain/repositories/notifications_repository.dart';
 import 'package:gp/features/notifications/domain/usecases/get_notifications.dart';
@@ -183,7 +182,7 @@ Future<void> init() async {
   );
 
   // ── BLoC ──────────────────────────────────────────────────────────────────
-sl.registerFactory(() => HomeBloc(getCategoriesUseCase: sl()));
+  sl.registerFactory(() => HomeBloc(getCategoriesUseCase: sl()));
   sl.registerFactory(
     () => ProfessionalsBloc(
       getProfessionalsByCategory: sl(),
@@ -239,7 +238,8 @@ sl.registerFactory(() => HomeBloc(getCategoriesUseCase: sl()));
   );
 
   sl.registerFactory(() => PersonalBloc(repository: sl()));
-  sl.registerFactory(() => SetPasswordBloc(verifyCurrentPassword: sl(), setNewPassword: sl()));
+  sl.registerFactory(
+      () => SetPasswordBloc(verifyCurrentPassword: sl(), setNewPassword: sl()));
   sl.registerFactory(() => ApplicationStatusBloc(getApplicationStatus: sl()));
 
   sl.registerFactory(
@@ -399,60 +399,91 @@ sl.registerFactory(() => HomeBloc(getCategoriesUseCase: sl()));
   sl.registerLazySingleton(() => ToggleAvailability(sl()));
 
   // ── Repositories ──────────────────────────────────────────────────────────
-  sl.registerLazySingleton<HomeRepository>(() => HomeRepositoryImpl(remoteDataSource: sl()));
-  sl.registerLazySingleton<ProfessionalsRepository>(() => ProfessionalsRepositoryImpl(remoteDataSource: sl()));
-  sl.registerLazySingleton<ReviewsRepository>(() => ReviewsRepositoryImpl(remoteDataSource: sl()));
-  sl.registerLazySingleton<BookingsRepository>(() => BookingsRepositoryImpl(remoteDataSource: sl()));
-  sl.registerLazySingleton<NotificationsRepository>(() => NotificationsRepositoryImpl(remoteDataSource: sl()));
-  sl.registerLazySingleton<AccountRepository>(() => AccountRepositoryImpl(sl()));
-  sl.registerLazySingleton<AddressRepository>(() => AddressRepositoryImpl(sl()));
-  sl.registerLazySingleton<NotificationSettingsRepository>(() => NotificationSettingsRepositoryImpl(sl()));
-  sl.registerLazySingleton<ProfileRepository>(() => ProfileRepositoryImpl(dio: sl()));
-  sl.registerLazySingleton<SetPasswordRepository>(() => SetPasswordRepositoryImpl(sl()));
+  sl.registerLazySingleton<HomeRepository>(
+      () => HomeRepositoryImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton<ProfessionalsRepository>(
+      () => ProfessionalsRepositoryImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton<ReviewsRepository>(
+      () => ReviewsRepositoryImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton<BookingsRepository>(
+      () => BookingsRepositoryImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton<NotificationsRepository>(
+      () => NotificationsRepositoryImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton<AccountRepository>(
+      () => AccountRepositoryImpl(sl()));
+  sl.registerLazySingleton<AddressRepository>(
+      () => AddressRepositoryImpl(sl()));
+  sl.registerLazySingleton<NotificationSettingsRepository>(
+      () => NotificationSettingsRepositoryImpl(sl()));
+  sl.registerLazySingleton<ProfileRepository>(
+      () => ProfileRepositoryImpl(dio: sl()));
+  sl.registerLazySingleton<SetPasswordRepository>(
+      () => SetPasswordRepositoryImpl(sl()));
   sl.registerLazySingleton<BecomeProfessionalRepository>(
       () => BecomeProfessionalRepositoryImpl(remoteDataSource: sl()));
-  sl.registerLazySingleton<ApplicationStatusRepository>(() => ApplicationStatusRepositoryImpl(remoteDataSource: sl()));
-  sl.registerLazySingleton<SearchRepository>(() => SearchRepositoryImpl(remoteDataSource: sl()));
-  sl.registerLazySingleton<FavoritesRepository>(() => FavoritesRepositoryImpl(dataSource: sl()));
-  sl.registerLazySingleton<ChatRepository>(() => ChatRepositoryImpl(dataSource: sl()));
+  sl.registerLazySingleton<ApplicationStatusRepository>(
+      () => ApplicationStatusRepositoryImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton<SearchRepository>(
+      () => SearchRepositoryImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton<FavoritesRepository>(
+      () => FavoritesRepositoryImpl(dataSource: sl()));
+  sl.registerLazySingleton<ChatRepository>(
+      () => ChatRepositoryImpl(dataSource: sl()));
   sl.registerLazySingleton<ProfessionalDashboardRepository>(
       () => ProfessionalDashboardRepositoryImpl(remoteDataSource: sl()));
 
-  sl.registerLazySingleton<AvailabilityRemoteDataSource>(() => AvailabilityRemoteDataSourceImpl(dio: sl()));
-  sl.registerLazySingleton<AvailabilityRepository>(() => AvailabilityRepositoryImpl(
-        remoteDataSource: sl(),
-        localDataSource: sl(),
-      ));
+  sl.registerLazySingleton<AvailabilityRemoteDataSource>(
+      () => AvailabilityRemoteDataSourceImpl(dio: sl()));
+  sl.registerLazySingleton<AvailabilityRepository>(
+      () => AvailabilityRepositoryImpl(
+            remoteDataSource: sl(),
+            localDataSource: sl(),
+          ));
 
   // ── Data Sources ──────────────────────────────────────────────────────────
-  sl.registerLazySingleton<HomeRemoteDataSource>(() => HomeRemoteDataSourceImpl(dio: sl()));
-  sl.registerLazySingleton<ProfessionalsRemoteDataSource>(() => ProfessionalsRemoteDataSourceImpl(dio: sl()));
+  sl.registerLazySingleton<HomeRemoteDataSource>(
+      () => HomeRemoteDataSourceImpl(dio: sl()));
+  sl.registerLazySingleton<ProfessionalsRemoteDataSource>(
+      () => ProfessionalsRemoteDataSourceImpl(dio: sl()));
   sl.registerLazySingleton<BookingsRemoteDataSource>(
-    () => _useMockBookings ? MockBookingsDataSource() : BookingsRemoteDataSourceImpl(dio: sl()),
+    () => _useMockBookings
+        ? MockBookingsDataSource()
+        : BookingsRemoteDataSourceImpl(dio: sl()),
   );
   sl.registerLazySingleton<NotificationsRemoteDataSource>(
-  () => NotificationsRemoteDataSourceImpl(dio: sl()),
-);
-  sl.registerLazySingleton<AccountRemoteDataSource>(() => AccountRemoteDataSourceImpl(dio: sl()));
-  sl.registerLazySingleton<AddressRemoteDataSource>(() => AddressRemoteDataSourceImpl(dio: sl()));
+    () => NotificationsRemoteDataSourceImpl(dio: sl()),
+  );
+  sl.registerLazySingleton<AccountRemoteDataSource>(
+      () => AccountRemoteDataSourceImpl(dio: sl()));
+  sl.registerLazySingleton<AddressRemoteDataSource>(
+      () => AddressRemoteDataSourceImpl(dio: sl()));
   sl.registerLazySingleton<NotificationSettingsRemoteDataSource>(
       () => NotificationSettingsRemoteDataSourceImpl(dio: sl()));
-  sl.registerLazySingleton<SetPasswordRemoteDataSource>(() => SetPasswordRemoteDataSourceImpl(dio: sl()));
-  sl.registerLazySingleton<BecomeProfessionalRemoteDataSource>(() => BecomeProfessionalRemoteDataSourceImpl(dio: sl()));
-  sl.registerLazySingleton<ApplicationStatusRemoteDataSource>(() => ApplicationStatusRemoteDataSourceImpl(dio: sl()));
-  sl.registerLazySingleton<SearchRemoteDataSource>(() => SearchRemoteDataSourceImpl(dio: sl()));
+  sl.registerLazySingleton<SetPasswordRemoteDataSource>(
+      () => SetPasswordRemoteDataSourceImpl(dio: sl()));
+  sl.registerLazySingleton<BecomeProfessionalRemoteDataSource>(
+      () => BecomeProfessionalRemoteDataSourceImpl(dio: sl()));
+  sl.registerLazySingleton<ApplicationStatusRemoteDataSource>(
+      () => ApplicationStatusRemoteDataSourceImpl(dio: sl()));
+  sl.registerLazySingleton<SearchRemoteDataSource>(
+      () => SearchRemoteDataSourceImpl(dio: sl()));
   sl.registerLazySingleton<FavoritesRemoteDataSource>(
-    () => _useMockFavorites ? MockFavoritesDataSource() : FavoritesRemoteDataSourceImpl(dio: sl()),
+    () => _useMockFavorites
+        ? MockFavoritesDataSource()
+        : FavoritesRemoteDataSourceImpl(dio: sl()),
   );
   sl.registerLazySingleton<ChatRemoteDataSource>(
-    () => _useMockChat ? MockChatDataSource() : ChatRemoteDataSourceImpl(dio: sl()),
+    () => _useMockChat
+        ? MockChatDataSource()
+        : ChatRemoteDataSourceImpl(dio: sl()),
   );
   sl.registerLazySingleton<ProfessionalDashboardRemoteDataSource>(
     () => _useMockProfessionalDashboard
         ? MockProfessionalDashboardDataSource()
         : ProfessionalDashboardRemoteDataSourceImpl(dio: sl()),
   );
-  sl.registerLazySingleton<AvailabilityLocalDataSource>(() => AvailabilityLocalDataSourceImpl(sharedPreferences: sl()));
+  sl.registerLazySingleton<AvailabilityLocalDataSource>(
+      () => AvailabilityLocalDataSourceImpl(sharedPreferences: sl()));
 
   sl.registerFactory(() => ProfessionalJobsBloc(
         getUpcomingJobs: sl(),
@@ -501,7 +532,8 @@ sl.registerFactory(() => HomeBloc(getCategoriesUseCase: sl()));
   sl.registerLazySingleton(() {
     final dio = Dio(
       BaseOptions(
-        baseUrl: 'https://gofix-api-ceaaewf7hua0ghez.uaenorth-01.azurewebsites.net/api',
+        baseUrl:
+            'https://gofix-api-ceaaewf7hua0ghez.uaenorth-01.azurewebsites.net/api',
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 15),
         headers: {'Content-Type': 'application/json'},

@@ -52,9 +52,10 @@ class _MyAvailabilityView extends StatelessWidget {
             );
             await UserTypeStorage.setAsProfessional('');
             Future.delayed(const Duration(milliseconds: 500), () {
-              if (context.mounted)
+              if (context.mounted) {
                 Navigator.of(context)
                     .pushNamedAndRemoveUntil('/dashboard', (_) => false);
+              }
             });
           } else if (state is AvailabilityError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -168,7 +169,7 @@ class _AvailabilityForm extends StatelessWidget {
                                           isAvailable: value),
                                     );
                               },
-                              activeColor: AppColors.primaryOrange,
+                              activeThumbColor: AppColors.primaryOrange,
                             ),
                     ],
                   ),

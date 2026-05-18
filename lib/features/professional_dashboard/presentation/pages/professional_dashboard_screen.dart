@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/job_entity.dart';
+import 'job_request_info_page.dart';
 import '../bloc/professional_dashboard_bloc.dart';
 import '../bloc/professional_dashboard_event.dart';
 import '../bloc/professional_dashboard_state.dart';
@@ -10,6 +11,8 @@ import '../../../professional_availability/presentation/pages/my_availability_sc
 import '../../../../core/widgets/gofix_bottom_nav_bar.dart';
 import '../../../../injection_container.dart' as di;
 import 'package:gp/core/utils/user_info_helper.dart';
+import 'package:gp/features/professional_jobs/presentation/pages/my_jobs_page.dart';
+import 'package:gp/features/professional_jobs/presentation/bloc/professional_jobs_bloc.dart';
 
 class ProfessionalDashboardScreen extends StatefulWidget {
   const ProfessionalDashboardScreen({Key? key})
@@ -41,8 +44,10 @@ class _ProfessionalDashboardScreenState
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
-        child: BlocConsumer<ProfessionalDashboardBloc, ProfessionalDashboardState>(
-          listenWhen: (_, current) => current is RequestActionSuccess || current is RequestActionError,
+        child:
+            BlocConsumer<ProfessionalDashboardBloc, ProfessionalDashboardState>(
+          listenWhen: (_, current) =>
+              current is RequestActionSuccess || current is RequestActionError,
           listener: (context, state) {
             if (state is RequestActionSuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -61,7 +66,9 @@ class _ProfessionalDashboardScreenState
             }
           },
           buildWhen: (_, current) =>
-              current is DashboardLoading || current is DashboardLoaded || current is DashboardError,
+              current is DashboardLoading ||
+              current is DashboardLoaded ||
+              current is DashboardError,
           builder: (context, state) {
             if (state is DashboardLoading) {
               return const Center(child: CircularProgressIndicator());
@@ -402,6 +409,23 @@ class _ProfessionalDashboardScreenState
   }
 
   Widget _buildRequestCard(JobEntity request) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BlocProvider.value(
+              value: context.read<ProfessionalDashboardBloc>(),
+              child: JobRequestInfoPage(job: request),
+            ),
+          ),
+        );
+      },
+      child: _buildRequestCardContent(request),
+    );
+  }
+
+  Widget _buildRequestCardContent(JobEntity request) {
     return Container(
       width: 280,
       margin: const EdgeInsets.only(right: 16),
@@ -523,17 +547,7 @@ class _ProfessionalDashboardScreenState
               ),
             );
           }),
-          _buildMenuItem('My Jobs', Icons.work_outline, () {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => BlocProvider(
-        create: (_) => di.sl<ProfessionalJobsBloc>(),
-        child: const MyJobsPage(),
-      ),
-    ),
-  );
-}),
+          _buildMenuItem('My Jobs', Icons.work_outline, () {}),
           _buildMenuItem('My Profile', Icons.person_outline, () {}),
           _buildMenuItem('My Earnings', Icons.attach_money, () {}),
         ],
