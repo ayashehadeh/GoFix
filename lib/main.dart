@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:gp/core/bloc/locale_bloc.dart';
 import 'package:gp/core/storage/token_storage.dart';
 import 'package:gp/core/storage/user_type_storage.dart';
+import 'package:gp/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:gp/features/bookings/presentation/bloc/bookings_bloc.dart';
 import 'package:gp/features/bookings/presentation/pages/my_bookings_page.dart';
 import 'package:gp/features/home/presentation/bloc/home_bloc.dart';
@@ -18,7 +19,6 @@ import 'package:gp/l10n/app_localizations.dart';
 import 'package:dio/dio.dart';
 import 'package:gp/features/auth/presentation/pages/start_page.dart';
 
-// Handle background messages (must be top-level function)
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -27,15 +27,10 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
   await Firebase.initializeApp();
-
-  // Handle background messages
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   await di.init();
-
-  // Send FCM token to backend if user is logged in
   await _registerFcmToken();
 
   runApp(
@@ -43,13 +38,13 @@ Future<void> main() async {
       providers: [
         BlocProvider(create: (_) => LocaleBloc()),
         BlocProvider(create: (_) => di.sl<HomeBloc>()),
+        BlocProvider(create: (_) => di.sl<AuthBloc>()),
       ],
       child: const MainApp(),
     ),
   );
 }
 
-/// Gets the FCM token and sends it to the backend.
 Future<void> _registerFcmToken() async {
   try {
     final isLoggedIn = await TokenStorage.isLoggedIn();
@@ -71,9 +66,7 @@ Future<void> _registerFcmToken() async {
     ));
 
     await dio.put('/auth/fcm-token', data: {'fcmToken': fcmToken});
-  } catch (_) {
-    // Don't crash the app if FCM token registration fails
-  }
+  } catch (_) {}
 }
 
 class MainApp extends StatelessWidget {
