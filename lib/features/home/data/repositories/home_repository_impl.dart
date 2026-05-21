@@ -19,7 +19,7 @@ class HomeRepositoryImpl implements HomeRepository {
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout) {
-        return const Left(NetworkFailure());
+        return Left(NetworkFailure('No network connection'));
       }
       return Left(ServerFailure(
         e.response?.data?['message'] as String? ?? 'Failed to load categories',

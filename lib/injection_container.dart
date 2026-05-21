@@ -6,6 +6,13 @@ import 'package:gp/features/become_professional/domain/usecases/get_cities.dart'
 import 'package:gp/features/become_professional/domain/usecases/set_service_areas.dart';
 import 'package:gp/features/become_professional/domain/usecases/set_working_hours.dart';
 
+//earnings
+import 'package:gp/features/earnings/presentation/bloc/earnings_bloc.dart';
+import 'package:gp/features/earnings/domain/usecases/earnings_usecases.dart';
+import 'package:gp/features/earnings/domain/repositories/earnings_repository.dart';
+import 'package:gp/features/earnings/data/repositories/earnings_repository_impl.dart';
+import 'package:gp/features/earnings/data/datasources/earnings_remote_datasource.dart';
+import 'package:gp/features/earnings/data/datasources/mock_earnings_datasource.dart';
 // ── Home ──────────────────────────────────────────────────────────────────────
 import 'package:gp/features/home/data/data_sources/data_remote_datasource.dart';
 import 'package:gp/features/home/domain/use_cases/get_categories_usecase.dart';
@@ -160,6 +167,7 @@ const bool _useMockChat = false;
 const bool _useMockProfessionalDashboard = false;
 
 Future<void> init() async {
+  // ── Auth ──────────────────────────────────────────────────────────────────
   sl.registerFactory(() => AuthBloc(
         login: sl(),
         register: sl(),
@@ -183,6 +191,12 @@ Future<void> init() async {
 
   // ── BLoC ──────────────────────────────────────────────────────────────────
   sl.registerFactory(() => HomeBloc(getCategoriesUseCase: sl()));
+
+  sl.registerFactory(() => EarningsBloc(
+        getEarnings: sl(),
+        refreshEarnings: sl(),
+      ));
+
   sl.registerFactory(
     () => ProfessionalsBloc(
       getProfessionalsByCategory: sl(),
@@ -306,8 +320,18 @@ Future<void> init() async {
     ),
   );
 
+  sl.registerFactory(() => ProfessionalJobsBloc(
+        getUpcomingJobs: sl(),
+        getPastJobs: sl(),
+        updateJobStatus: sl(),
+      ));
+
   // ── Use Cases — Home ───────────────────────────────────────────────────────
   sl.registerLazySingleton(() => GetCategoriesUseCase(sl()));
+
+  // ── Use Cases — Earnings ───────────────────────────────────────────────────
+  sl.registerLazySingleton(() => GetEarnings(sl()));
+  sl.registerLazySingleton(() => RefreshEarnings(sl()));
 
   // ── Use Cases — Professionals ──────────────────────────────────────────────
   sl.registerLazySingleton(() => GetProfessionalsByCategory(sl()));
@@ -394,13 +418,25 @@ Future<void> init() async {
 
   // ── Use Cases — Professional Availability ──────────────────────────────────
   sl.registerLazySingleton(() => GetAvailability(sl()));
-  //sl.registerLazySingleton(() => SaveAvailability(sl()));
   sl.registerLazySingleton(() => SaveWorkingHours(sl()));
   sl.registerLazySingleton(() => ToggleAvailability(sl()));
+
+  // ── Use Cases — Professional Jobs ──────────────────────────────────────────
+  sl.registerLazySingleton(() => GetUpcomingJobs(sl()));
+  sl.registerLazySingleton(() => GetPastJobs(sl()));
+  sl.registerLazySingleton(() => UpdateProJobStatus(sl()));
 
   // ── Repositories ──────────────────────────────────────────────────────────
   sl.registerLazySingleton<HomeRepository>(
       () => HomeRepositoryImpl(remoteDataSource: sl()));
+
+  sl.registerLazySingleton<EarningsRepository>(
+    () => EarningsRepositoryImpl(
+      remoteDataSource: sl(),
+      sharedPreferences: sl(),
+    ),
+  );
+
   sl.registerLazySingleton<ProfessionalsRepository>(
       () => ProfessionalsRepositoryImpl(remoteDataSource: sl()));
   sl.registerLazySingleton<ReviewsRepository>(
@@ -431,18 +467,23 @@ Future<void> init() async {
       () => ChatRepositoryImpl(dataSource: sl()));
   sl.registerLazySingleton<ProfessionalDashboardRepository>(
       () => ProfessionalDashboardRepositoryImpl(remoteDataSource: sl()));
-
-  sl.registerLazySingleton<AvailabilityRemoteDataSource>(
-      () => AvailabilityRemoteDataSourceImpl(dio: sl()));
   sl.registerLazySingleton<AvailabilityRepository>(
       () => AvailabilityRepositoryImpl(
             remoteDataSource: sl(),
             localDataSource: sl(),
           ));
+  sl.registerLazySingleton<ProfessionalJobsRepository>(
+    () => ProfessionalJobsRepositoryImpl(remoteDataSource: sl()),
+  );
 
   // ── Data Sources ──────────────────────────────────────────────────────────
   sl.registerLazySingleton<HomeRemoteDataSource>(
       () => HomeRemoteDataSourceImpl(dio: sl()));
+
+  sl.registerLazySingleton<EarningsRemoteDataSource>(
+    () => MockEarningsDataSource(), // ← Use mock instead of real API
+  );
+
   sl.registerLazySingleton<ProfessionalsRemoteDataSource>(
       () => ProfessionalsRemoteDataSourceImpl(dio: sl()));
   sl.registerLazySingleton<BookingsRemoteDataSource>(
@@ -451,8 +492,7 @@ Future<void> init() async {
         : BookingsRemoteDataSourceImpl(dio: sl()),
   );
   sl.registerLazySingleton<NotificationsRemoteDataSource>(
-    () => NotificationsRemoteDataSourceImpl(dio: sl()),
-  );
+      () => NotificationsRemoteDataSourceImpl(dio: sl()));
   sl.registerLazySingleton<AccountRemoteDataSource>(
       () => AccountRemoteDataSourceImpl(dio: sl()));
   sl.registerLazySingleton<AddressRemoteDataSource>(
@@ -482,53 +522,17 @@ Future<void> init() async {
         ? MockProfessionalDashboardDataSource()
         : ProfessionalDashboardRemoteDataSourceImpl(dio: sl()),
   );
+  sl.registerLazySingleton<AvailabilityRemoteDataSource>(
+      () => AvailabilityRemoteDataSourceImpl(dio: sl()));
   sl.registerLazySingleton<AvailabilityLocalDataSource>(
       () => AvailabilityLocalDataSourceImpl(sharedPreferences: sl()));
-
-  sl.registerFactory(() => ProfessionalJobsBloc(
-        getUpcomingJobs: sl(),
-        getPastJobs: sl(),
-        updateJobStatus: sl(),
-      ));
-  sl.registerLazySingleton(() => GetUpcomingJobs(sl()));
-  sl.registerLazySingleton(() => GetPastJobs(sl()));
-  sl.registerLazySingleton(() => UpdateProJobStatus(sl()));
-  sl.registerLazySingleton<ProfessionalJobsRepository>(
-    () => ProfessionalJobsRepositoryImpl(remoteDataSource: sl()),
-  );
   sl.registerLazySingleton<ProfessionalJobsRemoteDataSource>(
-    () => MockProfessionalJobsDataSource(),
-  );
-
-/*
-  sl.registerFactory(() => ProfessionalJobsBloc(
-        getUpcomingJobs: sl(),
-        getPastJobs: sl(),
-        updateJobStatus: sl(),
-      ));
-  sl.registerLazySingleton(() => GetUpcomingJobs(sl()));
-  sl.registerLazySingleton(() => GetPastJobs(sl()));
-  sl.registerLazySingleton(() => UpdateProJobStatus(sl()));
-  sl.registerFactory(() => ProfessionalJobsBloc(
-        getUpcomingJobs: sl(),
-        getPastJobs: sl(),
-        updateJobStatus:
-            sl<UpdateProJobStatus>(), // ← explicit type to avoid ambiguity
-      ));
-
-  sl.registerLazySingleton<ProfessionalJobsRepository>(
-    () => ProfessionalJobsRepositoryImpl(remoteDataSource: sl()),
-  );
-  sl.registerLazySingleton<ProfessionalJobsRemoteDataSource>(
-    () => MockProfessionalJobsDataSource(),
-  );*/
+      () => MockProfessionalJobsDataSource());
 
   // ── External ──────────────────────────────────────────────────────────────
-  // SharedPreferences
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
 
-  // Dio
   sl.registerLazySingleton(() {
     final dio = Dio(
       BaseOptions(

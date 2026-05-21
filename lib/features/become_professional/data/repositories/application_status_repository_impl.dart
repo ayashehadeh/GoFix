@@ -17,7 +17,7 @@ class ApplicationStatusRepositoryImpl implements ApplicationStatusRepository {
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout) {
-        return const Left(NetworkFailure());
+        return Left(NetworkFailure('No internet connection'));
       }
       final msg = e.response?.data?['message'] as String? ?? 'Something went wrong';
       return Left(ServerFailure(msg));
