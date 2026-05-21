@@ -2,21 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/job_entity.dart';
-import 'job_request_info_page.dart';
 import '../bloc/professional_dashboard_bloc.dart';
 import '../bloc/professional_dashboard_event.dart';
 import '../bloc/professional_dashboard_state.dart';
 import '../../../professional_availability/presentation/bloc/availability_bloc.dart';
 import '../../../professional_availability/presentation/pages/my_availability_screen.dart';
+import '../../../earnings/presentation/bloc/earnings_bloc.dart';
+import '../../../earnings/presentation/pages/earnings_page.dart';
 import '../../../../core/widgets/gofix_bottom_nav_bar.dart';
 import '../../../../injection_container.dart' as di;
 import 'package:gp/core/utils/user_info_helper.dart';
-import 'package:gp/features/professional_jobs/presentation/pages/my_jobs_page.dart';
-import 'package:gp/features/professional_jobs/presentation/bloc/professional_jobs_bloc.dart';
 
 class ProfessionalDashboardScreen extends StatefulWidget {
-  const ProfessionalDashboardScreen({Key? key})
-      : super(key: key); // remove professionalName param
+  const ProfessionalDashboardScreen({Key? key}) : super(key: key);
 
   @override
   State<ProfessionalDashboardScreen> createState() =>
@@ -26,6 +24,7 @@ class ProfessionalDashboardScreen extends StatefulWidget {
 class _ProfessionalDashboardScreenState
     extends State<ProfessionalDashboardScreen> {
   String _userName = '';
+
   @override
   void initState() {
     super.initState();
@@ -34,7 +33,6 @@ class _ProfessionalDashboardScreenState
   }
 
   Future<void> _loadUserName() async {
-    // ADD THIS
     final name = await UserInfoHelper.getFullName();
     if (mounted) setState(() => _userName = name);
   }
@@ -46,8 +44,6 @@ class _ProfessionalDashboardScreenState
       body: SafeArea(
         child:
             BlocConsumer<ProfessionalDashboardBloc, ProfessionalDashboardState>(
-          listenWhen: (_, current) =>
-              current is RequestActionSuccess || current is RequestActionError,
           listener: (context, state) {
             if (state is RequestActionSuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -65,10 +61,6 @@ class _ProfessionalDashboardScreenState
               );
             }
           },
-          buildWhen: (_, current) =>
-              current is DashboardLoading ||
-              current is DashboardLoaded ||
-              current is DashboardError,
           builder: (context, state) {
             if (state is DashboardLoading) {
               return const Center(child: CircularProgressIndicator());
@@ -132,7 +124,7 @@ class _ProfessionalDashboardScreenState
             Navigator.of(context).pushReplacementNamed('/bookings');
           if (index == 2)
             Navigator.of(context).pushReplacementNamed('/profile');
-          if (index == 3) return; // already here
+          if (index == 3) return;
         },
       ),
     );
@@ -171,6 +163,10 @@ class _ProfessionalDashboardScreenState
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.notifications, color: Colors.white),
                   ),
                 ],
               ),
@@ -409,23 +405,6 @@ class _ProfessionalDashboardScreenState
   }
 
   Widget _buildRequestCard(JobEntity request) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => BlocProvider.value(
-              value: context.read<ProfessionalDashboardBloc>(),
-              child: JobRequestInfoPage(job: request),
-            ),
-          ),
-        );
-      },
-      child: _buildRequestCardContent(request),
-    );
-  }
-
-  Widget _buildRequestCardContent(JobEntity request) {
     return Container(
       width: 280,
       margin: const EdgeInsets.only(right: 16),
@@ -549,7 +528,17 @@ class _ProfessionalDashboardScreenState
           }),
           _buildMenuItem('My Jobs', Icons.work_outline, () {}),
           _buildMenuItem('My Profile', Icons.person_outline, () {}),
-          _buildMenuItem('My Earnings', Icons.attach_money, () {}),
+          _buildMenuItem('My Earnings', Icons.attach_money, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BlocProvider(
+                  create: (_) => di.sl<EarningsBloc>(),
+                  child: const EarningsPage(),
+                ),
+              ),
+            );
+          }),
         ],
       ),
     );
@@ -578,28 +567,33 @@ class _ProfessionalDashboardScreenState
     );
   }
 
-  // Status dialog — uses correct backend status values
   void _showStatusUpdateDialog(String jobId, JobStatus currentStatus) {
-    final next = {
-      JobStatus.scheduled: MapEntry('OnTheWay', 'On The Way'),
-      JobStatus.onTheWay: MapEntry('InProgress', 'In Progress'),
-      JobStatus.inProgress: MapEntry('Completed', 'Completed'),
-    }[currentStatus];
+    final options = <String, String>{};
+    if (currentStatus == JobStatus.scheduled) {
+      options['OnTheWay'] = 'On The Way';
+      options['InProgress'] = 'In Progress';
+      options['Completed'] = 'Completed';
+    }
 
-    if (next == null) return;
+    if (options.isEmpty) return;
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Update Job Status'),
-        content: ListTile(
-          title: Text(next.value),
-          onTap: () {
-            this.context.read<ProfessionalDashboardBloc>().add(
-                  UpdateStatus(jobId, next.key),
-                );
-            Navigator.pop(context);
-          },
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: options.entries
+              .map((entry) => ListTile(
+                    title: Text(entry.value),
+                    onTap: () {
+                      this.context.read<ProfessionalDashboardBloc>().add(
+                            UpdateStatus(jobId, entry.key),
+                          );
+                      Navigator.pop(context);
+                    },
+                  ))
+              .toList(),
         ),
       ),
     );

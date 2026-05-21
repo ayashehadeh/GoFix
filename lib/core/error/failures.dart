@@ -12,7 +12,7 @@ class ServerFailure extends Failure {
 }
 
 class NetworkFailure extends Failure {
-  const NetworkFailure() : super('No internet connection');
+  const NetworkFailure(String string) : super('No internet connection');
 }
 
 class CacheFailure extends Failure {

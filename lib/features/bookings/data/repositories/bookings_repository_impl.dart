@@ -137,7 +137,7 @@ class BookingsRepositoryImpl implements BookingsRepository {
   Failure _handleDioError(DioException e) {
     if (e.type == DioExceptionType.connectionError ||
         e.type == DioExceptionType.connectionTimeout) {
-      return const NetworkFailure();
+      return NetworkFailure('Network error');
     }
     return ServerFailure(
       e.response?.data?['message'] as String? ?? 'Something went wrong',

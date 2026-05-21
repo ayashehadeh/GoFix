@@ -22,8 +22,8 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
 
   @override
   Future<Either<Failure, List<Category>>> getCategories() {
-    return _wrap(() async =>
-        (await remoteDataSource.getCategories()).cast<Category>());
+    return _wrap(
+        () async => (await remoteDataSource.getCategories()).cast<Category>());
   }
 
   @override
@@ -43,8 +43,7 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
 
   @override
   Future<Either<Failure, List<City>>> getCities() {
-    return _wrap(
-        () async => (await remoteDataSource.getCities()).cast<City>());
+    return _wrap(() async => (await remoteDataSource.getCities()).cast<City>());
   }
 
   // ── Application flow ──────────────────────────────────────────────────────
@@ -76,8 +75,7 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> setServiceAreas(
-      List<int> serviceAreaIds) {
+  Future<Either<Failure, Unit>> setServiceAreas(List<int> serviceAreaIds) {
     return _wrapUnit(
         () async => await remoteDataSource.setServiceAreas(serviceAreaIds));
   }
@@ -111,7 +109,6 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
     String? issuedBy,
     int? issuedYear,
   }) {
-    
     return _wrapUnit(() async => await remoteDataSource.uploadDocument(
           filePath: filePath,
           documentType: documentType.apiValue,
@@ -142,18 +139,19 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
   }
 
   Future<Either<Failure, Unit>> _wrapUnit(Future<void> Function() fn) async {
-  try {
-    await fn();
-    return const Right(unit);
-  } on DioException catch (e) {
-    print('_wrapUnit DioException: ${e.response?.statusCode} ${e.response?.data}');
-    return Left(_handleDioError(e));
-  } catch (e, st) {
-    print('_wrapUnit UNKNOWN ERROR: $e');
-    print('_wrapUnit STACKTRACE: $st');
-    return Left(ServerFailure(e.toString()));
+    try {
+      await fn();
+      return const Right(unit);
+    } on DioException catch (e) {
+      print(
+          '_wrapUnit DioException: ${e.response?.statusCode} ${e.response?.data}');
+      return Left(_handleDioError(e));
+    } catch (e, st) {
+      print('_wrapUnit UNKNOWN ERROR: $e');
+      print('_wrapUnit STACKTRACE: $st');
+      return Left(ServerFailure(e.toString()));
+    }
   }
-}
 
   Failure _handleDioError(DioException e) {
     if (e.response?.statusCode == 401) {
@@ -162,7 +160,7 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
     if (e.type == DioExceptionType.connectionError ||
         e.type == DioExceptionType.connectionTimeout ||
         e.type == DioExceptionType.receiveTimeout) {
-      return const NetworkFailure();
+      return const NetworkFailure('Network error');
     }
     final data = e.response?.data;
     final message =
