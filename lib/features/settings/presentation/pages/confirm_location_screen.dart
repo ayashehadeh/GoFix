@@ -6,6 +6,7 @@ import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/core/theme/app_text_styles.dart';
 import 'package:gp/features/settings/presentation/bloc/address_bloc.dart';
 import 'package:gp/features/settings/presentation/pages/new_address_screen.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import 'package:latlong2/latlong.dart';
 
 class ConfirmLocationScreen extends StatefulWidget {
@@ -49,6 +50,7 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -72,7 +74,7 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
                         onPressed: () => Navigator.pop(context),
                       ),
                       const Spacer(),
-                      Text('Confirm Location', style: AppTextStyles.heading2),
+                      Text(t.confirmLocation, style: AppTextStyles.heading2),
                       const Spacer(),
                       const SizedBox(width: 48),
                     ],
@@ -142,7 +144,7 @@ class _ConfirmLocationScreenState extends State<ConfirmLocationScreen> {
                         elevation: 0,
                       ),
                       child: Text(
-                        'Continue',
+                        t.continue1,
                         style: AppTextStyles.bodyMedium.copyWith(
                           color: Colors.white,
                           fontSize: 16,

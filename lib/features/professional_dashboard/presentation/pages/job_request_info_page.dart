@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/job_entity.dart';
 import '../bloc/professional_dashboard_bloc.dart';
@@ -48,9 +49,9 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
             backgroundColor: Colors.white,
             elevation: 0,
             leading: const BackButton(color: Color(0xFF062B4D)),
-            title: const Text(
-              'Job Information',
-              style: TextStyle(
+            title: Text(
+              AppLocalizations.of(context)!.jobInformation,
+              style: const TextStyle(
                 color: Color(0xFF062B4D),
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
@@ -97,8 +98,8 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                               height: 22,
                               child: CircularProgressIndicator(
                                   color: Colors.white, strokeWidth: 2.5))
-                          : const Text('Accept Request',
-                              style: TextStyle(
+                          : Text(AppLocalizations.of(context)!.acceptRequest,
+                              style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700)),
                     ),
@@ -120,8 +121,8 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                       ),
-                      child: const Text('Decline Request',
-                          style: TextStyle(
+                      child: Text(AppLocalizations.of(context)!.declineRequest,
+                          style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.w700)),
                     ),
                   ),
@@ -182,30 +183,29 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                         ),
                       ),
                     ),
-                    const Text(
-                      'Request Rejected.',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(sheetCtx)!.requestRejected,
+                      style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF062B4D),
                       ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
-                      'Customer has been notified.',
-                      style:
-                          TextStyle(fontSize: 14, color: Colors.grey),
+                    Text(
+                      AppLocalizations.of(sheetCtx)!.customerNotified,
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                     const SizedBox(height: 24),
 
                     // Reason field
                     Row(
-                      children: const [
-                        Icon(Icons.edit_outlined,
+                      children: [
+                        const Icon(Icons.edit_outlined,
                             color: Color(0xFFFF8C1A), size: 16),
-                        SizedBox(width: 6),
-                        Text('Reason (optional)',
-                            style: TextStyle(
+                        const SizedBox(width: 6),
+                        Text(AppLocalizations.of(sheetCtx)!.reasonOptional,
+                            style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                                 color: Color(0xFF062B4D))),
@@ -216,7 +216,7 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                       controller: reasonCtrl,
                       maxLines: 4,
                       decoration: InputDecoration(
-                        hintText: 'Tell the customer why...',
+                        hintText: AppLocalizations.of(sheetCtx)!.tellCustomerWhy,
                         hintStyle: const TextStyle(
                             fontSize: 13, color: Colors.grey),
                         filled: true,
@@ -246,8 +246,8 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                               borderRadius: BorderRadius.circular(14)),
                           elevation: 0,
                         ),
-                        child: const Text('Done',
-                            style: TextStyle(
+                        child: Text(AppLocalizations.of(sheetCtx)!.done,
+                            style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700)),
                       ),
@@ -302,7 +302,9 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                   ),
 
                   Text(
-                    accepted ? 'Request Accepted!' : 'Request Rejected.',
+                    accepted
+                        ? AppLocalizations.of(sheetCtx)!.requestAccepted
+                        : AppLocalizations.of(sheetCtx)!.requestRejected,
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
@@ -312,8 +314,8 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                   const SizedBox(height: 10),
                   Text(
                     accepted
-                        ? 'Customer has been notified.\nThe job is now in your scheduled list.'
-                        : 'Customer has been notified.',
+                        ? AppLocalizations.of(sheetCtx)!.jobAddedToSchedule
+                        : AppLocalizations.of(sheetCtx)!.customerNotified,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                         fontSize: 14, color: Colors.grey, height: 1.6),
@@ -362,8 +364,8 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                               borderRadius: BorderRadius.circular(14)),
                           elevation: 0,
                         ),
-                        child: const Text('View My Jobs',
-                            style: TextStyle(
+                        child: Text(AppLocalizations.of(sheetCtx)!.viewMyJobs,
+                            style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700)),
                       ),
@@ -385,8 +387,8 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                               borderRadius: BorderRadius.circular(14)),
                           elevation: 0,
                         ),
-                        child: const Text('Done',
-                            style: TextStyle(
+                        child: Text(AppLocalizations.of(sheetCtx)!.done,
+                            style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700)),
                       ),
@@ -426,8 +428,8 @@ class _JobDetailsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Job Details',
-              style: TextStyle(
+          Text(AppLocalizations.of(context)!.jobDetails,
+              style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF062B4D))),
@@ -476,12 +478,12 @@ class _ServiceDescriptionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.edit_outlined, color: Color(0xFFFF8C1A), size: 18),
-              SizedBox(width: 8),
-              Text('Service Description',
-                  style: TextStyle(
+              const Icon(Icons.edit_outlined, color: Color(0xFFFF8C1A), size: 18),
+              const SizedBox(width: 8),
+              Text(AppLocalizations.of(context)!.serviceDescription,
+                  style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF062B4D))),
@@ -494,12 +496,12 @@ class _ServiceDescriptionCard extends StatelessWidget {
                 fontSize: 13, color: Colors.grey, height: 1.6),
           ),
           const SizedBox(height: 12),
-          const Row(
+          Row(
             children: [
-              Icon(Icons.image_outlined, color: Color(0xFF062B4D), size: 18),
-              SizedBox(width: 8),
-              Text('1 picture attached',
-                  style: TextStyle(
+              const Icon(Icons.image_outlined, color: Color(0xFF062B4D), size: 18),
+              const SizedBox(width: 8),
+              Text(AppLocalizations.of(context)!.pictureAttached,
+                  style: const TextStyle(
                       fontSize: 13, color: Color(0xFF062B4D))),
             ],
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/features/professionals/presentation/pages/professional_detail_page.dart';
 import 'package:gp/injection_container.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -55,9 +56,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
           }
           if (state is FavoritesLoaded) {
             if (state.favorites.isEmpty) {
-              return const Center(
-                child: Text('No favorites yet',
-                    style: TextStyle(color: AppColors.textSecondary)),
+              return Center(
+                child: Text(AppLocalizations.of(context)!.noFavoritesYet,
+                    style: const TextStyle(color: AppColors.textSecondary)),
               );
             }
             return ListView.builder(
@@ -149,7 +150,7 @@ child: ProfessionalDetailPage(id: item.id, professionalId: item.id),          ),
                     const Icon(Icons.access_time,
                         color: AppColors.primaryOrange, size: 14),
                     const SizedBox(width: 4),
-                    Text('${item.yearsExperience} years experience',
+                    Text(AppLocalizations.of(context)!.yearsExperience(item.yearsExperience),
                         style: const TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 12)),

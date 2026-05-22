@@ -59,37 +59,4 @@ class AuthService {
     }
   }
 
-  Future<void> verifyEmail({
-    required String token,
-    required String code,
-  }) async {
-    try {
-      await _dio.post(
-        '/verify-email',
-        data: {'code': code},
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
-      );
-    } on DioException catch (e) {
-      String message = 'Verification failed. Please try again.';
-      if (e.response?.data != null) {
-        message = e.response?.data['message'] ?? message;
-      }
-      throw Exception(message);
-    }
-  }
-
-  Future<void> resendVerificationCode({required String token}) async {
-    try {
-      await _dio.post(
-        '/send-verification',
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
-      );
-    } on DioException catch (e) {
-      String message = 'Failed to resend code. Please try again.';
-      if (e.response?.data != null) {
-        message = e.response?.data['message'] ?? message;
-      }
-      throw Exception(message);
-    }
-  }
 }

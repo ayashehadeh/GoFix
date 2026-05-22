@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/core/storage/user_type_storage.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/availability_entity.dart';
 import '../bloc/availability_bloc.dart';
@@ -44,10 +45,10 @@ class _MyAvailabilityView extends StatelessWidget {
         listener: (context, state) async {
           if (state is AvailabilitySaved) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Availability saved successfully!'),
+              SnackBar(
+                content: Text(AppLocalizations.of(context)!.availabilitySaved),
                 backgroundColor: Colors.green,
-                duration: Duration(seconds: 2),
+                duration: const Duration(seconds: 2),
               ),
             );
             await UserTypeStorage.setAsProfessional('');

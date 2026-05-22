@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gp/l10n/app_localizations.dart';
 
 class UpdateDobPage extends StatefulWidget {
   final String currentDob;
@@ -16,20 +17,6 @@ class UpdateDobPage extends StatefulWidget {
 
 class _UpdateDobPageState extends State<UpdateDobPage> {
   final days = List.generate(31, (i) => (i + 1).toString().padLeft(2, '0'));
-  final months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
-  ];
   late final List<String> years;
 
   int selDay = 3;
@@ -53,6 +40,21 @@ class _UpdateDobPageState extends State<UpdateDobPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    final months = [
+      t.monthJanuary,
+      t.monthFebruary,
+      t.monthMarch,
+      t.monthApril,
+      t.monthMay,
+      t.monthJune,
+      t.monthJuly,
+      t.monthAugust,
+      t.monthSeptember,
+      t.monthOctober,
+      t.monthNovember,
+      t.monthDecember,
+    ];
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -69,8 +71,8 @@ class _UpdateDobPageState extends State<UpdateDobPage> {
                 onPressed: () => Navigator.pop(context),
               ),
               const SizedBox(height: 16),
-              const Text('Date of birth',
-                  style: TextStyle(
+              Text(t.dateOfBirth,
+                  style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF062B4D))),
@@ -119,8 +121,8 @@ class _UpdateDobPageState extends State<UpdateDobPage> {
                     widget.onUpdate('$d-$m-$y');
                     Navigator.pop(context);
                   },
-                  child: const Text('Update',
-                      style: TextStyle(
+                  child: Text(t.update,
+                      style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w600)),

@@ -44,6 +44,7 @@ import 'package:gp/features/professionals/domain/usecases/review_usecases/delete
 import 'package:gp/features/professionals/domain/usecases/review_usecases/edit_review.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/filter_professionals.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/get_favorites.dart';
+import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/get_my_profile.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/get_professional_by_id.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/get_professionals_by_category.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/get_service_areas_by_professional.dart';
@@ -64,6 +65,7 @@ import 'package:gp/features/bookings/domain/usecases/create_booking.dart';
 import 'package:gp/features/bookings/domain/usecases/modify_booking.dart';
 import 'package:gp/features/bookings/domain/usecases/cancel_booking.dart';
 import 'package:gp/features/bookings/domain/usecases/submit_report.dart';
+import 'package:gp/features/bookings/domain/usecases/confirm_payment.dart';
 import 'package:gp/features/bookings/presentation/bloc/bookings_bloc.dart';
 
 // ── Notifications ─────────────────────────────────────────────────────────────
@@ -171,15 +173,11 @@ Future<void> init() async {
   sl.registerFactory(() => AuthBloc(
         login: sl(),
         register: sl(),
-        verifyEmail: sl(),
-        resendCode: sl(),
         forgotPassword: sl(),
         resetPassword: sl(),
       ));
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
-  sl.registerLazySingleton(() => VerifyEmailUseCase(sl()));
-  sl.registerLazySingleton(() => ResendVerificationCodeUseCase(sl()));
   sl.registerLazySingleton(() => ForgotPasswordUseCase(sl()));
   sl.registerLazySingleton(() => ResetPasswordUseCase(sl()));
   sl.registerLazySingleton<AuthRepository>(
@@ -201,6 +199,7 @@ Future<void> init() async {
     () => ProfessionalsBloc(
       getProfessionalsByCategory: sl(),
       getProfessionalById: sl(),
+      getMyProfile: sl(),
       getServiceAreasByProfessional: sl(),
       getReviewsByProfessional: sl(),
       toggleFavorite: sl(),
@@ -220,6 +219,7 @@ Future<void> init() async {
       modifyBooking: sl(),
       cancelBooking: sl(),
       submitReport: sl(),
+      confirmPayment: sl(),
     ),
   );
 
@@ -336,6 +336,7 @@ Future<void> init() async {
   // ── Use Cases — Professionals ──────────────────────────────────────────────
   sl.registerLazySingleton(() => GetProfessionalsByCategory(sl()));
   sl.registerLazySingleton(() => GetProfessionalById(sl()));
+  sl.registerLazySingleton(() => GetMyProfile(sl()));
   sl.registerLazySingleton(() => GetServiceAreasByProfessional(sl()));
   sl.registerLazySingleton(() => GetFavorites(sl()));
   sl.registerLazySingleton(() => ToggleFavorite(sl()));
@@ -354,6 +355,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => ModifyBooking(sl()));
   sl.registerLazySingleton(() => CancelBooking(sl()));
   sl.registerLazySingleton(() => SubmitReport(sl()));
+  sl.registerLazySingleton(() => ConfirmPayment(sl()));
 
   // ── Use Cases — Notifications ──────────────────────────────────────────────
   sl.registerLazySingleton(() => GetNotifications(sl()));

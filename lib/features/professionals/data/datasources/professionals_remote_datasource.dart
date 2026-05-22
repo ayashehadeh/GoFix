@@ -8,6 +8,7 @@ import 'package:gp/features/professionals/domain/entities/service_category.dart'
 
 abstract class ProfessionalsRemoteDataSource {
   Future<List<CityModel>> getCities();
+  Future<ProfessionalModel> getMyProfile();
   Future<List<ServiceAreaModel>> getServiceAreas({int? cityId});
   Future<List<ServiceAreaModel>> getServiceAreasByProfessional(
       String professionalId);
@@ -88,6 +89,12 @@ class ProfessionalsRemoteDataSourceImpl
     final response = await dio.get('/professionals/cities');
     final data = response.data['data'] as List;
     return data.map((e) => CityModel.fromJson(e)).toList();
+  }
+
+  @override
+  Future<ProfessionalModel> getMyProfile() async {
+    final response = await dio.get('/professionals/profile/me');
+    return ProfessionalModel.fromJson(response.data['data']);
   }
 
   @override

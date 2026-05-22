@@ -32,6 +32,7 @@ enum BookingStatus {
       case 'in progress':
       case 'ontheway':
       case 'on_the_way':
+      case 'arrived':
         return BookingStatus.inProgress;
       case 'completed':
         return BookingStatus.completed;
@@ -60,6 +61,7 @@ class Booking extends Equatable {
   final String description;
   final List<String> imageUrls;
   final BookingStatus status;
+  final bool paymentConfirmed;
   final DateTime createdAt;
 
   const Booking({
@@ -77,16 +79,19 @@ class Booking extends Equatable {
     required this.description,
     required this.imageUrls,
     required this.status,
+    this.paymentConfirmed = false,
     required this.createdAt,
   });
 
   bool get isUpcoming =>
       status == BookingStatus.pending ||
       status == BookingStatus.confirmed ||
-      status == BookingStatus.inProgress;
+      status == BookingStatus.inProgress ||
+      (status == BookingStatus.completed && !paymentConfirmed);
 
   bool get isPast =>
-      status == BookingStatus.completed || status == BookingStatus.cancelled;
+      (status == BookingStatus.completed && paymentConfirmed) ||
+      status == BookingStatus.cancelled;
 
   String get formattedDate {
     const months = [
@@ -112,6 +117,7 @@ class Booking extends Equatable {
         description,
         imageUrls,
         status,
+        paymentConfirmed,
         createdAt,
       ];
 }

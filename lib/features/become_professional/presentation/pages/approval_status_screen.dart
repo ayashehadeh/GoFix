@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gp/features/professional_availability/presentation/bloc/availability_bloc.dart';
 import 'package:gp/features/professional_availability/presentation/pages/my_availability_screen.dart';
 import 'package:gp/injection_container.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../bloc/application_status_bloc.dart';
 import '../bloc/application_status_event.dart';
@@ -52,7 +53,7 @@ class ApprovalStatusScreen extends StatelessWidget {
                         backgroundColor: AppColors.primaryOrange,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text('Retry', style: TextStyle(color: Colors.white)),
+                      child: Text(AppLocalizations.of(context)!.retry, style: const TextStyle(color: Colors.white)),
                     ),
                   ],
                 ),
@@ -124,72 +125,79 @@ class _ApprovedScreen extends StatelessWidget {
               const SizedBox(height: 28),
 
               // ── Title ───────────────────────────────────────────────────
-              const Text(
-                "You're Approved!",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primaryDark,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Your professional profile is now live on GoFix. '
-                'Set your availability to start receiving bookings.',
-                style: TextStyle(
-                  fontSize: 14,
-                  height: 1.6,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 32),
+              Builder(builder: (context) {
+                final t = AppLocalizations.of(context)!;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      t.approved,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryDark,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      t.approvedMessage,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        height: 1.6,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
 
-              // ── Checklist ────────────────────────────────────────────────
-              ApprovalChecklistItem(
-                title: 'Profile submitted',
-                subtitle: 'Your details & documents are verified.',
-                isCompleted: status.hasProfile,
-              ),
-              const SizedBox(height: 16),
-              ApprovalChecklistItem(
-                title: 'Identity verified',
-                subtitle: 'Background check passed.',
-                isCompleted: status.hasIdentityDocument,
-              ),
-              const SizedBox(height: 40),
+                    // ── Checklist ──────────────────────────────────────────
+                    ApprovalChecklistItem(
+                      title: t.profileSubmitted,
+                      subtitle: t.profileVerifiedSubtitle,
+                      isCompleted: status.hasProfile,
+                    ),
+                    const SizedBox(height: 16),
+                    ApprovalChecklistItem(
+                      title: t.identityVerified,
+                      subtitle: t.backgroundCheckPassed,
+                      isCompleted: status.hasIdentityDocument,
+                    ),
+                    const SizedBox(height: 40),
 
-              // ── CTA ──────────────────────────────────────────────────────
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => BlocProvider(
-                          create: (_) => sl<AvailabilityBloc>(),
-                          child: const MyAvailabilityScreen(),
+                    // ── CTA ────────────────────────────────────────────────
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => BlocProvider(
+                                create: (_) => sl<AvailabilityBloc>(),
+                                child: const MyAvailabilityScreen(),
+                              ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryOrange,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          t.setMyAvailability,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryOrange,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
                     ),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    'Set My Availability',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
+                  ],
+                );
+              }),
               const SizedBox(height: 24),
             ],
           ),
@@ -235,65 +243,73 @@ class _NotApprovedScreen extends StatelessWidget {
               const SizedBox(height: 28),
 
               // ── Title ───────────────────────────────────────────────────
-              const Text(
-                'Application Not Approved',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primaryDark,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                status.rejectionReason ?? 'Your application is currently under review.',
-                style: const TextStyle(
-                  fontSize: 14,
-                  height: 1.6,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // ── Checklist ────────────────────────────────────────────────
-              ApprovalChecklistItem(
-                title: 'Profile submitted',
-                subtitle: 'Your details & documents are verified.',
-                isCompleted: status.hasProfile,
-              ),
-              const SizedBox(height: 16),
-              ApprovalChecklistItem(
-                title: 'Identity verified',
-                subtitle: 'Background check passed.',
-                isCompleted: status.hasIdentityDocument,
-              ),
-              const SizedBox(height: 40),
-
-              // ── CTA ──────────────────────────────────────────────────────
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // TODO: Navigator.push to DocumentUploadPage
-                    // with documentType: DocumentType.identity
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryOrange,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+              Builder(builder: (context) {
+                final t = AppLocalizations.of(context)!;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      t.notApproved,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryDark,
+                      ),
                     ),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    'Resubmit Documents',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                    const SizedBox(height: 8),
+                    Text(
+                      status.rejectionReason ?? '',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        height: 1.6,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
-                  ),
-                ),
-              ),
+                    const SizedBox(height: 32),
+
+                    // ── Checklist ──────────────────────────────────────────
+                    ApprovalChecklistItem(
+                      title: t.profileSubmitted,
+                      subtitle: t.profileVerifiedSubtitle,
+                      isCompleted: status.hasProfile,
+                    ),
+                    const SizedBox(height: 16),
+                    ApprovalChecklistItem(
+                      title: t.identityVerified,
+                      subtitle: t.backgroundCheckPassed,
+                      isCompleted: status.hasIdentityDocument,
+                    ),
+                    const SizedBox(height: 40),
+
+                    // ── CTA ────────────────────────────────────────────────
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // TODO: Navigator.push to DocumentUploadPage
+                          // with documentType: DocumentType.identity
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryOrange,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          t.resubmitDocuments,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }),
               const SizedBox(height: 24),
             ],
           ),
@@ -327,47 +343,54 @@ class _IncompleteScreen extends StatelessWidget {
                 color: AppColors.textSecondary,
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Application Incomplete',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primaryDark,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Please complete all steps of your application before we can review it.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textSecondary,
-                  height: 1.6,
-                ),
-              ),
-              const SizedBox(height: 28),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryOrange,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+              Builder(builder: (context) {
+                final t = AppLocalizations.of(context)!;
+                return Column(
+                  children: [
+                    Text(
+                      t.applicationIncomplete,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryDark,
+                      ),
                     ),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    'Complete Application',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                    const SizedBox(height: 8),
+                    Text(
+                      t.incompleteApplicationMsg,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                        height: 1.6,
+                      ),
                     ),
-                  ),
-                ),
-              ),
+                    const SizedBox(height: 28),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryOrange,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          t.completeApplication,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }),
             ],
           ),
         ),

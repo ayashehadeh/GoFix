@@ -5,6 +5,7 @@ import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/core/theme/app_text_styles.dart';
 import 'package:gp/features/settings/presentation/bloc/address_bloc.dart';
 import 'package:gp/features/settings/presentation/widgets/address_form.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import 'package:latlong2/latlong.dart';
 
 class NewAddressScreen extends StatelessWidget {
@@ -19,6 +20,7 @@ class NewAddressScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -42,7 +44,7 @@ class NewAddressScreen extends StatelessWidget {
                         onPressed: () => Navigator.pop(context),
                       ),
                       const Spacer(),
-                      Text('New Address', style: AppTextStyles.heading2),
+                      Text(t.newAddress, style: AppTextStyles.heading2),
                       const Spacer(),
                       const SizedBox(width: 48),
                     ],

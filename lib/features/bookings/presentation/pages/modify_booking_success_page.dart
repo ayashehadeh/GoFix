@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class ModifyBookingSuccessPage extends StatefulWidget {
@@ -40,12 +41,14 @@ class _ModifyBookingSuccessPageState extends State<ModifyBookingSuccessPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         automaticallyImplyLeading: false,
-        title: const Text(
-          'Modify Booking',
-          style: TextStyle(
-            color: AppColors.primaryDark,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
+        title: Builder(
+          builder: (ctx) => Text(
+            AppLocalizations.of(ctx)!.modifyBooking,
+            style: const TextStyle(
+              color: AppColors.primaryDark,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
         centerTitle: false,
@@ -152,9 +155,9 @@ class _SuccessSheet extends StatelessWidget {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      'Done',
-                      style: TextStyle(
+                    child: Text(
+                      AppLocalizations.of(context)!.done,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                       ),

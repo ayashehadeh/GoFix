@@ -13,6 +13,8 @@ class LoadProfessionalsByCategory extends ProfessionalsEvent {
   List<Object?> get props => [category];
 }
 
+class LoadMyProfile extends ProfessionalsEvent {}
+
 class LoadProfessionalDetail extends ProfessionalsEvent {
   final String professionalId;
   LoadProfessionalDetail(this.professionalId);

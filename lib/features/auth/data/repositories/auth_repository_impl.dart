@@ -64,35 +64,6 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> verifyEmail({
-    required String token,
-    required String code,
-  }) async {
-    try {
-      await remoteDataSource.verifyEmail(token: token, code: code);
-      return const Right(null);
-    } on DioException catch (e) {
-      return Left(_dioFailure(e, 'Verification failed. Please try again.'));
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, void>> resendVerificationCode({
-    required String token,
-  }) async {
-    try {
-      await remoteDataSource.resendVerificationCode(token: token);
-      return const Right(null);
-    } on DioException catch (e) {
-      return Left(_dioFailure(e, 'Failed to resend code. Please try again.'));
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
-  }
-
-  @override
   Future<Either<Failure, void>> forgotPassword({
     required String email,
   }) async {
@@ -108,11 +79,13 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, void>> resetPassword({
+    required String token,
     required String newPassword,
     required String confirmPassword,
   }) async {
     try {
       await remoteDataSource.resetPassword(
+        token: token,
         newPassword: newPassword,
         confirmPassword: confirmPassword,
       );

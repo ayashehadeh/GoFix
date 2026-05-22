@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/category_entity.dart';
 
 class CategoryCard extends StatelessWidget {
@@ -14,8 +15,23 @@ class CategoryCard extends StatelessWidget {
     required this.onTap,
   });
 
+  String _localizedName(AppLocalizations l10n) {
+    switch (category.name) {
+      case 'Plumbing':         return l10n.categoryPlumbing;
+      case 'Electrical Work':  return l10n.categoryElectricalWork;
+      case 'AC Repair':        return l10n.categoryAcRepair;
+      case 'Carpentry':        return l10n.categoryCarpentry;
+      case 'Painting':         return l10n.categoryPainting;
+      case 'Cleaning':         return l10n.categoryCleaning;
+      case 'Moving Services':  return l10n.categoryMovingServices;
+      case 'Appliance Repair': return l10n.categoryApplianceRepair;
+      default:                 return category.name;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -51,7 +67,7 @@ class CategoryCard extends StatelessWidget {
           SizedBox(
             width: 72,
             child: Text(
-              category.name,
+              _localizedName(l10n),
               style: AppTextStyles.categoryLabel,
               textAlign: TextAlign.center,
               maxLines: 2,

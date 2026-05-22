@@ -6,6 +6,7 @@ import 'package:gp/features/settings/presentation/pages/update_field_page.dart';
 import 'package:gp/features/settings/presentation/pages/update_phone_page.dart';
 import 'package:gp/features/settings/presentation/pages/update_dob_page.dart';
 import 'package:gp/features/settings/presentation/pages/update_gender_page.dart';
+import 'package:gp/l10n/app_localizations.dart';
 
 class PersonalInformationPage extends StatefulWidget {
   const PersonalInformationPage({super.key});
@@ -49,56 +50,61 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
   }
 
   Future<void> _updateName(String val) async {
+    final t = AppLocalizations.of(context)!;
     final result = await _repo.updateName(val);
     result.fold(
       (err) => _showSnackbar(err, success: false),
       (_) {
         setState(() => name = val);
-        _showSnackbar('Name updated successfully ✓');
+        _showSnackbar(t.nameUpdatedSuccess);
       },
     );
   }
 
   Future<void> _updatePhone(String val) async {
+    final t = AppLocalizations.of(context)!;
     final result = await _repo.updatePhone(val);
     result.fold(
       (err) => _showSnackbar(err, success: false),
       (_) {
         setState(() => phone = val);
-        _showSnackbar('Phone updated successfully ✓');
+        _showSnackbar(t.phoneUpdatedSuccess);
       },
     );
   }
 
   Future<void> _updateEmail(String val) async {
+    final t = AppLocalizations.of(context)!;
     final result = await _repo.updateEmail(val);
     result.fold(
       (err) => _showSnackbar(err, success: false),
       (_) {
         setState(() => email = val);
-        _showSnackbar('Email updated successfully ✓');
+        _showSnackbar(t.emailUpdatedSuccess);
       },
     );
   }
 
   Future<void> _updateDob(String val) async {
+    final t = AppLocalizations.of(context)!;
     final result = await _repo.updateDateOfBirth(val);
     result.fold(
       (err) => _showSnackbar(err, success: false),
       (_) {
         setState(() => dob = val);
-        _showSnackbar('Date of birth updated successfully ✓');
+        _showSnackbar(t.dobUpdatedSuccess);
       },
     );
   }
 
   Future<void> _updateGender(String val) async {
+    final t = AppLocalizations.of(context)!;
     final result = await _repo.updateGender(val);
     result.fold(
       (err) => _showSnackbar(err, success: false),
       (_) {
         setState(() => gender = val);
-        _showSnackbar('Gender updated successfully ✓');
+        _showSnackbar(t.genderUpdatedSuccess);
       },
     );
   }
@@ -114,6 +120,7 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -125,10 +132,10 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
                   color: Color(0xFF062B4D), size: 28),
               onPressed: () => Navigator.pop(context),
             ),
-            const Center(
+            Center(
               child: Text(
-                'Personal Information',
-                style: TextStyle(
+                t.personalInformationTitle,
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF062B4D),
@@ -143,17 +150,16 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
                   : ListView(
                       children: [
                         _InfoTile(
-                          label: 'Name',
+                          label: t.nameLabelField,
                           value: name,
                           onTap: () async {
                             await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => UpdateFieldPage(
-                                  title: 'Update your name',
-                                  subtitle:
-                                      'Your name helps personalize your app experience',
-                                  hint: 'Enter your new name',
+                                  title: t.updateYourName,
+                                  subtitle: t.namePersonalizeExp,
+                                  hint: t.enterNewName,
                                   onUpdate: _updateName,
                                 ),
                               ),
@@ -161,7 +167,7 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
                           },
                         ),
                         _InfoTile(
-                          label: 'Phone number',
+                          label: t.phoneNumberField,
                           value: phone,
                           onTap: () async {
                             await Navigator.push(
@@ -175,17 +181,16 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
                           },
                         ),
                         _InfoTile(
-                          label: 'Email',
+                          label: t.emailField,
                           value: email,
                           onTap: () async {
                             await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => UpdateFieldPage(
-                                  title: 'Update your email',
-                                  subtitle:
-                                      'We will send a verification to your new email',
-                                  hint: 'Enter your new email',
+                                  title: t.updateYourEmail,
+                                  subtitle: t.emailVerificationMsg,
+                                  hint: t.enterNewEmail,
                                   onUpdate: _updateEmail,
                                 ),
                               ),
@@ -193,7 +198,7 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
                           },
                         ),
                         _InfoTile(
-                          label: 'Date of birth',
+                          label: t.dateOfBirthField,
                           value: dob,
                           onTap: () async {
                             await Navigator.push(
@@ -208,7 +213,7 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
                           },
                         ),
                         _InfoTile(
-                          label: 'Gender',
+                          label: t.genderField,
                           value: gender,
                           onTap: () async {
                             await Navigator.push(

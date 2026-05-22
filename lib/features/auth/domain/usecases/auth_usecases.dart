@@ -36,25 +36,6 @@ class RegisterUseCase {
       );
 }
 
-class VerifyEmailUseCase {
-  final AuthRepository repository;
-  const VerifyEmailUseCase(this.repository);
-
-  Future<Either<Failure, void>> call({
-    required String token,
-    required String code,
-  }) =>
-      repository.verifyEmail(token: token, code: code);
-}
-
-class ResendVerificationCodeUseCase {
-  final AuthRepository repository;
-  const ResendVerificationCodeUseCase(this.repository);
-
-  Future<Either<Failure, void>> call({required String token}) =>
-      repository.resendVerificationCode(token: token);
-}
-
 class ForgotPasswordUseCase {
   final AuthRepository repository;
   const ForgotPasswordUseCase(this.repository);
@@ -68,10 +49,12 @@ class ResetPasswordUseCase {
   const ResetPasswordUseCase(this.repository);
 
   Future<Either<Failure, void>> call({
+    required String token,
     required String newPassword,
     required String confirmPassword,
   }) =>
       repository.resetPassword(
+        token: token,
         newPassword: newPassword,
         confirmPassword: confirmPassword,
       );

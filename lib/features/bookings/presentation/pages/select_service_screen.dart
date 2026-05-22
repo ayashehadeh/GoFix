@@ -2,6 +2,11 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/features/professionals/domain/entities/service_offered.dart';
+import 'package:gp/features/settings/presentation/bloc/address_bloc.dart';
+import 'package:gp/injection_container.dart' as di;
+import 'package:gp/l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:gp/features/bookings/presentation/pages/book_service_screen.dart';
 
@@ -15,12 +20,14 @@ class SelectServiceScreen extends StatefulWidget {
   final String professionalName;
   final String professionalRole;
   final String professionalId;
+  final List<ServiceOffered> services;
 
   const SelectServiceScreen({
     super.key,
     required this.professionalName,
     required this.professionalRole,
     required this.professionalId,
+    required this.services,
   });
 
   @override
@@ -42,14 +49,9 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
   static const Color errorRed = Color(0xFFD32F2F);
   static const Color lightGrey = Color(0xFFF5F5F5);
 
-  final List<ServiceItem> _services = const [
-    ServiceItem(name: 'Pipe Installation', price: '30-40 JD'),
-    ServiceItem(name: 'Leak Repairs', price: '25-35 JD'),
-    ServiceItem(name: 'Water Heater Service', price: '40-60 JD'),
-    ServiceItem(name: 'Drain Cleaning', price: '25-30 JD'),
-    ServiceItem(name: 'Bathroom Fixtures', price: '35-50 JD'),
-    ServiceItem(name: 'Other', price: 'TBD'),
-  ];
+  late final List<ServiceItem> _services = widget.services
+      .map((s) => ServiceItem(name: s.name, price: s.priceDisplay))
+      .toList();
 
   @override
   void dispose() {
@@ -88,14 +90,17 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => BookServiceScreen(
-            serviceName: _services[_selectedServiceIndex!].name,
-            servicePrice: _services[_selectedServiceIndex!].price,
-            description: _descriptionController.text.trim(),
-            images: List.from(_pickedImages),
-            workerName: widget.professionalName,
-            workerRole: widget.professionalRole,
-            professionalId: widget.professionalId, 
+          builder: (context) => BlocProvider(
+            create: (_) => di.sl<AddressBloc>(),
+            child: BookServiceScreen(
+              serviceName: _services[_selectedServiceIndex!].name,
+              servicePrice: _services[_selectedServiceIndex!].price,
+              description: _descriptionController.text.trim(),
+              images: List.from(_pickedImages),
+              workerName: widget.professionalName,
+              workerRole: widget.professionalRole,
+              professionalId: widget.professionalId,
+            ),
           ),
         ),
       );
@@ -104,15 +109,16 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: lightGrey,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: const BackButton(color: darkBlue),
-        title: const Text(
-          'Book a Service',
-          style: TextStyle(
+        title: Text(
+          t.bookAService,
+          style: const TextStyle(
             color: darkBlue,
             fontWeight: FontWeight.bold,
             fontSize: 20,
@@ -129,15 +135,15 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
                 children: [
                   _buildWorkerCard(),
                   const SizedBox(height: 16),
-                  _buildSelectServiceCard(),
+                  _buildSelectServiceCard(t),
                   const SizedBox(height: 16),
-                  _buildDescriptionCard(),
+                  _buildDescriptionCard(t),
                   const SizedBox(height: 24),
                 ],
               ),
             ),
           ),
-          _buildContinueButton(),
+          _buildContinueButton(t),
         ],
       ),
     );
@@ -228,7 +234,7 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
     );
   }
 
-  Widget _buildSelectServiceCard() {
+  Widget _buildSelectServiceCard(AppLocalizations t) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -250,26 +256,26 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Row(
                   children: [
-                    Icon(Icons.settings, color: orange, size: 22),
-                    SizedBox(width: 8),
+                    const Icon(Icons.settings, color: orange, size: 22),
+                    const SizedBox(width: 8),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Select Service',
-                          style: TextStyle(
+                          t.selectServiceTitle,
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                             color: darkBlue,
                           ),
                         ),
                         Text(
-                          'Choose the service you need',
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                          t.selectServiceSubtitle,
+                          style: const TextStyle(color: Colors.grey, fontSize: 12),
                         ),
                       ],
                     ),
@@ -277,6 +283,15 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
                 ),
               ),
               const Divider(height: 1),
+              if (_services.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text(
+                    'This professional has not listed any services yet.',
+                    style: TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
+                )
+              else
               Column(
                 children: List.generate(_services.length, (index) {
                   final service = _services[index];
@@ -332,18 +347,18 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
           ),
         ),
         if (_showServiceError)
-          const Padding(
-            padding: EdgeInsets.only(top: 6, left: 4),
+          Padding(
+            padding: const EdgeInsets.only(top: 6, left: 4),
             child: Text(
-              'Please select a service to continue.',
-              style: TextStyle(color: errorRed, fontSize: 12),
+              t.selectServiceToContinue,
+              style: const TextStyle(color: errorRed, fontSize: 12),
             ),
           ),
       ],
     );
   }
 
-  Widget _buildDescriptionCard() {
+  Widget _buildDescriptionCard(AppLocalizations t) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -366,13 +381,13 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.edit, color: orange, size: 20),
-                  SizedBox(width: 8),
+                  const Icon(Icons.edit, color: orange, size: 20),
+                  const SizedBox(width: 8),
                   Text(
-                    'Describe the service you need',
-                    style: TextStyle(
+                    t.describeServiceNeeded,
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                       color: darkBlue,
@@ -390,7 +405,7 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
                   }
                 },
                 decoration: InputDecoration(
-                  hintText: 'Write a description...',
+                  hintText: t.writeDescription,
                   hintStyle: TextStyle(
                     color: Colors.grey.shade400,
                     fontSize: 13,
@@ -413,9 +428,9 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
                 children: [
                   const Icon(Icons.upload_file, color: darkBlue, size: 20),
                   const SizedBox(width: 8),
-                  const Text(
-                    'Upload picture',
-                    style: TextStyle(color: darkBlue, fontSize: 14),
+                  Text(
+                    t.uploadPicture,
+                    style: const TextStyle(color: darkBlue, fontSize: 14),
                   ),
                   const Spacer(),
                   GestureDetector(
@@ -430,17 +445,17 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
                         border: Border.all(color: orange),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.add_photo_alternate,
                             color: orange,
                             size: 18,
                           ),
-                          SizedBox(width: 4),
+                          const SizedBox(width: 4),
                           Text(
-                            'Add',
-                            style: TextStyle(
+                            t.add,
+                            style: const TextStyle(
                               color: orange,
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -503,26 +518,26 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
           ),
         ),
         if (_showDescriptionError)
-          const Padding(
-            padding: EdgeInsets.only(top: 6, left: 4),
+          Padding(
+            padding: const EdgeInsets.only(top: 6, left: 4),
             child: Text(
-              'Please add a description.',
-              style: TextStyle(color: errorRed, fontSize: 12),
+              t.descriptionRequired,
+              style: const TextStyle(color: errorRed, fontSize: 12),
             ),
           ),
         if (_showPictureError)
-          const Padding(
-            padding: EdgeInsets.only(top: 4, left: 4),
+          Padding(
+            padding: const EdgeInsets.only(top: 4, left: 4),
             child: Text(
-              'Please upload at least one picture.',
-              style: TextStyle(color: errorRed, fontSize: 12),
+              t.pictureRequired,
+              style: const TextStyle(color: errorRed, fontSize: 12),
             ),
           ),
       ],
     );
   }
 
-  Widget _buildContinueButton() {
+  Widget _buildContinueButton(AppLocalizations t) {
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -539,9 +554,9 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
             ),
             elevation: 0,
           ),
-          child: const Text(
-            'Continue',
-            style: TextStyle(
+          child: Text(
+            t.continue1,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.5,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/booking.dart';
 import '../bloc/bookings_bloc.dart';
@@ -142,12 +143,14 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
             backgroundColor: Colors.white,
             elevation: 0,
             leading: const BackButton(color: AppColors.primaryDark),
-            title: const Text(
-              'Modify Booking',
-              style: TextStyle(
-                color: AppColors.primaryDark,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
+            title: Builder(
+              builder: (ctx) => Text(
+                AppLocalizations.of(ctx)!.modifyBooking,
+                style: const TextStyle(
+                  color: AppColors.primaryDark,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
             centerTitle: false,
@@ -176,8 +179,8 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
                       onContinue: () {
                         if (_selectedServiceIndex == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please select a service'),
+                            SnackBar(
+                              content: Text(AppLocalizations.of(context)!.pleaseSelectService),
                               backgroundColor: AppColors.error,
                             ),
                           );
@@ -203,8 +206,8 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
                       onContinue: () {
                         if (_addressController.text.trim().isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please enter your address'),
+                            SnackBar(
+                              content: Text(AppLocalizations.of(context)!.pleaseEnterAddress),
                               backgroundColor: AppColors.error,
                             ),
                           );
@@ -345,22 +348,22 @@ class _Step1SelectServiceState extends State<_Step1SelectService> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(
+                      Row(
                         children: [
-                          Icon(Icons.settings,
+                          const Icon(Icons.settings,
                               color: AppColors.primaryOrange, size: 18),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Select Service',
-                                  style: TextStyle(
+                              Text(AppLocalizations.of(context)!.selectService,
+                                  style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.primaryDark,
                                   )),
-                              Text('Choose the service you need',
-                                  style: TextStyle(
+                              Text(AppLocalizations.of(context)!.chooseService,
+                                  style: const TextStyle(
                                       fontSize: 11,
                                       color: AppColors.textSecondary)),
                             ],
@@ -451,7 +454,7 @@ class _Step1SelectServiceState extends State<_Step1SelectService> {
                         maxLines: 5,
                         onChanged: widget.onDescriptionChanged,
                         decoration: InputDecoration(
-                          hintText: 'Describe the issue...',
+                          hintText: AppLocalizations.of(context)!.describeIssuePlaceholder,
                           hintStyle: const TextStyle(
                               fontSize: 13,
                               color: AppColors.textSecondary),
@@ -542,11 +545,11 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel',
-                        style: TextStyle(color: Colors.grey)),
+                    child: Text(AppLocalizations.of(context)!.cancel,
+                        style: const TextStyle(color: Colors.grey)),
                   ),
-                  const Text('Select Time',
-                      style: TextStyle(
+                  Text(AppLocalizations.of(context)!.selectTime,
+                      style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                           color: AppColors.primaryDark)),
@@ -555,9 +558,9 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                       widget.onTimeChanged(tempH, tempM);
                       Navigator.pop(context);
                     },
-                    child: const Text('Done',
+                    child: Text(AppLocalizations.of(context)!.done,
                         style:
-                            TextStyle(color: AppColors.primaryOrange)),
+                            const TextStyle(color: AppColors.primaryOrange)),
                   ),
                 ],
               ),
@@ -624,21 +627,21 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(
+                      Row(
                         children: [
-                          Icon(Icons.settings,
+                          const Icon(Icons.settings,
                               color: AppColors.primaryOrange, size: 20),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Choose Date & Time',
-                                  style: TextStyle(
+                              Text(AppLocalizations.of(context)!.chooseDateTime,
+                                  style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.primaryDark)),
-                              Text('Select your preferred appointment slot',
-                                  style: TextStyle(
+                              Text(AppLocalizations.of(context)!.selectPreferredSlot,
+                                  style: const TextStyle(
                                       fontSize: 11,
                                       color: AppColors.textSecondary)),
                             ],
@@ -648,13 +651,13 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                       const SizedBox(height: 20),
 
                       // Select Date label
-                      const Row(
+                      Row(
                         children: [
-                          Icon(Icons.calendar_month_outlined,
+                          const Icon(Icons.calendar_month_outlined,
                               color: AppColors.primaryOrange, size: 20),
-                          SizedBox(width: 8),
-                          Text('Select Date',
-                              style: TextStyle(
+                          const SizedBox(width: 8),
+                          Text(AppLocalizations.of(context)!.selectDate,
+                              style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.primaryDark)),
@@ -721,13 +724,13 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                       const SizedBox(height: 20),
 
                       // Select Time label
-                      const Row(
+                      Row(
                         children: [
-                          Icon(Icons.access_time_outlined,
+                          const Icon(Icons.access_time_outlined,
                               color: AppColors.primaryOrange, size: 20),
-                          SizedBox(width: 8),
-                          Text('Select Time',
-                              style: TextStyle(
+                          const SizedBox(width: 8),
+                          Text(AppLocalizations.of(context)!.selectTime,
+                              style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.primaryDark)),
@@ -770,13 +773,13 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(
+                      Row(
                         children: [
-                          Icon(Icons.location_on_outlined,
+                          const Icon(Icons.location_on_outlined,
                               color: AppColors.primaryOrange, size: 20),
-                          SizedBox(width: 8),
-                          Text('Choose Address',
-                              style: TextStyle(
+                          const SizedBox(width: 8),
+                          Text(AppLocalizations.of(context)!.chooseAddress,
+                              style: const TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.primaryDark)),
@@ -787,7 +790,7 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                         controller: widget.addressController,
                         maxLines: 2,
                         decoration: InputDecoration(
-                          hintText: 'Enter your address...',
+                          hintText: AppLocalizations.of(context)!.enterAddress,
                           hintStyle: const TextStyle(
                               fontSize: 13,
                               color: AppColors.textSecondary),
@@ -877,8 +880,8 @@ class _Step3Review extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Booking Details',
-                          style: TextStyle(
+                      Text(AppLocalizations.of(context)!.bookingDetails,
+                          style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                               color: AppColors.primaryDark)),
@@ -913,13 +916,13 @@ class _Step3Review extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(
+                      Row(
                         children: [
-                          Icon(Icons.edit_outlined,
+                          const Icon(Icons.edit_outlined,
                               color: AppColors.primaryOrange, size: 18),
-                          SizedBox(width: 8),
-                          Text('Service Description',
-                              style: TextStyle(
+                          const SizedBox(width: 8),
+                          Text(AppLocalizations.of(context)!.serviceDescription,
+                              style: const TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.primaryDark)),
@@ -1135,9 +1138,9 @@ class _ContinueButton extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12)),
             elevation: 0,
           ),
-          child: const Text(
-            'Continue',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          child: Text(
+            AppLocalizations.of(context)!.continue1,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
           ),
         ),
       ),

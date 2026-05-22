@@ -6,6 +6,7 @@ import 'package:gp/core/theme/app_text_styles.dart';
 import 'package:gp/features/settings/domain/entities/address_entity.dart';
 import 'package:gp/features/settings/presentation/bloc/address_bloc.dart';
 import 'package:gp/features/settings/presentation/widgets/address_form.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import 'package:latlong2/latlong.dart';
 
 class EditAddressScreen extends StatelessWidget {
@@ -14,22 +15,23 @@ class EditAddressScreen extends StatelessWidget {
   const EditAddressScreen({super.key, required this.address});
 
   void _confirmDelete(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Delete Address'),
-        content: const Text('Are you sure you want to delete this address?'),
+        title: Text(t.deleteAddress),
+        content: Text(t.deleteAddressConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(t.cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               context.read<AddressBloc>().add(DeleteAddressEvent(address.id));
             },
-            child: Text('Delete', style: TextStyle(color: AppColors.error)),
+            child: Text(t.delete, style: const TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -38,6 +40,7 @@ class EditAddressScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -61,12 +64,12 @@ class EditAddressScreen extends StatelessWidget {
                         onPressed: () => Navigator.pop(context),
                       ),
                       const Spacer(),
-                      Text('Edit Address', style: AppTextStyles.heading2),
+                      Text(t.editAddress, style: AppTextStyles.heading2),
                       const Spacer(),
                       GestureDetector(
                         onTap: () => _confirmDelete(context),
                         child: Text(
-                          'Delete',
+                          t.deleteAddress,
                           style: AppTextStyles.bodyMedium.copyWith(
                             color: AppColors.error,
                             fontWeight: FontWeight.w600,

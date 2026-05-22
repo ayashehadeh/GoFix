@@ -35,21 +35,6 @@ class RegisterSubmitted extends AuthEvent {
       [firstName, lastName, email, phone, password, confirmPassword];
 }
 
-class VerifyEmailSubmitted extends AuthEvent {
-  final String token;
-  final String code;
-  VerifyEmailSubmitted({required this.token, required this.code});
-  @override
-  List<Object?> get props => [token, code];
-}
-
-class ResendCodeRequested extends AuthEvent {
-  final String token;
-  ResendCodeRequested({required this.token});
-  @override
-  List<Object?> get props => [token];
-}
-
 class ForgotPasswordSubmitted extends AuthEvent {
   final String email;
   ForgotPasswordSubmitted({required this.email});
@@ -58,14 +43,16 @@ class ForgotPasswordSubmitted extends AuthEvent {
 }
 
 class ResetPasswordSubmitted extends AuthEvent {
+  final String token;
   final String newPassword;
   final String confirmPassword;
   ResetPasswordSubmitted({
+    required this.token,
     required this.newPassword,
     required this.confirmPassword,
   });
   @override
-  List<Object?> get props => [newPassword, confirmPassword];
+  List<Object?> get props => [token, newPassword, confirmPassword];
 }
 
 class AuthReset extends AuthEvent {}

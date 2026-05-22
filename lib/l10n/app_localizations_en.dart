@@ -12,7 +12,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hello => 'Hello';
 
   @override
-  String get startSubtitle => 'Lets build something great together!';
+  String get startSubtitle => 'Let\'s build something great together!';
 
   @override
   String get signIn => 'Sign In';
@@ -24,7 +24,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomeBack => 'Welcome back';
 
   @override
-  String get quickSignIn => 'Just a quick sign-in and you are all set';
+  String get quickSignIn => 'Just a quick sign-in and you\'re all set';
 
   @override
   String get enterPhone => 'Enter your phone number';
@@ -69,7 +69,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetPassword => 'Reset Password';
 
   @override
-  String get resetPasswordDesc => 'Enter the email associated with your account and we will send you an email with instructions to reset your password.';
+  String get resetPasswordDesc => 'Enter the email associated with your account and we\'ll send you an email with instructions to reset your password.';
 
   @override
   String get sendInstructions => 'Send Instructions';
@@ -117,7 +117,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verifyEmailDesc => 'Enter the confirmation code we sent to your email.';
 
   @override
-  String get didNotReceiveCode => 'Did not receive the code?';
+  String get didNotReceiveCode => 'Didn\'t receive the code?';
 
   @override
   String get sendAgain => 'Send Again';
@@ -162,7 +162,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get support => 'Support';
 
   @override
-  String get helpAndSupport => 'Help and Support';
+  String get helpAndSupport => 'Help & Support';
 
   @override
   String get becomeAProfessional => 'Become a professional';
@@ -228,7 +228,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get thankYouFeedback => 'Thank you for your feedback!';
 
   @override
-  String get helpTitle => 'Help and Support';
+  String get helpTitle => 'Help & Support';
 
   @override
   String get contactUs => 'Contact Us';
@@ -255,5 +255,1031 @@ class AppLocalizationsEn extends AppLocalizations {
   String get faq4Q => 'How do I report an issue?';
 
   @override
-  String get faq4A => 'Go to Help and Support and tap Send Feedback to report any issues.';
+  String get faq4A => 'Go to Help & Support and tap Send Feedback to report any issues.';
+
+  @override
+  String get myBookings => 'My Bookings';
+
+  @override
+  String get upcoming => 'Upcoming';
+
+  @override
+  String get past => 'Past';
+
+  @override
+  String get noUpcomingBookings => 'No upcoming bookings';
+
+  @override
+  String get noPastBookings => 'No past bookings yet';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get bookService => 'Book Service';
+
+  @override
+  String get bookingDetails => 'Booking Details';
+
+  @override
+  String get cancelBooking => 'Cancel Booking';
+
+  @override
+  String get modifyBooking => 'Modify Booking';
+
+  @override
+  String get confirmPayment => 'Confirm Payment';
+
+  @override
+  String get paymentConfirmed => 'Payment Confirmed';
+
+  @override
+  String get writeReview => 'Write a Review';
+
+  @override
+  String get submitReport => 'Submit Report';
+
+  @override
+  String get bookingCancelled => 'Booking cancelled successfully';
+
+  @override
+  String get statusPending => 'Pending';
+
+  @override
+  String get statusAccepted => 'Accepted';
+
+  @override
+  String get statusOnTheWay => 'On The Way';
+
+  @override
+  String get statusArrived => 'Arrived';
+
+  @override
+  String get statusInProgress => 'In Progress';
+
+  @override
+  String get statusCompleted => 'Completed';
+
+  @override
+  String get statusCancelled => 'Cancelled';
+
+  @override
+  String get statusDeclined => 'Declined';
+
+  @override
+  String get selectService => 'Select a Service';
+
+  @override
+  String get scheduledDate => 'Scheduled Date';
+
+  @override
+  String get scheduledTime => 'Scheduled Time';
+
+  @override
+  String get address => 'Address';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get bookingSuccess => 'Booking Successful!';
+
+  @override
+  String get modifySuccess => 'Booking Modified Successfully!';
+
+  @override
+  String get allChats => 'All chats';
+
+  @override
+  String get searchChats => 'Search chats...';
+
+  @override
+  String get noChatsYet => 'No chats yet';
+
+  @override
+  String get noChatsFound => 'No chats found';
+
+  @override
+  String get deleteChat => 'Delete chat';
+
+  @override
+  String get deleteChatTitle => 'Delete chat?';
+
+  @override
+  String deleteChatMessage(String name) {
+    return 'Are you sure you want to delete the chat with $name?';
+  }
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get typeMessage => 'Type a message...';
+
+  @override
+  String get sendImage => 'Send Image';
+
+  @override
+  String get search => 'Search';
+
+  @override
+  String get searchHint => 'Search for a service or professional...';
+
+  @override
+  String get recentSearches => 'Recent Searches';
+
+  @override
+  String get clearAll => 'Clear All';
+
+  @override
+  String get noResults => 'No results found';
+
+  @override
+  String get searchResults => 'Search Results';
+
+  @override
+  String get notificationsTitle => 'Notifications';
+
+  @override
+  String get noNotifications => 'No notifications yet';
+
+  @override
+  String get markAllRead => 'Mark all as read';
+
+  @override
+  String get dashboard => 'Dashboard';
+
+  @override
+  String get myJobs => 'My Jobs';
+
+  @override
+  String get myEarnings => 'My Earnings';
+
+  @override
+  String get totalRequests => 'Total Requests';
+
+  @override
+  String get scheduled => 'Scheduled';
+
+  @override
+  String get completedJobs => 'Completed';
+
+  @override
+  String get jobDetails => 'Job Details';
+
+  @override
+  String get markOnTheWay => 'Mark as On The Way';
+
+  @override
+  String get markArrived => 'Mark as Arrived';
+
+  @override
+  String get startJob => 'Start Job';
+
+  @override
+  String get completeJob => 'Complete Job';
+
+  // ── Filter page ──────────────────────────────────────────────────────────────
+
+  @override
+  String get applyFilters => 'Apply Filters';
+
+  @override
+  String get experienceYears => 'Experience Years';
+
+  @override
+  String get maximumDistance => 'Maximum Distance';
+
+  @override
+  String get minimumRating => 'Minimum Rating';
+
+  // ── Booking report ───────────────────────────────────────────────────────────
+
+  @override
+  String get bookingInformation => 'Booking Information';
+
+  @override
+  String get reportAnIssue => 'Report an Issue';
+
+  @override
+  String get reportHelpText => 'Help us improve by reporting problems';
+
+  @override
+  String get describeIssue => 'Describe the issue';
+
+  @override
+  String get issueTitleHint => 'e.g. Technician arrived late';
+
+  @override
+  String get describeIssueError => 'Please describe the issue';
+
+  @override
+  String get provideDetails => 'Provide details';
+
+  @override
+  String get provideDetailsHint => 'Provide details so our team can investigate.';
+
+  @override
+  String get provideDetailsError => 'Please provide details';
+
+  @override
+  String get reportSubmittedSuccess => 'Report submitted successfully';
+
+  // ── Booking review ───────────────────────────────────────────────────────────
+
+  @override
+  String get howWasService => 'How was the service?';
+
+  @override
+  String get writeYourFeedback => 'Write your feedback (optional)';
+
+  @override
+  String get selectRatingError => 'Please select a rating';
+
+  @override
+  String get submitReview => 'Submit Review';
+
+  @override
+  String get reviewSubmittedSuccess => 'Review submitted successfully';
+
+  // ── Addresses ────────────────────────────────────────────────────────────────
+
+  @override
+  String get addresses => 'Addresses';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get noAddressesYet => 'No addresses yet.\nTap Add to create one.';
+
+  // ── Confirm location ─────────────────────────────────────────────────────────
+
+  @override
+  String get confirmLocation => 'Confirm Location';
+
+  // ── Edit / New address ───────────────────────────────────────────────────────
+
+  @override
+  String get editAddress => 'Edit Address';
+
+  @override
+  String get deleteAddress => 'Delete';
+
+  @override
+  String get deleteAddressConfirm => 'Are you sure you want to delete this address?';
+
+  @override
+  String get newAddress => 'New Address';
+
+  @override
+  String get saveAddress => 'Save Address';
+
+  @override
+  String get apartment => 'Apartment';
+
+  @override
+  String get house => 'House';
+
+  @override
+  String get area => 'Area';
+
+  @override
+  String get buildingName => 'Building name';
+
+  @override
+  String get apartmentNumber => 'Apartment number';
+
+  @override
+  String get floor => 'Floor';
+
+  @override
+  String get street => 'Street';
+
+  @override
+  String get additionalDirections => 'Additional directions';
+
+  @override
+  String get required => 'Required';
+
+  // ── Notification settings ────────────────────────────────────────────────────
+
+  @override
+  String get notificationSettings => 'Notifications Settings';
+
+  @override
+  String get bookingConfirmations => 'Booking Confirmations';
+
+  @override
+  String get bookingConfirmationsDesc => 'Get notified when a professional accepts your service request.';
+
+  @override
+  String get modificationsCancellations => 'Modifications & Cancellations';
+
+  @override
+  String get modificationsCancellationsDesc => 'Alerts if a booking is changed or cancelled by the professional.';
+
+  @override
+  String get chatMessages => 'Chat Messages';
+
+  @override
+  String get chatMessagesDesc => 'Notifications for new direct messages from your service provider.';
+
+  @override
+  String get supportComplaints => 'Support & Complaints';
+
+  @override
+  String get supportComplaintsDesc => 'Notifications regarding the status of a reported issue or complaint.';
+
+  @override
+  String get appFeedback => 'App Feedback';
+
+  @override
+  String get appFeedbackDesc => 'Occasional alerts to rate your experience or provide feedback on the app.';
+
+  // ── Update DOB ───────────────────────────────────────────────────────────────
+
+  @override
+  String get dateOfBirth => 'Date of birth';
+
+  @override
+  String get update => 'Update';
+
+  @override
+  String get monthJanuary => 'January';
+
+  @override
+  String get monthFebruary => 'February';
+
+  @override
+  String get monthMarch => 'March';
+
+  @override
+  String get monthApril => 'April';
+
+  @override
+  String get monthMay => 'May';
+
+  @override
+  String get monthJune => 'June';
+
+  @override
+  String get monthJuly => 'July';
+
+  @override
+  String get monthAugust => 'August';
+
+  @override
+  String get monthSeptember => 'September';
+
+  @override
+  String get monthOctober => 'October';
+
+  @override
+  String get monthNovember => 'November';
+
+  @override
+  String get monthDecember => 'December';
+
+  // ── Update gender ────────────────────────────────────────────────────────────
+
+  @override
+  String get gender => 'Gender';
+
+  @override
+  String get genderMale => 'Male';
+
+  @override
+  String get genderFemale => 'Female';
+
+  // ── Update phone ─────────────────────────────────────────────────────────────
+
+  @override
+  String get updateYourMobileNumber => 'Update your mobile number';
+
+  @override
+  String get weWillSendCode => 'We will send you a code to confirm it';
+
+  @override
+  String get phoneNumberRequired => 'Phone number is required';
+
+  @override
+  String get mustBe9Digits => 'Must be at least 9 digits';
+
+  // ── Personal information ─────────────────────────────────────────────────────
+
+  @override
+  String get personalInformationTitle => 'Personal Information';
+
+  @override
+  String get nameLabelField => 'Name';
+
+  @override
+  String get phoneNumberField => 'Phone number';
+
+  @override
+  String get emailField => 'Email';
+
+  @override
+  String get dateOfBirthField => 'Date of birth';
+
+  @override
+  String get genderField => 'Gender';
+
+  @override
+  String get updateYourName => 'Update your name';
+
+  @override
+  String get namePersonalizeExp => 'Your name helps personalize your app experience';
+
+  @override
+  String get enterNewName => 'Enter your new name';
+
+  @override
+  String get updateYourEmail => 'Update your email';
+
+  @override
+  String get emailVerificationMsg => 'We will send a verification to your new email';
+
+  @override
+  String get enterNewEmail => 'Enter your new email';
+
+  @override
+  String get nameUpdatedSuccess => 'Name updated successfully ✓';
+
+  @override
+  String get phoneUpdatedSuccess => 'Phone updated successfully ✓';
+
+  @override
+  String get emailUpdatedSuccess => 'Email updated successfully ✓';
+
+  @override
+  String get dobUpdatedSuccess => 'Date of birth updated successfully ✓';
+
+  @override
+  String get genderUpdatedSuccess => 'Gender updated successfully ✓';
+
+  // ── Become professional ──────────────────────────────────────────────────────
+
+  @override
+  String get uploadProfilePicture => 'Upload Profile Picture';
+
+  @override
+  String get tapToChoosePhoto => 'Tap the area below to choose a photo from your device.';
+
+  @override
+  String get photoFormatLimit => 'JPG or PNG · max 5 MB';
+
+  @override
+  String get changePhoto => 'Change';
+
+  @override
+  String get uploadedSuccessfully => 'Uploaded successfully.';
+
+  @override
+  String get takePhoto => 'Take a photo';
+
+  @override
+  String get chooseFromGallery => 'Choose from gallery';
+
+  @override
+  String get savePhoto => 'Save Photo';
+
+  @override
+  String get pleaseChoosePhotoFirst => 'Please choose a photo first.';
+
+  @override
+  String get tapToUpload => 'Tap to upload';
+
+  @override
+  String get inQueueTitle => "You're In the Queue!";
+
+  @override
+  String get inQueueMessage => "We've received your application and will review it within 24-48 hours. You'll get a notification once your profile is approved and ready to go live.";
+
+  @override
+  String get checkStatus => 'Check Status';
+
+  @override
+  String get becomeProfessionalTitle => 'Become a Professional';
+
+  @override
+  String get verificationUpload => 'Verification Upload';
+
+  @override
+  String get verificationInstructions => 'Upload the required documents to verify your professional account.';
+
+  @override
+  String get profilePicture => 'Profile Picture';
+
+  @override
+  String get uploadId => 'Upload ID';
+
+  @override
+  String get uploadCertification => 'Upload Certification';
+
+  @override
+  String get goodConduct => 'Certificate of Good Conduct';
+
+  @override
+  String get pleaseUploadProfilePicture => 'Please upload your profile picture first.';
+
+  @override
+  String get pleaseUploadId => 'Please upload your ID first.';
+
+  @override
+  String get submitApplication => 'Submit Application';
+
+  @override
+  String get uploaded => 'Uploaded';
+
+  @override
+  String get approved => "You're Approved!";
+
+  @override
+  String get approvedMessage => 'Your professional profile is now live on GoFix. Set your availability to start receiving bookings.';
+
+  @override
+  String get profileSubmitted => 'Profile submitted';
+
+  @override
+  String get profileVerifiedSubtitle => 'Your details & documents are verified.';
+
+  @override
+  String get identityVerified => 'Identity verified';
+
+  @override
+  String get backgroundCheckPassed => 'Background check passed.';
+
+  @override
+  String get setMyAvailability => 'Set My Availability';
+
+  @override
+  String get notApproved => 'Application Not Approved';
+
+  @override
+  String get resubmitDocuments => 'Resubmit Documents';
+
+  @override
+  String get applicationIncomplete => 'Application Incomplete';
+
+  @override
+  String get incompleteApplicationMsg => 'Please complete all steps of your application before we can review it.';
+
+  @override
+  String get completeApplication => 'Complete Application';
+
+  @override
+  String get setYourAvailability => 'Set Your Availability';
+
+  @override
+  String get availabilityInstructions => 'You can pause bookings anytime from your dashboard.';
+
+  @override
+  String get workingDays => 'Working Days';
+
+  @override
+  String get workingHours => 'Working Hours';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get selectLabel => 'Select';
+
+  @override
+  String get daySun => 'Sun';
+
+  @override
+  String get dayMon => 'Mon';
+
+  @override
+  String get dayTue => 'Tue';
+
+  @override
+  String get dayWed => 'Wed';
+
+  @override
+  String get dayThu => 'Thu';
+
+  @override
+  String get dayFri => 'Fri';
+
+  @override
+  String get daySat => 'Sat';
+
+  // ── Booking screens ──────────────────────────────────────────────────────────
+
+  @override
+  String get bookAService => 'Book a Service';
+
+  @override
+  String get chooseDateAndTime => 'Choose Date & Time';
+
+  @override
+  String get selectPreferredSlot => 'Select your preferred appointment slot';
+
+  @override
+  String get selectDate => 'Select Date';
+
+  @override
+  String get selectTime => 'Select Time';
+
+  @override
+  String get chooseAddress => 'Choose Address';
+
+  @override
+  String get enterAddress => 'Enter your address...';
+
+  @override
+  String get addressRequired => 'Please enter your address to continue.';
+
+  @override
+  String get serviceDescription => 'Service Description';
+
+  @override
+  String get sendBookingRequest => 'Send Booking Request';
+
+  @override
+  String get selectServiceToContinue => 'Please select a service to continue.';
+
+  @override
+  String get selectServiceTitle => 'Select Service';
+
+  @override
+  String get selectServiceSubtitle => 'Choose the service you need';
+
+  @override
+  String get describeServiceNeeded => 'Describe the service you need';
+
+  @override
+  String get writeDescription => 'Write a description...';
+
+  @override
+  String get descriptionRequired => 'Please add a description.';
+
+  @override
+  String get uploadPicture => 'Upload picture';
+
+  @override
+  String get pictureRequired => 'Please upload at least one picture.';
+
+  @override
+  String get monthJan => 'Jan';
+
+  @override
+  String get monthFeb => 'Feb';
+
+  @override
+  String get monthMar => 'Mar';
+
+  @override
+  String get monthApr => 'Apr';
+
+  @override
+  String get monthJun => 'Jun';
+
+  @override
+  String get monthJul => 'Jul';
+
+  @override
+  String get monthAugShort => 'Aug';
+
+  @override
+  String get monthSep => 'Sep';
+
+  @override
+  String get monthOct => 'Oct';
+
+  @override
+  String get monthNov => 'Nov';
+
+  @override
+  String get monthDec => 'Dec';
+
+  @override
+  String get dayMonShort => 'Mon';
+
+  @override
+  String get dayTueShort => 'Tue';
+
+  @override
+  String get dayWedShort => 'Wed';
+
+  @override
+  String get dayThuShort => 'Thu';
+
+  @override
+  String get dayFriShort => 'Fri';
+
+  @override
+  String get daySatShort => 'Sat';
+
+  @override
+  String get daySunShort => 'Sun';
+
+  // ── Professionals / Search ───────────────────────────────────────────────────
+
+  @override
+  String get noProfessionalsFound => 'No professionals found';
+
+  @override
+  String get allCategories => 'All';
+
+  @override
+  String noProfessionalsInArea(String areaName) => 'No professionals found in $areaName';
+
+  // ── Favorites ────────────────────────────────────────────────────────────────
+
+  @override
+  String get favorites => 'Favorites';
+
+  @override
+  String get noFavoritesYet => 'No favorites yet';
+
+  @override
+  String yearsExperience(int years) => '$years years experience';
+
+  // ── Set new password ─────────────────────────────────────────────────────────
+
+  @override
+  String get chooseStrongPassword => "Choose a strong password you haven't used before.";
+
+  @override
+  String get currentPasswordLabel => 'Current Password';
+
+  @override
+  String get pleaseEnterNewPassword => 'Please enter a new password';
+
+  @override
+  String get mustBe8Chars => 'Must be at least 8 characters';
+
+  @override
+  String get addUppercase => 'Add at least one uppercase letter';
+
+  @override
+  String get addLowercase => 'Add at least one lowercase letter';
+
+  @override
+  String get addDigit => 'Add at least one number';
+
+  @override
+  String get addSpecial => 'Add at least one special character';
+
+  @override
+  String get savePassword => 'Save Password';
+
+  @override
+  String get passwordChangedSuccess => 'Password changed successfully!';
+
+  @override
+  String get strengthWeak => 'Weak';
+
+  @override
+  String get strengthFair => 'Fair';
+
+  @override
+  String get strengthGood => 'Good';
+
+  @override
+  String get strengthStrong => 'Strong';
+
+  @override
+  String get strengthVeryStrong => 'Very Strong';
+
+  // ── Verify current password ──────────────────────────────────────────────────
+
+  @override
+  String get verifyIdentity => 'Verify Identity';
+
+  @override
+  String get enterCurrentPassword => 'Enter your current password to continue.';
+
+  @override
+  String get currentPasswordRequired => 'Please enter your current password';
+
+  // ── Sign in ──────────────────────────────────────────────────────────────────
+
+  @override
+  String get emailExampleHint => 'example@email.com';
+
+  @override
+  String get enterEmailAndPassword => 'Please enter your email and password.';
+
+  // ── Reset password ───────────────────────────────────────────────────────────
+
+  @override
+  String get resetCode => 'Reset Code';
+
+  @override
+  String get enterResetCode => 'Enter the code sent to your email';
+
+  @override
+  String get resetCodeRequired => 'Please enter the reset code from your email';
+
+  // ── Document upload ──────────────────────────────────────────────────────────
+
+  @override
+  String uploadDoc(String title) => 'Upload $title';
+
+  // ── Welcome snackbar ─────────────────────────────────────────────────────────
+
+  @override
+  String welcomeUser(String name) => 'Welcome back, $name!';
+
+  @override
+  String get ok => 'OK';
+
+  // ── Feedback / Review / Report ───────────────────────────────────────────────
+
+  @override
+  String get leaveFeedback => 'Leave Feedback';
+
+  @override
+  String get whatWouldYouDo => 'What would you like to do?';
+
+  @override
+  String get writeFeedbackHint => 'Write your feedback (optional)';
+
+  // ── Job Request ───────────────────────────────────────────────────────────────
+
+  @override
+  String get jobInformation => 'Job Information';
+
+  @override
+  String get acceptRequest => 'Accept Request';
+
+  @override
+  String get declineRequest => 'Decline Request';
+
+  @override
+  String get reasonOptional => 'Reason (optional)';
+
+  @override
+  String get tellCustomerWhy => 'Tell the customer why...';
+
+  @override
+  String get requestRejected => 'Request Rejected.';
+
+  @override
+  String get customerNotified => 'Customer has been notified.';
+
+  @override
+  String get requestAccepted => 'Request Accepted!';
+
+  @override
+  String get jobAddedToSchedule => 'Customer has been notified.\nThe job is now in your scheduled list.';
+
+  @override
+  String get viewMyJobs => 'View My Jobs';
+
+  // ── Dashboard ─────────────────────────────────────────────────────────────────
+
+  @override
+  String get scheduledJobsTitle => 'Scheduled Jobs';
+
+  @override
+  String get noScheduledJobsYet => 'No scheduled jobs yet';
+
+  @override
+  String get seeAll => 'See All';
+
+  @override
+  String get updateStatus => 'Update Status';
+
+  @override
+  String get incomingRequestsTitle => 'Incoming Requests';
+
+  @override
+  String get noIncomingRequests => 'No incoming requests';
+
+  @override
+  String get declineLabel => 'Decline';
+
+  @override
+  String get acceptLabel => 'Accept';
+
+  @override
+  String get updateJobStatus => 'Update Job Status';
+
+  @override
+  String get goodMorning => 'Good Morning';
+
+  @override
+  String get goodAfternoon => 'Good Afternoon';
+
+  @override
+  String get goodEvening => 'Good Evening';
+
+  // ── Job Info ──────────────────────────────────────────────────────────────────
+
+  @override
+  String get jobStatus => 'Job Status';
+
+  @override
+  String get confirmUpdate => 'Confirm Update';
+
+  @override
+  String picturesAttached(int count) =>
+      '$count picture${count > 1 ? 's' : ''} attached';
+
+  // ── Chat ──────────────────────────────────────────────────────────────────────
+
+  @override
+  String get photo => 'Photo';
+
+  @override
+  String get camera => 'Camera';
+
+  @override
+  String get fileLabel => 'File';
+
+  // ── Nav bar ───────────────────────────────────────────────────────────────────
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navBookings => 'Bookings';
+
+  @override
+  String get navProfile => 'Profile';
+
+  @override
+  String get navDashboard => 'Dashboard';
+
+  // ── Categories ────────────────────────────────────────────────────────────────
+
+  @override
+  String get categoryPlumbing => 'Plumbing';
+
+  @override
+  String get categoryElectricalWork => 'Electrical Work';
+
+  @override
+  String get categoryAcRepair => 'AC Repair';
+
+  @override
+  String get categoryCarpentry => 'Carpentry';
+
+  @override
+  String get categoryPainting => 'Painting';
+
+  @override
+  String get categoryCleaning => 'Cleaning';
+
+  @override
+  String get categoryMovingServices => 'Moving Services';
+
+  @override
+  String get categoryApplianceRepair => 'Appliance Repair';
+
+  // ── Booking status ────────────────────────────────────────────────────────────
+
+  @override
+  String get statusConfirmed => 'Confirmed';
+
+  // ── Misc ──────────────────────────────────────────────────────────────────────
+
+  @override
+  String get describeIssuePlaceholder => 'Describe the issue...';
+
+  @override
+  String get myAvailability => 'My Availability';
+
+  @override
+  String get myProfile => 'My Profile';
+
+  @override
+  String get categories => 'Categories';
+
+  @override
+  String get location => 'Location';
+
+  @override
+  String get chooseService => 'Choose the service you need';
+
+  @override
+  String get chooseDateTime => 'Choose Date & Time';
+
+  @override
+  String get pleaseSelectService => 'Please select a service';
+
+  @override
+  String get pleaseEnterAddress => 'Please enter your address';
+
+  @override
+  String get availabilitySaved => 'Availability saved successfully!';
+
+  @override
+  String get pictureAttached => '1 picture attached';
+
+  @override
+  String get pleaseEnterEmail => 'Please enter your email.';
+
+  @override
+  String get atLeastOneService => 'Please add at least one service.';
+
+  @override
+  String get noServiceAreasAdded => 'No service areas added.';
 }

@@ -58,6 +58,16 @@ class BookingCancelledSuccess extends BookingsState {}
 /// Emitted after a successful modify — the success page is shown.
 class BookingModifiedSuccess extends BookingsState {}
 
+class ConfirmPaymentSuccess extends BookingsState {}
+
+class ConfirmPaymentError extends BookingsState {
+  final String message;
+  ConfirmPaymentError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
 class BookingsError extends BookingsState {
   final String message;
   BookingsError(this.message);

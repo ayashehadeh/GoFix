@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../injection_container.dart' as di;
 import '../bloc/chat_bloc.dart';
@@ -42,6 +43,7 @@ class _AllChatsPageState extends State<AllChatsPage> {
   }
 
   void _showChatOptions(BuildContext context, ChatPreviewEntity chat) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -64,8 +66,8 @@ class _AllChatsPageState extends State<AllChatsPage> {
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(Icons.delete_outline, color: Colors.red),
-                title: const Text('Delete chat',
-                    style: TextStyle(color: Colors.red)),
+                title: Text(l10n.deleteChat,
+                    style: const TextStyle(color: Colors.red)),
                 onTap: () {
                   Navigator.pop(sheetContext);
                   _confirmDelete(context, chat);
@@ -80,25 +82,25 @@ class _AllChatsPageState extends State<AllChatsPage> {
   }
 
   void _confirmDelete(BuildContext context, ChatPreviewEntity chat) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Delete chat?'),
-          content: Text(
-              'Are you sure you want to delete the chat with ${chat.name}?'),
+          title: Text(l10n.deleteChatTitle),
+          content: Text(l10n.deleteChatMessage(chat.name)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel',
-                  style: TextStyle(color: AppColors.primaryDark)),
+              child: Text(l10n.cancel,
+                  style: const TextStyle(color: AppColors.primaryDark)),
             ),
             TextButton(
               onPressed: () {
                 context.read<ChatBloc>().add(DeleteChatEvent(chat.id));
                 Navigator.pop(dialogContext);
               },
-              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+              child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
             ),
           ],
         );
@@ -120,10 +122,10 @@ class _AllChatsPageState extends State<AllChatsPage> {
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'Search chats...',
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.searchChats,
                   border: InputBorder.none,
-                  hintStyle: TextStyle(color: AppColors.textSecondary),
+                  hintStyle: const TextStyle(color: AppColors.textSecondary),
                 ),
                 style: const TextStyle(color: AppColors.primaryDark),
                 onChanged: (query) {
@@ -133,9 +135,9 @@ class _AllChatsPageState extends State<AllChatsPage> {
                   }
                 },
               )
-            : const Text(
-                'All chats',
-                style: TextStyle(
+            : Text(
+                AppLocalizations.of(context)!.allChats,
+                style: const TextStyle(
                   color: AppColors.primaryDark,
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
@@ -194,8 +196,8 @@ class _AllChatsPageState extends State<AllChatsPage> {
               return Center(
                 child: Text(
                   _searchController.text.isNotEmpty
-                      ? 'No chats found'
-                      : 'No chats yet',
+                      ? AppLocalizations.of(context)!.noChatsFound
+                      : AppLocalizations.of(context)!.noChatsYet,
                   style: const TextStyle(color: AppColors.textSecondary),
                 ),
               );

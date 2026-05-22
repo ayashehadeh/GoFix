@@ -1,43 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../../../../injection_container.dart' as di;
-import '../../../../l10n/app_localizations.dart';
-import '../bloc/become_professional_bloc.dart';
-import '../bloc/become_professional_event.dart';
-import '../bloc/become_professional_state.dart';
-import '../widgets/step_indicator.dart';
-import 'in_queue_page.dart';
-import 'professional_details_page.dart';
-import 'services_pricing_page.dart';
-import 'verification_upload_page.dart';
+import 'package:gp/core/constants/app_colors.dart';
+import 'package:gp/features/become_professional/presentation/bloc/become_professional_bloc.dart';
+import 'package:gp/features/become_professional/presentation/bloc/become_professional_event.dart';
+import 'package:gp/features/become_professional/presentation/bloc/become_professional_state.dart';
+import 'package:gp/features/become_professional/presentation/pages/edit_verification_page.dart';
+import 'package:gp/features/become_professional/presentation/pages/professional_details_page.dart';
+import 'package:gp/features/become_professional/presentation/pages/profile_updated_page.dart';
+import 'package:gp/features/become_professional/presentation/pages/services_pricing_page.dart';
+import 'package:gp/features/become_professional/presentation/widgets/step_indicator.dart';
+import 'package:gp/features/professionals/domain/entities/professional.dart';
+import 'package:gp/injection_container.dart' as di;
 
-/// Entry page for the Become Professional flow.
-/// Steps:
-///   0 – Professional Details (category, experience, city, service areas, bio)
-///   1 – Services & Pricing
-///   2 – Verification / Documents
-class StepperScreen extends StatelessWidget {
-  const StepperScreen({super.key});
+class EditProfileStepper extends StatelessWidget {
+  final Professional professional;
+
+  const EditProfileStepper({super.key, required this.professional});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) =>
-          di.sl<BecomeProfessionalBloc>()..add(const LoadInitialData()),
-      child: const _StepperScreenView(),
+      create: (_) => di.sl<BecomeProfessionalBloc>()
+        ..add(PreloadProfileData(professional))
+        ..add(const LoadInitialData()),
+      child: _EditProfileStepperView(professional: professional),
     );
   }
 }
 
-class _StepperScreenView extends StatefulWidget {
-  const _StepperScreenView();
+class _EditProfileStepperView extends StatefulWidget {
+  final Professional professional;
+  const _EditProfileStepperView({required this.professional});
 
   @override
-  State<_StepperScreenView> createState() => _StepperScreenViewState();
+  State<_EditProfileStepperView> createState() =>
+      _EditProfileStepperViewState();
 }
 
-class _StepperScreenViewState extends State<_StepperScreenView> {
+class _EditProfileStepperViewState extends State<_EditProfileStepperView> {
   final _controller = PageController();
   int _currentStep = 0;
 
@@ -59,9 +59,9 @@ class _StepperScreenViewState extends State<_StepperScreenView> {
     return true;
   }
 
-  void _onSubmitted() {
+  void _onSaved() {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const InQueuePage()),
+      MaterialPageRoute(builder: (_) => const ProfileUpdatedPage()),
     );
   }
 
@@ -73,8 +73,11 @@ class _StepperScreenViewState extends State<_StepperScreenView> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _handleBack,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (!didPop) await _handleBack();
+      },
       child: Scaffold(
         backgroundColor: AppColors.background,
         body: SafeArea(
@@ -106,17 +109,16 @@ class _StepperScreenViewState extends State<_StepperScreenView> {
                       controller: _controller,
                       physics: const NeverScrollableScrollPhysics(),
                       children: [
-                        // Step 0 – details + service areas
                         ProfessionalDetailsPage(
                           onContinue: () => _goToStep(1),
+                          isEditMode: true,
                         ),
-                        // Step 1 – services & pricing
                         ServicesPricingPage(
                           onContinue: () => _goToStep(2),
                         ),
-                        // Step 2 – documents & submit
-                        VerificationUploadPage(
-                          onSubmitted: _onSubmitted,
+                        EditVerificationPage(
+                          professional: widget.professional,
+                          onSaved: _onSaved,
                         ),
                       ],
                     ),
@@ -131,7 +133,6 @@ class _StepperScreenViewState extends State<_StepperScreenView> {
   }
 
   Widget _buildHeader() {
-    final t = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 16),
@@ -139,33 +140,29 @@ class _StepperScreenViewState extends State<_StepperScreenView> {
         color: AppColors.primaryDark,
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
       ),
-      child: Column(
+      child: Row(
         children: [
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new,
-                    color: Colors.white, size: 18),
-                onPressed: () async {
-                  if (await _handleBack()) {
-                    if (mounted) Navigator.of(context).pop();
-                  }
-                },
-              ),
-              Expanded(
-                child: Text(
-                  t.becomeProfessionalTitle,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 48),
-            ],
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new,
+                color: Colors.white, size: 18),
+            onPressed: () async {
+              if (await _handleBack()) {
+                if (mounted) Navigator.of(context).pop();
+              }
+            },
           ),
+          const Expanded(
+            child: Text(
+              'Edit Profile',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: 48),
         ],
       ),
     );

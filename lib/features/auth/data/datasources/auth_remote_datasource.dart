@@ -16,16 +16,10 @@ abstract class AuthRemoteDataSource {
     required String confirmPassword,
   });
 
-  Future<void> verifyEmail({
-    required String token,
-    required String code,
-  });
-
-  Future<void> resendVerificationCode({required String token});
-
   Future<void> forgotPassword({required String email});
 
   Future<void> resetPassword({
+    required String token,
     required String newPassword,
     required String confirmPassword,
   });
@@ -73,26 +67,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> verifyEmail({
-    required String token,
-    required String code,
-  }) async {
-    await dio.post(
-      '/auth/verify-email',
-      data: {'code': code},
-      options: Options(headers: {'Authorization': 'Bearer $token'}),
-    );
-  }
-
-  @override
-  Future<void> resendVerificationCode({required String token}) async {
-    await dio.post(
-      '/auth/send-verification',
-      options: Options(headers: {'Authorization': 'Bearer $token'}),
-    );
-  }
-
-  @override
   Future<void> forgotPassword({required String email}) async {
     await dio.post(
       '/auth/forgot-password',
@@ -102,12 +76,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> resetPassword({
+    required String token,
     required String newPassword,
     required String confirmPassword,
   }) async {
     await dio.post(
       '/auth/reset-password',
       data: {
+        'token': token,
         'newPassword': newPassword,
         'confirmPassword': confirmPassword,
       },

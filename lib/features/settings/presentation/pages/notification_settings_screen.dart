@@ -5,6 +5,7 @@ import 'package:gp/core/theme/app_text_styles.dart';
 import 'package:gp/features/settings/domain/entities/notification_settings_entity.dart';
 import 'package:gp/features/settings/presentation/bloc/notification_settings_bloc.dart';
 import 'package:gp/features/settings/presentation/widgets/notification_tile.dart';
+import 'package:gp/l10n/app_localizations.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -36,7 +37,7 @@ class _NotificationSettingsScreenState
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Notifications Settings',
+          AppLocalizations.of(context)!.notificationSettings,
           style: AppTextStyles.heading2,
         ),
         centerTitle: true,
@@ -65,7 +66,8 @@ class _NotificationSettingsScreenState
 
           if (settings == null) return const SizedBox();
 
-          final items = _buildItems(settings);
+          final t = AppLocalizations.of(context)!;
+          final items = _buildItems(settings, t);
 
           return ListView.separated(
             padding: const EdgeInsets.symmetric(vertical: 8),
@@ -91,40 +93,35 @@ class _NotificationSettingsScreenState
     );
   }
 
-  List<_NotificationItemData> _buildItems(NotificationSettingsEntity s) => [
+  List<_NotificationItemData> _buildItems(NotificationSettingsEntity s, AppLocalizations t) => [
         _NotificationItemData(
           key: 'bookingConfirmations',
-          title: 'Booking Confirmations',
-          subtitle:
-              'Get notified when a professional accepts your service request.',
+          title: t.bookingConfirmations,
+          subtitle: t.bookingConfirmationsDesc,
           value: s.bookingConfirmations,
         ),
         _NotificationItemData(
           key: 'modificationsCancellations',
-          title: 'Modifications & Cancellations',
-          subtitle:
-              'Alerts if a booking is changed or cancelled by the professional.',
+          title: t.modificationsCancellations,
+          subtitle: t.modificationsCancellationsDesc,
           value: s.modificationsCancellations,
         ),
         _NotificationItemData(
           key: 'chatMessages',
-          title: 'Chat Messages',
-          subtitle:
-              'Notifications for new direct messages from your service provider.',
+          title: t.chatMessages,
+          subtitle: t.chatMessagesDesc,
           value: s.chatMessages,
         ),
         _NotificationItemData(
           key: 'supportComplaints',
-          title: 'Support & Complaints',
-          subtitle:
-              'Notifications regarding the status of a reported issue or complaint.',
+          title: t.supportComplaints,
+          subtitle: t.supportComplaintsDesc,
           value: s.supportComplaints,
         ),
         _NotificationItemData(
           key: 'appFeedback',
-          title: 'App Feedback',
-          subtitle:
-              'Occasional alerts to rate your experience or provide feedback on the app.',
+          title: t.appFeedback,
+          subtitle: t.appFeedbackDesc,
           value: s.appFeedback,
         ),
       ];

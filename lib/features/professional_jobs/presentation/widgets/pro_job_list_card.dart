@@ -16,6 +16,7 @@ class ProJobListCard extends StatelessWidget {
       case ProJobStatus.pending:    return const Color(0xFFFF8C1A);
       case ProJobStatus.confirmed:  return const Color(0xFF2196F3);
       case ProJobStatus.onTheWay:   return const Color(0xFF9C27B0);
+      case ProJobStatus.arrived:    return const Color(0xFF00BCD4);
       case ProJobStatus.inProgress: return const Color(0xFF4CAF50);
       case ProJobStatus.completed:  return const Color(0xFF607D8B);
       case ProJobStatus.cancelled:  return const Color(0xFFF44336);

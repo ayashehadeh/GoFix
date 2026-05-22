@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/category_service.dart';
 import '../../domain/entities/service_pricing.dart';
@@ -10,10 +11,14 @@ import '../bloc/become_professional_state.dart';
 import '../widgets/step_continue_button.dart';
 
 class ServicesPricingPage extends StatefulWidget {
-  /// Called when Step 2 submission succeeds.
   final VoidCallback onContinue;
+  final String buttonLabel;
 
-  const ServicesPricingPage({super.key, required this.onContinue});
+  const ServicesPricingPage({
+    super.key,
+    required this.onContinue,
+    this.buttonLabel = 'Continue',
+  });
 
   @override
   State<ServicesPricingPage> createState() => _ServicesPricingPageState();
@@ -73,8 +78,8 @@ class _ServicesPricingPageState extends State<ServicesPricingPage> {
     final services = context.read<BecomeProfessionalBloc>().state.application.services;
     if (services.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please add at least one service.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.atLeastOneService),
           backgroundColor: AppColors.error,
         ),
       );
@@ -274,6 +279,7 @@ class _ServicesPricingPageState extends State<ServicesPricingPage> {
             StepContinueButton(
               onPressed: _onContinuePressed,
               isLoading: isLoading,
+              label: widget.buttonLabel,
             ),
             const SizedBox(height: 8),
           ],

@@ -27,7 +27,7 @@ class _ResetPasswordState extends State<ResetPassword> {
     final email = _emailCtrl.text.trim();
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your email.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.pleaseEnterEmail)),
       );
       return;
     }

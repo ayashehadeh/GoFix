@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../injection_container.dart' as di;
+import '../../../../l10n/app_localizations.dart';
 import '../../../professionals/presentation/bloc/professionals_bloc.dart';
 import '../../../professionals/presentation/bloc/professionals_event.dart';
 import '../../../professionals/presentation/bloc/professionals_state.dart';
@@ -49,9 +50,9 @@ class _BookingReviewPageState extends State<BookingReviewPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: const BackButton(color: AppColors.primaryDark),
-        title: const Text(
-          'Booking Information',
-          style: TextStyle(
+        title: Text(
+          AppLocalizations.of(context)!.bookingInformation,
+          style: const TextStyle(
             color: AppColors.primaryDark,
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -101,13 +102,14 @@ class _ReviewSheetState extends State<_ReviewSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return BlocConsumer<ProfessionalsBloc, ProfessionalsState>(
       listener: (context, state) {
         if (state is ReviewActionSuccess) {
           Navigator.of(context).pop(); // close sheet
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Review submitted successfully'),
+            SnackBar(
+              content: Text(t.reviewSubmittedSuccess),
               backgroundColor: AppColors.primaryOrange,
             ),
           );
@@ -167,18 +169,18 @@ class _ReviewSheetState extends State<_ReviewSheet> {
                         ),
                       ),
 
-                      const Text(
-                        'Write a Review',
-                        style: TextStyle(
+                      Text(
+                        t.writeReview,
+                        style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w700,
                           color: AppColors.primaryDark,
                         ),
                       ),
                       const SizedBox(height: 6),
-                      const Text(
-                        'How was the service?',
-                        style: TextStyle(
+                      Text(
+                        t.howWasService,
+                        style: const TextStyle(
                           fontSize: 14,
                           color: AppColors.textSecondary,
                         ),
@@ -209,9 +211,9 @@ class _ReviewSheetState extends State<_ReviewSheet> {
                       ),
                       if (_showStarError) ...[
                         const SizedBox(height: 6),
-                        const Text(
-                          'Please select a rating',
-                          style: TextStyle(
+                        Text(
+                          t.selectRatingError,
+                          style: const TextStyle(
                             fontSize: 12,
                             color: AppColors.error,
                           ),
@@ -237,7 +239,7 @@ class _ReviewSheetState extends State<_ReviewSheet> {
                             ),
                           ),
                           prefixIconConstraints: const BoxConstraints(),
-                          hintText: 'Write your feedback (optional)',
+                          hintText: t.writeYourFeedback,
                           hintStyle: const TextStyle(
                             fontSize: 13,
                             color: AppColors.textSecondary,
@@ -290,9 +292,9 @@ class _ReviewSheetState extends State<_ReviewSheet> {
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Text(
-                                  'Submit Review',
-                                  style: TextStyle(
+                              : Text(
+                                  t.submitReview,
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -382,6 +384,7 @@ class _BookingDetailsSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -399,9 +402,9 @@ class _BookingDetailsSummary extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Booking Details',
-            style: TextStyle(
+          Text(
+            t.bookingDetails,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: AppColors.primaryDark,

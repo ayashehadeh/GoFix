@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/core/theme/app_colors.dart';
+import 'package:gp/core/utils/login_helper.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -28,10 +29,11 @@ class _SigninPageState extends State<SigninPage> {
   }
 
   void _submit() {
+    final t = AppLocalizations.of(context)!;
     final email = _emailCtrl.text.trim();
     final password = _passwordCtrl.text.trim();
     if (email.isEmpty || password.isEmpty) {
-      _showError('Please enter your email and password.');
+      _showError(t.enterEmailAndPassword);
       return;
     }
     context.read<AuthBloc>().add(
@@ -53,15 +55,15 @@ class _SigninPageState extends State<SigninPage> {
     final t = AppLocalizations.of(context)!;
 
     return BlocConsumer<AuthBloc, AuthState>(
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state is AuthLoggedIn) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Welcome back, ${state.user.firstName}!'),
+              content: Text(t.welcomeUser(state.user.firstName)),
               backgroundColor: Colors.green,
             ),
           );
-          Navigator.of(context).pushReplacementNamed('/home');
+          await LoginHelper.navigateAfterLogin(context);
         }
         if (state is AuthError) {
           _showError(state.message);
@@ -123,7 +125,7 @@ class _SigninPageState extends State<SigninPage> {
                             keyboardType: TextInputType.emailAddress,
                             decoration: InputDecoration(
                               prefixIcon: const Icon(Icons.email),
-                              hintText: 'example@email.com',
+                              hintText: t.emailExampleHint,
                               filled: true,
                               fillColor: Colors.grey.shade100,
                               border: OutlineInputBorder(

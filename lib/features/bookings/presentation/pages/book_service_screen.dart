@@ -6,7 +6,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/features/bookings/presentation/bloc/bookings_bloc.dart';
 import 'package:gp/features/bookings/presentation/pages/book_details_screen.dart';
+import 'package:gp/features/settings/domain/entities/address_entity.dart';
+import 'package:gp/features/settings/presentation/bloc/address_bloc.dart';
 import 'package:gp/injection_container.dart' as di;
+import 'package:gp/l10n/app_localizations.dart';
 
 class BookServiceScreen extends StatefulWidget {
   final String serviceName;
@@ -38,7 +41,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
   int selectedHour = 7;
   int selectedMinute = 0;
 
-  final TextEditingController _addressController = TextEditingController();
+  AddressEntity? _selectedAddress;
   bool _showAddressError = false;
 
   static const Color darkBlue = Color(0xFF1A2B4A);
@@ -54,38 +57,88 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     },
   );
 
-  static const List<String> _dayLabels = [
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-    'Sat',
-    'Sun',
-  ];
-
-  static const List<String> _monthLabels = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
 
   @override
-  void dispose() {
-    _addressController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    context.read<AddressBloc>().add(const GetAddressesEvent());
+  }
+
+  void _showAddressPicker(List<AddressEntity> addresses) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            width: 40, height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Select Address',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: darkBlue,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (addresses.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(24),
+              child: Text(
+                'No saved addresses. Please add one in Settings.',
+                style: TextStyle(color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+            )
+          else
+            ...addresses.map((addr) => ListTile(
+                  leading: Icon(
+                    addr.type == AddressType.apartment
+                        ? Icons.apartment
+                        : Icons.home_outlined,
+                    color: orange,
+                  ),
+                  title: Text(addr.displayTitle,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600, color: darkBlue)),
+                  subtitle: Text(addr.displaySubtitle,
+                      style: const TextStyle(fontSize: 12)),
+                  trailing: _selectedAddress?.id == addr.id
+                      ? const Icon(Icons.check_circle, color: orange)
+                      : null,
+                  onTap: () {
+                    setState(() {
+                      _selectedAddress = addr;
+                      _showAddressError = false;
+                    });
+                    Navigator.pop(context);
+                  },
+                )),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
   }
 
   void _showTimePicker() {
+    final t = AppLocalizations.of(context)!;
     int tempHour = selectedHour;
     int tempMinute = selectedMinute;
 
@@ -110,14 +163,14 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.grey),
+                      child: Text(
+                        t.cancel,
+                        style: const TextStyle(color: Colors.grey),
                       ),
                     ),
-                    const Text(
-                      'Select Time',
-                      style: TextStyle(
+                    Text(
+                      t.selectTime,
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                         color: darkBlue,
@@ -131,9 +184,9 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                         });
                         Navigator.pop(context);
                       },
-                      child: const Text(
-                        'Done',
-                        style: TextStyle(color: orange),
+                      child: Text(
+                        t.done,
+                        style: const TextStyle(color: orange),
                       ),
                     ),
                   ],
@@ -204,10 +257,13 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
 
   bool _validate() {
     setState(() {
-      _showAddressError = _addressController.text.trim().isEmpty;
+      _showAddressError = _selectedAddress == null;
     });
     return !_showAddressError;
   }
+
+  List<String> _dayLabels = [];
+  List<String> _monthLabels = [];
 
   void _onContinue() {
     if (_validate()) {
@@ -231,7 +287,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
               images: widget.images,
               date: dateStr,
               time: timeStr,
-              address: _addressController.text.trim(),
+              address: '${_selectedAddress!.displayTitle}, ${_selectedAddress!.displaySubtitle}',
               workerName: widget.workerName,
               professionalId: widget.professionalId, // ADD
               scheduledDate: selectedDate,
@@ -244,15 +300,25 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    _dayLabels = [
+      t.dayMonShort, t.dayTueShort, t.dayWedShort, t.dayThuShort,
+      t.dayFriShort, t.daySatShort, t.daySunShort,
+    ];
+    _monthLabels = [
+      t.monthJan, t.monthFeb, t.monthMar, t.monthApr,
+      t.monthJun, t.monthJul, t.monthAugShort, t.monthSep,
+      t.monthOct, t.monthNov, t.monthDec,
+    ];
     return Scaffold(
       backgroundColor: lightGrey,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: const BackButton(color: darkBlue),
-        title: const Text(
-          'Book a Service',
-          style: TextStyle(
+        title: Text(
+          t.bookAService,
+          style: const TextStyle(
             color: darkBlue,
             fontWeight: FontWeight.bold,
             fontSize: 20,
@@ -502,85 +568,131 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                   const SizedBox(height: 16),
 
                   // Address Card
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: _showAddressError
-                              ? Border.all(color: errorRed, width: 1.5)
-                              : null,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Row(
-                              children: [
-                                Icon(
-                                  Icons.map_outlined,
-                                  color: orange,
-                                  size: 22,
-                                ),
-                                SizedBox(width: 10),
-                                Text(
-                                  'Choose Address',
-                                  style: TextStyle(
-                                    color: darkBlue,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                  BlocBuilder<AddressBloc, AddressState>(
+                    builder: (context, addrState) {
+                      final addresses = addrState is AddressLoaded
+                          ? addrState.addresses
+                          : addrState is AddressActionSuccess
+                              ? addrState.addresses
+                              : <AddressEntity>[];
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          GestureDetector(
+                            onTap: () => _showAddressPicker(addresses),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: _showAddressError
+                                    ? Border.all(color: errorRed, width: 1.5)
+                                    : null,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.05),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            TextField(
-                              controller: _addressController,
-                              maxLines: 3,
-                              onChanged: (_) {
-                                if (_showAddressError) {
-                                  setState(() => _showAddressError = false);
-                                }
-                              },
-                              decoration: InputDecoration(
-                                hintText: 'Enter your address...',
-                                hintStyle: TextStyle(
-                                  color: Colors.grey.shade400,
-                                  fontSize: 13,
-                                ),
-                                filled: true,
-                                fillColor: _showAddressError
-                                    ? const Color(0xFFFFF3F3)
-                                    : const Color(0xFFF8F8F8),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide.none,
-                                ),
-                                contentPadding: const EdgeInsets.all(12),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Row(
+                                    children: [
+                                      Icon(Icons.map_outlined, color: orange, size: 22),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        'Choose Address',
+                                        style: TextStyle(
+                                          color: darkBlue,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: _showAddressError
+                                          ? const Color(0xFFFFF3F3)
+                                          : const Color(0xFFF8F8F8),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: _selectedAddress == null
+                                        ? Row(
+                                            children: [
+                                              Icon(Icons.location_on_outlined,
+                                                  color: Colors.grey.shade400, size: 18),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                addrState is AddressLoading
+                                                    ? 'Loading addresses...'
+                                                    : 'Tap to select your address',
+                                                style: TextStyle(
+                                                  color: Colors.grey.shade400,
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        : Row(
+                                            children: [
+                                              Icon(
+                                                _selectedAddress!.type == AddressType.apartment
+                                                    ? Icons.apartment
+                                                    : Icons.home_outlined,
+                                                color: orange,
+                                                size: 18,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      _selectedAddress!.displayTitle,
+                                                      style: const TextStyle(
+                                                        fontWeight: FontWeight.w600,
+                                                        color: darkBlue,
+                                                        fontSize: 13,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      _selectedAddress!.displaySubtitle,
+                                                      style: const TextStyle(
+                                                        color: Colors.grey,
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const Icon(Icons.edit_outlined,
+                                                  color: orange, size: 16),
+                                            ],
+                                          ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                      if (_showAddressError)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 6, left: 4),
-                          child: Text(
-                            'Please enter your address to continue.',
-                            style: TextStyle(color: errorRed, fontSize: 12),
                           ),
-                        ),
-                    ],
+                          if (_showAddressError)
+                            const Padding(
+                              padding: EdgeInsets.only(top: 6, left: 4),
+                              child: Text(
+                                'Please select your address to continue.',
+                                style: TextStyle(color: errorRed, fontSize: 12),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 24),

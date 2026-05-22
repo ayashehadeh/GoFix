@@ -5,6 +5,7 @@ import 'package:gp/core/theme/app_text_styles.dart';
 import 'package:gp/features/settings/presentation/bloc/set_password_bloc.dart';
 import 'package:gp/features/settings/presentation/pages/set_new_password_screen.dart';
 import 'package:gp/features/settings/presentation/widgets/password_field.dart';
+import 'package:gp/l10n/app_localizations.dart';
 
 class VerifyCurrentPasswordScreen extends StatefulWidget {
   const VerifyCurrentPasswordScreen({super.key});
@@ -79,21 +80,26 @@ class _VerifyCurrentPasswordScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 8),
-                  Text('Verify Identity', style: AppTextStyles.heading1),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Enter your current password to continue.',
-                    style: AppTextStyles.bodySmall,
-                  ),
+                  Builder(builder: (context) {
+                    final t = AppLocalizations.of(context)!;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(t.verifyIdentity, style: AppTextStyles.heading1),
+                        const SizedBox(height: 6),
+                        Text(t.enterCurrentPassword, style: AppTextStyles.bodySmall),
+                      ],
+                    );
+                  }),
                   const SizedBox(height: 32),
                   PasswordField(
                     controller: _controller,
-                    label: 'Current Password',
+                    label: AppLocalizations.of(context)!.currentPasswordLabel,
                     obscure: _obscure,
                     onToggle: () => setState(() => _obscure = !_obscure),
                     validator: (val) {
                       if (val == null || val.isEmpty) {
-                        return 'Please enter your current password';
+                        return AppLocalizations.of(context)!.currentPasswordRequired;
                       }
                       return null;
                     },
@@ -126,7 +132,7 @@ class _VerifyCurrentPasswordScreenState
                                   ),
                                 )
                               : Text(
-                                  'Continue',
+                                  AppLocalizations.of(context)!.continue1,
                                   style: AppTextStyles.bodyMedium.copyWith(
                                     color: Colors.white,
                                     fontSize: 16,

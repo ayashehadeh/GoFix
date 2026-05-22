@@ -6,6 +6,7 @@ import '../../domain/usecases/create_booking.dart';
 import '../../domain/usecases/modify_booking.dart';
 import '../../domain/usecases/cancel_booking.dart';
 import '../../domain/usecases/submit_report.dart';
+import '../../domain/usecases/confirm_payment.dart';
 import 'bookings_event.dart';
 import 'bookings_state.dart';
 
@@ -17,6 +18,7 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
   final ModifyBooking modifyBooking;
   final CancelBooking cancelBooking;
   final SubmitReport submitReport;
+  final ConfirmPayment confirmPayment;
 
   BookingsBloc({
     required this.getUpcomingBookings,
@@ -26,6 +28,7 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     required this.modifyBooking,
     required this.cancelBooking,
     required this.submitReport,
+    required this.confirmPayment,
   }) : super(BookingsInitial()) {
     on<LoadUpcomingBookings>(_onLoadUpcoming);
     on<LoadPastBookings>(_onLoadPast);
@@ -34,6 +37,7 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     on<CreateBookingEvent>(_onCreateBooking);
     on<CancelBookingEvent>(_onCancelBooking);
     on<ModifyBookingEvent>(_onModifyBooking);
+    on<ConfirmPaymentEvent>(_onConfirmPayment);
   }
 
   Future<void> _onLoadUpcoming(
@@ -164,6 +168,18 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     result.fold(
       (failure) => emit(BookingsError(failure.message)),
       (_) => emit(BookingModifiedSuccess()),
+    );
+  }
+
+  Future<void> _onConfirmPayment(
+    ConfirmPaymentEvent event,
+    Emitter<BookingsState> emit,
+  ) async {
+    emit(BookingActionLoading());
+    final result = await confirmPayment(event.bookingId);
+    result.fold(
+      (failure) => emit(ConfirmPaymentError(failure.message)),
+      (_) => emit(ConfirmPaymentSuccess()),
     );
   }
 }

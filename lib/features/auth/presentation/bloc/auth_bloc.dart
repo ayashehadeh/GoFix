@@ -6,23 +6,17 @@ import 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase login;
   final RegisterUseCase register;
-  final VerifyEmailUseCase verifyEmail;
-  final ResendVerificationCodeUseCase resendCode;
   final ForgotPasswordUseCase forgotPassword;
   final ResetPasswordUseCase resetPassword;
 
   AuthBloc({
     required this.login,
     required this.register,
-    required this.verifyEmail,
-    required this.resendCode,
     required this.forgotPassword,
     required this.resetPassword,
   }) : super(AuthInitial()) {
     on<LoginSubmitted>(_onLogin);
     on<RegisterSubmitted>(_onRegister);
-    on<VerifyEmailSubmitted>(_onVerifyEmail);
-    on<ResendCodeRequested>(_onResendCode);
     on<ForgotPasswordSubmitted>(_onForgotPassword);
     on<ResetPasswordSubmitted>(_onResetPassword);
     on<AuthReset>((_, emit) => emit(AuthInitial()));
@@ -56,27 +50,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
-  Future<void> _onVerifyEmail(
-      VerifyEmailSubmitted event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
-    final result =
-        await verifyEmail(token: event.token, code: event.code);
-    result.fold(
-      (failure) => emit(AuthError(failure.message)),
-      (_) => emit(AuthEmailVerified()),
-    );
-  }
-
-  Future<void> _onResendCode(
-      ResendCodeRequested event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
-    final result = await resendCode(token: event.token);
-    result.fold(
-      (failure) => emit(AuthError(failure.message)),
-      (_) => emit(AuthCodeResent()),
-    );
-  }
-
   Future<void> _onForgotPassword(
       ForgotPasswordSubmitted event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
@@ -91,6 +64,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       ResetPasswordSubmitted event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     final result = await resetPassword(
+      token: event.token,
       newPassword: event.newPassword,
       confirmPassword: event.confirmPassword,
     );

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../injection_container.dart' as di;
+import '../../../../l10n/app_localizations.dart';
 import '../bloc/application_status_bloc.dart';
 import '../bloc/application_status_event.dart';
 import 'approval_status_screen.dart';
@@ -12,6 +13,7 @@ class InQueuePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -30,22 +32,20 @@ class InQueuePage extends StatelessWidget {
               const SizedBox(height: 32),
 
               // ── Title ──────────────────────────────────────────────────
-              const Text(
-                "You're In the Queue!",
+              Text(
+                t.inQueueTitle,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                   color: AppColors.primaryDark,
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                "We've received your application and will review it "
-                "within 24-48 hours. You'll get a notification once "
-                "your profile is approved and ready to go live.",
+              Text(
+                t.inQueueMessage,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
                   height: 1.7,
                   color: AppColors.textSecondary,
@@ -81,9 +81,9 @@ class InQueuePage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: const Text(
-                    'Check Status',
-                    style: TextStyle(
+                  child: Text(
+                    t.checkStatus,
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -106,9 +106,9 @@ class InQueuePage extends StatelessWidget {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Done',
-                    style: TextStyle(
+                  child: Text(
+                    t.done,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,

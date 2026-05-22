@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/core/constants/app_colors.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
 import 'package:gp/features/professionals/presentation/pages/category_professionals_page.dart';
 import 'package:gp/features/professionals/presentation/pages/professional_detail_page.dart';
@@ -311,9 +312,9 @@ class _RecentSearchesView extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'RECENT SEARCHES',
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context)!.recentSearches.toUpperCase(),
+              style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF888888),
@@ -322,9 +323,9 @@ class _RecentSearchesView extends StatelessWidget {
             ),
             GestureDetector(
               onTap: onClearAll,
-              child: const Text(
-                'Clear all',
-                style: TextStyle(
+              child: Text(
+                AppLocalizations.of(context)!.clearAll,
+                style: const TextStyle(
                   fontSize: 12,
                   color: AppColors.primaryOrange,
                   fontWeight: FontWeight.w500,

@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import '../../domain/entities/booking.dart';
 import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
@@ -90,9 +91,9 @@ class _BookingFeedbackPageState extends State<BookingFeedbackPage> {
       } else if (result == 'report') {
         _openSheet(_Sheet.report);
       } else if (result == 'review_done') {
-        _goBackWithSnackbar('Review submitted successfully');
+        _goBackWithSnackbar(AppLocalizations.of(context)!.reviewSubmittedSuccess);
       } else if (result == 'report_done') {
-        _goBackWithSnackbar('Report submitted successfully');
+        _goBackWithSnackbar(AppLocalizations.of(context)!.reportSubmittedSuccess);
       } else {
         Navigator.of(context).maybePop();
       }
@@ -107,9 +108,9 @@ class _BookingFeedbackPageState extends State<BookingFeedbackPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: const BackButton(color: Color(0xFF062B4D)),
-        title: const Text(
-          'Booking Information',
-          style: TextStyle(
+        title: Text(
+          AppLocalizations.of(context)!.bookingInformation,
+          style: const TextStyle(
             color: Color(0xFF062B4D),
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -141,6 +142,7 @@ class _ChooseSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Stack(
       children: [
         BackdropFilter(
@@ -160,18 +162,18 @@ class _ChooseSheet extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _Handle(),
-                const Text('Leave Feedback',
-                    style: TextStyle(
+                Text(t.leaveFeedback,
+                    style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF062B4D))),
                 const SizedBox(height: 8),
-                const Text('What would you like to do?',
-                    style: TextStyle(fontSize: 14, color: Colors.grey)),
+                Text(t.whatWouldYouDo,
+                    style: const TextStyle(fontSize: 14, color: Colors.grey)),
                 const SizedBox(height: 32),
-                _PrimaryBtn(label: 'Write a Review', onTap: onReviewChosen),
+                _PrimaryBtn(label: t.writeReview, onTap: onReviewChosen),
                 const SizedBox(height: 14),
-                _OutlineBtn(label: 'Report an Issue', onTap: onReportChosen),
+                _OutlineBtn(label: t.reportAnIssue, onTap: onReportChosen),
               ],
             ),
           ),
@@ -219,6 +221,7 @@ class _ReviewSheetState extends State<_ReviewSheet> {
   @override
   Widget build(BuildContext context) {
     final loading = _submitting;
+    final t = AppLocalizations.of(context)!;
     return Stack(
       children: [
         BackdropFilter(
@@ -245,14 +248,14 @@ class _ReviewSheetState extends State<_ReviewSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _Handle(),
-                  const Text('Write a Review',
-                      style: TextStyle(
+                  Text(t.writeReview,
+                      style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF062B4D))),
                   const SizedBox(height: 6),
-                  const Text('How was the service?',
-                      style: TextStyle(fontSize: 14, color: Colors.grey)),
+                  Text(t.howWasService,
+                      style: const TextStyle(fontSize: 14, color: Colors.grey)),
                   const SizedBox(height: 20),
                   Row(
                     children: List.generate(5, (i) {
@@ -277,8 +280,8 @@ class _ReviewSheetState extends State<_ReviewSheet> {
                   ),
                   if (_starError) ...[
                     const SizedBox(height: 6),
-                    const Text('Please select a rating',
-                        style: TextStyle(fontSize: 12, color: Colors.red)),
+                    Text(t.selectRatingError,
+                        style: const TextStyle(fontSize: 12, color: Colors.red)),
                   ],
                   const SizedBox(height: 20),
                   TextField(
@@ -291,7 +294,7 @@ class _ReviewSheetState extends State<_ReviewSheet> {
                             color: Color(0xFFFF8C1A), size: 18),
                       ),
                       prefixIconConstraints: const BoxConstraints(),
-                      hintText: 'Write your feedback (optional)',
+                      hintText: t.writeFeedbackHint,
                       hintStyle:
                           const TextStyle(fontSize: 13, color: Colors.grey),
                       filled: true,
@@ -305,7 +308,7 @@ class _ReviewSheetState extends State<_ReviewSheet> {
                   ),
                   const SizedBox(height: 24),
                   _PrimaryBtn(
-                    label: 'Submit Review',
+                    label: t.submitReview,
                     loading: loading,
                     onTap: () => _submit(context),
                   ),
@@ -364,6 +367,7 @@ class _ReportSheetState extends State<_ReportSheet> {
       },
       builder: (ctx, state) {
         final loading = state is BookingActionLoading;
+        final t = AppLocalizations.of(ctx)!;
         return Stack(
           children: [
             BackdropFilter(
@@ -390,43 +394,43 @@ class _ReportSheetState extends State<_ReportSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _Handle(),
-                      const Text('Report an Issue',
-                          style: TextStyle(
+                      Text(t.reportAnIssue,
+                          style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w700,
                               color: Color(0xFF062B4D))),
                       const SizedBox(height: 6),
-                      const Text('Help us improve by reporting problems',
-                          style: TextStyle(fontSize: 14, color: Colors.grey)),
+                      Text(t.reportHelpText,
+                          style: const TextStyle(fontSize: 14, color: Colors.grey)),
                       const SizedBox(height: 24),
-                      _FieldLabel('Describe the issue'),
+                      _FieldLabel(t.describeIssue),
                       const SizedBox(height: 8),
                       _ReportField(
                         ctrl: _title,
-                        hint: 'e.g. Technician arrived late',
+                        hint: t.issueTitleHint,
                         maxLines: 1,
                         hasError: _titleErr,
-                        errText: 'Please describe the issue',
+                        errText: t.describeIssueError,
                         onChange: (_) {
                           if (_titleErr) setState(() => _titleErr = false);
                         },
                       ),
                       const SizedBox(height: 18),
-                      _FieldLabel('Provide details'),
+                      _FieldLabel(t.provideDetails),
                       const SizedBox(height: 8),
                       _ReportField(
                         ctrl: _details,
-                        hint: 'Provide details so our team can investigate.',
+                        hint: t.provideDetailsHint,
                         maxLines: 4,
                         hasError: _detailsErr,
-                        errText: 'Please provide details',
+                        errText: t.provideDetailsError,
                         onChange: (_) {
                           if (_detailsErr) setState(() => _detailsErr = false);
                         },
                       ),
                       const SizedBox(height: 24),
                       _PrimaryBtn(
-                        label: 'Submit Report',
+                        label: t.submitReport,
                         loading: loading,
                         onTap: () {
                           if (_validate()) {
@@ -661,8 +665,8 @@ class _BookingDetailsSummary extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Booking Details',
-                style: TextStyle(
+            Text(AppLocalizations.of(context)!.bookingDetails,
+                style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF062B4D))),

@@ -4,6 +4,7 @@ enum ProJobStatus {
   pending,    // incoming request not yet accepted
   confirmed,  // accepted, scheduled
   onTheWay,   // professional heading to client
+  arrived,    // professional at client's location
   inProgress, // job started
   completed,  // job done → moves to past
   cancelled,  // cancelled → moves to past
@@ -15,6 +16,7 @@ extension ProJobStatusX on ProJobStatus {
       case ProJobStatus.pending:    return 'Pending';
       case ProJobStatus.confirmed:  return 'Confirmed';
       case ProJobStatus.onTheWay:   return 'On the Way';
+      case ProJobStatus.arrived:    return 'Arrived';
       case ProJobStatus.inProgress: return 'In Progress';
       case ProJobStatus.completed:  return 'Completed';
       case ProJobStatus.cancelled:  return 'Cancelled';

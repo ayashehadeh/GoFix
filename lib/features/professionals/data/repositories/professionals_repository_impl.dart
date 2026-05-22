@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:gp/core/error/failures.dart';
+import 'package:gp/core/storage/token_storage.dart';
 import 'package:gp/features/professionals/data/datasources/professionals_remote_datasource.dart';
 import 'package:gp/features/professionals/data/models/professional_model.dart';
 import 'package:gp/features/professionals/domain/entities/city.dart';
@@ -17,6 +18,14 @@ class ProfessionalsRepositoryImpl implements ProfessionalsRepository {
   final ProfessionalsRemoteDataSource remoteDataSource;
 
   const ProfessionalsRepositoryImpl({required this.remoteDataSource});
+
+  Future<List<Professional>> _filterSelf(List<Professional> professionals) async {
+    final role = await TokenStorage.getUserRole();
+    if (role != 'professional') return professionals;
+    final myId = await TokenStorage.getUserId();
+    if (myId == null) return professionals;
+    return professionals.where((p) => p.id != myId).toList();
+  }
 
   // Helper to sync isFavorite flags with the favorites datasource
   Future<List<Professional>> _syncFavorites(List<Professional> professionals) async {
@@ -55,8 +64,21 @@ class ProfessionalsRepositoryImpl implements ProfessionalsRepository {
   Future<Either<Failure, List<Professional>>> getProfessionalsByCategory(ServiceCategory category) async {
     try {
       final result = await remoteDataSource.getProfessionalsByCategory(category);
-      final synced = await _syncFavorites(result);
+      final filtered = await _filterSelf(result);
+      final synced = await _syncFavorites(filtered);
       return Right(synced);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Professional>> getMyProfile() async {
+    try {
+      final result = await remoteDataSource.getMyProfile();
+      return Right(result);
     } on DioException catch (e) {
       return Left(_handleDioError(e));
     } catch (e) {
@@ -105,7 +127,8 @@ class ProfessionalsRepositoryImpl implements ProfessionalsRepository {
   Future<Either<Failure, List<Professional>>> searchProfessionals(String query) async {
     try {
       final result = await remoteDataSource.searchProfessionals(query);
-      final synced = await _syncFavorites(result);
+      final filtered = await _filterSelf(result);
+      final synced = await _syncFavorites(filtered);
       return Right(synced);
     } on DioException catch (e) {
       return Left(_handleDioError(e));
@@ -128,7 +151,8 @@ class ProfessionalsRepositoryImpl implements ProfessionalsRepository {
         maxDistanceKm: maxDistanceKm,
         minRating: minRating,
       );
-      final synced = await _syncFavorites(result);
+      final filtered = await _filterSelf(result);
+      final synced = await _syncFavorites(filtered);
       return Right(synced);
     } on DioException catch (e) {
       return Left(_handleDioError(e));
