@@ -5,7 +5,7 @@ import 'package:gp/l10n/app_localizations.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
-import 'code.dart';
+import 'created.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -56,6 +56,22 @@ class _SignupState extends State<Signup> {
       _showError('Password must be at least 8 characters.');
       return;
     }
+    if (!password.contains(RegExp(r'[A-Z]'))) {
+      _showError('Password must contain at least one uppercase letter.');
+      return;
+    }
+    if (!password.contains(RegExp(r'[a-z]'))) {
+      _showError('Password must contain at least one lowercase letter.');
+      return;
+    }
+    if (!password.contains(RegExp(r'\d'))) {
+      _showError('Password must contain at least one number.');
+      return;
+    }
+    if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>_\-]'))) {
+      _showError('Password must contain at least one special character.');
+      return;
+    }
 
     context.read<AuthBloc>().add(RegisterSubmitted(
           firstName: firstName,
@@ -81,18 +97,8 @@ class _SignupState extends State<Signup> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthRegistered) {
-          // Navigate to email verification, pass token + email
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => BlocProvider.value(
-                value: context.read<AuthBloc>(),
-                child: VerifyEmailPage(
-                  token: state.user.token,
-                  email: state.user.email,
-                ),
-              ),
-            ),
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const Created()),
           );
         }
         if (state is AuthError) _showError(state.message);

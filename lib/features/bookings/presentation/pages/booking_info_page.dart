@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/booking.dart';
 import '../bloc/bookings_bloc.dart';
@@ -31,19 +32,33 @@ class _BookingInfoPageState extends State<BookingInfoPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: const BackButton(color: AppColors.primaryDark),
-        title: const Text(
-          'Booking Information',
-          style: TextStyle(
-            color: AppColors.primaryDark,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
+        title: Builder(
+          builder: (ctx) => Text(
+            AppLocalizations.of(ctx)!.bookingDetails,
+            style: const TextStyle(
+              color: AppColors.primaryDark,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
         centerTitle: false,
       ),
-      body: BlocBuilder<BookingsBloc, BookingsState>(
+      body: BlocConsumer<BookingsBloc, BookingsState>(
+        listener: (context, state) {
+          if (state is ConfirmPaymentSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(AppLocalizations.of(context)!.paymentConfirmed)),
+            );
+            context.read<BookingsBloc>().add(LoadBookingById(widget.bookingId));
+          } else if (state is ConfirmPaymentError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }
+        },
         builder: (context, state) {
-          if (state is BookingsLoading) {
+          if (state is BookingsLoading || state is BookingActionLoading) {
             return const Center(
               child: CircularProgressIndicator(color: AppColors.primaryOrange),
             );
@@ -69,8 +84,8 @@ class _BookingInfoPageState extends State<BookingInfoPage> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text('Retry',
-                        style: TextStyle(color: Colors.white)),
+                    child: Text(AppLocalizations.of(context)!.retry,
+                        style: const TextStyle(color: Colors.white)),
                   ),
                 ],
               ),
@@ -110,7 +125,7 @@ class _BookingInfoBody extends StatelessWidget {
 
                 // Booking details
                 _SectionCard(
-                  title: 'Booking Details',
+                  title: AppLocalizations.of(context)!.bookingDetails,
                   child: Column(
                     children: [
                       _DetailRow(
@@ -375,58 +390,89 @@ class _BottomActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final showConfirmPayment =
+        booking.status == BookingStatus.completed && !booking.paymentConfirmed;
+
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {
-                // Navigate back and trigger re-booking with same professional
-                Navigator.pop(context);
-                // TODO: Navigate to booking flow with professionalId pre-filled
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryOrange,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(0, 50),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                elevation: 0,
-              ),
-              child: const Text(
-                'Book Again',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+          if (showConfirmPayment) ...[
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () => context
+                    .read<BookingsBloc>()
+                    .add(ConfirmPaymentEvent(booking.id)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryOrange,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  elevation: 0,
+                ),
+                child: Text(
+                  AppLocalizations.of(context)!.confirmPayment,
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: OutlinedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BlocProvider.value(
-                      value: context.read<BookingsBloc>(),
-                      child: BookingFeedbackPage(booking: booking),
-                    ),
+            const SizedBox(height: 10),
+          ],
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Navigate back and trigger re-booking with same professional
+                    Navigator.pop(context);
+                    // TODO: Navigate to booking flow with professionalId pre-filled
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryOrange,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(0, 50),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    elevation: 0,
                   ),
-                );
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primaryDark,
-                minimumSize: const Size(0, 50),
-                side: const BorderSide(color: AppColors.primaryDark),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  child: Text(
+                    AppLocalizations.of(context)!.bookService,
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                  ),
+                ),
               ),
-              child: const Text(
-                'Feedback',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BlocProvider.value(
+                          value: context.read<BookingsBloc>(),
+                          child: BookingFeedbackPage(booking: booking),
+                        ),
+                      ),
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primaryDark,
+                    minimumSize: const Size(0, 50),
+                    side: const BorderSide(color: AppColors.primaryDark),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text(
+                    AppLocalizations.of(context)!.writeReview,
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),

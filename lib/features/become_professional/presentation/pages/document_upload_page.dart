@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/document_type.dart';
 import '../bloc/become_professional_bloc.dart';
 import '../bloc/become_professional_event.dart';
@@ -46,36 +47,39 @@ class _DocumentUploadPageState extends State<DocumentUploadPage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
+      builder: (ctx) {
+        final t = AppLocalizations.of(ctx)!;
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            ListTile(
-              leading: const Icon(Icons.photo_camera_outlined,
-                  color: AppColors.primaryDark),
-              title: const Text('Take a photo'),
-              onTap: () => Navigator.pop(context, ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined,
-                  color: AppColors.primaryDark),
-              title: const Text('Choose from gallery'),
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
+              const SizedBox(height: 8),
+              ListTile(
+                leading: const Icon(Icons.photo_camera_outlined,
+                    color: AppColors.primaryDark),
+                title: Text(t.takePhoto),
+                onTap: () => Navigator.pop(ctx, ImageSource.camera),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined,
+                    color: AppColors.primaryDark),
+                title: Text(t.chooseFromGallery),
+                onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
     );
 
     if (source == null) return;
@@ -113,9 +117,10 @@ class _DocumentUploadPageState extends State<DocumentUploadPage> {
     final state = context.read<BecomeProfessionalBloc>().state;
     final path = _pathFrom(state);
     if (path == null) {
+      final t = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please choose a photo first.'),
+        SnackBar(
+          content: Text(t.pleaseChoosePhotoFirst),
           backgroundColor: AppColors.error,
         ),
       );
@@ -164,9 +169,10 @@ class _DocumentUploadPageState extends State<DocumentUploadPage> {
           final status = _statusFrom(state);
           if (_previousUploadStatus == ActionStatus.loading &&
               status == ActionStatus.success) {
+            final t = AppLocalizations.of(context)!;
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Uploaded successfully.'),
+              SnackBar(
+                content: Text(t.uploadedSuccessfully),
                 backgroundColor: AppColors.primaryOrange,
               ),
             );
@@ -187,6 +193,7 @@ class _DocumentUploadPageState extends State<DocumentUploadPage> {
           final status = _statusFrom(state);
           final isLoading = status == ActionStatus.loading;
 
+          final t = AppLocalizations.of(context)!;
           return Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -194,8 +201,8 @@ class _DocumentUploadPageState extends State<DocumentUploadPage> {
               children: [
                 Text(
                   widget.documentType == null
-                      ? 'Upload Profile Picture'
-                      : 'Upload ${widget.title}',
+                      ? t.uploadProfilePicture
+                      : t.uploadDoc(widget.title),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -203,9 +210,9 @@ class _DocumentUploadPageState extends State<DocumentUploadPage> {
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'Tap the area below to choose a photo from your device.',
-                  style: TextStyle(
+                Text(
+                  t.tapToChoosePhoto,
+                  style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
                   ),
@@ -237,7 +244,7 @@ class _DocumentUploadPageState extends State<DocumentUploadPage> {
                 StepContinueButton(
                   onPressed: _onSavePressed,
                   isLoading: isLoading,
-                  label: 'Save Photo',
+                  label: t.savePhoto,
                 ),
                 const SizedBox(height: 8),
               ],
@@ -249,6 +256,7 @@ class _DocumentUploadPageState extends State<DocumentUploadPage> {
   }
 
   Widget _buildPlaceholder() {
+    final t = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -267,18 +275,18 @@ class _DocumentUploadPageState extends State<DocumentUploadPage> {
             ),
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Tap to choose a photo',
-            style: TextStyle(
+          Text(
+            t.tapToChoosePhoto,
+            style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
               color: AppColors.primaryDark,
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'JPG or PNG · max 5 MB',
-            style: TextStyle(
+          Text(
+            t.photoFormatLimit,
+            style: const TextStyle(
               fontSize: 11,
               color: AppColors.textSecondary,
             ),
@@ -304,14 +312,14 @@ class _DocumentUploadPageState extends State<DocumentUploadPage> {
                 color: Colors.black.withOpacity(0.55),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.refresh, color: Colors.white, size: 14),
-                  SizedBox(width: 4),
+                  const Icon(Icons.refresh, color: Colors.white, size: 14),
+                  const SizedBox(width: 4),
                   Text(
-                    'Change',
-                    style: TextStyle(
+                    AppLocalizations.of(context)!.changePhoto,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,

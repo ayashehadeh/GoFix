@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/core/theme/app_text_styles.dart';
 import 'package:gp/features/professionals/domain/entities/professional.dart';
@@ -90,7 +91,7 @@ class _CategoryProfessionalsPageState extends State<CategoryProfessionalsPage> {
                 backgroundColor: AppColors.primaryOrange,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('Retry', style: TextStyle(color: Colors.white)),
+              child: Text(AppLocalizations.of(context)!.retry, style: const TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -167,7 +168,7 @@ class _CategoryProfessionalsPageState extends State<CategoryProfessionalsPage> {
           // ── Professionals list ───────────────────────────────────
           Expanded(
             child: _filteredList.isEmpty
-                ? Center(child: Text('No professionals found', style: AppTextStyles.bodyMedium))
+                ? Center(child: Text(AppLocalizations.of(context)!.noProfessionalsFound, style: AppTextStyles.bodyMedium))
                 : ListView.separated(
                     padding: const EdgeInsets.all(16),
                     itemCount: _filteredList.length,

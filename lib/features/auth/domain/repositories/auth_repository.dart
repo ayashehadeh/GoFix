@@ -17,20 +17,12 @@ abstract class AuthRepository {
     required String confirmPassword,
   });
 
-  Future<Either<Failure, void>> verifyEmail({
-    required String token,
-    required String code,
-  });
-
-  Future<Either<Failure, void>> resendVerificationCode({
-    required String token,
-  });
-
   Future<Either<Failure, void>> forgotPassword({
     required String email,
   });
 
   Future<Either<Failure, void>> resetPassword({
+    required String token,
     required String newPassword,
     required String confirmPassword,
   });

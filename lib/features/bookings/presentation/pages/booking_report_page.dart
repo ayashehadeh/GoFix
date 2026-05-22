@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/booking.dart';
 import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
@@ -48,9 +49,9 @@ class _BookingReportPageState extends State<BookingReportPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: const BackButton(color: AppColors.primaryDark),
-        title: const Text(
-          'Booking Information',
-          style: TextStyle(
+        title: Text(
+          AppLocalizations.of(context)!.bookingInformation,
+          style: const TextStyle(
             color: AppColors.primaryDark,
             fontSize: 18,
             fontWeight: FontWeight.w700,
@@ -105,13 +106,14 @@ class _ReportSheetState extends State<_ReportSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return BlocConsumer<BookingsBloc, BookingsState>(
       listener: (context, state) {
         if (state is BookingActionSuccess) {
           Navigator.of(context).pop(); // close sheet
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Report submitted successfully'),
+            SnackBar(
+              content: Text(t.reportSubmittedSuccess),
               backgroundColor: AppColors.primaryOrange,
             ),
           );
@@ -170,18 +172,18 @@ class _ReportSheetState extends State<_ReportSheet> {
                         ),
                       ),
 
-                      const Text(
-                        'Report an Issue',
-                        style: TextStyle(
+                      Text(
+                        t.reportAnIssue,
+                        style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w700,
                           color: AppColors.primaryDark,
                         ),
                       ),
                       const SizedBox(height: 6),
-                      const Text(
-                        'Help us improve by reporting problems',
-                        style: TextStyle(
+                      Text(
+                        t.reportHelpText,
+                        style: const TextStyle(
                           fontSize: 14,
                           color: AppColors.textSecondary,
                         ),
@@ -189,14 +191,14 @@ class _ReportSheetState extends State<_ReportSheet> {
                       const SizedBox(height: 24),
 
                       // Issue title
-                      _FieldLabel(label: 'Describe the issue'),
+                      _FieldLabel(label: t.describeIssue),
                       const SizedBox(height: 8),
                       _ReportTextField(
                         controller: _titleController,
-                        hintText: 'e.g. Technician arrived late',
+                        hintText: t.issueTitleHint,
                         maxLines: 1,
                         hasError: _showTitleError,
-                        errorText: 'Please describe the issue',
+                        errorText: t.describeIssueError,
                         onChanged: (_) {
                           if (_showTitleError) {
                             setState(() => _showTitleError = false);
@@ -206,15 +208,14 @@ class _ReportSheetState extends State<_ReportSheet> {
                       const SizedBox(height: 18),
 
                       // Details
-                      _FieldLabel(label: 'Provide details'),
+                      _FieldLabel(label: t.provideDetails),
                       const SizedBox(height: 8),
                       _ReportTextField(
                         controller: _descriptionController,
-                        hintText:
-                            'Provide details so our team can investigate.',
+                        hintText: t.provideDetailsHint,
                         maxLines: 4,
                         hasError: _showDescriptionError,
-                        errorText: 'Please provide details',
+                        errorText: t.provideDetailsError,
                         onChanged: (_) {
                           if (_showDescriptionError) {
                             setState(() => _showDescriptionError = false);
@@ -259,9 +260,9 @@ class _ReportSheetState extends State<_ReportSheet> {
                                     strokeWidth: 2,
                                   ),
                                 )
-                              : const Text(
-                                  'Submit Report',
-                                  style: TextStyle(
+                              : Text(
+                                  t.submitReport,
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -450,6 +451,7 @@ class _BookingDetailsSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -467,9 +469,9 @@ class _BookingDetailsSummary extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Booking Details',
-            style: TextStyle(
+          Text(
+            t.bookingDetails,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: AppColors.primaryDark,

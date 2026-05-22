@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gp/l10n/app_localizations.dart';
 
 class SetAvailabilityScreen extends StatefulWidget {
   const SetAvailabilityScreen({super.key});
@@ -8,7 +9,7 @@ class SetAvailabilityScreen extends StatefulWidget {
 }
 
 class _SetAvailabilityScreenState extends State<SetAvailabilityScreen> {
-  // Selected days
+  // Selected days (stored as API/key values matching t.daySun etc.)
   final Set<String> selectedDays = {'Mon', 'Tue', 'Wed', 'Thu', 'Fri'};
 
   // Working hours
@@ -17,18 +18,18 @@ class _SetAvailabilityScreenState extends State<SetAvailabilityScreen> {
   int toHour = 13;
   int toMinute = 0;
 
-  final List<String> daysOfWeek = [
-    'Sun',
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-    'Sat'
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    final daysOfWeek = [
+      t.daySun,
+      t.dayMon,
+      t.dayTue,
+      t.dayWed,
+      t.dayThu,
+      t.dayFri,
+      t.daySat,
+    ];
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
@@ -63,11 +64,11 @@ class _SetAvailabilityScreenState extends State<SetAvailabilityScreen> {
                       color: Colors.white,
                       shape: BoxShape.circle,
                     ),
-                    child: Center(
+                    child: const Center(
                       child: Icon(
                         Icons.calendar_today_rounded,
                         size: 60,
-                        color: const Color(0xFF1A3A5C),
+                        color: Color(0xFF1A3A5C),
                       ),
                     ),
                   ),
@@ -83,18 +84,18 @@ class _SetAvailabilityScreenState extends State<SetAvailabilityScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Set Your Availability',
-                      style: TextStyle(
+                    Text(
+                      t.setYourAvailability,
+                      style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF1A3A5C),
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'You can pause bookings anytime from your dashboard.',
-                      style: TextStyle(
+                    Text(
+                      t.availabilityInstructions,
+                      style: const TextStyle(
                         fontSize: 14,
                         color: Colors.grey,
                       ),
@@ -104,12 +105,12 @@ class _SetAvailabilityScreenState extends State<SetAvailabilityScreen> {
                     // Working Days
                     Row(
                       children: [
-                        Icon(Icons.calendar_month,
+                        const Icon(Icons.calendar_month,
                             color: Colors.orange, size: 20),
                         const SizedBox(width: 8),
-                        const Text(
-                          'Working Days',
-                          style: TextStyle(
+                        Text(
+                          t.workingDays,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF1A3A5C),
@@ -168,11 +169,12 @@ class _SetAvailabilityScreenState extends State<SetAvailabilityScreen> {
                     // Working Hours
                     Row(
                       children: [
-                        Icon(Icons.access_time, color: Colors.orange, size: 20),
+                        const Icon(Icons.access_time,
+                            color: Colors.orange, size: 20),
                         const SizedBox(width: 8),
-                        const Text(
-                          'Working Hours',
-                          style: TextStyle(
+                        Text(
+                          t.workingHours,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF1A3A5C),
@@ -211,7 +213,6 @@ class _SetAvailabilityScreenState extends State<SetAvailabilityScreen> {
                 height: 52,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navigate to dashboard and remove all previous routes
                     Navigator.of(context).pushNamedAndRemoveUntil(
                       '/dashboard',
                       (route) => false,
@@ -224,9 +225,9 @@ class _SetAvailabilityScreenState extends State<SetAvailabilityScreen> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Save',
-                    style: TextStyle(
+                  child: Text(
+                    t.save,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
@@ -302,11 +303,12 @@ class _SetAvailabilityScreenState extends State<SetAvailabilityScreen> {
 
   Future<int?> _showNumberPicker(
       BuildContext context, int initial, int min, int max) async {
+    final t = AppLocalizations.of(context)!;
     int selected = initial;
     return showDialog<int>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Select'),
+      builder: (ctx) => AlertDialog(
+        title: Text(t.selectLabel),
         content: SizedBox(
           height: 200,
           width: 100,
@@ -315,7 +317,7 @@ class _SetAvailabilityScreenState extends State<SetAvailabilityScreen> {
             controller: FixedExtentScrollController(initialItem: initial - min),
             onSelectedItemChanged: (index) => selected = min + index,
             childDelegate: ListWheelChildBuilderDelegate(
-              builder: (context, index) {
+              builder: (ctx, index) {
                 if (index < 0 || index > max - min) return null;
                 return Center(
                   child: Text(
@@ -329,12 +331,12 @@ class _SetAvailabilityScreenState extends State<SetAvailabilityScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(t.cancel),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, selected),
-            child: const Text('OK'),
+            onPressed: () => Navigator.pop(ctx, selected),
+            child: Text(t.ok),
           ),
         ],
       ),

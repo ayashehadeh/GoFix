@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../bloc/chat_bloc.dart';
@@ -86,7 +87,7 @@ class _ChatPageState extends State<ChatPage> {
               ListTile(
                 leading: const Icon(Icons.photo_library,
                     color: AppColors.primaryOrange),
-                title: const Text('Photo'),
+                title: Text(AppLocalizations.of(sheetContext)!.photo),
                 onTap: () async {
                   Navigator.pop(sheetContext);
                   await _pickImage(ImageSource.gallery);
@@ -95,7 +96,7 @@ class _ChatPageState extends State<ChatPage> {
               ListTile(
                 leading: const Icon(Icons.camera_alt,
                     color: AppColors.primaryOrange),
-                title: const Text('Camera'),
+                title: Text(AppLocalizations.of(sheetContext)!.camera),
                 onTap: () async {
                   Navigator.pop(sheetContext);
                   await _pickImage(ImageSource.camera);
@@ -104,7 +105,7 @@ class _ChatPageState extends State<ChatPage> {
               ListTile(
                 leading: const Icon(Icons.attach_file,
                     color: AppColors.primaryOrange),
-                title: const Text('File'),
+                title: Text(AppLocalizations.of(sheetContext)!.fileLabel),
                 onTap: () async {
                   Navigator.pop(sheetContext);
                   await _pickFile();
@@ -246,7 +247,7 @@ class _ChatPageState extends State<ChatPage> {
             child: TextField(
               controller: _controller,
               decoration: InputDecoration(
-                hintText: 'Type a message...',
+                hintText: AppLocalizations.of(context)!.typeMessage,
                 hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
                 filled: true,
                 fillColor: const Color(0xFFF5F5F5),

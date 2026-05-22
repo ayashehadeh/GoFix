@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/features/bookings/presentation/pages/booking_success_screen.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
 import '../bloc/bookings_state.dart';
@@ -142,9 +143,9 @@ class BookDetailsScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Booking Details',
-                          style: TextStyle(
+                        Text(
+                          AppLocalizations.of(context)!.bookingDetails,
+                          style: const TextStyle(
                             color: darkBlue,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,

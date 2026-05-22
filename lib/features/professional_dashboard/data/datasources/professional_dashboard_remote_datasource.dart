@@ -45,7 +45,7 @@ class ProfessionalDashboardRemoteDataSourceImpl
   // Response: { success, message, data: [ ...BookingDto ] }
   @override
   Future<List<JobModel>> getScheduledJobs() async {
-    final statuses = ['Accepted', 'OnTheWay', 'InProgress'];
+    final statuses = ['Accepted', 'OnTheWay', 'Arrived', 'InProgress'];
 
     final results = await Future.wait(
       statuses.map(

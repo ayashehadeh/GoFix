@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../injection_container.dart' as di;
 import '../../domain/entities/booking.dart';
@@ -34,12 +35,14 @@ class _UpcomingBookingInfoPageState extends State<UpcomingBookingInfoPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: const BackButton(color: AppColors.primaryDark),
-        title: const Text(
-          'Booking Information',
-          style: TextStyle(
-            color: AppColors.primaryDark,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
+        title: Builder(
+          builder: (ctx) => Text(
+            AppLocalizations.of(ctx)!.bookingDetails,
+            style: const TextStyle(
+              color: AppColors.primaryDark,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
         centerTitle: false,
@@ -47,8 +50,24 @@ class _UpcomingBookingInfoPageState extends State<UpcomingBookingInfoPage> {
       body: BlocConsumer<BookingsBloc, BookingsState>(
         listener: (context, state) {
           if (state is BookingCancelledSuccess) {
-            // Return to My Bookings and refresh
             Navigator.of(context).popUntil((route) => route.isFirst);
+          }
+          if (state is ConfirmPaymentSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Payment confirmed! Booking moved to past.'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          }
+          if (state is ConfirmPaymentError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
           }
         },
         builder: (context, state) {
@@ -100,7 +119,7 @@ class _UpcomingInfoBody extends StatelessWidget {
 
                 // Booking details card
                 _SectionCard(
-                  title: 'Booking Details',
+                  title: AppLocalizations.of(context)!.bookingDetails,
                   child: Column(
                     children: [
                       _DetailRow(
@@ -184,68 +203,87 @@ class _BottomActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final awaitingPayment =
+        booking.status == BookingStatus.completed && !booking.paymentConfirmed;
+
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
-      child: Row(
-        children: [
-          // Modify Booking — primary wide button
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BlocProvider(
-                      create: (_) => di.sl<BookingsBloc>(),
-                      child: ModifyBookingPage(booking: booking),
+      child: awaitingPayment
+          ? SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton.icon(
+                onPressed: () => context
+                    .read<BookingsBloc>()
+                    .add(ConfirmPaymentEvent(booking.id)),
+                icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+                label: Text(
+                  AppLocalizations.of(context)!.confirmPayment,
+                  style: const TextStyle(
+                      fontSize: 15, fontWeight: FontWeight.w700),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  elevation: 0,
+                ),
+              ),
+            )
+          : Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider(
+                            create: (_) => di.sl<BookingsBloc>(),
+                            child: ModifyBookingPage(booking: booking),
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryOrange,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(0, 50),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context)!.modifyBooking,
+                      style: const TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.w700),
                     ),
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryOrange,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(0, 50),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                elevation: 0,
-              ),
-              child: const Text(
-                'Modify Booking',
-                style:
-                    TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-
-          // Cancel / trash icon button
-          _IconActionButton(
-            icon: Icons.delete_outline_rounded,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => BlocProvider.value(
-                    value: context.read<BookingsBloc>(),
-                    child: CancelBookingPage(booking: booking),
-                  ),
                 ),
-              );
-            },
-          ),
-          const SizedBox(width: 10),
-
-          // Chat icon button
-          _IconActionButton(
-            icon: Icons.chat_bubble_outline_rounded,
-            onTap: () {
-              // TODO: navigate to chat
-            },
-          ),
-        ],
-      ),
+                const SizedBox(width: 10),
+                _IconActionButton(
+                  icon: Icons.delete_outline_rounded,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BlocProvider.value(
+                          value: context.read<BookingsBloc>(),
+                          child: CancelBookingPage(booking: booking),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(width: 10),
+                _IconActionButton(
+                  icon: Icons.chat_bubble_outline_rounded,
+                  onTap: () {},
+                ),
+              ],
+            ),
     );
   }
 }
@@ -463,8 +501,8 @@ class _ErrorBody extends StatelessWidget {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            child:
-                const Text('Retry', style: TextStyle(color: Colors.white)),
+            child: Text(AppLocalizations.of(context)!.retry,
+                style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),

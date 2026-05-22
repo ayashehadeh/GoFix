@@ -16,6 +16,7 @@ class BookingModel extends Booking {
     required super.description,
     required super.imageUrls,
     required super.status,
+    super.paymentConfirmed,
     required super.createdAt,
   });
 
@@ -37,6 +38,7 @@ class BookingModel extends Booking {
       description: json['description'] as String? ?? '',
       imageUrls: List<String>.from(json['imageUrls'] as List? ?? []),
       status: BookingStatus.fromString(json['status'] as String? ?? 'pending'),
+      paymentConfirmed: json['paymentConfirmed'] as bool? ?? false,
       createdAt: DateTime.parse(
         json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
       ),

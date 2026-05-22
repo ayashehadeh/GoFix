@@ -6,6 +6,7 @@ import 'package:gp/features/settings/domain/entities/address_entity.dart';
 import 'package:gp/features/settings/presentation/bloc/address_bloc.dart';
 import 'package:gp/features/settings/presentation/pages/confirm_location_screen.dart';
 import 'package:gp/features/settings/presentation/pages/edit_address_screen.dart';
+import 'package:gp/l10n/app_localizations.dart';
 
 class AddressesScreen extends StatefulWidget {
   const AddressesScreen({super.key});
@@ -23,6 +24,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -47,7 +49,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
                       constraints: const BoxConstraints(),
                     ),
                     const Spacer(),
-                    Text('Addresses', style: AppTextStyles.heading2),
+                    Text(t.addresses, style: AppTextStyles.heading2),
                     const Spacer(),
                     GestureDetector(
                       onTap: () => Navigator.push(
@@ -60,7 +62,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
                         ),
                       ),
                       child: Text(
-                        'Add',
+                        t.add,
                         style: AppTextStyles.bodyMedium.copyWith(
                           color: AppColors.primaryOrange,
                           fontWeight: FontWeight.w600,
@@ -99,7 +101,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
                       if (addresses.isEmpty) {
                         return Center(
                           child: Text(
-                            'No addresses yet.\nTap Add to create one.',
+                            t.noAddressesYet,
                             textAlign: TextAlign.center,
                             style: AppTextStyles.bodySmall,
                           ),

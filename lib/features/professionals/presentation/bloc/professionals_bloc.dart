@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/features/professionals/domain/entities/professional.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/get_professionals_by_category.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/get_professional_by_id.dart';
+import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/get_my_profile.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/get_service_areas_by_professional.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/toggle_favorite.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/filter_professionals.dart';
@@ -15,6 +16,7 @@ import 'professionals_state.dart';
 class ProfessionalsBloc extends Bloc<ProfessionalsEvent, ProfessionalsState> {
   final GetProfessionalsByCategory getProfessionalsByCategory;
   final GetProfessionalById getProfessionalById;
+  final GetMyProfile getMyProfile;
   final GetServiceAreasByProfessional getServiceAreasByProfessional;
   final GetReviewsByProfessional getReviewsByProfessional;
   final ToggleFavorite toggleFavorite;
@@ -26,6 +28,7 @@ class ProfessionalsBloc extends Bloc<ProfessionalsEvent, ProfessionalsState> {
   ProfessionalsBloc({
     required this.getProfessionalsByCategory,
     required this.getProfessionalById,
+    required this.getMyProfile,
     required this.getServiceAreasByProfessional,
     required this.getReviewsByProfessional,
     required this.toggleFavorite,
@@ -34,6 +37,7 @@ class ProfessionalsBloc extends Bloc<ProfessionalsEvent, ProfessionalsState> {
     required this.editReview,
     required this.deleteReview,
   }) : super(ProfessionalsInitial()) {
+    on<LoadMyProfile>(_onLoadMyProfile);
     on<LoadProfessionalsByCategory>(_onLoadByCategory);
     on<LoadProfessionalDetail>(_onLoadDetail);
     on<LoadReviews>(_onLoadReviews);
@@ -42,6 +46,40 @@ class ProfessionalsBloc extends Bloc<ProfessionalsEvent, ProfessionalsState> {
     on<AddReviewEvent>(_onAddReview);
     on<EditReviewEvent>(_onEditReview);
     on<DeleteReviewEvent>(_onDeleteReview);
+  }
+
+  Future<void> _onLoadMyProfile(
+    LoadMyProfile event,
+    Emitter<ProfessionalsState> emit,
+  ) async {
+    emit(ProfessionalsLoading());
+    final result = await getMyProfile();
+    await result.fold(
+      (failure) async => emit(ProfessionalsError(failure.message)),
+      (professional) async {
+        Professional professionalWithAreas = professional;
+        try {
+          final areasResult = await getServiceAreasByProfessional(professional.id)
+              .timeout(const Duration(seconds: 4));
+          areasResult.fold(
+            (_) => null,
+            (areas) {
+              if (areas.isNotEmpty) {
+                professionalWithAreas = professional.copyWith(serviceAreas: areas);
+              }
+            },
+          );
+        } catch (_) {}
+        final reviewsResult = await getReviewsByProfessional(professional.id);
+        reviewsResult.fold(
+          (failure) => emit(ProfessionalsError(failure.message)),
+          (reviews) => emit(ProfessionalDetailLoaded(
+            professional: professionalWithAreas,
+            reviews: reviews,
+          )),
+        );
+      },
+    );
   }
 
   Future<void> _onLoadByCategory(

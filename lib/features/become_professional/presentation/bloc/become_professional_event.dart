@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:gp/features/professionals/domain/entities/professional.dart';
 import '../../domain/entities/document_type.dart';
 import '../../domain/entities/service_pricing.dart';
 
@@ -134,4 +135,13 @@ class UploadDocumentWithPathRequested extends BecomeProfessionalEvent {
 /// Final submission — calls POST /api/professionals/profile/submit.
 class SubmitApplicationRequested extends BecomeProfessionalEvent {
   const SubmitApplicationRequested();
+}
+
+/// Pre-fills the bloc state from an already-fetched Professional profile
+/// (used by the Edit Profile wizard so fields are pre-populated).
+class PreloadProfileData extends BecomeProfessionalEvent {
+  final Professional professional;
+  const PreloadProfileData(this.professional);
+  @override
+  List<Object?> get props => [professional];
 }

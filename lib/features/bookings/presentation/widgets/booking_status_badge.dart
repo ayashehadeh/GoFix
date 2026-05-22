@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/booking.dart';
 
 class BookingStatusBadge extends StatelessWidget {
@@ -36,6 +37,16 @@ class BookingStatusBadge extends StatelessWidget {
     }
   }
 
+  String _localizedStatus(AppLocalizations l10n) {
+    switch (status) {
+      case BookingStatus.pending:    return l10n.statusPending;
+      case BookingStatus.confirmed:  return l10n.statusConfirmed;
+      case BookingStatus.inProgress: return l10n.statusInProgress;
+      case BookingStatus.completed:  return l10n.statusCompleted;
+      case BookingStatus.cancelled:  return l10n.statusCancelled;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -45,7 +56,7 @@ class BookingStatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        status.displayName,
+        _localizedStatus(AppLocalizations.of(context)!),
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w600,

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/features/professional_jobs/presentation/bloc/professional_jobs_bloc.dart';
+import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/features/professional_jobs/presentation/pages/my_jobs_page.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/job_entity.dart';
 import '../bloc/professional_dashboard_bloc.dart';
@@ -12,6 +15,8 @@ import '../../../earnings/presentation/pages/earnings_page.dart';
 import '../../../../core/widgets/gofix_bottom_nav_bar.dart';
 import '../../../../injection_container.dart' as di;
 import 'package:gp/core/utils/user_info_helper.dart';
+import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
+import 'package:gp/features/professionals/presentation/pages/professional_my_profile_page.dart';
 
 class ProfessionalDashboardScreen extends StatefulWidget {
   const ProfessionalDashboardScreen({Key? key}) : super(key: key);
@@ -78,7 +83,7 @@ class _ProfessionalDashboardScreenState
                       onPressed: () => context
                           .read<ProfessionalDashboardBloc>()
                           .add(RefreshDashboard()),
-                      child: const Text('Retry'),
+                      child: Text(AppLocalizations.of(context)!.retry),
                     ),
                   ],
                 ),
@@ -154,7 +159,7 @@ class _ProfessionalDashboardScreenState
                 children: [
                   Expanded(
                     child: Text(
-                      'Good ${_getTimeOfDay()}, $_userName',
+                      '${_getTimeOfDay(AppLocalizations.of(context)!)}, $_userName',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -183,17 +188,17 @@ class _ProfessionalDashboardScreenState
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStatCard('${state.stats.requestsCount}', 'Requests'),
+                  _buildStatCard('${state.stats.requestsCount}', AppLocalizations.of(context)!.totalRequests),
                   Container(
                       width: 1,
                       height: 40,
                       color: Colors.white.withOpacity(0.2)),
-                  _buildStatCard('${state.stats.scheduledCount}', 'Scheduled'),
+                  _buildStatCard('${state.stats.scheduledCount}', AppLocalizations.of(context)!.scheduled),
                   Container(
                       width: 1,
                       height: 40,
                       color: Colors.white.withOpacity(0.2)),
-                  _buildStatCard('${state.stats.completedCount}', 'Completed'),
+                  _buildStatCard('${state.stats.completedCount}', AppLocalizations.of(context)!.completedJobs),
                 ],
               ),
             ),
@@ -203,11 +208,9 @@ class _ProfessionalDashboardScreenState
     );
   }
 
-  String _getTimeOfDay() {
+  String _getTimeOfDay(AppLocalizations t) {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Morning';
-    if (hour < 17) return 'Afternoon';
-    return 'Evening';
+    return hour < 12 ? t.goodMorning : t.goodEvening;
   }
 
   Widget _buildStatCard(String count, String label) {
@@ -241,13 +244,13 @@ class _ProfessionalDashboardScreenState
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Scheduled Jobs',
-                  style: TextStyle(
+              Text(AppLocalizations.of(context)!.scheduledJobsTitle,
+                  style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF1A3A5C))),
               if (state.scheduledJobs.isNotEmpty)
-                TextButton(onPressed: () {}, child: const Text('See All')),
+                TextButton(onPressed: () {}, child: Text(AppLocalizations.of(context)!.seeAll)),
             ],
           ),
         ),
@@ -258,7 +261,7 @@ class _ProfessionalDashboardScreenState
               ? Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Text('No scheduled jobs yet',
+                    child: Text(AppLocalizations.of(context)!.noScheduledJobsYet,
                         style:
                             TextStyle(color: Colors.grey[600], fontSize: 16)),
                   ),
@@ -352,8 +355,8 @@ class _ProfessionalDashboardScreenState
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
               ),
-              child: const Text('Update Status',
-                  style: TextStyle(color: Colors.white)),
+              child: Text(AppLocalizations.of(context)!.updateStatus,
+                  style: const TextStyle(color: Colors.white)),
             ),
           ),
         ],
@@ -370,13 +373,13 @@ class _ProfessionalDashboardScreenState
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Incoming Requests',
-                  style: TextStyle(
+              Text(AppLocalizations.of(context)!.incomingRequestsTitle,
+                  style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF1A3A5C))),
               if (state.incomingRequests.isNotEmpty)
-                TextButton(onPressed: () {}, child: const Text('See All')),
+                TextButton(onPressed: () {}, child: Text(AppLocalizations.of(context)!.seeAll)),
             ],
           ),
         ),
@@ -387,7 +390,7 @@ class _ProfessionalDashboardScreenState
               ? Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Text('No incoming requests',
+                    child: Text(AppLocalizations.of(context)!.noIncomingRequests,
                         style:
                             TextStyle(color: Colors.grey[600], fontSize: 16)),
                   ),
@@ -484,8 +487,8 @@ class _ProfessionalDashboardScreenState
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8)),
                   ),
-                  child: const Text('Decline',
-                      style: TextStyle(color: Colors.red)),
+                  child: Text(AppLocalizations.of(context)!.declineLabel,
+                      style: const TextStyle(color: Colors.red)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -499,8 +502,8 @@ class _ProfessionalDashboardScreenState
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8)),
                   ),
-                  child: const Text('Accept',
-                      style: TextStyle(color: Colors.white)),
+                  child: Text(AppLocalizations.of(context)!.acceptLabel,
+                      style: const TextStyle(color: Colors.white)),
                 ),
               ),
             ],
@@ -515,7 +518,7 @@ class _ProfessionalDashboardScreenState
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
-          _buildMenuItem('My Availability', Icons.schedule, () {
+          _buildMenuItem(AppLocalizations.of(context)!.myAvailability, Icons.schedule, () {
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -526,9 +529,29 @@ class _ProfessionalDashboardScreenState
               ),
             );
           }),
-          _buildMenuItem('My Jobs', Icons.work_outline, () {}),
-          _buildMenuItem('My Profile', Icons.person_outline, () {}),
-          _buildMenuItem('My Earnings', Icons.attach_money, () {
+          _buildMenuItem(AppLocalizations.of(context)!.myJobs, Icons.work_outline, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BlocProvider(
+                  create: (_) => di.sl<ProfessionalJobsBloc>(),
+                  child: const MyJobsPage(),
+                ),
+              ),
+            );
+          }),
+          _buildMenuItem(AppLocalizations.of(context)!.myProfile, Icons.person_outline, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BlocProvider(
+                  create: (_) => di.sl<ProfessionalsBloc>(),
+                  child: const ProfessionalMyProfilePage(),
+                ),
+              ),
+            );
+          }),
+          _buildMenuItem(AppLocalizations.of(context)!.myEarnings, Icons.attach_money, () {
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -573,6 +596,12 @@ class _ProfessionalDashboardScreenState
       options['OnTheWay'] = 'On The Way';
       options['InProgress'] = 'In Progress';
       options['Completed'] = 'Completed';
+    } else if (currentStatus == JobStatus.onTheWay) {
+      options['Arrived'] = 'Arrived';
+    } else if (currentStatus == JobStatus.arrived) {
+      options['InProgress'] = 'In Progress';
+    } else if (currentStatus == JobStatus.inProgress) {
+      options['Completed'] = 'Completed';
     }
 
     if (options.isEmpty) return;
@@ -580,7 +609,7 @@ class _ProfessionalDashboardScreenState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Update Job Status'),
+        title: Text(AppLocalizations.of(context)!.updateJobStatus),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: options.entries

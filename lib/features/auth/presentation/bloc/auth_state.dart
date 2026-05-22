@@ -10,7 +10,6 @@ class AuthInitial extends AuthState {}
 
 class AuthLoading extends AuthState {}
 
-/// Login or register succeeded — navigate to verify email page
 class AuthRegistered extends AuthState {
   final AuthUser user;
   AuthRegistered(this.user);
@@ -25,12 +24,6 @@ class AuthLoggedIn extends AuthState {
   @override
   List<Object?> get props => [user];
 }
-
-/// Email verification succeeded — navigate to Created page
-class AuthEmailVerified extends AuthState {}
-
-/// Code resent successfully — show snackbar, stay on page
-class AuthCodeResent extends AuthState {}
 
 /// Forgot password email sent — navigate to CheckYourMail page
 class AuthForgotPasswordSent extends AuthState {}

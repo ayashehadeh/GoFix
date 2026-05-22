@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gp/core/utils/professional_nav_mixin.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/gofix_bottom_nav_bar.dart';
@@ -137,7 +138,7 @@ class _HomePageState extends State<HomePage>
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text('Retry', style: TextStyle(color: Colors.white)),
+              child: Text(AppLocalizations.of(context)!.retry, style: const TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -158,7 +159,7 @@ class _HomePageState extends State<HomePage>
               const SizedBox(height: 24),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Text('Categories', style: AppTextStyles.sectionTitle),
+                child: Text(AppLocalizations.of(context)!.categories, style: AppTextStyles.sectionTitle),
               ),
               const SizedBox(height: 16),
               _CategoriesGrid(
@@ -228,7 +229,7 @@ class _HomeHeader extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Location', style: AppTextStyles.locationLabel),
+                      Text(AppLocalizations.of(context)!.location, style: AppTextStyles.locationLabel),
                       isLoadingLocation
                           ? const SizedBox(
                               width: 120,
@@ -282,7 +283,7 @@ class _HomeHeader extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Text('Search', style: AppTextStyles.searchHint),
+                  Text(AppLocalizations.of(context)!.search, style: AppTextStyles.searchHint),
                 ],
               ),
             ),

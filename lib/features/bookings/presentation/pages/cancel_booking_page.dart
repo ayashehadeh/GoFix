@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/booking.dart';
 import '../bloc/bookings_bloc.dart';
@@ -50,12 +51,14 @@ class _CancelBookingPageState extends State<CancelBookingPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: const BackButton(color: AppColors.primaryDark),
-        title: const Text(
-          'Booking Information',
-          style: TextStyle(
-            color: AppColors.primaryDark,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
+        title: Builder(
+          builder: (ctx) => Text(
+            AppLocalizations.of(ctx)!.bookingDetails,
+            style: const TextStyle(
+              color: AppColors.primaryDark,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
         centerTitle: false,
@@ -321,9 +324,9 @@ class _BookingDetailsSummary extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Booking Details',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context)!.bookingDetails,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: AppColors.primaryDark,

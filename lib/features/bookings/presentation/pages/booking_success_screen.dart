@@ -3,12 +3,14 @@
 import 'package:flutter/material.dart';
 import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/core/theme/app_text_styles.dart';
+import 'package:gp/l10n/app_localizations.dart';
 
 class BookingSuccessScreen extends StatelessWidget {
   const BookingSuccessScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -86,7 +88,7 @@ class BookingSuccessScreen extends StatelessWidget {
                     elevation: 0,
                   ),
                   child: Text(
-                    'Done',
+                    l10n.done,
                     style: AppTextStyles.bodyMedium.copyWith(
                       color: Colors.white,
                       fontSize: 16,

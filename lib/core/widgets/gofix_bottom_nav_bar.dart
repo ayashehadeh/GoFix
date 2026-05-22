@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../l10n/app_localizations.dart';
 
 class GoFixBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -35,21 +36,21 @@ class GoFixBottomNavBar extends StatelessWidget {
           _NavItem(
             index: 0,
             currentIndex: currentIndex,
-            label: 'Home',
+            label: AppLocalizations.of(context)!.navHome,
             iconAsset: 'assets/home_screen/home.svg',
             onTap: onTap,
           ),
           _NavItem(
             index: 1,
             currentIndex: currentIndex,
-            label: 'Bookings',
+            label: AppLocalizations.of(context)!.navBookings,
             iconAsset: 'assets/home_screen/event.svg',
             onTap: onTap,
           ),
           _NavItem(
             index: 2,
             currentIndex: currentIndex,
-            label: 'Profile',
+            label: AppLocalizations.of(context)!.navProfile,
             iconAsset: 'assets/home_screen/person.svg',
             onTap: onTap,
           ),
@@ -57,6 +58,7 @@ class GoFixBottomNavBar extends StatelessWidget {
             _DashboardNavItem(
               index: 3,
               currentIndex: currentIndex,
+              label: AppLocalizations.of(context)!.navDashboard,
               onTap: onTap,
             ),
         ],
@@ -130,11 +132,13 @@ class _NavItem extends StatelessWidget {
 class _DashboardNavItem extends StatelessWidget {
   final int index;
   final int currentIndex;
+  final String label;
   final ValueChanged<int> onTap;
 
   const _DashboardNavItem({
     required this.index,
     required this.currentIndex,
+    required this.label,
     required this.onTap,
   });
 
@@ -166,7 +170,7 @@ class _DashboardNavItem extends StatelessWidget {
             Icon(Icons.handyman, size: 24, color: color),
             const SizedBox(height: 4),
             Text(
-              'Dashboard',
+              label,
               style: AppTextStyles.bottomNavLabel.copyWith(color: color),
             ),
           ],

@@ -11,7 +11,14 @@ import '../widgets/step_form_field.dart';
 
 class ProfessionalDetailsPage extends StatefulWidget {
   final VoidCallback onContinue;
-  const ProfessionalDetailsPage({super.key, required this.onContinue});
+  final bool isEditMode;
+  final String buttonLabel;
+  const ProfessionalDetailsPage({
+    super.key,
+    required this.onContinue,
+    this.isEditMode = false,
+    this.buttonLabel = 'Continue',
+  });
 
   @override
   State<ProfessionalDetailsPage> createState() =>
@@ -102,7 +109,10 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
                       hasError: _showCategoryError,
                       isLoading: initialLoading,
                       value: app.categoryName,
-                      onTap: () => _pickCategory(context, state),
+                      enabled: !widget.isEditMode,
+                      onTap: widget.isEditMode
+                          ? null
+                          : () => _pickCategory(context, state),
                     ),
                     const SizedBox(height: 12),
 
@@ -301,6 +311,7 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
             StepContinueButton(
               onPressed: _onContinuePressed,
               isLoading: isLoading,
+              label: widget.buttonLabel,
             ),
             const SizedBox(height: 8),
           ],

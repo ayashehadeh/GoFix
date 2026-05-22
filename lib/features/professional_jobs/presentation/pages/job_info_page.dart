@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import '../bloc/professional_jobs_bloc.dart';
 import '../bloc/professional_jobs_event.dart';
 import '../bloc/professional_jobs_state.dart';
@@ -25,12 +26,14 @@ class JobInfoPage extends StatelessWidget {
           backgroundColor: Colors.white,
           elevation: 0,
           leading: const BackButton(color: Color(0xFF062B4D)),
-          title: const Text(
-            'Job Information',
-            style: TextStyle(
-              color: Color(0xFF062B4D),
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
+          title: Builder(
+            builder: (ctx) => Text(
+              AppLocalizations.of(ctx)!.jobDetails,
+              style: const TextStyle(
+                color: Color(0xFF062B4D),
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
           centerTitle: false,
@@ -76,8 +79,8 @@ class _JobDetailsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Job Details',
-              style: TextStyle(
+          Text(AppLocalizations.of(context)!.jobDetails,
+              style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF062B4D))),
@@ -118,12 +121,12 @@ class _ServiceDescriptionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.edit_outlined, color: Color(0xFFFF8C1A), size: 18),
-              SizedBox(width: 8),
-              Text('Service Description',
-                  style: TextStyle(
+              const Icon(Icons.edit_outlined, color: Color(0xFFFF8C1A), size: 18),
+              const SizedBox(width: 8),
+              Text(AppLocalizations.of(context)!.serviceDescription,
+                  style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF062B4D))),
@@ -141,7 +144,7 @@ class _ServiceDescriptionCard extends StatelessWidget {
                     color: Color(0xFF062B4D), size: 18),
                 const SizedBox(width: 8),
                 Text(
-                  '${job.pictureCount} picture${job.pictureCount > 1 ? 's' : ''} attached',
+                  AppLocalizations.of(context)!.picturesAttached(job.pictureCount),
                   style:
                       const TextStyle(fontSize: 13, color: Color(0xFF062B4D)),
                 ),
@@ -179,9 +182,9 @@ class _BottomActions extends StatelessWidget {
                         borderRadius: BorderRadius.circular(14)),
                     elevation: 0,
                   ),
-                  child: const Text('Update Status',
+                  child: Text(AppLocalizations.of(context)!.updateStatus,
                       style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                          const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
               ),
             ),
@@ -235,28 +238,34 @@ class _StatusSheet extends StatefulWidget {
 class _StatusSheetState extends State<_StatusSheet> {
   ProJobStatus? _selected;
 
-  static const _options = [
+  List<_StatusOption> _buildOptions(AppLocalizations l10n) => [
     _StatusOption(
       status: ProJobStatus.onTheWay,
-      title: 'On the Way',
+      title: l10n.statusOnTheWay,
       subtitle: "Let the customer know you're heading over.",
       icon: Icons.directions_car_outlined,
     ),
     _StatusOption(
+      status: ProJobStatus.arrived,
+      title: l10n.statusArrived,
+      subtitle: "You're at the client's location.",
+      icon: Icons.place_outlined,
+    ),
+    _StatusOption(
       status: ProJobStatus.inProgress,
-      title: 'In Progress',
-      subtitle: "You've arrived and started the job.",
+      title: l10n.statusInProgress,
+      subtitle: "You've started the job.",
       icon: Icons.settings_outlined,
     ),
     _StatusOption(
       status: ProJobStatus.completed,
-      title: 'Completed',
+      title: l10n.statusCompleted,
       subtitle: "The job is done successfully.",
       icon: Icons.check_circle_outline,
     ),
     _StatusOption(
       status: ProJobStatus.cancelled,
-      title: 'Cancel Job',
+      title: l10n.cancelBooking,
       subtitle: "Only use if the job can't be completed.",
       icon: Icons.cancel_outlined,
     ),
@@ -307,8 +316,8 @@ class _StatusSheetState extends State<_StatusSheet> {
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
-                    const Text('Job Status',
-                        style: TextStyle(
+                    Text(AppLocalizations.of(ctx)!.jobStatus,
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF062B4D),
@@ -316,7 +325,7 @@ class _StatusSheetState extends State<_StatusSheet> {
                     const SizedBox(height: 20),
 
                     // Status options
-                    ..._options.map((opt) => _StatusTile(
+                    ..._buildOptions(AppLocalizations.of(ctx)!).map((opt) => _StatusTile(
                           option: opt,
                           isSelected: _selected == opt.status,
                           onTap: () => setState(() => _selected = opt.status),
@@ -352,8 +361,8 @@ class _StatusSheetState extends State<_StatusSheet> {
                                 height: 22,
                                 child: CircularProgressIndicator(
                                     color: Colors.white, strokeWidth: 2))
-                            : const Text('Confirm Update',
-                                style: TextStyle(
+                            : Text(AppLocalizations.of(ctx)!.confirmUpdate,
+                                style: const TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.w700)),
                       ),
                     ),

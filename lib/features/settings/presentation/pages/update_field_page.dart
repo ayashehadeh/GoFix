@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gp/l10n/app_localizations.dart';
 
 class UpdateFieldPage extends StatefulWidget {
   final String title;
@@ -29,6 +30,7 @@ class _UpdateFieldPageState extends State<UpdateFieldPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -90,8 +92,8 @@ class _UpdateFieldPageState extends State<UpdateFieldPage> {
                       Navigator.pop(context);
                     }
                   },
-                  child: const Text('Update',
-                      style: TextStyle(
+                  child: Text(t.update,
+                      style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w600)),

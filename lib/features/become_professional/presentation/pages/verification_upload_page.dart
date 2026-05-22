@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/document_type.dart';
 import '../bloc/become_professional_bloc.dart';
 import '../bloc/become_professional_event.dart';
@@ -22,23 +23,24 @@ class _VerificationUploadPageState extends State<VerificationUploadPage> {
   ActionStatus _previousSubmitStatus = ActionStatus.idle;
 
   void _onSubmitPressed() {
+    final t = AppLocalizations.of(context)!;
     final state = context.read<BecomeProfessionalBloc>().state;
     final app = state.application;
 
     if (app.profileImagePath == null) {
-      _showSnack('Please upload your profile picture first.');
+      _showSnack(t.pleaseUploadProfilePicture);
       return;
     }
     if (state.profilePictureUploadStatus != ActionStatus.success) {
-      _showSnack('Please upload your profile picture first.');
+      _showSnack(t.pleaseUploadProfilePicture);
       return;
     }
     if (app.identityPath == null) {
-      _showSnack('Please upload your ID first.');
+      _showSnack(t.pleaseUploadId);
       return;
     }
     if (state.statusFor(DocumentType.identity) != ActionStatus.success) {
-      _showSnack('Please upload your ID first.');
+      _showSnack(t.pleaseUploadId);
       return;
     }
 
@@ -89,21 +91,22 @@ class _VerificationUploadPageState extends State<VerificationUploadPage> {
       builder: (context, state) {
         final isLoading = state.submitStatus == ActionStatus.loading;
 
+        final t = AppLocalizations.of(context)!;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Verification Upload',
-              style: TextStyle(
+            Text(
+              t.verificationUpload,
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
                 color: AppColors.primaryDark,
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Upload the required documents to verify your professional account.',
-              style: TextStyle(
+            Text(
+              t.verificationInstructions,
+              style: const TextStyle(
                 fontSize: 12,
                 color: AppColors.textSecondary,
               ),
@@ -113,43 +116,43 @@ class _VerificationUploadPageState extends State<VerificationUploadPage> {
               child: ListView(
                 children: [
                   _UploadRow(
-                    label: 'Profile Picture',
+                    label: t.profilePicture,
                     isUploaded: state.profilePictureUploadStatus ==
                         ActionStatus.success,
                     isRequired: true,
                     onTap: () => _openUpload(
-                      title: 'Profile Picture',
+                      title: t.profilePicture,
                       documentType: null,
                     ),
                   ),
                   const SizedBox(height: 10),
                   _UploadRow(
-                    label: 'Upload ID',
+                    label: t.uploadId,
                     isUploaded: state.statusFor(DocumentType.identity) ==
                         ActionStatus.success,
                     isRequired: true,
                     onTap: () => _openUpload(
-                      title: 'Upload ID',
+                      title: t.uploadId,
                       documentType: DocumentType.identity,
                     ),
                   ),
                   const SizedBox(height: 10),
                   _UploadRow(
-                    label: 'Upload Certification',
+                    label: t.uploadCertification,
                     isUploaded: state.statusFor(DocumentType.certification) ==
                         ActionStatus.success,
                     onTap: () => _openUpload(
-                      title: 'Upload Certification',
+                      title: t.uploadCertification,
                       documentType: DocumentType.certification,
                     ),
                   ),
                   const SizedBox(height: 10),
                   _UploadRow(
-                    label: 'Certificate of Good Conduct',
+                    label: t.goodConduct,
                     isUploaded: state.statusFor(DocumentType.goodConduct) ==
                         ActionStatus.success,
                     onTap: () => _openUpload(
-                      title: 'Certificate of Good Conduct',
+                      title: t.goodConduct,
                       documentType: DocumentType.goodConduct,
                     ),
                   ),
@@ -159,7 +162,7 @@ class _VerificationUploadPageState extends State<VerificationUploadPage> {
             StepContinueButton(
               onPressed: _onSubmitPressed,
               isLoading: isLoading,
-              label: 'Submit Application',
+              label: t.submitApplication,
             ),
             const SizedBox(height: 8),
           ],
@@ -184,6 +187,7 @@ class _UploadRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -248,7 +252,7 @@ class _UploadRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    isUploaded ? 'Uploaded' : 'Tap to upload',
+                    isUploaded ? t.uploaded : t.tapToUpload,
                     style: TextStyle(
                       fontSize: 11,
                       color: isUploaded

@@ -72,6 +72,14 @@ class CancelBookingEvent extends BookingsEvent {
   List<Object?> get props => [bookingId];
 }
 
+class ConfirmPaymentEvent extends BookingsEvent {
+  final String bookingId;
+  ConfirmPaymentEvent(this.bookingId);
+
+  @override
+  List<Object?> get props => [bookingId];
+}
+
 class ModifyBookingEvent extends BookingsEvent {
   final String bookingId;
   final String serviceName;

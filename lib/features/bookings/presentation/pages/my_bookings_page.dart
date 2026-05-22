@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/professional_nav_mixin.dart';
 import '../../../../core/widgets/gofix_bottom_nav_bar.dart';
@@ -124,6 +125,7 @@ class _BookingsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
@@ -133,9 +135,9 @@ class _BookingsHeader extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'My Bookings',
-                style: TextStyle(
+              Text(
+                l10n.myBookings,
+                style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: AppColors.primaryDark),
@@ -201,15 +203,16 @@ class _TabToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       children: [
         _TabButton(
-            label: 'Upcoming',
+            label: l10n.upcoming,
             isSelected: isUpcoming,
             onTap: () => onSwitchTab(true)),
         const SizedBox(width: 8),
         _TabButton(
-            label: 'Past',
+            label: l10n.past,
             isSelected: !isUpcoming,
             onTap: () => onSwitchTab(false)),
       ],
@@ -255,6 +258,7 @@ class _EmptyBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -262,7 +266,8 @@ class _EmptyBody extends StatelessWidget {
           Icon(isUpcoming ? Icons.calendar_today_outlined : Icons.history,
               size: 56, color: AppColors.divider),
           const SizedBox(height: 16),
-          Text(isUpcoming ? 'No upcoming bookings' : 'No past bookings yet',
+          Text(
+              isUpcoming ? l10n.noUpcomingBookings : l10n.noPastBookings,
               style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -280,6 +285,7 @@ class _ErrorBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -296,7 +302,7 @@ class _ErrorBody extends StatelessWidget {
                 backgroundColor: AppColors.primaryOrange,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12))),
-            child: const Text('Retry', style: TextStyle(color: Colors.white)),
+            child: Text(l10n.retry, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),

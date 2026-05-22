@@ -4,6 +4,7 @@ import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/core/theme/app_text_styles.dart';
 import 'package:gp/features/settings/presentation/bloc/set_password_bloc.dart';
 import 'package:gp/features/settings/presentation/widgets/password_field.dart';
+import 'package:gp/l10n/app_localizations.dart';
 
 class SetNewPasswordScreen extends StatefulWidget {
   final String currentPassword;
@@ -40,12 +41,13 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
   }
 
   String? _validateNewPassword(String? val) {
-    if (val == null || val.isEmpty) return 'Please enter a new password';
-    if (val.length < 8) return 'Must be at least 8 characters';
-    if (!_hasUppercase(val)) return 'Add at least one uppercase letter';
-    if (!_hasLowercase(val)) return 'Add at least one lowercase letter';
-    if (!_hasDigit(val)) return 'Add at least one number';
-    if (!_hasSpecial(val)) return 'Add at least one special character';
+    final t = AppLocalizations.of(context)!;
+    if (val == null || val.isEmpty) return t.pleaseEnterNewPassword;
+    if (val.length < 8) return t.mustBe8Chars;
+    if (!_hasUppercase(val)) return t.addUppercase;
+    if (!_hasLowercase(val)) return t.addLowercase;
+    if (!_hasDigit(val)) return t.addDigit;
+    if (!_hasSpecial(val)) return t.addSpecial;
     return null;
   }
 
@@ -83,9 +85,10 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
       body: BlocListener<SetPasswordBloc, SetPasswordState>(
         listener: (context, state) {
           if (state is SetPasswordSuccess) {
+            final t = AppLocalizations.of(context)!;
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Password changed successfully!'),
+              SnackBar(
+                content: Text(t.passwordChangedSuccess),
                 backgroundColor: AppColors.primaryOrange,
               ),
             );
@@ -111,16 +114,21 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 8),
-                  Text('Set New Password', style: AppTextStyles.heading1),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Choose a strong password you haven\'t used before.',
-                    style: AppTextStyles.bodySmall,
-                  ),
+                  Builder(builder: (context) {
+                    final t = AppLocalizations.of(context)!;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(t.setNewPassword, style: AppTextStyles.heading1),
+                        const SizedBox(height: 6),
+                        Text(t.chooseStrongPassword, style: AppTextStyles.bodySmall),
+                      ],
+                    );
+                  }),
                   const SizedBox(height: 32),
                   PasswordField(
                     controller: _newPasswordController,
-                    label: 'New Password',
+                    label: AppLocalizations.of(context)!.newPassword,
                     obscure: _obscureNew,
                     onToggle: () => setState(() => _obscureNew = !_obscureNew),
                     validator: _validateNewPassword,
@@ -132,16 +140,17 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                   const SizedBox(height: 16),
                   PasswordField(
                     controller: _confirmPasswordController,
-                    label: 'Confirm Password',
+                    label: AppLocalizations.of(context)!.confirmPassword,
                     obscure: _obscureConfirm,
                     onToggle: () =>
                         setState(() => _obscureConfirm = !_obscureConfirm),
                     validator: (val) {
+                      final t = AppLocalizations.of(context)!;
                       if (val == null || val.isEmpty) {
-                        return 'Please confirm your password';
+                        return t.confirmPasswordRequired;
                       }
                       if (val != _newPasswordController.text) {
-                        return 'Passwords do not match';
+                        return t.passwordNotMatch;
                       }
                       return null;
                     },
@@ -174,7 +183,7 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                                   ),
                                 )
                               : Text(
-                                  'Save Password',
+                                  AppLocalizations.of(context)!.savePassword,
                                   style: AppTextStyles.bodyMedium.copyWith(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -207,18 +216,19 @@ class _StrengthIndicator extends StatelessWidget {
     return Colors.green;
   }
 
-  String get _label {
+  String _label(AppLocalizations t) {
     if (score == 0) return '';
-    if (score <= 1) return 'Weak';
-    if (score == 2) return 'Fair';
-    if (score == 3) return 'Good';
-    if (score == 4) return 'Strong';
-    return 'Very Strong';
+    if (score <= 1) return t.strengthWeak;
+    if (score == 2) return t.strengthFair;
+    if (score == 3) return t.strengthGood;
+    if (score == 4) return t.strengthStrong;
+    return t.strengthVeryStrong;
   }
 
   @override
   Widget build(BuildContext context) {
     if (score == 0) return const SizedBox.shrink();
+    final t = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -233,7 +243,7 @@ class _StrengthIndicator extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          _label,
+          _label(t),
           style: TextStyle(
             fontSize: 12,
             color: _color,

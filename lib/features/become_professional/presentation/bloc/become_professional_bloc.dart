@@ -46,6 +46,7 @@ class BecomeProfessionalBloc
     required this.submitApplication,
     required this.getCitiesFromProfessional,
   }) : super(const BecomeProfessionalState()) {
+    on<PreloadProfileData>(_onPreloadProfileData);
     on<LoadInitialData>(_onLoadInitialData);
     on<LoadServicesForCategory>(_onLoadServicesForCategory);
 
@@ -66,6 +67,54 @@ class BecomeProfessionalBloc
     on<UploadProfilePictureWithPathRequested>(_onUploadProfilePicture);
     on<UploadDocumentWithPathRequested>(_onUploadDocument);
     on<SubmitApplicationRequested>(_onSubmitApplication);
+  }
+
+  // ── Edit profile pre-fill ─────────────────────────────────────────────────
+
+  void _onPreloadProfileData(
+    PreloadProfileData event,
+    Emitter<BecomeProfessionalState> emit,
+  ) {
+    final p = event.professional;
+
+    // Map ServiceCategory enum → integer id (mirrors backend _categoryId helper)
+    final catId = _categoryIdFromEnum(p.category);
+
+    // Map ServiceOffered → ServicePricing
+    final services = p.services.map((s) => ServicePricing(
+          serviceId: s.serviceId ?? 0,
+          serviceName: s.name,
+          minPrice: s.minPrice,
+          maxPrice: s.maxPrice,
+        )).toList();
+
+    // Derive cityId from first service area (areas carry their cityId)
+    final cityId = p.serviceAreas.isNotEmpty ? p.serviceAreas.first.cityId : null;
+
+    emit(state.copyWith(
+      application: state.application.copyWith(
+        categoryId: catId,
+        categoryName: p.category.displayName,
+        experienceYears: p.experienceYears,
+        bio: p.bio,
+        cityId: cityId != 0 ? cityId : null,
+        selectedServiceAreaIds: p.serviceAreas.map((a) => a.id).toList(),
+        selectedServiceAreaNames: p.serviceAreas.map((a) => a.name).toList(),
+        services: services,
+      ),
+    ));
+
+    // Trigger services list load for the category
+    if (catId > 0) add(LoadServicesForCategory(catId));
+  }
+
+  static int _categoryIdFromEnum(dynamic category) {
+    try {
+      // ignore: avoid_dynamic_calls
+      return (category as dynamic).index + 1;
+    } catch (_) {
+      return 1;
+    }
   }
 
   // ── Lookups ───────────────────────────────────────────────────────────────

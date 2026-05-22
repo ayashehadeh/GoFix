@@ -48,6 +48,7 @@ class ProJobModel extends ProJob {
     switch (s?.toLowerCase()) {
       case 'ontheway':
       case 'on_the_way':   return ProJobStatus.onTheWay;
+      case 'arrived':      return ProJobStatus.arrived;
       case 'inprogress':
       case 'in_progress':  return ProJobStatus.inProgress;
       case 'completed':    return ProJobStatus.completed;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import '../bloc/earnings_bloc.dart';
 import '../../domain/entities/earning_entity.dart';
@@ -72,7 +73,7 @@ class EarningsPage extends StatelessWidget {
                       backgroundColor: const Color(0xFF0B1D3A),
                       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                     ),
-                    child: const Text('Retry', style: TextStyle(color: Colors.white)),
+                    child: Text(AppLocalizations.of(context)!.retry, style: const TextStyle(color: Colors.white)),
                   ),
                 ],
               ),

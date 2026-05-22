@@ -4,6 +4,7 @@ enum JobStatus {
   pending,
   scheduled,   // Accepted
   onTheWay,    // OnTheWay
+  arrived,     // Arrived
   inProgress,  // InProgress
   completed,
   declined,

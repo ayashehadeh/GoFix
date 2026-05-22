@@ -12,6 +12,8 @@ abstract class ProfessionalsRepository {
 
   Future<Either<Failure, Professional>> getProfessionalById(String id);
 
+  Future<Either<Failure, Professional>> getMyProfile();
+
   Future<Either<Failure, List<Professional>>> getFavorites();
 
   Future<Either<Failure, void>> toggleFavorite(String professionalId);

@@ -47,6 +47,7 @@ class JobModel extends JobEntity {
     case 'pending':      return JobStatus.pending;
     case 'accepted':     return JobStatus.scheduled;
     case 'ontheway':     return JobStatus.onTheWay;
+    case 'arrived':      return JobStatus.arrived;
     case 'inprogress':   return JobStatus.inProgress;
     case 'completed':    return JobStatus.completed;
     case 'declined':     return JobStatus.declined;

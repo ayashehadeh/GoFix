@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gp/l10n/app_localizations.dart';
 
 class UpdateGenderPage extends StatefulWidget {
   final String currentGender;
@@ -25,6 +26,12 @@ class _UpdateGenderPageState extends State<UpdateGenderPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    // API values stay as 'Male'/'Female'; display labels are localized
+    final genderOptions = <String, String>{
+      'Male': t.genderMale,
+      'Female': t.genderFemale,
+    };
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -41,20 +48,22 @@ class _UpdateGenderPageState extends State<UpdateGenderPage> {
                 onPressed: () => Navigator.pop(context),
               ),
               const SizedBox(height: 16),
-              const Text('Gender',
-                  style: TextStyle(
+              Text(t.gender,
+                  style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF062B4D))),
               const SizedBox(height: 40),
               Row(
-                children: ['Male', 'Female'].map((g) {
-                  final isSelected = selected == g;
+                children: genderOptions.entries.map((entry) {
+                  final apiValue = entry.key;
+                  final displayLabel = entry.value;
+                  final isSelected = selected == apiValue;
                   return Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: GestureDetector(
-                        onTap: () => setState(() => selected = g),
+                        onTap: () => setState(() => selected = apiValue),
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 28),
                           decoration: BoxDecoration(
@@ -67,7 +76,7 @@ class _UpdateGenderPageState extends State<UpdateGenderPage> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Center(
-                            child: Text(g,
+                            child: Text(displayLabel,
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
@@ -97,8 +106,8 @@ class _UpdateGenderPageState extends State<UpdateGenderPage> {
                     widget.onUpdate(selected);
                     Navigator.pop(context);
                   },
-                  child: const Text('Update',
-                      style: TextStyle(
+                  child: Text(t.update,
+                      style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w600)),

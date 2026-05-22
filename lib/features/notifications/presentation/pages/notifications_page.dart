@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/storage/user_type_storage.dart';
 import '../../domain/entities/notification_item.dart';
@@ -127,10 +128,10 @@ class _NotificationsHeader extends StatelessWidget {
               ),
 
               // Title
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Notifications',
-                  style: TextStyle(
+                  AppLocalizations.of(context)!.notificationsTitle,
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
@@ -143,6 +144,7 @@ class _NotificationsHeader extends StatelessWidget {
                 builder: (context, state) {
                   final hasUnread =
                       state is NotificationsLoaded && state.unreadCount > 0;
+                  final l10n = AppLocalizations.of(context)!;
                   return GestureDetector(
                     onTap: hasUnread
                         ? () => context.read<NotificationsBloc>().add(
@@ -159,7 +161,7 @@ class _NotificationsHeader extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Mark all',
+                          l10n.markAllRead,
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
@@ -467,7 +469,7 @@ class _EmptyBody extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            showAll ? 'No notifications yet' : 'No unread notifications',
+            showAll ? AppLocalizations.of(context)!.noNotifications : 'No unread notifications',
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
@@ -510,7 +512,7 @@ class _ErrorBody extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text('Retry', style: TextStyle(color: Colors.white)),
+            child: Text(AppLocalizations.of(context)!.retry, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),

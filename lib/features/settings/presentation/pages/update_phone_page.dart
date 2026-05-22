@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gp/l10n/app_localizations.dart';
 
 class UpdatePhonePage extends StatefulWidget {
   final Function(String) onUpdate;
@@ -22,6 +23,7 @@ class _UpdatePhonePageState extends State<UpdatePhonePage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -38,14 +40,14 @@ class _UpdatePhonePageState extends State<UpdatePhonePage> {
                 onPressed: () => Navigator.pop(context),
               ),
               const SizedBox(height: 16),
-              const Text('Update your mobile number',
-                  style: TextStyle(
+              Text(t.updateYourMobileNumber,
+                  style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF062B4D))),
               const SizedBox(height: 8),
-              const Text('We will send you a code to confirm it',
-                  style: TextStyle(fontSize: 14, color: Colors.grey)),
+              Text(t.weWillSendCode,
+                  style: const TextStyle(fontSize: 14, color: Colors.grey)),
               const SizedBox(height: 24),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,18 +114,18 @@ class _UpdatePhonePageState extends State<UpdatePhonePage> {
                   ),
                   onPressed: () {
                     if (_ctrl.text.isEmpty) {
-                      setState(() => _error = 'Phone number is required');
+                      setState(() => _error = t.phoneNumberRequired);
                       return;
                     }
                     if (_ctrl.text.length < 9) {
-                      setState(() => _error = 'Must be at least 9 digits');
+                      setState(() => _error = t.mustBe9Digits);
                       return;
                     }
                     widget.onUpdate('+962${_ctrl.text}');
                     Navigator.pop(context);
                   },
-                  child: const Text('Update',
-                      style: TextStyle(
+                  child: Text(t.update,
+                      style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w600)),

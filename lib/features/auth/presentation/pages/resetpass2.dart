@@ -16,6 +16,7 @@ class ResetPassword2 extends StatefulWidget {
 
 class _ResetPassword2State extends State<ResetPassword2> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _tokenCtrl = TextEditingController();
   final TextEditingController _newPasswordCtrl = TextEditingController();
   final TextEditingController _confirmPasswordCtrl = TextEditingController();
   bool _obscureNew = true;
@@ -23,6 +24,7 @@ class _ResetPassword2State extends State<ResetPassword2> {
 
   @override
   void dispose() {
+    _tokenCtrl.dispose();
     _newPasswordCtrl.dispose();
     _confirmPasswordCtrl.dispose();
     super.dispose();
@@ -31,6 +33,7 @@ class _ResetPassword2State extends State<ResetPassword2> {
   void _submit() {
     if (_formKey.currentState!.validate()) {
       context.read<AuthBloc>().add(ResetPasswordSubmitted(
+            token: _tokenCtrl.text.trim(),
             newPassword: _newPasswordCtrl.text,
             confirmPassword: _confirmPasswordCtrl.text,
           ));
@@ -106,6 +109,28 @@ class _ResetPassword2State extends State<ResetPassword2> {
                                   color: AppColors.primary, fontSize: 13),
                             ),
                             const SizedBox(height: 30),
+                            Text(t.resetCode,
+                                style: const TextStyle(color: Colors.grey)),
+                            const SizedBox(height: 8),
+                            TextFormField(
+                              controller: _tokenCtrl,
+                              keyboardType: TextInputType.text,
+                              validator: (v) =>
+                                  (v == null || v.trim().isEmpty)
+                                      ? t.resetCodeRequired
+                                      : null,
+                              decoration: InputDecoration(
+                                prefixIcon: const Icon(Icons.vpn_key_outlined),
+                                hintText: t.enterResetCode,
+                                filled: true,
+                                fillColor: Colors.grey.shade100,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 25),
                             Text(t.newPassword,
                                 style: const TextStyle(color: Colors.grey)),
                             const SizedBox(height: 8),
@@ -116,8 +141,20 @@ class _ResetPassword2State extends State<ResetPassword2> {
                                 if (v == null || v.isEmpty) {
                                   return t.passwordEmpty;
                                 }
-                                if (v.length < 6) {
+                                if (v.length < 8) {
                                   return t.passwordTooShort;
+                                }
+                                if (!v.contains(RegExp(r'[A-Z]'))) {
+                                  return 'Must contain an uppercase letter.';
+                                }
+                                if (!v.contains(RegExp(r'[a-z]'))) {
+                                  return 'Must contain a lowercase letter.';
+                                }
+                                if (!v.contains(RegExp(r'\d'))) {
+                                  return 'Must contain a number.';
+                                }
+                                if (!v.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>_\-]'))) {
+                                  return 'Must contain a special character.';
                                 }
                                 return null;
                               },

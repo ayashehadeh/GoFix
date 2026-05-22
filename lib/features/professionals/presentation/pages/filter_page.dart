@@ -6,6 +6,7 @@ import 'package:gp/core/widgets/custom_button.dart';
 import 'package:gp/features/professionals/domain/entities/service_category.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_event.dart';
+import 'package:gp/l10n/app_localizations.dart';
 
 class FilterPage extends StatefulWidget {
   final ServiceCategory category;
@@ -26,6 +27,7 @@ class _FilterPageState extends State<FilterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Column(
@@ -105,7 +107,7 @@ class _FilterPageState extends State<FilterPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Apply Filters', style: AppTextStyles.heading2),
+                    Text(t.applyFilters, style: AppTextStyles.heading2),
                     const SizedBox(height: 24),
 
                     // ── Experience Years ────────────────────────────
@@ -114,7 +116,7 @@ class _FilterPageState extends State<FilterPage> {
                         const Icon(Icons.access_time,
                             color: AppColors.primaryOrange, size: 18),
                         const SizedBox(width: 8),
-                        Text('Experience Years',
+                        Text(t.experienceYears,
                             style: AppTextStyles.bodyMedium),
                       ],
                     ),
@@ -164,7 +166,7 @@ class _FilterPageState extends State<FilterPage> {
                         const Icon(Icons.bookmark_border,
                             color: AppColors.primaryOrange, size: 18),
                         const SizedBox(width: 8),
-                        Text('Maximum Distance',
+                        Text(t.maximumDistance,
                             style: AppTextStyles.bodyMedium),
                         const Spacer(),
                         Text(
@@ -210,7 +212,7 @@ class _FilterPageState extends State<FilterPage> {
                         const Icon(Icons.star,
                             color: AppColors.primaryOrange, size: 18),
                         const SizedBox(width: 8),
-                        Text('Minimum Rating',
+                        Text(t.minimumRating,
                             style: AppTextStyles.bodyMedium),
                       ],
                     ),
@@ -282,7 +284,7 @@ class _FilterPageState extends State<FilterPage> {
 
                     // ── Apply Button ────────────────────────────────
                     CustomButton(
-                      text: 'Apply Filters',
+                      text: t.applyFilters,
                       onPressed: () {
                         context.read<ProfessionalsBloc>().add(
                               ApplyFilters(
