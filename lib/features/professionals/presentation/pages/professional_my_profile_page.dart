@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/l10n/service_name_l10n.dart';
 import 'package:gp/core/theme/app_text_styles.dart';
 import 'package:gp/features/become_professional/presentation/pages/edit_certifications_screen.dart';
 import 'package:gp/features/become_professional/presentation/pages/edit_details_screen.dart';
@@ -12,6 +13,25 @@ import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.d
 import 'package:gp/features/professionals/presentation/bloc/professionals_event.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_state.dart';
 import 'package:gp/features/professionals/presentation/widgets/star_rating.dart';
+
+String _localizeDay(String day, AppLocalizations l10n) {
+  String translate(String name) {
+    switch (name.trim()) {
+      case 'Sunday':    return l10n.dayFullSunday;
+      case 'Monday':    return l10n.dayFullMonday;
+      case 'Tuesday':   return l10n.dayFullTuesday;
+      case 'Wednesday': return l10n.dayFullWednesday;
+      case 'Thursday':  return l10n.dayFullThursday;
+      case 'Friday':    return l10n.dayFullFriday;
+      case 'Saturday':  return l10n.dayFullSaturday;
+      default:          return name;
+    }
+  }
+  return day.split(' - ').map(translate).join(' - ');
+}
+
+String _localizeTime(String time, AppLocalizations l10n) =>
+    time.replaceAll('AM', l10n.amLabel).replaceAll('PM', l10n.pmLabel);
 
 class ProfessionalMyProfilePage extends StatefulWidget {
   const ProfessionalMyProfilePage({super.key});
@@ -348,25 +368,26 @@ class _AboutTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _SectionCard(
           icon: Icons.person_outline,
-          title: 'About Me',
+          title: l10n.aboutMe,
           child: Text(
             professional.bio.isNotEmpty
                 ? professional.bio
-                : 'No bio added yet.',
+                : l10n.noBioAdded,
             style: AppTextStyles.bodySmall,
           ),
         ),
         const SizedBox(height: 16),
         _SectionCard(
           icon: Icons.bookmark_border,
-          title: 'Service Areas',
+          title: l10n.serviceAreas,
           child: professional.serviceAreas.isEmpty
-              ? Text(AppLocalizations.of(context)!.noServiceAreasAdded, style: AppTextStyles.bodySmall)
+              ? Text(l10n.noServiceAreasAdded, style: AppTextStyles.bodySmall)
               : Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -394,7 +415,7 @@ class _AboutTab extends StatelessWidget {
         const SizedBox(height: 16),
         _SectionCard(
           icon: Icons.access_time,
-          title: 'Working Hours',
+          title: l10n.workingHours,
           child: Column(
             children: professional.workingHours.schedules
                 .map(
@@ -403,9 +424,9 @@ class _AboutTab extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(s.day, style: AppTextStyles.bodySmall),
+                        Text(_localizeDay(s.day, l10n), style: AppTextStyles.bodySmall),
                         Text(
-                          s.timeRange,
+                          _localizeTime(s.timeRange, l10n),
                           style: AppTextStyles.bodySmall.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -430,11 +451,12 @@ class _ServicesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return _SectionCard(
       icon: Icons.settings,
-      title: 'Services Offered',
+      title: l10n.servicesOffered,
       child: professional.services.isEmpty
-          ? Text('No services added yet.', style: AppTextStyles.bodySmall)
+          ? Text(l10n.noServicesListedYet, style: AppTextStyles.bodySmall)
           : Column(
               children: professional.services
                   .map(
@@ -453,7 +475,7 @@ class _ServicesTab extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              service.name,
+                              localizeServiceName(service.name, l10n),
                               style: AppTextStyles.bodySmall,
                             ),
                           ),

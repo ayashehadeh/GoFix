@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/features/bookings/presentation/pages/booking_success_screen.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/l10n/service_name_l10n.dart';
 import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
 import '../bloc/bookings_state.dart';
@@ -70,9 +71,9 @@ class BookDetailsScreen extends StatelessWidget {
             backgroundColor: Colors.white,
             elevation: 0,
             leading: const BackButton(color: darkBlue),
-            title: const Text(
-              'Book a Service',
-              style: TextStyle(
+            title: Text(
+              AppLocalizations.of(context)!.bookAService,
+              style: const TextStyle(
                 color: darkBlue,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
@@ -154,7 +155,7 @@ class BookDetailsScreen extends StatelessWidget {
                         const SizedBox(height: 16),
                         _buildDetailRow(
                           icon: Icons.settings,
-                          text: serviceName,
+                          text: localizeServiceName(serviceName, AppLocalizations.of(context)!),
                         ),
                         _buildDetailRow(
                           icon: Icons.calendar_month,
@@ -201,13 +202,13 @@ class BookDetailsScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.edit, color: orange, size: 20),
-                            SizedBox(width: 8),
+                            const Icon(Icons.edit, color: orange, size: 20),
+                            const SizedBox(width: 8),
                             Text(
-                              'Service Description',
-                              style: TextStyle(
+                              AppLocalizations.of(context)!.serviceDescription,
+                              style: const TextStyle(
                                 color: darkBlue,
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -237,7 +238,7 @@ class BookDetailsScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                '${images.length} picture${images.length > 1 ? 's' : ''} attached',
+                                '${images.length} ${images.length == 1 ? AppLocalizations.of(context)!.pictureAttachedSingular : AppLocalizations.of(context)!.picturesAttachedPlural}',
                                 style: const TextStyle(
                                   color: darkBlue,
                                   fontSize: 14,
@@ -314,9 +315,9 @@ class BookDetailsScreen extends StatelessWidget {
                               color: Colors.white,
                             ),
                           )
-                        : const Text(
-                            'Send Booking Request',
-                            style: TextStyle(
+                        : Text(
+                            AppLocalizations.of(context)!.sendBookingRequest,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,

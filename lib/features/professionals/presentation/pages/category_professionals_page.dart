@@ -125,7 +125,7 @@ class _CategoryProfessionalsPageState extends State<CategoryProfessionalsPage> {
                             controller: _searchController,
                             onChanged: (q) => _onSearch(q, state.professionals),
                             decoration: InputDecoration(
-                              hintText: 'Search',
+                              hintText: AppLocalizations.of(context)!.search,
                               hintStyle: AppTextStyles.searchHint,
                               border: InputBorder.none,
                               isDense: true,
@@ -224,8 +224,35 @@ class _CategoryHeader extends StatelessWidget {
 
   const _CategoryHeader({required this.category});
 
+  String _localizedName(AppLocalizations l10n) {
+    switch (category) {
+      case ServiceCategory.plumbing:        return l10n.categoryPlumbing;
+      case ServiceCategory.electricalWork:  return l10n.categoryElectricalWork;
+      case ServiceCategory.acRepair:        return l10n.categoryAcRepair;
+      case ServiceCategory.carpentry:       return l10n.categoryCarpentry;
+      case ServiceCategory.painting:        return l10n.categoryPainting;
+      case ServiceCategory.cleaning:        return l10n.categoryCleaning;
+      case ServiceCategory.movingServices:  return l10n.categoryMovingServices;
+      case ServiceCategory.applianceRepair: return l10n.categoryApplianceRepair;
+    }
+  }
+
+  String _localizedDescription(AppLocalizations l10n) {
+    switch (category) {
+      case ServiceCategory.plumbing:        return l10n.categoryDescPlumbing;
+      case ServiceCategory.electricalWork:  return l10n.categoryDescElectricalWork;
+      case ServiceCategory.acRepair:        return l10n.categoryDescAcRepair;
+      case ServiceCategory.carpentry:       return l10n.categoryDescCarpentry;
+      case ServiceCategory.painting:        return l10n.categoryDescPainting;
+      case ServiceCategory.cleaning:        return l10n.categoryDescCleaning;
+      case ServiceCategory.movingServices:  return l10n.categoryDescMovingServices;
+      case ServiceCategory.applianceRepair: return l10n.categoryDescApplianceRepair;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
@@ -260,12 +287,12 @@ class _CategoryHeader extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            category.displayName,
+            _localizedName(l10n),
             style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 6),
           Text(
-            category.description,
+            _localizedDescription(l10n),
             style: const TextStyle(color: Colors.white70, fontSize: 13),
             textAlign: TextAlign.center,
           ),

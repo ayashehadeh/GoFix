@@ -3,6 +3,7 @@ import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/core/theme/app_text_styles.dart';
 import 'package:gp/features/professionals/domain/entities/professional.dart';
 import 'package:gp/features/professionals/presentation/widgets/star_rating.dart';
+import 'package:gp/l10n/app_localizations.dart';
 
 class ProfessionalCard extends StatelessWidget {
   final Professional professional;
@@ -18,6 +19,7 @@ class ProfessionalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -69,7 +71,7 @@ class ProfessionalCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  '${professional.experienceYears} ${professional.experienceYears == 1 ? 'year' : 'years'} experience',
+                  '${professional.experienceYears} ${professional.experienceYears == 1 ? l10n.expYear : l10n.expYears}',
                   style: AppTextStyles.bodySmall,
                 ),
               ],
@@ -86,10 +88,10 @@ class ProfessionalCard extends StatelessWidget {
                 Text(
                   professional.distanceKm != null &&
                           professional.distanceKm! < 1
-                      ? '${(professional.distanceKm! * 1000).toInt()} m away'
+                      ? '${(professional.distanceKm! * 1000).toInt()} ${l10n.mAwayUnit}'
                       : professional.distanceKm != null
-                          ? '${professional.distanceKm!.toStringAsFixed(1)} Km away'
-                          : '-- Km away',
+                          ? '${professional.distanceKm!.toStringAsFixed(1)} ${l10n.kmAwayUnit}'
+                          : '-- ${l10n.kmAwayUnit}',
                   style: AppTextStyles.bodySmall,
                 ),
               ],

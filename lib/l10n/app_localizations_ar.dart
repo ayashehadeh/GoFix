@@ -1233,6 +1233,228 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get categoryApplianceRepair => 'إصلاح أجهزة';
 
+  // ── Category descriptions ─────────────────────────────────────────────────────
+
+  @override
+  String get categoryDescPlumbing => 'حلول متخصصة للتسربات وتركيب الأنابيب وإصلاح الحنفيات.';
+
+  @override
+  String get categoryDescElectricalWork => 'حلول متخصصة للأسلاك وإصلاح الدوائر الكهربائية وتركيب الإضاءة.';
+
+  @override
+  String get categoryDescAcRepair => 'حلول متخصصة لصيانة الوحدات ومشكلات التبريد والتنظيف الاحترافي.';
+
+  @override
+  String get categoryDescCarpentry => 'حلول متخصصة لتجميع الأثاث وإصلاح الأبواب والأعمال الخشبية المخصصة.';
+
+  @override
+  String get categoryDescPainting => 'حلول متخصصة لطلاء الجدران الداخلية والخارجية وأسقف المنازل.';
+
+  @override
+  String get categoryDescCleaning => 'حلول متخصصة للتنظيف العميق والتعقيم والترتيب الاحترافي.';
+
+  @override
+  String get categoryDescMovingServices => 'حلول متخصصة للتغليف الآمن ونقل الأثاث الثقيل والتفريغ الفعال.';
+
+  @override
+  String get categoryDescApplianceRepair => 'حلول متخصصة للثلاجات والغسالات والأجهزة المنزلية.';
+
+  // ── Full day names (for working hours) ───────────────────────────────────────
+
+  @override
+  String get dayFullSunday => 'الأحد';
+
+  @override
+  String get dayFullMonday => 'الاثنين';
+
+  @override
+  String get dayFullTuesday => 'الثلاثاء';
+
+  @override
+  String get dayFullWednesday => 'الأربعاء';
+
+  @override
+  String get dayFullThursday => 'الخميس';
+
+  @override
+  String get dayFullFriday => 'الجمعة';
+
+  @override
+  String get dayFullSaturday => 'السبت';
+
+  // ── Professional detail tabs ──────────────────────────────────────────────────
+
+  @override
+  String get tabAbout => 'نبذة';
+
+  @override
+  String get tabServices => 'الخدمات';
+
+  @override
+  String get tabReviews => 'التقييمات';
+
+  @override
+  String get tabCertifications => 'الشهادات';
+
+  // ── Professional detail labels ────────────────────────────────────────────────
+
+  @override
+  String get professionalPrefix => 'محترف';
+
+  @override
+  String get yearsExp => 'سنوات الخبرة';
+
+  @override
+  String get kmAwayLabel => 'كم';
+
+  @override
+  String get ratingLabel => 'التقييم';
+
+  @override
+  String get aboutMe => 'نبذة عني';
+
+  @override
+  String get serviceAreas => 'مناطق الخدمة';
+
+  @override
+  String get servicesOffered => 'الخدمات المقدمة';
+
+  @override
+  String get customerReviews => 'آراء العملاء';
+
+  @override
+  String get reviewsLabel => 'تقييمات';
+
+  @override
+  String get professionalCertifications => 'شهادات المحترف';
+
+  @override
+  String get noBioAdded => 'لم تتم إضافة نبذة بعد.';
+
+  @override
+  String get noCertificationsYet => 'لم يتم رفع شهادات بعد.';
+
+  @override
+  String get backgroundSafety => 'الخلفية والسلامة';
+
+  @override
+  String get backgroundCheck => 'فحص الخلفية';
+
+  @override
+  String get identityVerifiedLabel => 'الهوية موثقة';
+
+  @override
+  String get verifiedLabel => 'موثق 2026';
+
+  @override
+  String get notVerifiedLabel => 'غير موثق';
+
+  @override
+  String get bookNow => 'احجز الآن';
+
+  @override
+  String get noServicesListedYet => 'لم يضف المحترف أي خدمات بعد.';
+
+  @override
+  String get expYear => 'سنة خبرة';
+
+  @override
+  String get expYears => 'سنوات خبرة';
+
+  @override
+  String get kmAwayUnit => 'كم';
+
+  @override
+  String get mAwayUnit => 'م';
+
+  // ── Booking flow ──────────────────────────────────────────────────────────────
+
+  @override
+  String get selectAddress => 'اختر العنوان';
+
+  @override
+  String get noSavedAddresses => 'لا توجد عناوين محفوظة. يرجى إضافة عنوان من الإعدادات.';
+
+  @override
+  String get loadingAddresses => 'جاري تحميل العناوين...';
+
+  @override
+  String get tapToSelectAddress => 'اضغط لاختيار عنوانك';
+
+  @override
+  String get pleaseSelectYourAddress => 'يرجى اختيار عنوانك للمتابعة.';
+
+  @override
+  String get cancelBookingTitle => 'هل تريد إلغاء الحجز؟';
+
+  @override
+  String get cancelBookingWarning => 'هذا الإجراء دائم ولا يمكن التراجع عنه. سيتم حذف حجزك فوراً.';
+
+  @override
+  String get yesCancelBooking => 'نعم، إلغاء الحجز';
+
+  @override
+  String get keepMyBooking => 'احتفظ بحجزي';
+
+  @override
+  String get bookingUpdatedTitle => 'تم تحديث الحجز';
+
+  @override
+  String get bookingUpdatedMessage => 'تم إرسال تعديلاتك إلى المحترف. يمكنك متابعة الحالة في قسم "حجوزاتي".';
+
+  @override
+  String get appreciateTrust => 'نقدر ثقتك في\nخدمتنا.';
+
+  @override
+  String get weveGotItTitle => 'استلمنا الأمر من هنا!';
+
+  @override
+  String get bookingRequestPending => 'طلبك الآن قيد الانتظار. يرجى منح المحترف بعض الوقت لمراجعة التفاصيل. يمكنك متابعة حالة هذا الطلب في قسم "حجوزاتي".';
+
+  @override
+  String get paymentConfirmedMoved => 'تم تأكيد الدفع! تم نقل الحجز إلى السابقة.';
+
+  @override
+  String get pictureAttachedSingular => 'صورة مرفقة';
+
+  @override
+  String get picturesAttachedPlural => 'صور مرفقة';
+
+  @override
+  String get amLabel => 'ص';
+
+  @override
+  String get pmLabel => 'م';
+
+  // ── Service names ─────────────────────────────────────────────────────────────
+
+  @override
+  String get servicePipeInstallation => 'تركيب أنابيب';
+
+  @override
+  String get serviceLeakRepairs => 'إصلاح تسربات';
+
+  @override
+  String get serviceWaterHeaterService => 'صيانة سخان المياه';
+
+  @override
+  String get serviceDrainCleaning => 'تنظيف مصارف';
+
+  @override
+  String get serviceBathroomFixtures => 'تركيبات حمام';
+
+  @override
+  String get serviceWiringRepair => 'إصلاح أسلاك';
+
+  @override
+  String get serviceLightFixtureInstallation => 'تركيب تجهيزات إضاءة';
+
+  @override
+  String get serviceFurnitureAssembly => 'تجميع أثاث';
+
+  @override
+  String get serviceDoorRepair => 'إصلاح أبواب';
+
   // ── Booking status ────────────────────────────────────────────────────────────
 
   @override

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/l10n/service_name_l10n.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../injection_container.dart' as di;
 import '../../domain/entities/booking.dart';
@@ -54,8 +55,8 @@ class _UpcomingBookingInfoPageState extends State<UpcomingBookingInfoPage> {
           }
           if (state is ConfirmPaymentSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Payment confirmed! Booking moved to past.'),
+              SnackBar(
+                content: Text(AppLocalizations.of(context)!.paymentConfirmedMoved),
                 backgroundColor: Colors.green,
               ),
             );
@@ -145,7 +146,7 @@ class _UpcomingInfoBody extends StatelessWidget {
 
                 // Service description card
                 _SectionCard(
-                  title: 'Service Description',
+                  title: AppLocalizations.of(context)!.serviceDescription,
                   titleIcon: Icons.edit_outlined,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,7 +169,7 @@ class _UpcomingInfoBody extends StatelessWidget {
                                 color: AppColors.primaryDark, size: 18),
                             const SizedBox(width: 6),
                             Text(
-                              '${booking.imageUrls.length} picture${booking.imageUrls.length > 1 ? 's' : ''} attached',
+                              '${booking.imageUrls.length} ${booking.imageUrls.length == 1 ? AppLocalizations.of(context)!.pictureAttachedSingular : AppLocalizations.of(context)!.picturesAttachedPlural}',
                               style: const TextStyle(
                                 fontSize: 13,
                                 color: AppColors.primaryDark,
