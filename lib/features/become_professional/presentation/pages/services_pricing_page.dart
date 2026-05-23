@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/l10n/service_name_l10n.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/category_service.dart';
 import '../../domain/entities/service_pricing.dart';
@@ -170,7 +171,7 @@ class _ServicesPricingPageState extends State<ServicesPricingPage> {
                           final isAdded =
                               added.any((a) => a.serviceId == s.id);
                           return ChoiceChip(
-                            label: Text(s.name),
+                            label: Text(localizeServiceName(s.name, AppLocalizations.of(context)!, nameAr: s.nameAr)),
                             selected: isSel,
                             onSelected: isAdded
                                 ? null
@@ -374,7 +375,7 @@ class _AddedServiceCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  pricing.serviceName,
+                  localizeServiceName(pricing.serviceName, AppLocalizations.of(context)!),
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,

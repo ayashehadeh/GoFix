@@ -475,7 +475,7 @@ class _ServicesTab extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              localizeServiceName(service.name, l10n),
+                              localizeServiceName(service.name, l10n, nameAr: service.nameAr),
                               style: AppTextStyles.bodySmall,
                             ),
                           ),

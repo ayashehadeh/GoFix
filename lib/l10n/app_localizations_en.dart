@@ -1427,34 +1427,106 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pmLabel => 'PM';
 
-  // ── Service names ─────────────────────────────────────────────────────────────
+  // ── Service names — Plumbing ─────────────────────────────────────────────────
 
-  @override
-  String get servicePipeInstallation => 'Pipe Installation';
+  @override String get servicePipeInstallation => 'Pipe Installation';
+  @override String get serviceLeakRepairs => 'Leak Repairs';
+  @override String get serviceWaterHeaterService => 'Water Heater Service';
+  @override String get serviceDrainCleaning => 'Drain Cleaning';
+  @override String get serviceBathroomFixtures => 'Bathroom Fixtures';
+  @override String get serviceFaucetRepair => 'Faucet Repair';
+  @override String get serviceToiletRepair => 'Toilet Repair';
+  @override String get servicePipeRepair => 'Pipe Repair';
+  @override String get serviceWaterTankCleaning => 'Water Tank Cleaning';
+  @override String get serviceLeakDetection => 'Leak Detection';
+  @override String get serviceShowerInstallation => 'Shower Installation';
+  @override String get serviceSinkInstallation => 'Sink Installation';
+  @override String get serviceToiletInstallation => 'Toilet Installation';
 
-  @override
-  String get serviceLeakRepairs => 'Leak Repairs';
+  // ── Service names — Electrical Work ─────────────────────────────────────────
 
-  @override
-  String get serviceWaterHeaterService => 'Water Heater Service';
+  @override String get serviceWiringRepair => 'Wiring Repair';
+  @override String get serviceLightFixtureInstallation => 'Light Fixture Installation';
+  @override String get serviceElectricalWiring => 'Electrical Wiring';
+  @override String get serviceOutletInstallation => 'Outlet Installation';
+  @override String get serviceOutletRepair => 'Outlet Repair';
+  @override String get serviceSwitchInstallation => 'Switch Installation';
+  @override String get serviceSwitchRepair => 'Switch Repair';
+  @override String get serviceCircuitBreakerRepair => 'Circuit Breaker Repair';
+  @override String get serviceElectricalPanelService => 'Electrical Panel Service';
+  @override String get serviceFanInstallation => 'Fan Installation';
+  @override String get serviceCeilingFanInstallation => 'Ceiling Fan Installation';
+  @override String get serviceElectricalInspection => 'Electrical Inspection';
+  @override String get serviceGeneratorInstallation => 'Generator Installation';
 
-  @override
-  String get serviceDrainCleaning => 'Drain Cleaning';
+  // ── Service names — AC Repair ─────────────────────────────────────────────
 
-  @override
-  String get serviceBathroomFixtures => 'Bathroom Fixtures';
+  @override String get serviceAcInstallation => 'AC Installation';
+  @override String get serviceAcMaintenance => 'AC Maintenance';
+  @override String get serviceAcCleaning => 'AC Cleaning';
+  @override String get serviceAcRepair => 'AC Repair';
+  @override String get serviceAcGasRefill => 'AC Gas Refill';
+  @override String get serviceSplitAcInstallation => 'Split AC Installation';
+  @override String get serviceAcInspection => 'AC Inspection';
+  @override String get serviceCentralAcService => 'Central AC Service';
 
-  @override
-  String get serviceWiringRepair => 'Wiring Repair';
+  // ── Service names — Carpentry ─────────────────────────────────────────────
 
-  @override
-  String get serviceLightFixtureInstallation => 'Light Fixture Installation';
+  @override String get serviceFurnitureAssembly => 'Furniture Assembly';
+  @override String get serviceDoorRepair => 'Door Repair';
+  @override String get serviceCabinetInstallation => 'Cabinet Installation';
+  @override String get serviceWoodFlooring => 'Wood Flooring';
+  @override String get serviceWindowRepair => 'Window Repair';
+  @override String get serviceShelfInstallation => 'Shelf Installation';
+  @override String get serviceWardrobeAssembly => 'Wardrobe Assembly';
+  @override String get serviceKitchenCabinetInstallation => 'Kitchen Cabinet Installation';
+  @override String get serviceDoorInstallation => 'Door Installation';
+  @override String get serviceCustomWoodwork => 'Custom Woodwork';
 
-  @override
-  String get serviceFurnitureAssembly => 'Furniture Assembly';
+  // ── Service names — Painting ─────────────────────────────────────────────
 
-  @override
-  String get serviceDoorRepair => 'Door Repair';
+  @override String get serviceInteriorPainting => 'Interior Painting';
+  @override String get serviceExteriorPainting => 'Exterior Painting';
+  @override String get serviceWallPainting => 'Wall Painting';
+  @override String get serviceCeilingPainting => 'Ceiling Painting';
+  @override String get serviceTexturePainting => 'Texture Painting';
+  @override String get serviceWallpaperInstallation => 'Wallpaper Installation';
+  @override String get serviceTouchUpPainting => 'Touch-up Painting';
+
+  // ── Service names — Cleaning ─────────────────────────────────────────────
+
+  @override String get serviceDeepCleaning => 'Deep Cleaning';
+  @override String get serviceRegularCleaning => 'Regular Cleaning';
+  @override String get serviceCarpetCleaning => 'Carpet Cleaning';
+  @override String get serviceSofaCleaning => 'Sofa Cleaning';
+  @override String get serviceWindowCleaning => 'Window Cleaning';
+  @override String get serviceMoveInCleaning => 'Move-in Cleaning';
+  @override String get servicePostConstructionCleaning => 'Post-Construction Cleaning';
+  @override String get serviceKitchenDeepClean => 'Kitchen Deep Clean';
+  @override String get serviceBathroomDeepClean => 'Bathroom Deep Clean';
+
+  // ── Service names — Moving Services ─────────────────────────────────────
+
+  @override String get servicePackingAndUnpacking => 'Packing & Unpacking';
+  @override String get serviceHeavyItemMoving => 'Heavy Item Moving';
+  @override String get servicePianoMoving => 'Piano Moving';
+  @override String get serviceFurnitureMoving => 'Furniture Moving';
+  @override String get serviceHouseMoving => 'House Moving';
+  @override String get serviceOfficeMoving => 'Office Moving';
+  @override String get serviceStorageService => 'Storage Service';
+  @override String get serviceLoadingAndUnloading => 'Loading & Unloading';
+
+  // ── Service names — Appliance Repair ─────────────────────────────────────
+
+  @override String get serviceRefrigeratorRepair => 'Refrigerator Repair';
+  @override String get serviceWashingMachineRepair => 'Washing Machine Repair';
+  @override String get serviceDishwasherRepair => 'Dishwasher Repair';
+  @override String get serviceOvenRepair => 'Oven Repair';
+  @override String get serviceMicrowaveRepair => 'Microwave Repair';
+  @override String get serviceDryerRepair => 'Dryer Repair';
+  @override String get serviceStoveRepair => 'Stove Repair';
+  @override String get serviceWaterHeaterRepair => 'Water Heater Repair';
+  @override String get serviceTvRepair => 'TV Repair';
 
   // ── Booking status ────────────────────────────────────────────────────────────
 

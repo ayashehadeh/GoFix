@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/l10n/service_name_l10n.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/booking.dart';
 import '../bloc/bookings_bloc.dart';
@@ -391,7 +392,7 @@ class _Step1SelectServiceState extends State<_Step1SelectService> {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        svc.name,
+                                        localizeServiceName(svc.name, AppLocalizations.of(context)!),
                                         style: TextStyle(
                                           fontSize: 14,
                                           color: isSelected
@@ -888,8 +889,10 @@ class _Step3Review extends StatelessWidget {
                       const SizedBox(height: 14),
                       _ReviewRow(
                           icon: Icons.settings,
-                          text: selectedService?.name ??
-                              booking.serviceName),
+                          text: localizeServiceName(
+                              selectedService?.name ?? booking.serviceName,
+                              AppLocalizations.of(context)!,
+                              nameAr: selectedService == null ? booking.serviceNameAr : null)),
                       _ReviewRow(
                           icon: Icons.calendar_month_outlined,
                           text: dateStr),

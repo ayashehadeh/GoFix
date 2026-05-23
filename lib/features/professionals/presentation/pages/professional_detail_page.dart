@@ -530,7 +530,7 @@ class _ServicesTab extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(localizeServiceName(service.name, AppLocalizations.of(context)!), style: AppTextStyles.bodySmall),
+                    Text(localizeServiceName(service.name, AppLocalizations.of(context)!, nameAr: service.nameAr), style: AppTextStyles.bodySmall),
                     Text(
                       service.priceDisplay,
                       style: AppTextStyles.bodySmall.copyWith(

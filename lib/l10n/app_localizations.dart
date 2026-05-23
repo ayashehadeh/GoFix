@@ -1733,16 +1733,98 @@ abstract class AppLocalizations {
   // ── Booking status ────────────────────────────────────────────────────────────
   String get statusConfirmed;
 
-  // ── Service names ─────────────────────────────────────────────────────────────
+  // ── Service names — Plumbing ─────────────────────────────────────────────────
   String get servicePipeInstallation;
   String get serviceLeakRepairs;
   String get serviceWaterHeaterService;
   String get serviceDrainCleaning;
   String get serviceBathroomFixtures;
+  String get serviceFaucetRepair;
+  String get serviceToiletRepair;
+  String get servicePipeRepair;
+  String get serviceWaterTankCleaning;
+  String get serviceLeakDetection;
+  String get serviceShowerInstallation;
+  String get serviceSinkInstallation;
+  String get serviceToiletInstallation;
+
+  // ── Service names — Electrical Work ─────────────────────────────────────────
   String get serviceWiringRepair;
   String get serviceLightFixtureInstallation;
+  String get serviceElectricalWiring;
+  String get serviceOutletInstallation;
+  String get serviceOutletRepair;
+  String get serviceSwitchInstallation;
+  String get serviceSwitchRepair;
+  String get serviceCircuitBreakerRepair;
+  String get serviceElectricalPanelService;
+  String get serviceFanInstallation;
+  String get serviceCeilingFanInstallation;
+  String get serviceElectricalInspection;
+  String get serviceGeneratorInstallation;
+
+  // ── Service names — AC Repair ─────────────────────────────────────────────
+  String get serviceAcInstallation;
+  String get serviceAcMaintenance;
+  String get serviceAcCleaning;
+  String get serviceAcRepair;
+  String get serviceAcGasRefill;
+  String get serviceSplitAcInstallation;
+  String get serviceAcInspection;
+  String get serviceCentralAcService;
+
+  // ── Service names — Carpentry ─────────────────────────────────────────────
   String get serviceFurnitureAssembly;
   String get serviceDoorRepair;
+  String get serviceCabinetInstallation;
+  String get serviceWoodFlooring;
+  String get serviceWindowRepair;
+  String get serviceShelfInstallation;
+  String get serviceWardrobeAssembly;
+  String get serviceKitchenCabinetInstallation;
+  String get serviceDoorInstallation;
+  String get serviceCustomWoodwork;
+
+  // ── Service names — Painting ─────────────────────────────────────────────
+  String get serviceInteriorPainting;
+  String get serviceExteriorPainting;
+  String get serviceWallPainting;
+  String get serviceCeilingPainting;
+  String get serviceTexturePainting;
+  String get serviceWallpaperInstallation;
+  String get serviceTouchUpPainting;
+
+  // ── Service names — Cleaning ─────────────────────────────────────────────
+  String get serviceDeepCleaning;
+  String get serviceRegularCleaning;
+  String get serviceCarpetCleaning;
+  String get serviceSofaCleaning;
+  String get serviceWindowCleaning;
+  String get serviceMoveInCleaning;
+  String get servicePostConstructionCleaning;
+  String get serviceKitchenDeepClean;
+  String get serviceBathroomDeepClean;
+
+  // ── Service names — Moving Services ─────────────────────────────────────
+  String get servicePackingAndUnpacking;
+  String get serviceHeavyItemMoving;
+  String get servicePianoMoving;
+  String get serviceFurnitureMoving;
+  String get serviceHouseMoving;
+  String get serviceOfficeMoving;
+  String get serviceStorageService;
+  String get serviceLoadingAndUnloading;
+
+  // ── Service names — Appliance Repair ─────────────────────────────────────
+  String get serviceRefrigeratorRepair;
+  String get serviceWashingMachineRepair;
+  String get serviceDishwasherRepair;
+  String get serviceOvenRepair;
+  String get serviceMicrowaveRepair;
+  String get serviceDryerRepair;
+  String get serviceStoveRepair;
+  String get serviceWaterHeaterRepair;
+  String get serviceTvRepair;
 
   // ── Misc ──────────────────────────────────────────────────────────────────────
   String get describeIssuePlaceholder;

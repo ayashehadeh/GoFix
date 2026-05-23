@@ -5,14 +5,16 @@ import 'package:equatable/equatable.dart';
 class CategoryService extends Equatable {
   final int id;
   final String name;
+  final String? nameAr;
   final int categoryId;
 
   const CategoryService({
     required this.id,
     required this.name,
+    this.nameAr,
     required this.categoryId,
   });
 
   @override
-  List<Object?> get props => [id, name, categoryId];
+  List<Object?> get props => [id, name, nameAr, categoryId];
 }

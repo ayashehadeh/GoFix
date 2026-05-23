@@ -92,6 +92,7 @@ class ProfessionalModel extends Professional {
                     ? (e['serviceId'] ?? e['service_id'])?.toInt()
                     : int.tryParse('${e['serviceId'] ?? e['service_id']}'),
                 name: e['name'] as String,
+                nameAr: e['nameAr'] as String? ?? e['name_ar'] as String?,
                 minPrice: (e['minPrice'] as num? ?? e['min_price'] as num? ?? 0)
                     .toDouble(),
                 maxPrice: (e['maxPrice'] ?? e['max_price']) != null
