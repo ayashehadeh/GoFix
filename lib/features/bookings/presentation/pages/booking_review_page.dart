@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../injection_container.dart' as di;
 import '../../../../l10n/app_localizations.dart';
+import '../../../../l10n/service_name_l10n.dart';
 import '../../../professionals/presentation/bloc/professionals_bloc.dart';
 import '../../../professionals/presentation/bloc/professionals_event.dart';
 import '../../../professionals/presentation/bloc/professionals_state.dart';
@@ -411,7 +412,7 @@ class _BookingDetailsSummary extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          _Row(icon: Icons.settings, text: booking.serviceName),
+          _Row(icon: Icons.settings, text: localizeServiceName(booking.serviceName, t, nameAr: booking.serviceNameAr)),
           _Row(
             icon: Icons.calendar_month_outlined,
             text: booking.formattedDate,

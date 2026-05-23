@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/l10n/service_name_l10n.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/booking.dart';
 import '../bloc/bookings_bloc.dart';
@@ -332,7 +333,7 @@ class _BookingDetailsSummary extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          _Row(icon: Icons.settings, text: booking.serviceName),
+          _Row(icon: Icons.settings, text: localizeServiceName(booking.serviceName, AppLocalizations.of(context)!, nameAr: booking.serviceNameAr)),
           _Row(
             icon: Icons.calendar_month_outlined,
             text: booking.formattedDate,

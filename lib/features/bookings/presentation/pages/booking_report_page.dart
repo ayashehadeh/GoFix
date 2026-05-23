@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../l10n/service_name_l10n.dart';
 import '../../domain/entities/booking.dart';
 import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
@@ -478,7 +479,7 @@ class _BookingDetailsSummary extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          _R(icon: Icons.settings, text: booking.serviceName),
+          _R(icon: Icons.settings, text: localizeServiceName(booking.serviceName, t, nameAr: booking.serviceNameAr)),
           _R(icon: Icons.calendar_month_outlined, text: booking.formattedDate),
           _R(icon: Icons.access_time_outlined, text: booking.scheduledTime),
           _R(

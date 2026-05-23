@@ -9,6 +9,7 @@ class BookingModel extends Booking {
     super.professionalImageUrl,
     super.clientName,
     required super.serviceName,
+    super.serviceNameAr,
     required super.servicePrice,
     required super.scheduledDate,
     required super.scheduledTime,
@@ -29,6 +30,7 @@ class BookingModel extends Booking {
       professionalImageUrl: json['professionalImageUrl'] as String?,
       clientName: json['clientName'] as String? ?? '',
       serviceName: json['serviceName'] as String? ?? '',
+      serviceNameAr: json['serviceNameAr'] as String? ?? json['service_name_ar'] as String?,
       servicePrice: json['servicePrice'] as String? ?? '',
       scheduledDate: DateTime.parse(
         json['scheduledDate'] as String? ?? DateTime.now().toIso8601String(),

@@ -125,7 +125,7 @@ class _UpcomingInfoBody extends StatelessWidget {
                     children: [
                       _DetailRow(
                           icon: Icons.settings,
-                          text: booking.serviceName),
+                          text: localizeServiceName(booking.serviceName, AppLocalizations.of(context)!, nameAr: booking.serviceNameAr)),
                       _DetailRow(
                           icon: Icons.calendar_month_outlined,
                           text: booking.formattedDate),

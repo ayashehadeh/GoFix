@@ -7,13 +7,15 @@ import 'package:gp/features/professionals/domain/entities/service_offered.dart';
 import 'package:gp/features/settings/presentation/bloc/address_bloc.dart';
 import 'package:gp/injection_container.dart' as di;
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/l10n/service_name_l10n.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:gp/features/bookings/presentation/pages/book_service_screen.dart';
 
 class ServiceItem {
   final String name;
+  final String? nameAr;
   final String price;
-  const ServiceItem({required this.name, required this.price});
+  const ServiceItem({required this.name, this.nameAr, required this.price});
 }
 
 class SelectServiceScreen extends StatefulWidget {
@@ -50,7 +52,7 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
   static const Color lightGrey = Color(0xFFF5F5F5);
 
   late final List<ServiceItem> _services = widget.services
-      .map((s) => ServiceItem(name: s.name, price: s.priceDisplay))
+      .map((s) => ServiceItem(name: s.name, nameAr: s.nameAr, price: s.priceDisplay))
       .toList();
 
   @override
@@ -317,7 +319,7 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                service.name,
+                                localizeServiceName(service.name, t, nameAr: service.nameAr),
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: isSelected ? orange : darkBlue,

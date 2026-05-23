@@ -1426,34 +1426,106 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get pmLabel => 'م';
 
-  // ── Service names ─────────────────────────────────────────────────────────────
+  // ── Service names — Plumbing ─────────────────────────────────────────────────
 
-  @override
-  String get servicePipeInstallation => 'تركيب أنابيب';
+  @override String get servicePipeInstallation => 'تركيب أنابيب';
+  @override String get serviceLeakRepairs => 'إصلاح تسربات';
+  @override String get serviceWaterHeaterService => 'صيانة سخان المياه';
+  @override String get serviceDrainCleaning => 'تنظيف مصارف';
+  @override String get serviceBathroomFixtures => 'تركيبات حمام';
+  @override String get serviceFaucetRepair => 'إصلاح صنبور';
+  @override String get serviceToiletRepair => 'إصلاح مرحاض';
+  @override String get servicePipeRepair => 'إصلاح أنابيب';
+  @override String get serviceWaterTankCleaning => 'تنظيف خزان مياه';
+  @override String get serviceLeakDetection => 'كشف تسربات';
+  @override String get serviceShowerInstallation => 'تركيب دش';
+  @override String get serviceSinkInstallation => 'تركيب حوض';
+  @override String get serviceToiletInstallation => 'تركيب مرحاض';
 
-  @override
-  String get serviceLeakRepairs => 'إصلاح تسربات';
+  // ── Service names — Electrical Work ─────────────────────────────────────────
 
-  @override
-  String get serviceWaterHeaterService => 'صيانة سخان المياه';
+  @override String get serviceWiringRepair => 'إصلاح أسلاك';
+  @override String get serviceLightFixtureInstallation => 'تركيب تجهيزات إضاءة';
+  @override String get serviceElectricalWiring => 'تمديد أسلاك كهربائية';
+  @override String get serviceOutletInstallation => 'تركيب مقابس كهربائية';
+  @override String get serviceOutletRepair => 'إصلاح مقابس كهربائية';
+  @override String get serviceSwitchInstallation => 'تركيب مفاتيح كهربائية';
+  @override String get serviceSwitchRepair => 'إصلاح مفاتيح كهربائية';
+  @override String get serviceCircuitBreakerRepair => 'إصلاح قاطع التيار';
+  @override String get serviceElectricalPanelService => 'صيانة لوحة كهربائية';
+  @override String get serviceFanInstallation => 'تركيب مروحة';
+  @override String get serviceCeilingFanInstallation => 'تركيب مروحة سقفية';
+  @override String get serviceElectricalInspection => 'فحص كهربائي';
+  @override String get serviceGeneratorInstallation => 'تركيب مولد كهربائي';
 
-  @override
-  String get serviceDrainCleaning => 'تنظيف مصارف';
+  // ── Service names — AC Repair ─────────────────────────────────────────────
 
-  @override
-  String get serviceBathroomFixtures => 'تركيبات حمام';
+  @override String get serviceAcInstallation => 'تركيب مكيف';
+  @override String get serviceAcMaintenance => 'صيانة مكيف';
+  @override String get serviceAcCleaning => 'تنظيف مكيف';
+  @override String get serviceAcRepair => 'إصلاح مكيف';
+  @override String get serviceAcGasRefill => 'شحن غاز مكيف';
+  @override String get serviceSplitAcInstallation => 'تركيب مكيف سبليت';
+  @override String get serviceAcInspection => 'فحص مكيف';
+  @override String get serviceCentralAcService => 'صيانة تكييف مركزي';
 
-  @override
-  String get serviceWiringRepair => 'إصلاح أسلاك';
+  // ── Service names — Carpentry ─────────────────────────────────────────────
 
-  @override
-  String get serviceLightFixtureInstallation => 'تركيب تجهيزات إضاءة';
+  @override String get serviceFurnitureAssembly => 'تجميع أثاث';
+  @override String get serviceDoorRepair => 'إصلاح أبواب';
+  @override String get serviceCabinetInstallation => 'تركيب خزائن';
+  @override String get serviceWoodFlooring => 'أرضيات خشبية';
+  @override String get serviceWindowRepair => 'إصلاح نوافذ';
+  @override String get serviceShelfInstallation => 'تركيب رفوف';
+  @override String get serviceWardrobeAssembly => 'تجميع خزانة ملابس';
+  @override String get serviceKitchenCabinetInstallation => 'تركيب خزائن مطبخ';
+  @override String get serviceDoorInstallation => 'تركيب أبواب';
+  @override String get serviceCustomWoodwork => 'أعمال خشبية مخصصة';
 
-  @override
-  String get serviceFurnitureAssembly => 'تجميع أثاث';
+  // ── Service names — Painting ─────────────────────────────────────────────
 
-  @override
-  String get serviceDoorRepair => 'إصلاح أبواب';
+  @override String get serviceInteriorPainting => 'دهان داخلي';
+  @override String get serviceExteriorPainting => 'دهان خارجي';
+  @override String get serviceWallPainting => 'دهان جدران';
+  @override String get serviceCeilingPainting => 'دهان سقف';
+  @override String get serviceTexturePainting => 'دهان زخرفي';
+  @override String get serviceWallpaperInstallation => 'تركيب ورق جدران';
+  @override String get serviceTouchUpPainting => 'دهان ترميمي';
+
+  // ── Service names — Cleaning ─────────────────────────────────────────────
+
+  @override String get serviceDeepCleaning => 'تنظيف شامل';
+  @override String get serviceRegularCleaning => 'تنظيف دوري';
+  @override String get serviceCarpetCleaning => 'تنظيف سجاد';
+  @override String get serviceSofaCleaning => 'تنظيف كنب';
+  @override String get serviceWindowCleaning => 'تنظيف نوافذ';
+  @override String get serviceMoveInCleaning => 'تنظيف ما قبل السكن';
+  @override String get servicePostConstructionCleaning => 'تنظيف ما بعد البناء';
+  @override String get serviceKitchenDeepClean => 'تنظيف مطبخ شامل';
+  @override String get serviceBathroomDeepClean => 'تنظيف حمام شامل';
+
+  // ── Service names — Moving Services ─────────────────────────────────────
+
+  @override String get servicePackingAndUnpacking => 'التعبئة والتفريغ';
+  @override String get serviceHeavyItemMoving => 'نقل الأغراض الثقيلة';
+  @override String get servicePianoMoving => 'نقل البيانو';
+  @override String get serviceFurnitureMoving => 'نقل أثاث';
+  @override String get serviceHouseMoving => 'نقل منزل';
+  @override String get serviceOfficeMoving => 'نقل مكتب';
+  @override String get serviceStorageService => 'خدمة التخزين';
+  @override String get serviceLoadingAndUnloading => 'تحميل وتفريغ';
+
+  // ── Service names — Appliance Repair ─────────────────────────────────────
+
+  @override String get serviceRefrigeratorRepair => 'إصلاح ثلاجة';
+  @override String get serviceWashingMachineRepair => 'إصلاح غسالة';
+  @override String get serviceDishwasherRepair => 'إصلاح غسالة صحون';
+  @override String get serviceOvenRepair => 'إصلاح فرن';
+  @override String get serviceMicrowaveRepair => 'إصلاح ميكروويف';
+  @override String get serviceDryerRepair => 'إصلاح مجفف';
+  @override String get serviceStoveRepair => 'إصلاح موقد';
+  @override String get serviceWaterHeaterRepair => 'إصلاح سخان مياه';
+  @override String get serviceTvRepair => 'إصلاح تلفاز';
 
   // ── Booking status ────────────────────────────────────────────────────────────
 
