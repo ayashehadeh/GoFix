@@ -21,8 +21,7 @@ class ProfessionalDetailsPage extends StatefulWidget {
   });
 
   @override
-  State<ProfessionalDetailsPage> createState() =>
-      _ProfessionalDetailsPageState();
+  State<ProfessionalDetailsPage> createState() => _ProfessionalDetailsPageState();
 }
 
 class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
@@ -67,8 +66,7 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
     return BlocConsumer<BecomeProfessionalBloc, BecomeProfessionalState>(
       listenWhen: (prev, curr) => prev.step1Status != curr.step1Status,
       listener: (context, state) {
-        if (_previousStep1Status == ActionStatus.loading &&
-            state.step1Status == ActionStatus.success) {
+        if (_previousStep1Status == ActionStatus.loading && state.step1Status == ActionStatus.success) {
           widget.onContinue();
         }
         _previousStep1Status = state.step1Status;
@@ -76,14 +74,16 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
       builder: (context, state) {
         final app = state.application;
         final isLoading = state.step1Status == ActionStatus.loading;
-        final initialLoading =
-            state.initialDataStatus == ActionStatus.loading &&
-                state.categories.isEmpty;
+        if (_bioController.text != app.bio) {
+          _bioController.value = TextEditingValue(
+            text: app.bio,
+            selection: TextSelection.collapsed(offset: app.bio.length),
+          );
+        }
+        final initialLoading = state.initialDataStatus == ActionStatus.loading && state.categories.isEmpty;
 
         // Show areas for the selected city, fall back to all areas
-        final areas = state.areasForSelectedCity.isNotEmpty
-            ? state.areasForSelectedCity
-            : state.allAreas;
+        final areas = state.areasForSelectedCity.isNotEmpty ? state.areasForSelectedCity : state.allAreas;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,9 +110,7 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
                       isLoading: initialLoading,
                       value: app.categoryName,
                       enabled: !widget.isEditMode,
-                      onTap: widget.isEditMode
-                          ? null
-                          : () => _pickCategory(context, state),
+                      onTap: widget.isEditMode ? null : () => _pickCategory(context, state),
                     ),
                     const SizedBox(height: 12),
 
@@ -126,8 +124,7 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
                           : app.experienceYears == 0
                               ? 'Less than a year'
                               : '${app.experienceYears} years',
-                      onTap: () =>
-                          _pickExperience(context, app.experienceYears),
+                      onTap: () => _pickExperience(context, app.experienceYears),
                     ),
                     const SizedBox(height: 12),
 
@@ -149,9 +146,7 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: _showServiceAreaError
-                                ? AppColors.error
-                                : AppColors.primaryDark,
+                            color: _showServiceAreaError ? AppColors.error : AppColors.primaryDark,
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -159,9 +154,7 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
                           '(select at least one)',
                           style: TextStyle(
                             fontSize: 11,
-                            color: _showServiceAreaError
-                                ? AppColors.error
-                                : AppColors.textSecondary,
+                            color: _showServiceAreaError ? AppColors.error : AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -202,36 +195,29 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
                       Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: _showServiceAreaError
-                                ? AppColors.error
-                                : AppColors.divider,
+                            color: _showServiceAreaError ? AppColors.error : AppColors.divider,
                             width: 1.2,
                           ),
                           borderRadius: BorderRadius.circular(12),
                           color: Colors.white,
                         ),
                         child: Column(
-                          children:
-                              areas.asMap().entries.map((entry) {
+                          children: areas.asMap().entries.map((entry) {
                             final idx = entry.key;
                             final area = entry.value;
-                            final isSelected = app.selectedServiceAreaIds
-                                .contains(area.id);
+                            final isSelected = app.selectedServiceAreaIds.contains(area.id);
                             final isLast = idx == areas.length - 1;
                             return _AreaCheckTile(
                               area: area,
                               isSelected: isSelected,
                               isLast: isLast,
                               onTap: () {
-                                context
-                                    .read<BecomeProfessionalBloc>()
-                                    .add(ServiceAreaToggled(
+                                context.read<BecomeProfessionalBloc>().add(ServiceAreaToggled(
                                       serviceAreaId: area.id,
                                       serviceAreaName: area.name,
                                     ));
                                 if (_showServiceAreaError) {
-                                  setState(() =>
-                                      _showServiceAreaError = false);
+                                  setState(() => _showServiceAreaError = false);
                                 }
                               },
                             );
@@ -260,9 +246,7 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: _showBioError
-                            ? AppColors.error
-                            : AppColors.primaryDark,
+                        color: _showBioError ? AppColors.error : AppColors.primaryDark,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -271,9 +255,7 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: _showBioError
-                              ? AppColors.error
-                              : AppColors.divider,
+                          color: _showBioError ? AppColors.error : AppColors.divider,
                         ),
                       ),
                       child: TextField(
@@ -284,8 +266,7 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
                           color: AppColors.primaryDark,
                         ),
                         decoration: const InputDecoration(
-                          hintText:
-                              'This will appear as your bio on your public profile.',
+                          hintText: 'This will appear as your bio on your public profile.',
                           hintStyle: TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
@@ -294,9 +275,7 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
                           contentPadding: EdgeInsets.all(14),
                         ),
                         onChanged: (value) {
-                          context
-                              .read<BecomeProfessionalBloc>()
-                              .add(BioChanged(value));
+                          context.read<BecomeProfessionalBloc>().add(BioChanged(value));
                           if (_showBioError && value.trim().isNotEmpty) {
                             setState(() => _showBioError = false);
                           }
@@ -322,8 +301,7 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
 
   // ── Pickers ────────────────────────────────────────────────────────────────
 
-  void _pickCategory(
-      BuildContext context, BecomeProfessionalState state) {
+  void _pickCategory(BuildContext context, BecomeProfessionalState state) {
     if (state.categories.isEmpty) return;
     final selected = state.categories.firstWhere(
       (c) => c.id == state.application.categoryId,
@@ -337,8 +315,7 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
       selected: state.application.categoryId == null ? null : selected,
       onSelected: (cat) {
         context.read<BecomeProfessionalBloc>().add(
-              CategorySelected(
-                  categoryId: cat.id, categoryName: cat.name),
+              CategorySelected(categoryId: cat.id, categoryName: cat.name),
             );
         setState(() => _showCategoryError = false);
       },
@@ -354,16 +331,13 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
       labelOf: (e) => e == 0 ? 'Less than a year' : '$e years',
       selected: current,
       onSelected: (v) {
-        context
-            .read<BecomeProfessionalBloc>()
-            .add(ExperienceYearsSelected(v));
+        context.read<BecomeProfessionalBloc>().add(ExperienceYearsSelected(v));
         setState(() => _showExperienceError = false);
       },
     );
   }
 
-  void _pickCity(
-      BuildContext context, BecomeProfessionalState state) {
+  void _pickCity(BuildContext context, BecomeProfessionalState state) {
     final cities = state.derivedCities;
     if (cities.isEmpty) return;
     final currentId = state.application.cityId;
@@ -414,8 +388,7 @@ class _AreaCheckTile extends StatelessWidget {
             bottom: isLast ? const Radius.circular(12) : Radius.zero,
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 14, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
               children: [
                 AnimatedContainer(
@@ -424,20 +397,13 @@ class _AreaCheckTile extends StatelessWidget {
                   height: 20,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isSelected
-                        ? AppColors.primaryOrange
-                        : Colors.white,
+                    color: isSelected ? AppColors.primaryOrange : Colors.white,
                     border: Border.all(
-                      color: isSelected
-                          ? AppColors.primaryOrange
-                          : AppColors.divider,
+                      color: isSelected ? AppColors.primaryOrange : AppColors.divider,
                       width: 2,
                     ),
                   ),
-                  child: isSelected
-                      ? const Icon(Icons.check,
-                          color: Colors.white, size: 12)
-                      : null,
+                  child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 12) : null,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -445,9 +411,7 @@ class _AreaCheckTile extends StatelessWidget {
                     area.name,
                     style: TextStyle(
                       fontSize: 13,
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.normal,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                       color: AppColors.primaryDark,
                     ),
                   ),
@@ -456,9 +420,7 @@ class _AreaCheckTile extends StatelessWidget {
             ),
           ),
         ),
-        if (!isLast)
-          const Divider(
-              height: 1, indent: 46, color: AppColors.divider),
+        if (!isLast) const Divider(height: 1, indent: 46, color: AppColors.divider),
       ],
     );
   }

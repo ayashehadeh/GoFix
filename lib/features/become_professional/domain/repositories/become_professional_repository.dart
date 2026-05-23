@@ -45,8 +45,7 @@ abstract class BecomeProfessionalRepository {
   Future<Either<Failure, Unit>> setServiceAreas(List<int> serviceAreaIds);
 
   /// PUT /api/professionals/profile/working-hours  — Step 3b
-  Future<Either<Failure, Unit>> setWorkingHours(
-      List<WorkingHoursSchedule> schedules);
+  Future<Either<Failure, Unit>> setWorkingHours(List<WorkingHoursSchedule> schedules);
 
   /// POST /api/professionals/profile/picture  — Step 3 (multipart)
   Future<Either<Failure, Unit>> uploadProfilePicture(String filePath);
@@ -63,4 +62,13 @@ abstract class BecomeProfessionalRepository {
 
   /// POST /api/professionals/profile/submit  — final
   Future<Either<Failure, Unit>> submitApplication();
+
+  /// PUT /api/professionals/profile  — edit existing profile
+  Future<Either<Failure, Unit>> updateProfile({
+    required int categoryId,
+    required int experienceYears,
+    double? latitude,
+    double? longitude,
+    required String bio,
+  });
 }

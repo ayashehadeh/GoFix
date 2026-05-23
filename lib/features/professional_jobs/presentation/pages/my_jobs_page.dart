@@ -72,14 +72,11 @@ class _MyJobsPageState extends State<MyJobsPage> {
                 onBack: () => Navigator.pop(context),
               ),
               Expanded(
-                child: BlocBuilder<ProfessionalJobsBloc,
-                    ProfessionalJobsState>(
+                child: BlocBuilder<ProfessionalJobsBloc, ProfessionalJobsState>(
                   builder: (context, state) {
-                    if (state is ProfessionalJobsLoading ||
-                        state is JobStatusUpdateLoading) {
+                    if (state is ProfessionalJobsLoading || state is JobStatusUpdateLoading) {
                       return const Center(
-                        child: CircularProgressIndicator(
-                            color: Color(0xFFFF8C1A)),
+                        child: CircularProgressIndicator(color: Color(0xFFFF8C1A)),
                       );
                     }
 
@@ -98,8 +95,7 @@ class _MyJobsPageState extends State<MyJobsPage> {
                               context,
                               MaterialPageRoute(
                                 builder: (_) => BlocProvider.value(
-                                  value: context
-                                      .read<ProfessionalJobsBloc>(),
+                                  value: context.read<ProfessionalJobsBloc>(),
                                   child: JobInfoPage(job: job),
                                 ),
                               ),
@@ -145,8 +141,7 @@ class _Header extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: onBack,
-                child: const Icon(Icons.arrow_back_ios_new,
-                    size: 20, color: Color(0xFF062B4D)),
+                child: const Icon(Icons.arrow_back_ios_new, size: 20, color: Color(0xFF062B4D)),
               ),
               const SizedBox(width: 12),
               const Text(
@@ -158,8 +153,6 @@ class _Header extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              const Icon(Icons.chat_bubble_outline,
-                  size: 22, color: Color(0xFF062B4D)),
             ],
           ),
           const SizedBox(height: 16),
@@ -190,8 +183,7 @@ class _TabBtn extends StatelessWidget {
   final bool isActive;
   final VoidCallback onTap;
 
-  const _TabBtn(
-      {required this.label, required this.isActive, required this.onTap});
+  const _TabBtn({required this.label, required this.isActive, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -199,17 +191,12 @@ class _TabBtn extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
         decoration: BoxDecoration(
-          color: isActive
-              ? const Color(0xFFFF8C1A)
-              : Colors.transparent,
+          color: isActive ? const Color(0xFFFF8C1A) : Colors.transparent,
           borderRadius: BorderRadius.circular(50),
           border: Border.all(
-            color: isActive
-                ? const Color(0xFFFF8C1A)
-                : Colors.grey.shade300,
+            color: isActive ? const Color(0xFFFF8C1A) : Colors.grey.shade300,
           ),
         ),
         child: Text(

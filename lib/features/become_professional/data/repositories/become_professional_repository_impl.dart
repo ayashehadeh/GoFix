@@ -22,23 +22,19 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
 
   @override
   Future<Either<Failure, List<Category>>> getCategories() {
-    return _wrap(
-        () async => (await remoteDataSource.getCategories()).cast<Category>());
+    return _wrap(() async => (await remoteDataSource.getCategories()).cast<Category>());
   }
 
   @override
   Future<Either<Failure, List<CategoryService>>> getServicesForCategory(
     int categoryId,
   ) {
-    return _wrap(() async =>
-        (await remoteDataSource.getServicesForCategory(categoryId))
-            .cast<CategoryService>());
+    return _wrap(() async => (await remoteDataSource.getServicesForCategory(categoryId)).cast<CategoryService>());
   }
 
   @override
   Future<Either<Failure, List<ServiceArea>>> getServiceAreas() {
-    return _wrap(() async =>
-        (await remoteDataSource.getServiceAreas()).cast<ServiceArea>());
+    return _wrap(() async => (await remoteDataSource.getServiceAreas()).cast<ServiceArea>());
   }
 
   @override
@@ -66,23 +62,40 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
   }
 
   @override
+  Future<Either<Failure, Unit>> updateProfile({
+    required int categoryId,
+    required int experienceYears,
+    double? latitude,
+    double? longitude,
+    required String bio,
+  }) {
+    return _wrap(() async {
+      await remoteDataSource.updateProfile(
+        categoryId: categoryId,
+        experienceYears: experienceYears,
+        latitude: latitude,
+        longitude: longitude,
+        bio: bio,
+      );
+      return unit;
+    });
+  }
+
+  @override
   Future<Either<Failure, Unit>> setServices(
     List<ServicePricing> services,
   ) {
-    final models =
-        services.map((s) => ServicePricingModel.fromEntity(s)).toList();
+    final models = services.map((s) => ServicePricingModel.fromEntity(s)).toList();
     return _wrapUnit(() async => await remoteDataSource.setServices(models));
   }
 
   @override
   Future<Either<Failure, Unit>> setServiceAreas(List<int> serviceAreaIds) {
-    return _wrapUnit(
-        () async => await remoteDataSource.setServiceAreas(serviceAreaIds));
+    return _wrapUnit(() async => await remoteDataSource.setServiceAreas(serviceAreaIds));
   }
 
   @override
-  Future<Either<Failure, Unit>> setWorkingHours(
-      List<WorkingHoursSchedule> schedules) {
+  Future<Either<Failure, Unit>> setWorkingHours(List<WorkingHoursSchedule> schedules) {
     final models = schedules
         .map((s) => WorkingHoursModel(
               dayLabel: s.dayLabel,
@@ -90,8 +103,7 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
               closeTime: s.closeTime,
             ))
         .toList();
-    return _wrapUnit(
-        () async => await remoteDataSource.setWorkingHours(models));
+    return _wrapUnit(() async => await remoteDataSource.setWorkingHours(models));
   }
 
   @override
@@ -143,8 +155,7 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
       await fn();
       return const Right(unit);
     } on DioException catch (e) {
-      print(
-          '_wrapUnit DioException: ${e.response?.statusCode} ${e.response?.data}');
+      print('_wrapUnit DioException: ${e.response?.statusCode} ${e.response?.data}');
       return Left(_handleDioError(e));
     } catch (e, st) {
       print('_wrapUnit UNKNOWN ERROR: $e');
@@ -163,11 +174,8 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
       return const NetworkFailure('Network error');
     }
     final data = e.response?.data;
-    final message =
-        _extractBackendMessage(data) ?? e.response?.statusMessage ?? e.message;
-    return ServerFailure(message?.trim().isNotEmpty == true
-        ? message!.trim()
-        : 'Something went wrong');
+    final message = _extractBackendMessage(data) ?? e.response?.statusMessage ?? e.message;
+    return ServerFailure(message?.trim().isNotEmpty == true ? message!.trim() : 'Something went wrong');
   }
 
   String? _extractBackendMessage(dynamic data) {
@@ -181,8 +189,7 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
       return null;
     }
     if (data is Map) {
-      final dynamic directMessage =
-          data['message'] ?? data['error'] ?? data['detail'] ?? data['title'];
+      final dynamic directMessage = data['message'] ?? data['error'] ?? data['detail'] ?? data['title'];
       if (directMessage is String && directMessage.trim().isNotEmpty) {
         return directMessage;
       }

@@ -35,6 +35,13 @@ abstract class BecomeProfessionalRemoteDataSource {
   });
 
   Future<void> submitApplication();
+  Future<void> updateProfile({
+    required int categoryId,
+    required int experienceYears,
+    double? latitude,
+    double? longitude,
+    required String bio,
+  });
 }
 
 class BecomeProfessionalRemoteDataSourceImpl implements BecomeProfessionalRemoteDataSource {
@@ -237,6 +244,29 @@ class BecomeProfessionalRemoteDataSourceImpl implements BecomeProfessionalRemote
   Future<void> submitApplication() async {
     await dio.post(
       '/professionals/profile/submit',
+      options: Options(headers: await _authHeaders()),
+    );
+  }
+
+  @override
+  Future<void> updateProfile({
+    required int categoryId,
+    required int experienceYears,
+    double? latitude,
+    double? longitude,
+    required String bio,
+  }) async {
+    final payload = {
+      'categoryId': categoryId,
+      'experienceYears': experienceYears,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      'bio': bio,
+    };
+
+    await dio.put(
+      '/professionals/profile',
+      data: payload,
       options: Options(headers: await _authHeaders()),
     );
   }
