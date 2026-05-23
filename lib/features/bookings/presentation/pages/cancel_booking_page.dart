@@ -137,20 +137,19 @@ class _CancelSheet extends StatelessWidget {
                       ),
                     ),
 
-                    const Text(
-                      'Cancel Booking?',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context)!.cancelBookingTitle,
+                      style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w700,
                         color: AppColors.primaryDark,
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
-                      'This action is permanent and cannot be reversed. '
-                      'Your booking will be removed immediately.',
+                    Text(
+                      AppLocalizations.of(context)!.cancelBookingWarning,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 13,
                         color: AppColors.textSecondary,
                         height: 1.6,
@@ -187,9 +186,9 @@ class _CancelSheet extends StatelessWidget {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Text(
-                                'Yes, Cancel Booking',
-                                style: TextStyle(
+                            : Text(
+                                AppLocalizations.of(context)!.yesCancelBooking,
+                                style: const TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -216,9 +215,9 @@ class _CancelSheet extends StatelessWidget {
                             borderRadius: BorderRadius.circular(14),
                           ),
                         ),
-                        child: const Text(
-                          'Keep my Booking',
-                          style: TextStyle(
+                        child: Text(
+                          AppLocalizations.of(context)!.keepMyBooking,
+                          style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/l10n/service_name_l10n.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/booking.dart';
 import '../bloc/bookings_bloc.dart';
@@ -156,7 +157,7 @@ class _BookingInfoBody extends StatelessWidget {
 
                 // Service description
                 _SectionCard(
-                  title: 'Service Description',
+                  title: AppLocalizations.of(context)!.serviceDescription,
                   titleIcon: Icons.edit_outlined,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,7 +183,7 @@ class _BookingInfoBody extends StatelessWidget {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              '${booking.imageUrls.length} picture${booking.imageUrls.length > 1 ? 's' : ''} attached',
+                              '${booking.imageUrls.length} ${booking.imageUrls.length == 1 ? AppLocalizations.of(context)!.pictureAttachedSingular : AppLocalizations.of(context)!.picturesAttachedPlural}',
                               style: const TextStyle(
                                 fontSize: 13,
                                 color: AppColors.primaryDark,

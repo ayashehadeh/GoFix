@@ -13,6 +13,41 @@ import 'package:gp/features/bookings/presentation/pages/select_service_screen.da
 import 'package:gp/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:gp/features/chat/presentation/pages/chat_page.dart';
 import 'package:gp/injection_container.dart' as di;
+import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/l10n/service_name_l10n.dart';
+import 'package:gp/features/professionals/domain/entities/service_category.dart';
+
+String _localizeDay(String day, AppLocalizations l10n) {
+  String translate(String name) {
+    switch (name.trim()) {
+      case 'Sunday':    return l10n.dayFullSunday;
+      case 'Monday':    return l10n.dayFullMonday;
+      case 'Tuesday':   return l10n.dayFullTuesday;
+      case 'Wednesday': return l10n.dayFullWednesday;
+      case 'Thursday':  return l10n.dayFullThursday;
+      case 'Friday':    return l10n.dayFullFriday;
+      case 'Saturday':  return l10n.dayFullSaturday;
+      default:          return name;
+    }
+  }
+  return day.split(' - ').map(translate).join(' - ');
+}
+
+String _localizeTime(String time, AppLocalizations l10n) =>
+    time.replaceAll('AM', l10n.amLabel).replaceAll('PM', l10n.pmLabel);
+
+String _localizeCategoryName(AppLocalizations l10n, ServiceCategory cat) {
+  switch (cat) {
+    case ServiceCategory.plumbing:        return l10n.categoryPlumbing;
+    case ServiceCategory.electricalWork:  return l10n.categoryElectricalWork;
+    case ServiceCategory.acRepair:        return l10n.categoryAcRepair;
+    case ServiceCategory.carpentry:       return l10n.categoryCarpentry;
+    case ServiceCategory.painting:        return l10n.categoryPainting;
+    case ServiceCategory.cleaning:        return l10n.categoryCleaning;
+    case ServiceCategory.movingServices:  return l10n.categoryMovingServices;
+    case ServiceCategory.applianceRepair: return l10n.categoryApplianceRepair;
+  }
+}
 
 class ProfessionalDetailPage extends StatefulWidget {
   final String professionalId;
@@ -26,7 +61,7 @@ class ProfessionalDetailPage extends StatefulWidget {
 
 class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
   int _selectedTab = 0;
-  final List<String> _tabs = ['About', 'Services', 'Reviews', 'Certifications'];
+
 
   @override
   void initState() {
@@ -45,6 +80,8 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    final tabs = [t.tabAbout, t.tabServices, t.tabReviews, t.tabCertifications];
     return BlocProvider(
       create: (_) => di.sl<ChatBloc>(),
       child: BlocListener<ChatBloc, ChatState>(
@@ -126,7 +163,7 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
-                          children: List.generate(_tabs.length, (index) {
+                          children: List.generate(tabs.length, (index) {
                             final selected = _selectedTab == index;
                             return GestureDetector(
                               onTap: () => setState(() => _selectedTab = index),
@@ -148,7 +185,7 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                                   ),
                                 ),
                                 child: Text(
-                                  _tabs[index],
+                                  tabs[index],
                                   style: TextStyle(
                                     color: selected
                                         ? Colors.white
@@ -184,7 +221,7 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                             builder: (_) => SelectServiceScreen(
                               professionalName: professional.name,
                               professionalRole:
-                                  'Professional ${professional.category.displayName}',
+                                  '${t.professionalPrefix} ${_localizeCategoryName(t, professional.category)}',
                               professionalId: professional.id,
                               services: professional.services,
                             ),
@@ -312,33 +349,36 @@ class _DetailHeader extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Professional ${professional.category.displayName}',
+            '${AppLocalizations.of(context)!.professionalPrefix} ${_localizeCategoryName(AppLocalizations.of(context)!, professional.category)}',
             style: const TextStyle(color: Colors.white70, fontSize: 13),
           ),
           const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _StatItem(
-                icon: Icons.access_time,
-                value: '${professional.experienceYears}',
-                label: 'Years Exp.',
-              ),
-              _StatItem(
-                icon: Icons.bookmark_border,
-                value: professional.distanceKm != null
-                    ? professional.distanceKm!.toStringAsFixed(1)
-                    : 'N/A',
-                label: 'KM Away',
-              ),
-              _StatItem(
-                icon: Icons.star,
-                value: professional.rating.toStringAsFixed(1),
-                label: 'Rating',
-                isStar: true,
-              ),
-            ],
-          ),
+          Builder(builder: (ctx) {
+            final l = AppLocalizations.of(ctx)!;
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _StatItem(
+                  icon: Icons.access_time,
+                  value: '${professional.experienceYears}',
+                  label: l.yearsExp,
+                ),
+                _StatItem(
+                  icon: Icons.bookmark_border,
+                  value: professional.distanceKm != null
+                      ? professional.distanceKm!.toStringAsFixed(1)
+                      : 'N/A',
+                  label: l.kmAwayLabel,
+                ),
+                _StatItem(
+                  icon: Icons.star,
+                  value: professional.rating.toStringAsFixed(1),
+                  label: l.ratingLabel,
+                  isStar: true,
+                ),
+              ],
+            );
+          }),
         ],
       ),
     );
@@ -398,18 +438,19 @@ class _AboutTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _SectionCard(
           icon: Icons.person_outline,
-          title: 'About Me',
+          title: l10n.aboutMe,
           child: Text(professional.bio, style: AppTextStyles.bodySmall),
         ),
         const SizedBox(height: 16),
         _SectionCard(
           icon: Icons.bookmark_border,
-          title: 'Service Areas',
+          title: l10n.serviceAreas,
           child: Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -434,7 +475,7 @@ class _AboutTab extends StatelessWidget {
         const SizedBox(height: 16),
         _SectionCard(
           icon: Icons.access_time,
-          title: 'Working Hours',
+          title: l10n.workingHours,
           child: Column(
             children: professional.workingHours.schedules
                 .map(
@@ -443,9 +484,9 @@ class _AboutTab extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(s.day, style: AppTextStyles.bodySmall),
+                        Text(_localizeDay(s.day, l10n), style: AppTextStyles.bodySmall),
                         Text(
-                          s.timeRange,
+                          _localizeTime(s.timeRange, l10n),
                           style: AppTextStyles.bodySmall.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
@@ -472,7 +513,7 @@ class _ServicesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SectionCard(
       icon: Icons.settings,
-      title: 'Services Offered',
+      title: AppLocalizations.of(context)!.servicesOffered,
       child: Column(
         children: professional.services
             .map(
@@ -489,7 +530,7 @@ class _ServicesTab extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(service.name, style: AppTextStyles.bodySmall),
+                    Text(localizeServiceName(service.name, AppLocalizations.of(context)!), style: AppTextStyles.bodySmall),
                     Text(
                       service.priceDisplay,
                       style: AppTextStyles.bodySmall.copyWith(
@@ -517,9 +558,10 @@ class _ReviewsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return _SectionCard(
       icon: Icons.star,
-      title: 'Customer Reviews',
+      title: l10n.customerReviews,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -536,7 +578,7 @@ class _ReviewsTab extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '${professional.reviewCount} Reviews',
+                    '${professional.reviewCount} ${l10n.reviewsLabel}',
                     style: AppTextStyles.bodySmall,
                   ),
                 ],
@@ -645,16 +687,17 @@ class _CertificationsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final certifications = professional.certifications;
 
     return Column(
       children: [
         _SectionCard(
           icon: Icons.description_outlined,
-          title: 'Professional Certifications',
+          title: l10n.professionalCertifications,
           child: certifications.isEmpty
               ? Text(
-                  'No certifications uploaded yet.',
+                  l10n.noCertificationsYet,
                   style: AppTextStyles.bodySmall,
                 )
               : Column(
@@ -724,16 +767,16 @@ class _CertificationsTab extends StatelessWidget {
         const SizedBox(height: 16),
         _SectionCard(
           icon: Icons.verified_user_outlined,
-          title: 'Background & Safety',
+          title: l10n.backgroundSafety,
           child: Column(
             children: [
               _VerificationRow(
-                label: 'Background Check',
+                label: l10n.backgroundCheck,
                 verified: professional.isVerified,
               ),
               const SizedBox(height: 8),
               _VerificationRow(
-                label: 'Identity Verified',
+                label: l10n.identityVerifiedLabel,
                 verified: professional.isIdentityVerified,
               ),
             ],
@@ -768,7 +811,9 @@ class _VerificationRow extends StatelessWidget {
             ),
           ),
           Text(
-            verified ? 'Verified 2026' : 'Not Verified',
+            verified
+                ? AppLocalizations.of(context)!.verifiedLabel
+                : AppLocalizations.of(context)!.notVerifiedLabel,
             style: AppTextStyles.bodySmall,
           ),
         ],
@@ -816,9 +861,9 @@ class _BottomActions extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              child: const Text(
-                'Book Now',
-                style: TextStyle(
+              child: Text(
+                AppLocalizations.of(context)!.bookNow,
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
                   fontSize: 16,

@@ -24,7 +24,7 @@ class BookingSuccessScreen extends StatelessWidget {
                   children: [
                     const SizedBox(height: 48),
                     Text(
-                      "We've Got It From Here!",
+                      l10n.weveGotItTitle,
                       style: AppTextStyles.heading1.copyWith(
                         fontSize: 26,
                         color: AppColors.primaryDark,
@@ -34,7 +34,7 @@ class BookingSuccessScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Your request is now pending. Please allow some time for the professional to review the details. You can track the status of this request in the "My Bookings" section.',
+                      l10n.bookingRequestPending,
                       textAlign: TextAlign.justify,
                       style: AppTextStyles.bodySmall.copyWith(
                         fontSize: 14,
@@ -53,7 +53,7 @@ class BookingSuccessScreen extends StatelessWidget {
                     const SizedBox(height: 40),
                     Center(
                       child: Text(
-                        'We appreciate your trust in\nour service.',
+                        l10n.appreciateTrust,
                         textAlign: TextAlign.center,
                         style: AppTextStyles.sectionTitle.copyWith(
                           color: AppColors.primaryDark,

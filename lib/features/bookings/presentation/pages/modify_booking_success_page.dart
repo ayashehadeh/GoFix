@@ -97,9 +97,9 @@ class _SuccessSheet extends StatelessWidget {
                   ),
                 ),
 
-                const Text(
-                  'Booking Updated',
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context)!.bookingUpdatedTitle,
+                  style: const TextStyle(
                     color: AppColors.primaryDark,
                     fontSize: 26,
                     fontWeight: FontWeight.w700,
@@ -108,10 +108,9 @@ class _SuccessSheet extends StatelessWidget {
                 ),
                 const SizedBox(height: 14),
 
-                const Text(
-                  'Your changes have been sent to the professional. '
-                  'You can track the status in the "My Bookings" section.',
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context)!.bookingUpdatedMessage,
+                  style: const TextStyle(
                     color: Colors.grey,
                     fontSize: 14,
                     height: 1.7,
@@ -123,11 +122,11 @@ class _SuccessSheet extends StatelessWidget {
                 Center(child: _SuccessIllustration()),
                 const SizedBox(height: 32),
 
-                const Center(
+                Center(
                   child: Text(
-                    'We appreciate your trust in\nour service.',
+                    AppLocalizations.of(context)!.appreciateTrust,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.primaryDark,
                       fontSize: 15,
                       fontWeight: FontWeight.w700,

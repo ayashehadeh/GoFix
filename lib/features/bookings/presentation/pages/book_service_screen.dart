@@ -65,6 +65,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
   }
 
   void _showAddressPicker(List<AddressEntity> addresses) {
+    final t = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -83,13 +84,13 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Select Address',
-                style: TextStyle(
+                t.selectAddress,
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: darkBlue,
@@ -99,11 +100,11 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
           ),
           const SizedBox(height: 8),
           if (addresses.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(24),
+            Padding(
+              padding: const EdgeInsets.all(24),
               child: Text(
-                'No saved addresses. Please add one in Settings.',
-                style: TextStyle(color: Colors.grey),
+                t.noSavedAddresses,
+                style: const TextStyle(color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
             )
@@ -271,7 +272,8 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
       final dateStr =
           '${_dayLabels[selectedDate.weekday - 1]}, ${selectedDate.day} ${_monthLabels[selectedDate.month - 1]} ${selectedDate.year}';
       final hour = selectedHour % 12 == 0 ? 12 : selectedHour % 12;
-      final amPm = selectedHour < 12 ? 'AM' : 'PM';
+      final t2 = AppLocalizations.of(context)!;
+    final amPm = selectedHour < 12 ? t2.amLabel : t2.pmLabel;
       final timeStr =
           '${hour.toString().padLeft(2, '0')}:${selectedMinute.toString().padLeft(2, '0')} $amPm';
 
@@ -306,7 +308,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
       t.dayFriShort, t.daySatShort, t.daySunShort,
     ];
     _monthLabels = [
-      t.monthJan, t.monthFeb, t.monthMar, t.monthApr,
+      t.monthJan, t.monthFeb, t.monthMar, t.monthApr, t.monthMay,
       t.monthJun, t.monthJul, t.monthAugShort, t.monthSep,
       t.monthOct, t.monthNov, t.monthDec,
     ];
@@ -389,24 +391,24 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.settings, color: orange, size: 22),
-                            SizedBox(width: 10),
+                            const Icon(Icons.settings, color: orange, size: 22),
+                            const SizedBox(width: 10),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Choose Date & Time',
-                                  style: TextStyle(
+                                  t.chooseDateTime,
+                                  style: const TextStyle(
                                     color: darkBlue,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 Text(
-                                  'Select your preferred appointment slot',
-                                  style: TextStyle(
+                                  t.selectPreferredSlot,
+                                  style: const TextStyle(
                                     color: Colors.grey,
                                     fontSize: 12,
                                   ),
@@ -416,13 +418,13 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                           ],
                         ),
                         const SizedBox(height: 20),
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.calendar_month, color: orange, size: 22),
-                            SizedBox(width: 8),
+                            const Icon(Icons.calendar_month, color: orange, size: 22),
+                            const SizedBox(width: 8),
                             Text(
-                              'Select Date',
-                              style: TextStyle(
+                              t.selectDate,
+                              style: const TextStyle(
                                 color: darkBlue,
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
@@ -493,13 +495,13 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.access_time, color: orange, size: 22),
-                            SizedBox(width: 8),
+                            const Icon(Icons.access_time, color: orange, size: 22),
+                            const SizedBox(width: 8),
                             Text(
-                              'Select Time',
-                              style: TextStyle(
+                              t.selectTime,
+                              style: const TextStyle(
                                 color: darkBlue,
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
@@ -600,13 +602,13 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Row(
+                                  Row(
                                     children: [
-                                      Icon(Icons.map_outlined, color: orange, size: 22),
-                                      SizedBox(width: 10),
+                                      const Icon(Icons.map_outlined, color: orange, size: 22),
+                                      const SizedBox(width: 10),
                                       Text(
-                                        'Choose Address',
-                                        style: TextStyle(
+                                        t.chooseAddress,
+                                        style: const TextStyle(
                                           color: darkBlue,
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
@@ -632,8 +634,8 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                                               const SizedBox(width: 8),
                                               Text(
                                                 addrState is AddressLoading
-                                                    ? 'Loading addresses...'
-                                                    : 'Tap to select your address',
+                                                    ? t.loadingAddresses
+                                                    : t.tapToSelectAddress,
                                                 style: TextStyle(
                                                   color: Colors.grey.shade400,
                                                   fontSize: 13,
@@ -683,11 +685,11 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                             ),
                           ),
                           if (_showAddressError)
-                            const Padding(
-                              padding: EdgeInsets.only(top: 6, left: 4),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6, left: 4),
                               child: Text(
-                                'Please select your address to continue.',
-                                style: TextStyle(color: errorRed, fontSize: 12),
+                                t.pleaseSelectYourAddress,
+                                style: const TextStyle(color: errorRed, fontSize: 12),
                               ),
                             ),
                         ],
@@ -718,9 +720,9 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                   ),
                   elevation: 0,
                 ),
-                child: const Text(
-                  'Continue',
-                  style: TextStyle(
+                child: Text(
+                  t.continue1,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.5,

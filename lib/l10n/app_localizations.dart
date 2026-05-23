@@ -1651,6 +1651,65 @@ abstract class AppLocalizations {
   String get navProfile;
   String get navDashboard;
 
+  // ── Full day names (for working hours) ───────────────────────────────────────
+  String get dayFullSunday;
+  String get dayFullMonday;
+  String get dayFullTuesday;
+  String get dayFullWednesday;
+  String get dayFullThursday;
+  String get dayFullFriday;
+  String get dayFullSaturday;
+
+  // ── Professional detail ───────────────────────────────────────────────────────
+  String get tabAbout;
+  String get tabServices;
+  String get tabReviews;
+  String get tabCertifications;
+  String get professionalPrefix;
+  String get yearsExp;
+  String get kmAwayLabel;
+  String get ratingLabel;
+  String get aboutMe;
+  String get serviceAreas;
+  String get servicesOffered;
+  String get customerReviews;
+  String get reviewsLabel;
+  String get professionalCertifications;
+  String get noBioAdded;
+  String get noCertificationsYet;
+  String get backgroundSafety;
+  String get backgroundCheck;
+  String get identityVerifiedLabel;
+  String get verifiedLabel;
+  String get notVerifiedLabel;
+  String get bookNow;
+  String get noServicesListedYet;
+  String get expYear;
+  String get expYears;
+  String get kmAwayUnit;
+  String get mAwayUnit;
+
+  // ── Booking flow ──────────────────────────────────────────────────────────────
+  String get selectAddress;
+  String get noSavedAddresses;
+  String get loadingAddresses;
+  String get tapToSelectAddress;
+  String get pleaseSelectYourAddress;
+  String get cancelBookingTitle;
+  String get cancelBookingWarning;
+  String get yesCancelBooking;
+  String get keepMyBooking;
+  String get bookingUpdatedTitle;
+  String get bookingUpdatedMessage;
+  String get appreciateTrust;
+  String get weveGotItTitle;
+  String get bookingRequestPending;
+  String get paymentConfirmedMoved;
+  String get pictureAttachedSingular;
+  String get picturesAttachedPlural;
+  String get amLabel;
+  String get pmLabel;
+
   // ── Categories ────────────────────────────────────────────────────────────────
   String get categoryPlumbing;
   String get categoryElectricalWork;
@@ -1661,8 +1720,29 @@ abstract class AppLocalizations {
   String get categoryMovingServices;
   String get categoryApplianceRepair;
 
+  // ── Category descriptions ─────────────────────────────────────────────────────
+  String get categoryDescPlumbing;
+  String get categoryDescElectricalWork;
+  String get categoryDescAcRepair;
+  String get categoryDescCarpentry;
+  String get categoryDescPainting;
+  String get categoryDescCleaning;
+  String get categoryDescMovingServices;
+  String get categoryDescApplianceRepair;
+
   // ── Booking status ────────────────────────────────────────────────────────────
   String get statusConfirmed;
+
+  // ── Service names ─────────────────────────────────────────────────────────────
+  String get servicePipeInstallation;
+  String get serviceLeakRepairs;
+  String get serviceWaterHeaterService;
+  String get serviceDrainCleaning;
+  String get serviceBathroomFixtures;
+  String get serviceWiringRepair;
+  String get serviceLightFixtureInstallation;
+  String get serviceFurnitureAssembly;
+  String get serviceDoorRepair;
 
   // ── Misc ──────────────────────────────────────────────────────────────────────
   String get describeIssuePlaceholder;

@@ -284,11 +284,11 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
               ),
               const Divider(height: 1),
               if (_services.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(16),
+                Padding(
+                  padding: const EdgeInsets.all(16),
                   child: Text(
-                    'This professional has not listed any services yet.',
-                    style: TextStyle(color: Colors.grey, fontSize: 13),
+                    t.noServicesListedYet,
+                    style: const TextStyle(color: Colors.grey, fontSize: 13),
                   ),
                 )
               else
@@ -510,7 +510,7 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${_pickedImages.length} picture${_pickedImages.length > 1 ? 's' : ''} attached',
+                  '${_pickedImages.length} ${_pickedImages.length == 1 ? t.pictureAttachedSingular : t.picturesAttachedPlural}',
                   style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ],

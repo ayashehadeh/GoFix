@@ -1234,6 +1234,228 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get categoryApplianceRepair => 'Appliance Repair';
 
+  // ── Category descriptions ─────────────────────────────────────────────────────
+
+  @override
+  String get categoryDescPlumbing => 'Expert solutions for leaks, pipe installations, and faucet repairs.';
+
+  @override
+  String get categoryDescElectricalWork => 'Expert solutions for wiring, circuit repairs, and light fixture installations.';
+
+  @override
+  String get categoryDescAcRepair => 'Expert solutions for unit maintenance, cooling issues, and professional cleaning.';
+
+  @override
+  String get categoryDescCarpentry => 'Expert solutions for furniture assembly, door repairs, and custom woodwork.';
+
+  @override
+  String get categoryDescPainting => 'Expert solutions for interior walls, exterior finishes, and ceiling touch-ups.';
+
+  @override
+  String get categoryDescCleaning => 'Expert solutions for deep home cleaning, sanitization, and professional tidying.';
+
+  @override
+  String get categoryDescMovingServices => 'Expert solutions for secure packing, heavy furniture transport, and efficient unloading.';
+
+  @override
+  String get categoryDescApplianceRepair => 'Expert solutions for refrigerators, washing machines, and kitchen appliances.';
+
+  // ── Full day names (for working hours) ───────────────────────────────────────
+
+  @override
+  String get dayFullSunday => 'Sunday';
+
+  @override
+  String get dayFullMonday => 'Monday';
+
+  @override
+  String get dayFullTuesday => 'Tuesday';
+
+  @override
+  String get dayFullWednesday => 'Wednesday';
+
+  @override
+  String get dayFullThursday => 'Thursday';
+
+  @override
+  String get dayFullFriday => 'Friday';
+
+  @override
+  String get dayFullSaturday => 'Saturday';
+
+  // ── Professional detail tabs ──────────────────────────────────────────────────
+
+  @override
+  String get tabAbout => 'About';
+
+  @override
+  String get tabServices => 'Services';
+
+  @override
+  String get tabReviews => 'Reviews';
+
+  @override
+  String get tabCertifications => 'Certifications';
+
+  // ── Professional detail labels ────────────────────────────────────────────────
+
+  @override
+  String get professionalPrefix => 'Professional';
+
+  @override
+  String get yearsExp => 'Years Exp.';
+
+  @override
+  String get kmAwayLabel => 'KM Away';
+
+  @override
+  String get ratingLabel => 'Rating';
+
+  @override
+  String get aboutMe => 'About Me';
+
+  @override
+  String get serviceAreas => 'Service Areas';
+
+  @override
+  String get servicesOffered => 'Services Offered';
+
+  @override
+  String get customerReviews => 'Customer Reviews';
+
+  @override
+  String get reviewsLabel => 'Reviews';
+
+  @override
+  String get professionalCertifications => 'Professional Certifications';
+
+  @override
+  String get noBioAdded => 'No bio added yet.';
+
+  @override
+  String get noCertificationsYet => 'No certifications uploaded yet.';
+
+  @override
+  String get backgroundSafety => 'Background & Safety';
+
+  @override
+  String get backgroundCheck => 'Background Check';
+
+  @override
+  String get identityVerifiedLabel => 'Identity Verified';
+
+  @override
+  String get verifiedLabel => 'Verified 2026';
+
+  @override
+  String get notVerifiedLabel => 'Not Verified';
+
+  @override
+  String get bookNow => 'Book Now';
+
+  @override
+  String get noServicesListedYet => 'This professional has not listed any services yet.';
+
+  @override
+  String get expYear => 'year experience';
+
+  @override
+  String get expYears => 'years experience';
+
+  @override
+  String get kmAwayUnit => 'Km away';
+
+  @override
+  String get mAwayUnit => 'm away';
+
+  // ── Booking flow ──────────────────────────────────────────────────────────────
+
+  @override
+  String get selectAddress => 'Select Address';
+
+  @override
+  String get noSavedAddresses => 'No saved addresses. Please add one in Settings.';
+
+  @override
+  String get loadingAddresses => 'Loading addresses...';
+
+  @override
+  String get tapToSelectAddress => 'Tap to select your address';
+
+  @override
+  String get pleaseSelectYourAddress => 'Please select your address to continue.';
+
+  @override
+  String get cancelBookingTitle => 'Cancel Booking?';
+
+  @override
+  String get cancelBookingWarning => 'This action is permanent and cannot be reversed. Your booking will be removed immediately.';
+
+  @override
+  String get yesCancelBooking => 'Yes, Cancel Booking';
+
+  @override
+  String get keepMyBooking => 'Keep my Booking';
+
+  @override
+  String get bookingUpdatedTitle => 'Booking Updated';
+
+  @override
+  String get bookingUpdatedMessage => 'Your changes have been sent to the professional. You can track the status in the "My Bookings" section.';
+
+  @override
+  String get appreciateTrust => 'We appreciate your trust in\nour service.';
+
+  @override
+  String get weveGotItTitle => "We've Got It From Here!";
+
+  @override
+  String get bookingRequestPending => 'Your request is now pending. Please allow some time for the professional to review the details. You can track the status of this request in the "My Bookings" section.';
+
+  @override
+  String get paymentConfirmedMoved => 'Payment confirmed! Booking moved to past.';
+
+  @override
+  String get pictureAttachedSingular => 'picture attached';
+
+  @override
+  String get picturesAttachedPlural => 'pictures attached';
+
+  @override
+  String get amLabel => 'AM';
+
+  @override
+  String get pmLabel => 'PM';
+
+  // ── Service names ─────────────────────────────────────────────────────────────
+
+  @override
+  String get servicePipeInstallation => 'Pipe Installation';
+
+  @override
+  String get serviceLeakRepairs => 'Leak Repairs';
+
+  @override
+  String get serviceWaterHeaterService => 'Water Heater Service';
+
+  @override
+  String get serviceDrainCleaning => 'Drain Cleaning';
+
+  @override
+  String get serviceBathroomFixtures => 'Bathroom Fixtures';
+
+  @override
+  String get serviceWiringRepair => 'Wiring Repair';
+
+  @override
+  String get serviceLightFixtureInstallation => 'Light Fixture Installation';
+
+  @override
+  String get serviceFurnitureAssembly => 'Furniture Assembly';
+
+  @override
+  String get serviceDoorRepair => 'Door Repair';
+
   // ── Booking status ────────────────────────────────────────────────────────────
 
   @override
