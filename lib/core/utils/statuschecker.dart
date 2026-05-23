@@ -44,7 +44,7 @@ class ProfessionalStatusChecker {
 
       try {
         final response = await _dio.get(
-          '/professionals/profile/application-status', // FIXED: correct endpoint
+          '/professionals/profile/status', // FIXED: correct endpoint
           options: Options(
             headers: {'Authorization': 'Bearer $token'},
           ),

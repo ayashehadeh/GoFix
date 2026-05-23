@@ -25,23 +25,25 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with ProfessionalNavMixin<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver, ProfessionalNavMixin<HomePage> {
   final int _currentNavIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    loadProfessionalStatus();
+    initProfessionalNav();
     final currentState = context.read<HomeBloc>().state;
     if (currentState is! HomeLoaded) {
       context.read<HomeBloc>().add(HomeLoadRequested());
     }
-
-    
   }
 
- 
+  @override
+  void dispose() {
+    disposeProfessionalNav();
+    super.dispose();
+  }
+
   void _onCategoryTap(CategoryEntity category) {
     final serviceCategory = ServiceCategory.values.firstWhere(
       (e) => e.displayName == category.name,
@@ -130,8 +132,7 @@ class _HomePageState extends State<HomePage>
             Text(state.message, style: AppTextStyles.bodyMedium),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () =>
-                  context.read<HomeBloc>().add(HomeLoadRequested()),
+              onPressed: () => context.read<HomeBloc>().add(HomeLoadRequested()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryOrange,
                 shape: RoundedRectangleBorder(

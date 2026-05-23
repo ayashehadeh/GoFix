@@ -47,62 +47,29 @@ class EditVerificationPage extends StatelessWidget {
                   _DocRow(
                     label: 'Profile Picture',
                     isRequired: true,
-                    existingFileName: professional.profileImageUrl != null
-                        ? _fileNameFromUrl(professional.profileImageUrl!)
-                        : null,
-                    sessionUploaded: state.profilePictureUploadStatus ==
-                        ActionStatus.success,
+                    existingFileName:
+                        professional.profileImageUrl != null ? _fileNameFromUrl(professional.profileImageUrl!) : null,
+                    sessionUploaded: state.profilePictureUploadStatus == ActionStatus.success,
                     onTap: () => _openUpload(
                       context,
                       title: 'Profile Picture',
                       documentType: null,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  // ── Identity ──────────────────────────────────────────
-                  _DocRow(
-                    label: 'Upload ID',
-                    isRequired: true,
-                    existingFileName:
-                        _fileNameForType(professional.documents, 'identity'),
-                    sessionUploaded: state.statusFor(DocumentType.identity) ==
-                        ActionStatus.success,
-                    onTap: () => _openUpload(
-                      context,
-                      title: 'Upload ID',
-                      documentType: DocumentType.identity,
-                    ),
-                  ),
+
                   const SizedBox(height: 10),
                   // ── Certification ─────────────────────────────────────
                   _DocRow(
                     label: 'Upload Certification',
-                    existingFileName: _fileNameForType(
-                        professional.documents, 'certification'),
-                    sessionUploaded:
-                        state.statusFor(DocumentType.certification) ==
-                            ActionStatus.success,
+                    existingFileName: _fileNameForType(professional.documents, 'certification'),
+                    sessionUploaded: state.statusFor(DocumentType.certification) == ActionStatus.success,
                     onTap: () => _openUpload(
                       context,
                       title: 'Upload Certification',
                       documentType: DocumentType.certification,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  // ── Good Conduct ──────────────────────────────────────
-                  _DocRow(
-                    label: 'Certificate of Good Conduct',
-                    existingFileName: _fileNameForType(
-                        professional.documents, 'good_conduct'),
-                    sessionUploaded:
-                        state.statusFor(DocumentType.goodConduct) ==
-                            ActionStatus.success,
-                    onTap: () => _openUpload(
-                      context,
-                      title: 'Certificate of Good Conduct',
-                      documentType: DocumentType.goodConduct,
-                    ),
-                  ),
+
                   const SizedBox(height: 16),
                   // ── Info note ─────────────────────────────────────────
                   Container(
@@ -115,8 +82,7 @@ class EditVerificationPage extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.info_outline,
-                            size: 16, color: AppColors.textSecondary),
+                        const Icon(Icons.info_outline, size: 16, color: AppColors.textSecondary),
                         const SizedBox(width: 8),
                         const Expanded(
                           child: Text(
@@ -163,8 +129,7 @@ class EditVerificationPage extends StatelessWidget {
     );
   }
 
-  String? _fileNameForType(
-      List<ProfessionalDocument> docs, String type) {
+  String? _fileNameForType(List<ProfessionalDocument> docs, String type) {
     try {
       final doc = docs.firstWhere((d) => d.documentType == type);
       return doc.fileName ?? _fileNameFromUrl(doc.fileUrl);
@@ -223,9 +188,7 @@ class _DocRow extends StatelessWidget {
               ),
               child: Icon(
                 _isUploaded ? Icons.check_circle : Icons.cloud_upload_outlined,
-                color: _isUploaded
-                    ? AppColors.primaryOrange
-                    : AppColors.primaryDark,
+                color: _isUploaded ? AppColors.primaryOrange : AppColors.primaryDark,
                 size: 22,
               ),
             ),
@@ -258,22 +221,17 @@ class _DocRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    _isUploaded
-                        ? 'Uploaded${existingFileName != null ? ' · $existingFileName' : ''}'
-                        : 'Tap to upload',
+                    _isUploaded ? 'Uploaded${existingFileName != null ? ' · $existingFileName' : ''}' : 'Tap to upload',
                     style: TextStyle(
                       fontSize: 11,
-                      color: _isUploaded
-                          ? AppColors.primaryOrange
-                          : AppColors.textSecondary,
+                      color: _isUploaded ? AppColors.primaryOrange : AppColors.textSecondary,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right,
-                color: AppColors.primaryDark, size: 22),
+            const Icon(Icons.chevron_right, color: AppColors.primaryDark, size: 22),
           ],
         ),
       ),

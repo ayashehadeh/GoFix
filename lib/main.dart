@@ -18,6 +18,7 @@ import 'package:gp/injection_container.dart' as di;
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:dio/dio.dart';
 import 'package:gp/features/auth/presentation/pages/start_page.dart';
+import 'package:gp/core/utils/statuschecker.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -57,8 +58,7 @@ Future<void> _registerFcmToken() async {
     if (fcmToken == null) return;
 
     final dio = Dio(BaseOptions(
-      baseUrl:
-          'https://gofix-api-ceaaewf7hua0ghez.uaenorth-01.azurewebsites.net/api',
+      baseUrl: 'https://gofix-api-ceaaewf7hua0ghez.uaenorth-01.azurewebsites.net/api',
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
@@ -123,20 +123,26 @@ class _SplashRouterState extends State<_SplashRouter> {
   Future<void> _route() async {
     final isLoggedIn = await TokenStorage.isLoggedIn();
     if (!mounted) return;
-
     if (!isLoggedIn) {
       Navigator.of(context).pushReplacementNamed('/login');
       return;
     }
 
-    final isProfessional = await UserTypeStorage.isProfessional();
-    if (!mounted) return;
-
-    if (isProfessional) {
-      Navigator.of(context).pushReplacementNamed('/dashboard');
-    } else {
-      Navigator.of(context).pushReplacementNamed('/home');
+    bool isPro;
+    try {
+      final status = await ProfessionalStatusChecker(di.sl()).checkStatus();
+      isPro = status['isProfessional'] == true;
+      if (isPro) {
+        await UserTypeStorage.setAsProfessional(status['name'] ?? 'Professional');
+      } else {
+        await UserTypeStorage.clear();
+      }
+    } catch (_) {
+      isPro = await UserTypeStorage.isProfessional(); // offline fallback
     }
+
+    if (!mounted) return;
+    Navigator.of(context).pushReplacementNamed(isPro ? '/dashboard' : '/home');
   }
 
   @override

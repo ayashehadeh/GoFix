@@ -52,13 +52,19 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> with ProfessionalNavMixin<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, ProfessionalNavMixin<ProfilePage> {
   String _userName = '';
   @override
   void initState() {
     super.initState();
-    loadProfessionalStatus();
+    initProfessionalNav();
     _loadUserName();
+  }
+
+  @override
+  void dispose() {
+    disposeProfessionalNav();
+    super.dispose();
   }
 
   Future<void> _loadUserName() async {

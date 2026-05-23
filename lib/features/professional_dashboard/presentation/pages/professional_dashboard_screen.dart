@@ -17,17 +17,16 @@ import '../../../../injection_container.dart' as di;
 import 'package:gp/core/utils/user_info_helper.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
 import 'package:gp/features/professionals/presentation/pages/professional_my_profile_page.dart';
+import 'dart:ui';
 
 class ProfessionalDashboardScreen extends StatefulWidget {
   const ProfessionalDashboardScreen({Key? key}) : super(key: key);
 
   @override
-  State<ProfessionalDashboardScreen> createState() =>
-      _ProfessionalDashboardScreenState();
+  State<ProfessionalDashboardScreen> createState() => _ProfessionalDashboardScreenState();
 }
 
-class _ProfessionalDashboardScreenState
-    extends State<ProfessionalDashboardScreen> {
+class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScreen> {
   String _userName = '';
 
   @override
@@ -47,8 +46,9 @@ class _ProfessionalDashboardScreenState
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
-        child:
-            BlocConsumer<ProfessionalDashboardBloc, ProfessionalDashboardState>(
+        child: BlocConsumer<ProfessionalDashboardBloc, ProfessionalDashboardState>(
+          buildWhen: (prev, curr) =>
+              curr is DashboardInitial || curr is DashboardLoading || curr is DashboardLoaded || curr is DashboardError,
           listener: (context, state) {
             if (state is RequestActionSuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -76,13 +76,10 @@ class _ProfessionalDashboardScreenState
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Error: ${state.message}',
-                        style: const TextStyle(color: Colors.red)),
+                    Text('Error: ${state.message}', style: const TextStyle(color: Colors.red)),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () => context
-                          .read<ProfessionalDashboardBloc>()
-                          .add(RefreshDashboard()),
+                      onPressed: () => context.read<ProfessionalDashboardBloc>().add(RefreshDashboard()),
                       child: Text(AppLocalizations.of(context)!.retry),
                     ),
                   ],
@@ -93,9 +90,7 @@ class _ProfessionalDashboardScreenState
             if (state is DashboardLoaded) {
               return RefreshIndicator(
                 onRefresh: () async {
-                  context
-                      .read<ProfessionalDashboardBloc>()
-                      .add(RefreshDashboard());
+                  context.read<ProfessionalDashboardBloc>().add(RefreshDashboard());
                 },
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -125,10 +120,8 @@ class _ProfessionalDashboardScreenState
         showDashboard: true,
         onTap: (index) {
           if (index == 0) Navigator.of(context).pushReplacementNamed('/home');
-          if (index == 1)
-            Navigator.of(context).pushReplacementNamed('/bookings');
-          if (index == 2)
-            Navigator.of(context).pushReplacementNamed('/profile');
+          if (index == 1) Navigator.of(context).pushReplacementNamed('/bookings');
+          if (index == 2) Navigator.of(context).pushReplacementNamed('/profile');
           if (index == 3) return;
         },
       ),
@@ -169,10 +162,6 @@ class _ProfessionalDashboardScreenState
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.notifications, color: Colors.white),
-                  ),
                 ],
               ),
             ),
@@ -189,15 +178,9 @@ class _ProfessionalDashboardScreenState
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildStatCard('${state.stats.requestsCount}', AppLocalizations.of(context)!.totalRequests),
-                  Container(
-                      width: 1,
-                      height: 40,
-                      color: Colors.white.withOpacity(0.2)),
+                  Container(width: 1, height: 40, color: Colors.white.withOpacity(0.2)),
                   _buildStatCard('${state.stats.scheduledCount}', AppLocalizations.of(context)!.scheduled),
-                  Container(
-                      width: 1,
-                      height: 40,
-                      color: Colors.white.withOpacity(0.2)),
+                  Container(width: 1, height: 40, color: Colors.white.withOpacity(0.2)),
                   _buildStatCard('${state.stats.completedCount}', AppLocalizations.of(context)!.completedJobs),
                 ],
               ),
@@ -218,15 +201,10 @@ class _ProfessionalDashboardScreenState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(count,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold)),
+          Text(count, style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
           Text(label,
-              style:
-                  TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 11),
+              style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 11),
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis),
@@ -245,10 +223,7 @@ class _ProfessionalDashboardScreenState
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(AppLocalizations.of(context)!.scheduledJobsTitle,
-                  style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1A3A5C))),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1A3A5C))),
               if (state.scheduledJobs.isNotEmpty)
                 TextButton(onPressed: () {}, child: Text(AppLocalizations.of(context)!.seeAll)),
             ],
@@ -262,16 +237,14 @@ class _ProfessionalDashboardScreenState
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Text(AppLocalizations.of(context)!.noScheduledJobsYet,
-                        style:
-                            TextStyle(color: Colors.grey[600], fontSize: 16)),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 16)),
                   ),
                 )
               : ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   itemCount: state.scheduledJobs.length,
-                  itemBuilder: (context, index) =>
-                      _buildScheduledJobCard(state.scheduledJobs[index]),
+                  itemBuilder: (context, index) => _buildScheduledJobCard(state.scheduledJobs[index]),
                 ),
         ),
       ],
@@ -286,12 +259,7 @@ class _ProfessionalDashboardScreenState
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2))
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,10 +269,7 @@ class _ProfessionalDashboardScreenState
               CircleAvatar(
                 radius: 20,
                 backgroundColor: const Color(0xFF1A3A5C),
-                child: Text(
-                    job.clientName.isNotEmpty
-                        ? job.clientName[0].toUpperCase()
-                        : '?',
+                child: Text(job.clientName.isNotEmpty ? job.clientName[0].toUpperCase() : '?',
                     style: const TextStyle(color: Colors.white)),
               ),
               const SizedBox(width: 12),
@@ -312,12 +277,8 @@ class _ProfessionalDashboardScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(job.clientName,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16)),
-                    Text(job.serviceType,
-                        style:
-                            TextStyle(color: Colors.grey[600], fontSize: 14)),
+                    Text(job.clientName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(job.serviceType, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
                   ],
                 ),
               ),
@@ -326,13 +287,11 @@ class _ProfessionalDashboardScreenState
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(Icons.location_on_outlined,
-                  size: 16, color: Colors.grey[600]),
+              Icon(Icons.location_on_outlined, size: 16, color: Colors.grey[600]),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(job.location,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                    overflow: TextOverflow.ellipsis),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14), overflow: TextOverflow.ellipsis),
               ),
             ],
           ),
@@ -352,11 +311,9 @@ class _ProfessionalDashboardScreenState
               onPressed: () => _showStatusUpdateDialog(job.id, job.status),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFE87722),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
-              child: Text(AppLocalizations.of(context)!.updateStatus,
-                  style: const TextStyle(color: Colors.white)),
+              child: Text(AppLocalizations.of(context)!.updateStatus, style: const TextStyle(color: Colors.white)),
             ),
           ),
         ],
@@ -374,10 +331,7 @@ class _ProfessionalDashboardScreenState
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(AppLocalizations.of(context)!.incomingRequestsTitle,
-                  style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1A3A5C))),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1A3A5C))),
               if (state.incomingRequests.isNotEmpty)
                 TextButton(onPressed: () {}, child: Text(AppLocalizations.of(context)!.seeAll)),
             ],
@@ -391,16 +345,14 @@ class _ProfessionalDashboardScreenState
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Text(AppLocalizations.of(context)!.noIncomingRequests,
-                        style:
-                            TextStyle(color: Colors.grey[600], fontSize: 16)),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 16)),
                   ),
                 )
               : ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   itemCount: state.incomingRequests.length,
-                  itemBuilder: (context, index) =>
-                      _buildRequestCard(state.incomingRequests[index]),
+                  itemBuilder: (context, index) => _buildRequestCard(state.incomingRequests[index]),
                 ),
         ),
       ],
@@ -415,12 +367,7 @@ class _ProfessionalDashboardScreenState
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2))
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -430,10 +377,7 @@ class _ProfessionalDashboardScreenState
               CircleAvatar(
                 radius: 20,
                 backgroundColor: const Color(0xFF1A3A5C),
-                child: Text(
-                    request.clientName.isNotEmpty
-                        ? request.clientName[0].toUpperCase()
-                        : '?',
+                child: Text(request.clientName.isNotEmpty ? request.clientName[0].toUpperCase() : '?',
                     style: const TextStyle(color: Colors.white)),
               ),
               const SizedBox(width: 12),
@@ -441,12 +385,8 @@ class _ProfessionalDashboardScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(request.clientName,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16)),
-                    Text(request.serviceType,
-                        style:
-                            TextStyle(color: Colors.grey[600], fontSize: 14)),
+                    Text(request.clientName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(request.serviceType, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
                   ],
                 ),
               ),
@@ -455,13 +395,11 @@ class _ProfessionalDashboardScreenState
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(Icons.location_on_outlined,
-                  size: 16, color: Colors.grey[600]),
+              Icon(Icons.location_on_outlined, size: 16, color: Colors.grey[600]),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(request.location,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                    overflow: TextOverflow.ellipsis),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14), overflow: TextOverflow.ellipsis),
               ),
             ],
           ),
@@ -479,31 +417,23 @@ class _ProfessionalDashboardScreenState
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => context
-                      .read<ProfessionalDashboardBloc>()
-                      .add(DeclineRequest(request.id)),
+                  onPressed: () => context.read<ProfessionalDashboardBloc>().add(DeclineRequest(request.id)),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.red),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  child: Text(AppLocalizations.of(context)!.declineLabel,
-                      style: const TextStyle(color: Colors.red)),
+                  child: Text(AppLocalizations.of(context)!.declineLabel, style: const TextStyle(color: Colors.red)),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () => context
-                      .read<ProfessionalDashboardBloc>()
-                      .add(AcceptRequest(request.id)),
+                  onPressed: () => context.read<ProfessionalDashboardBloc>().add(AcceptRequest(request.id)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE87722),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  child: Text(AppLocalizations.of(context)!.acceptLabel,
-                      style: const TextStyle(color: Colors.white)),
+                  child: Text(AppLocalizations.of(context)!.acceptLabel, style: const TextStyle(color: Colors.white)),
                 ),
               ),
             ],
@@ -579,9 +509,7 @@ class _ProfessionalDashboardScreenState
           children: [
             Icon(icon, color: const Color(0xFF1A3A5C)),
             const SizedBox(width: 16),
-            Text(title,
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             const Spacer(),
             const Icon(Icons.chevron_right, color: Colors.grey),
           ],
@@ -591,40 +519,133 @@ class _ProfessionalDashboardScreenState
   }
 
   void _showStatusUpdateDialog(String jobId, JobStatus currentStatus) {
-    final options = <String, String>{};
-    if (currentStatus == JobStatus.scheduled) {
-      options['OnTheWay'] = 'On The Way';
-      options['InProgress'] = 'In Progress';
-      options['Completed'] = 'Completed';
-    } else if (currentStatus == JobStatus.onTheWay) {
-      options['Arrived'] = 'Arrived';
-    } else if (currentStatus == JobStatus.arrived) {
-      options['InProgress'] = 'In Progress';
-    } else if (currentStatus == JobStatus.inProgress) {
-      options['Completed'] = 'Completed';
-    }
+    // All five, always shown.
+    final options = <String, String>{
+      'OnTheWay': 'On The Way',
+      'Arrived': 'Arrived',
+      'InProgress': 'In Progress',
+      'Completed': 'Completed',
+      'Cancelled': 'Cancelled',
+    };
 
-    if (options.isEmpty) return;
+    // Backend allows exactly one next step; Cancelled is never allowed here.
+    final String? allowedKey = switch (currentStatus) {
+      JobStatus.scheduled => 'OnTheWay',
+      JobStatus.onTheWay => 'Arrived',
+      JobStatus.arrived => 'InProgress',
+      JobStatus.inProgress => 'Completed',
+      _ => null,
+    };
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)!.updateJobStatus),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: options.entries
-              .map((entry) => ListTile(
-                    title: Text(entry.value),
-                    onTap: () {
-                      this.context.read<ProfessionalDashboardBloc>().add(
-                            UpdateStatus(jobId, entry.key),
-                          );
-                      Navigator.pop(context);
-                    },
-                  ))
-              .toList(),
-        ),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetCtx) => Stack(
+        children: [
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+            child: Container(color: Colors.black.withOpacity(0.25)),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(24, 28, 24, 40),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  Text(
+                    AppLocalizations.of(sheetCtx)!.jobStatus,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF062B4D),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ...options.entries.map((entry) {
+                    final isEnabled = entry.key == allowedKey;
+                    final icon = _iconForStatusKey(entry.key);
+                    final accent = const Color(0xFFE87722);
+                    final disabledColor = Colors.grey.shade400;
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(14),
+                        onTap: isEnabled
+                            ? () {
+                                context.read<ProfessionalDashboardBloc>().add(UpdateStatus(jobId, entry.key));
+                                Navigator.pop(sheetCtx);
+                              }
+                            : null,
+                        child: Opacity(
+                          opacity: isEnabled ? 1.0 : 0.5,
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: isEnabled ? Colors.white : Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: isEnabled ? const Color(0xFFE0E0E0) : Colors.grey.shade200,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(icon, color: isEnabled ? accent : disabledColor),
+                                const SizedBox(width: 14),
+                                Text(
+                                  entry.value,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: isEnabled ? const Color(0xFF062B4D) : disabledColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  IconData _iconForStatusKey(String key) {
+    switch (key) {
+      case 'OnTheWay':
+        return Icons.directions_car_outlined;
+      case 'Arrived':
+        return Icons.place_outlined;
+      case 'InProgress':
+        return Icons.settings_outlined;
+      case 'Completed':
+        return Icons.check_circle_outline;
+      case 'Cancelled':
+        return Icons.cancel_outlined;
+      default:
+        return Icons.help_outline;
+    }
   }
 }
