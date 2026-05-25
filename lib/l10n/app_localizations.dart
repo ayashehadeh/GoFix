@@ -1270,6 +1270,12 @@ abstract class AppLocalizations {
 
   /// No description provided for @inQueueTitle.
   String get inQueueTitle;
+  String get alreadyProfessionalTitle;
+  String get alreadyProfessionalMessage;
+  String get cancelProfessionalTitle;
+  String get cancelProfessionalMessage;
+  String get cancelProfessionalConfirm;
+  String get cancelProfessionalButton;
 
   /// No description provided for @inQueueMessage.
   String get inQueueMessage;

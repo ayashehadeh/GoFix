@@ -71,4 +71,7 @@ abstract class BecomeProfessionalRepository {
     double? longitude,
     required String bio,
   });
+
+  /// DELETE /api/professionals/profile  — cancel professional status
+  Future<Either<Failure, Unit>> cancelProfessional();
 }

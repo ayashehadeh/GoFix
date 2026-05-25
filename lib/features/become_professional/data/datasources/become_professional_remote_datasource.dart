@@ -35,6 +35,7 @@ abstract class BecomeProfessionalRemoteDataSource {
   });
 
   Future<void> submitApplication();
+  Future<void> cancelProfessional();
   Future<void> updateProfile({
     required int categoryId,
     required int experienceYears,
@@ -246,6 +247,12 @@ class BecomeProfessionalRemoteDataSourceImpl implements BecomeProfessionalRemote
       '/professionals/profile/submit',
       options: Options(headers: await _authHeaders()),
     );
+  }
+
+  @override
+  Future<void> cancelProfessional() async {
+    // TODO: replace with real endpoint when available
+    throw UnimplementedError('cancelProfessional endpoint not yet available');
   }
 
   @override
