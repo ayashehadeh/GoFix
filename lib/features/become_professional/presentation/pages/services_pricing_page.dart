@@ -62,6 +62,7 @@ class _ServicesPricingPageState extends State<ServicesPricingPage> {
             ServicePricing(
               serviceId: service.id,
               serviceName: service.name,
+              serviceNameAr: service.nameAr,
               minPrice: min,
               maxPrice: max,
             ),
@@ -94,8 +95,7 @@ class _ServicesPricingPageState extends State<ServicesPricingPage> {
     return BlocConsumer<BecomeProfessionalBloc, BecomeProfessionalState>(
       listenWhen: (prev, curr) => prev.step2Status != curr.step2Status,
       listener: (context, state) {
-        if (_previousStep2Status == ActionStatus.loading &&
-            state.step2Status == ActionStatus.success) {
+        if (_previousStep2Status == ActionStatus.loading && state.step2Status == ActionStatus.success) {
           widget.onContinue();
         }
         _previousStep2Status = state.step2Status;
@@ -104,8 +104,7 @@ class _ServicesPricingPageState extends State<ServicesPricingPage> {
         final isLoading = state.step2Status == ActionStatus.loading;
         final services = state.categoryServices;
         final added = state.application.services;
-        final loadingServices =
-            state.categoryServicesStatus == ActionStatus.loading;
+        final loadingServices = state.categoryServicesStatus == ActionStatus.loading;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,9 +128,7 @@ class _ServicesPricingPageState extends State<ServicesPricingPage> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: _showServiceError
-                            ? AppColors.error
-                            : AppColors.primaryDark,
+                        color: _showServiceError ? AppColors.error : AppColors.primaryDark,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -168,8 +165,7 @@ class _ServicesPricingPageState extends State<ServicesPricingPage> {
                         runSpacing: 8,
                         children: services.map((s) {
                           final isSel = _selectedService?.id == s.id;
-                          final isAdded =
-                              added.any((a) => a.serviceId == s.id);
+                          final isAdded = added.any((a) => a.serviceId == s.id);
                           return ChoiceChip(
                             label: Text(localizeServiceName(s.name, AppLocalizations.of(context)!, nameAr: s.nameAr)),
                             selected: isSel,
@@ -181,12 +177,9 @@ class _ServicesPricingPageState extends State<ServicesPricingPage> {
                                     }),
                             selectedColor: AppColors.primaryOrange,
                             backgroundColor: Colors.white,
-                            disabledColor:
-                                AppColors.divider.withOpacity(0.4),
+                            disabledColor: AppColors.divider.withOpacity(0.4),
                             side: BorderSide(
-                              color: isSel
-                                  ? AppColors.primaryOrange
-                                  : AppColors.divider,
+                              color: isSel ? AppColors.primaryOrange : AppColors.divider,
                             ),
                             labelStyle: TextStyle(
                               fontSize: 12,
@@ -195,9 +188,7 @@ class _ServicesPricingPageState extends State<ServicesPricingPage> {
                                   : isAdded
                                       ? AppColors.textSecondary
                                       : AppColors.primaryDark,
-                              fontWeight: isSel
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
+                              fontWeight: isSel ? FontWeight.w600 : FontWeight.normal,
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
@@ -235,8 +226,7 @@ class _ServicesPricingPageState extends State<ServicesPricingPage> {
                       width: double.infinity,
                       child: OutlinedButton.icon(
                         onPressed: _onAddService,
-                        icon: const Icon(Icons.add,
-                            color: AppColors.primaryOrange),
+                        icon: const Icon(Icons.add, color: AppColors.primaryOrange),
                         label: const Text(
                           'Add service',
                           style: TextStyle(
@@ -246,8 +236,7 @@ class _ServicesPricingPageState extends State<ServicesPricingPage> {
                         ),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: const BorderSide(
-                              color: AppColors.primaryOrange),
+                          side: const BorderSide(color: AppColors.primaryOrange),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -267,9 +256,7 @@ class _ServicesPricingPageState extends State<ServicesPricingPage> {
                       const SizedBox(height: 10),
                       ...added.map((sp) => _AddedServiceCard(
                             pricing: sp,
-                            onRemove: () => context
-                                .read<BecomeProfessionalBloc>()
-                                .add(ServiceRemoved(sp.serviceId)),
+                            onRemove: () => context.read<BecomeProfessionalBloc>().add(ServiceRemoved(sp.serviceId)),
                           )),
                     ],
                     const SizedBox(height: 16),
@@ -342,8 +329,7 @@ class _PriceInput extends StatelessWidget {
                 color: AppColors.textSecondary,
               ),
               border: InputBorder.none,
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             ),
           ),
         ),
@@ -375,7 +361,8 @@ class _AddedServiceCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  localizeServiceName(pricing.serviceName, AppLocalizations.of(context)!),
+                  localizeServiceName(pricing.serviceName, AppLocalizations.of(context)!,
+                      nameAr: pricing.serviceNameAr),
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,

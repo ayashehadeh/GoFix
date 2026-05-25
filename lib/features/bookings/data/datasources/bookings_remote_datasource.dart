@@ -8,6 +8,7 @@ abstract class BookingsRemoteDataSource {
   Future<BookingModel> createBooking({
     required String professionalId,
     required String serviceName,
+    String? serviceNameAr,
     required String servicePrice,
     required DateTime scheduledDate,
     required String scheduledTime,
@@ -61,6 +62,7 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   Future<BookingModel> createBooking({
     required String professionalId,
     required String serviceName,
+    String? serviceNameAr,
     required String servicePrice,
     required DateTime scheduledDate,
     required String scheduledTime,
@@ -73,6 +75,7 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
       data: {
         'professionalId': professionalId,
         'serviceName': serviceName,
+        if (serviceNameAr != null) 'serviceNameAr': serviceNameAr,
         'servicePrice': servicePrice,
         'scheduledDate': scheduledDate.toIso8601String(),
         'scheduledTime': scheduledTime,

@@ -33,6 +33,7 @@ class SubmitReportEvent extends BookingsEvent {
 class CreateBookingEvent extends BookingsEvent {
   final String professionalId;
   final String serviceName;
+  final String? serviceNameAr;
   final String servicePrice;
   final DateTime scheduledDate;
   final String scheduledTime;
@@ -43,6 +44,7 @@ class CreateBookingEvent extends BookingsEvent {
   CreateBookingEvent({
     required this.professionalId,
     required this.serviceName,
+    this.serviceNameAr,
     required this.servicePrice,
     required this.scheduledDate,
     required this.scheduledTime,
@@ -55,6 +57,7 @@ class CreateBookingEvent extends BookingsEvent {
   List<Object?> get props => [
         professionalId,
         serviceName,
+        serviceNameAr,
         servicePrice,
         scheduledDate,
         scheduledTime,

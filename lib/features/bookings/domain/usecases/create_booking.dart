@@ -10,6 +10,7 @@ class CreateBooking {
   Future<Either<Failure, Booking>> call({
     required String professionalId,
     required String serviceName,
+    String? serviceNameAr,
     required String servicePrice,
     required DateTime scheduledDate,
     required String scheduledTime,
@@ -20,6 +21,7 @@ class CreateBooking {
       repository.createBooking(
         professionalId: professionalId,
         serviceName: serviceName,
+        serviceNameAr: serviceNameAr,
         servicePrice: servicePrice,
         scheduledDate: scheduledDate,
         scheduledTime: scheduledTime,
