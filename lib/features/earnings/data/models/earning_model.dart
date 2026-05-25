@@ -19,12 +19,12 @@ class EarningModel extends Earning {
 
   factory EarningModel.fromJson(Map<String, dynamic> json) {
     return EarningModel(
-      period: json['period'] ?? '',
-      label: json['label'] ?? '',
-      dateRange: json['date_range'] ?? json['dateRange'] ?? '',
-      grossAmount: (json['gross_amount'] ?? json['grossAmount'] ?? 0).toDouble(),
-      jobCount: json['job_count'] ?? json['jobCount'] ?? 0,
-      adminFeeRate: (json['admin_fee_rate'] ?? json['adminFeeRate'] ?? 0.15).toDouble(),
+      period: json['period'] as String? ?? '',
+      label: json['label'] as String? ?? '',
+      dateRange: json['dateRange'] as String? ?? '',
+      grossAmount: (json['grossAmount'] as num?)?.toDouble() ?? 0.0,
+      jobCount: json['jobCount'] as int? ?? 0,
+      adminFeeRate: (json['adminFeeRate'] as num?)?.toDouble() ?? 0.15,
     );
   }
 
@@ -32,10 +32,10 @@ class EarningModel extends Earning {
     return {
       'period': period,
       'label': label,
-      'date_range': dateRange,
-      'gross_amount': grossAmount,
-      'job_count': jobCount,
-      'admin_fee_rate': adminFeeRate,
+      'dateRange': dateRange,
+      'grossAmount': grossAmount,
+      'jobCount': jobCount,
+      'adminFeeRate': adminFeeRate,
     };
   }
 

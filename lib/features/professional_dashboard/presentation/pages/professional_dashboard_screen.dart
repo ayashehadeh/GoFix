@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/features/professional_dashboard/presentation/pages/job_request_info_page.dart';
 import 'package:gp/features/professional_jobs/presentation/bloc/professional_jobs_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/features/professional_jobs/presentation/pages/my_jobs_page.dart';
@@ -119,9 +120,9 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
         currentIndex: 3,
         showDashboard: true,
         onTap: (index) {
-          if (index == 0) Navigator.of(context).pushReplacementNamed('/home');
-          if (index == 1) Navigator.of(context).pushReplacementNamed('/bookings');
-          if (index == 2) Navigator.of(context).pushReplacementNamed('/profile');
+          if (index == 0) Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+          if (index == 1) Navigator.of(context).pushNamedAndRemoveUntil('/bookings', (route) => false);
+          if (index == 2) Navigator.of(context).pushNamedAndRemoveUntil('/profile', (route) => false);
           if (index == 3) return;
         },
       ),
@@ -231,7 +232,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
         ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 200,
+          height: 220,
           child: state.scheduledJobs.isEmpty
               ? Center(
                   child: Padding(
@@ -263,6 +264,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
@@ -277,34 +279,42 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(job.clientName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    Text(job.serviceType, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                    Text(job.clientName,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
+                    Text(job.serviceType,
+                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Row(
             children: [
-              Icon(Icons.location_on_outlined, size: 16, color: Colors.grey[600]),
+              Icon(Icons.location_on_outlined, size: 15, color: Colors.grey[600]),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(job.location,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14), overflow: TextOverflow.ellipsis),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Row(
             children: [
-              Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+              Icon(Icons.access_time, size: 15, color: Colors.grey[600]),
               const SizedBox(width: 4),
               Text(DateFormat('MMM d, h:mm a').format(job.scheduledTime),
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 13)),
             ],
           ),
-          const Spacer(),
+          const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -312,8 +322,10 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFE87722),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                padding: const EdgeInsets.symmetric(vertical: 10),
               ),
-              child: Text(AppLocalizations.of(context)!.updateStatus, style: const TextStyle(color: Colors.white)),
+              child: Text(AppLocalizations.of(context)!.updateStatus,
+                  style: const TextStyle(color: Colors.white, fontSize: 13)),
             ),
           ),
         ],
@@ -360,85 +372,102 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
   }
 
   Widget _buildRequestCard(JobEntity request) {
-    return Container(
-      width: 280,
-      margin: const EdgeInsets.only(right: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: const Color(0xFF1A3A5C),
-                child: Text(request.clientName.isNotEmpty ? request.clientName[0].toUpperCase() : '?',
-                    style: const TextStyle(color: Colors.white)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(request.clientName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    Text(request.serviceType, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
-                  ],
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BlocProvider.value(
+              value: context.read<ProfessionalDashboardBloc>(),
+              child: JobRequestInfoPage(job: request),
+            ),
+          ),
+        ).then((_) {
+          if (context.mounted) {
+            context.read<ProfessionalDashboardBloc>().add(RefreshDashboard());
+          }
+        });
+      },
+      child: Container(
+        width: 280,
+        margin: const EdgeInsets.only(right: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 2))],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: const Color(0xFF1A3A5C),
+                  child: Text(request.clientName.isNotEmpty ? request.clientName[0].toUpperCase() : '?',
+                      style: const TextStyle(color: Colors.white)),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Icon(Icons.location_on_outlined, size: 16, color: Colors.grey[600]),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(request.location,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14), overflow: TextOverflow.ellipsis),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
-              const SizedBox(width: 4),
-              Text(DateFormat('MMM d, h:mm a').format(request.scheduledTime),
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14)),
-            ],
-          ),
-          const Spacer(),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => context.read<ProfessionalDashboardBloc>().add(DeclineRequest(request.id)),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.red),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(request.clientName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text(request.serviceType, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                    ],
                   ),
-                  child: Text(AppLocalizations.of(context)!.declineLabel, style: const TextStyle(color: Colors.red)),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => context.read<ProfessionalDashboardBloc>().add(AcceptRequest(request.id)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE87722),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(Icons.location_on_outlined, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(request.location,
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14), overflow: TextOverflow.ellipsis),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 4),
+                Text(DateFormat('MMM d, h:mm a').format(request.scheduledTime),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+              ],
+            ),
+            const Spacer(),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => context.read<ProfessionalDashboardBloc>().add(DeclineRequest(request.id)),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.red),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: Text(AppLocalizations.of(context)!.declineLabel, style: const TextStyle(color: Colors.red)),
                   ),
-                  child: Text(AppLocalizations.of(context)!.acceptLabel, style: const TextStyle(color: Colors.white)),
                 ),
-              ),
-            ],
-          ),
-        ],
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => context.read<ProfessionalDashboardBloc>().add(AcceptRequest(request.id)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE87722),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: Text(AppLocalizations.of(context)!.acceptLabel, style: const TextStyle(color: Colors.white)),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -589,8 +618,12 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
                         borderRadius: BorderRadius.circular(14),
                         onTap: isEnabled
                             ? () {
-                                context.read<ProfessionalDashboardBloc>().add(UpdateStatus(jobId, entry.key));
                                 Navigator.pop(sheetCtx);
+                                if (entry.key == 'Completed') {
+                                  _showPaymentAmountSheet(jobId);
+                                } else {
+                                  context.read<ProfessionalDashboardBloc>().add(UpdateStatus(jobId, entry.key));
+                                }
                               }
                             : null,
                         child: Opacity(
@@ -647,5 +680,142 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
       default:
         return Icons.help_outline;
     }
+  }
+
+  void _showPaymentAmountSheet(String jobId) {
+    final amountController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    bool _statusUpdated = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => BlocProvider.value(
+        value: context.read<ProfessionalDashboardBloc>(),
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(sheetCtx).viewInsets.bottom),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(24, 28, 24, 40),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            ),
+            child: BlocListener<ProfessionalDashboardBloc, ProfessionalDashboardState>(
+              listener: (ctx, state) {
+                if (state is PaymentAmountSubmitted) {
+                  Navigator.pop(sheetCtx);
+                  context.read<ProfessionalDashboardBloc>().add(RefreshDashboard());
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Amount submitted. Waiting for customer confirmation.'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              },
+              child: StatefulBuilder(
+                builder: (ctx, setSheetState) {
+                  return Form(
+                    key: formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 40,
+                            height: 4,
+                            margin: const EdgeInsets.only(bottom: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                        const Text(
+                          'Set Agreed Amount',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Color(0xFF062B4D)),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Enter the final cash amount agreed with the customer.',
+                          style: TextStyle(fontSize: 13.5, color: Colors.grey.shade600),
+                        ),
+                        const SizedBox(height: 20),
+                        TextFormField(
+                          controller: amountController,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          autofocus: true,
+                          decoration: InputDecoration(
+                            labelText: 'Amount (JD)',
+                            prefixIcon: const Icon(Icons.attach_money, color: Color(0xFF062B4D)),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(color: Color(0xFFE87722), width: 2),
+                            ),
+                          ),
+                          validator: (val) {
+                            if (val == null || val.trim().isEmpty) return 'Please enter an amount';
+                            final parsed = double.tryParse(val.trim());
+                            if (parsed == null || parsed <= 0) return 'Enter a valid amount';
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 24),
+                        BlocBuilder<ProfessionalDashboardBloc, ProfessionalDashboardState>(
+                          builder: (ctx, state) {
+                            final isLoading = state is RequestActionLoading || state is PaymentAmountSubmitting;
+                            return SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: ElevatedButton(
+                                onPressed: isLoading
+                                    ? null
+                                    : () async {
+                                        if (!formKey.currentState!.validate()) return;
+                                        final amount = double.parse(amountController.text.trim());
+
+                                        // Step 1 — mark as Completed
+                                        context.read<ProfessionalDashboardBloc>().add(UpdateStatus(jobId, 'Completed'));
+
+                                        // Wait briefly for status to persist, then submit amount
+                                        await Future.delayed(const Duration(milliseconds: 800));
+
+                                        if (ctx.mounted) {
+                                          context.read<ProfessionalDashboardBloc>().add(
+                                                SubmitPaymentAmountEvent(jobId, amount),
+                                              );
+                                        }
+                                      },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFE87722),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                  elevation: 0,
+                                ),
+                                child: isLoading
+                                    ? const SizedBox(
+                                        width: 22,
+                                        height: 22,
+                                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                                      )
+                                    : const Text('Submit Amount',
+                                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

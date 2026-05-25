@@ -148,6 +148,18 @@ class BookingsRepositoryImpl implements BookingsRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, void>> submitPaymentAmount(String bookingId, double amount) async {
+    try {
+      await remoteDataSource.submitPaymentAmount(bookingId, amount);
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
   Failure _handleDioError(DioException e) {
     if (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout) {
       return NetworkFailure('Network error');

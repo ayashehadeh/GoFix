@@ -30,9 +30,8 @@ abstract class BookingsRepository {
   });
 
   Future<Either<Failure, void>> cancelBooking(String bookingId);
-
   Future<Either<Failure, void>> confirmPayment(String bookingId);
-
+  Future<Either<Failure, void>> submitPaymentAmount(String bookingId, double amount);
   Future<Either<Failure, void>> submitReport({
     required String bookingId,
     required String description,

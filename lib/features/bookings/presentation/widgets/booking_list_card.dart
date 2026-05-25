@@ -40,9 +40,8 @@ class BookingListCard extends StatelessWidget {
               child: CircleAvatar(
                 radius: 26,
                 backgroundColor: const Color(0xFFE0E8F0),
-                backgroundImage: booking.professionalImageUrl != null
-                    ? NetworkImage(booking.professionalImageUrl!)
-                    : null,
+                backgroundImage:
+                    booking.professionalImageUrl != null ? NetworkImage(booking.professionalImageUrl!) : null,
                 child: booking.professionalImageUrl == null
                     ? const Icon(
                         Icons.person,
@@ -120,12 +119,18 @@ class _StatusBar extends StatelessWidget {
       case BookingStatus.pending:
         return const Color(0xFFF3800D);
       case BookingStatus.confirmed:
+      case BookingStatus.accepted:
         return const Color(0xFF1565C0);
+      case BookingStatus.onTheWay:
+        return const Color(0xFF6A1B9A);
+      case BookingStatus.arrived:
+        return const Color(0xFF00838F);
       case BookingStatus.inProgress:
         return const Color(0xFF2E7D32);
       case BookingStatus.completed:
         return const Color(0xFF757575);
       case BookingStatus.cancelled:
+      case BookingStatus.declined:
         return const Color(0xFFC62828);
     }
   }

@@ -24,8 +24,7 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ProfessionalDashboardBloc, ProfessionalDashboardState>(
-      listenWhen: (_, current) =>
-          current is RequestActionSuccess || current is RequestActionError,
+      listenWhen: (_, current) => current is RequestActionSuccess || current is RequestActionError,
       listener: (context, state) {
         if (state is RequestActionSuccess) {
           final accepted = state.message.toLowerCase().contains('accept');
@@ -82,26 +81,20 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                     child: ElevatedButton(
                       onPressed: isLoading
                           ? null
-                          : () => context
-                              .read<ProfessionalDashboardBloc>()
-                              .add(AcceptRequest(widget.job.id)),
+                          : () => context.read<ProfessionalDashboardBloc>().add(AcceptRequest(widget.job.id)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFF8C1A),
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         elevation: 0,
                       ),
                       child: isLoading
                           ? const SizedBox(
                               width: 22,
                               height: 22,
-                              child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2.5))
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
                           : Text(AppLocalizations.of(context)!.acceptRequest,
-                              style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700)),
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -111,19 +104,14 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                     width: double.infinity,
                     height: 52,
                     child: OutlinedButton(
-                      onPressed: isLoading
-                          ? null
-                          : () => _showDeclineSheet(context),
+                      onPressed: isLoading ? null : () => _showDeclineSheet(context),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF062B4D),
-                        side: const BorderSide(
-                            color: Color(0xFF062B4D), width: 1.5),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14)),
+                        side: const BorderSide(color: Color(0xFF062B4D), width: 1.5),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                       ),
                       child: Text(AppLocalizations.of(context)!.declineRequest,
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w700)),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                     ),
                   ),
                 ],
@@ -163,8 +151,7 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
               ),
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(28)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
               ),
               child: SingleChildScrollView(
                 child: Column(
@@ -201,14 +188,11 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                     // Reason field
                     Row(
                       children: [
-                        const Icon(Icons.edit_outlined,
-                            color: Color(0xFFFF8C1A), size: 16),
+                        const Icon(Icons.edit_outlined, color: Color(0xFFFF8C1A), size: 16),
                         const SizedBox(width: 6),
                         Text(AppLocalizations.of(sheetCtx)!.reasonOptional,
-                            style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xFF062B4D))),
+                            style:
+                                const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF062B4D))),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -217,8 +201,7 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                       maxLines: 4,
                       decoration: InputDecoration(
                         hintText: AppLocalizations.of(sheetCtx)!.tellCustomerWhy,
-                        hintStyle: const TextStyle(
-                            fontSize: 13, color: Colors.grey),
+                        hintStyle: const TextStyle(fontSize: 13, color: Colors.grey),
                         filled: true,
                         fillColor: const Color(0xFFF8F9FA),
                         border: OutlineInputBorder(
@@ -242,14 +225,11 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFF8C1A),
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           elevation: 0,
                         ),
                         child: Text(AppLocalizations.of(sheetCtx)!.done,
-                            style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700)),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                       ),
                     ),
                   ],
@@ -284,8 +264,7 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
               padding: const EdgeInsets.fromLTRB(24, 32, 24, 48),
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(28)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -317,8 +296,7 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                         ? AppLocalizations.of(sheetCtx)!.jobAddedToSchedule
                         : AppLocalizations.of(sheetCtx)!.customerNotified,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontSize: 14, color: Colors.grey, height: 1.6),
+                    style: const TextStyle(fontSize: 14, color: Colors.grey, height: 1.6),
                   ),
                   const SizedBox(height: 28),
 
@@ -332,8 +310,7 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: const Center(
-                        child: Icon(Icons.check_circle_outline,
-                            color: Color(0xFFFF8C1A), size: 64),
+                        child: Icon(Icons.check_circle_outline, color: Color(0xFFFF8C1A), size: 64),
                       ),
                     ),
                     const SizedBox(height: 28),
@@ -350,8 +327,7 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (_) => BlocProvider(
-                                create: (_) =>
-                                    di.sl<ProfessionalJobsBloc>(),
+                                create: (_) => di.sl<ProfessionalJobsBloc>(),
                                 child: const MyJobsPage(),
                               ),
                             ),
@@ -360,14 +336,11 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFF8C1A),
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           elevation: 0,
                         ),
                         child: Text(AppLocalizations.of(sheetCtx)!.viewMyJobs,
-                            style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700)),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                       ),
                     ),
                   ] else ...[
@@ -383,14 +356,11 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFF8C1A),
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           elevation: 0,
                         ),
                         child: Text(AppLocalizations.of(sheetCtx)!.done,
-                            style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700)),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                       ),
                     ),
                   ],
@@ -419,20 +389,14 @@ class _JobDetailsCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2)),
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2)),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(AppLocalizations.of(context)!.jobDetails,
-              style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF062B4D))),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF062B4D))),
           const SizedBox(height: 12),
           _Row(icon: Icons.build_outlined, text: job.serviceType),
           _Row(icon: Icons.person_outline, text: job.clientName),
@@ -444,10 +408,7 @@ class _JobDetailsCard extends StatelessWidget {
             icon: Icons.access_time_outlined,
             text: DateFormat('h:mm a').format(job.scheduledTime),
           ),
-          _Row(
-              icon: Icons.location_on_outlined,
-              text: job.location,
-              isLast: true),
+          _Row(icon: Icons.location_on_outlined, text: job.location, isLast: true),
         ],
       ),
     );
@@ -469,10 +430,7 @@ class _ServiceDescriptionCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2)),
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2)),
         ],
       ),
       child: Column(
@@ -483,34 +441,58 @@ class _ServiceDescriptionCard extends StatelessWidget {
               const Icon(Icons.edit_outlined, color: Color(0xFFFF8C1A), size: 18),
               const SizedBox(width: 8),
               Text(AppLocalizations.of(context)!.serviceDescription,
-                  style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF062B4D))),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF062B4D))),
             ],
           ),
           const SizedBox(height: 10),
           Text(
-            'The customer needs ${job.serviceType.toLowerCase()} services at ${job.location}.',
-            style: const TextStyle(
-                fontSize: 13, color: Colors.grey, height: 1.6),
+            (job.description != null && job.description!.isNotEmpty) ? job.description! : 'No description provided.',
+            style: const TextStyle(fontSize: 13, color: Colors.grey, height: 1.6),
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              const Icon(Icons.image_outlined, color: Color(0xFF062B4D), size: 18),
-              const SizedBox(width: 8),
-              Text(AppLocalizations.of(context)!.pictureAttached,
-                  style: const TextStyle(
-                      fontSize: 13, color: Color(0xFF062B4D))),
-            ],
-          ),
+          if (job.imageUrls.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            const Divider(height: 1, color: Color(0xFFF0F0F0)),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                const Icon(Icons.image_outlined, color: Color(0xFF062B4D), size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  '${job.imageUrls.length} ${job.imageUrls.length == 1 ? 'picture attached' : 'pictures attached'}',
+                  style: const TextStyle(fontSize: 13, color: Color(0xFF062B4D), fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 90,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: job.imageUrls.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (context, index) => ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.network(
+                    job.imageUrls[index],
+                    width: 90,
+                    height: 90,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 90,
+                      height: 90,
+                      color: Colors.grey.shade200,
+                      child: const Icon(Icons.broken_image_outlined, color: Colors.grey),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 }
-
 // ─── Detail row ───────────────────────────────────────────────────────────────
 
 class _Row extends StatelessWidget {
@@ -529,10 +511,7 @@ class _Row extends StatelessWidget {
             children: [
               Icon(icon, color: const Color(0xFFFF8C1A), size: 18),
               const SizedBox(width: 12),
-              Expanded(
-                  child: Text(text,
-                      style: const TextStyle(
-                          fontSize: 13, color: Color(0xFF062B4D)))),
+              Expanded(child: Text(text, style: const TextStyle(fontSize: 13, color: Color(0xFF062B4D)))),
             ],
           ),
         ),
