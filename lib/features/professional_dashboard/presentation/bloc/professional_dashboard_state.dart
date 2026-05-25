@@ -56,3 +56,7 @@ class RequestActionError extends ProfessionalDashboardState {
   @override
   List<Object?> get props => [message];
 }
+
+class PaymentAmountSubmitting extends ProfessionalDashboardState {}
+
+class PaymentAmountSubmitted extends ProfessionalDashboardState {}

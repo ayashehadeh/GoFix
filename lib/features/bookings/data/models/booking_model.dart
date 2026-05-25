@@ -18,6 +18,9 @@ class BookingModel extends Booking {
     required super.imageUrls,
     required super.status,
     super.paymentConfirmed,
+    super.professionalConfirmedPayment,
+    super.agreedAmount,
+    super.paymentAgreedAt,
     required super.createdAt,
   });
 
@@ -41,6 +44,9 @@ class BookingModel extends Booking {
       imageUrls: List<String>.from(json['imageUrls'] as List? ?? []),
       status: BookingStatus.fromString(json['status'] as String? ?? 'pending'),
       paymentConfirmed: json['paymentConfirmed'] as bool? ?? false,
+      professionalConfirmedPayment: json['professionalConfirmedPayment'] as bool? ?? false,
+      agreedAmount: (json['agreedAmount'] as num?)?.toDouble(),
+      paymentAgreedAt: json['paymentAgreedAt'] != null ? DateTime.tryParse(json['paymentAgreedAt'] as String) : null,
       createdAt: DateTime.parse(
         json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
       ),
@@ -62,6 +68,10 @@ class BookingModel extends Booking {
         'description': description,
         'image_urls': imageUrls,
         'status': status.name,
+        'payment_confirmed': paymentConfirmed,
+        'professional_confirmed_payment': professionalConfirmedPayment,
+        'agreed_amount': agreedAmount,
+        'payment_agreed_at': paymentAgreedAt?.toIso8601String(),
         'created_at': createdAt.toIso8601String(),
       };
 }

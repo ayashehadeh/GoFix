@@ -52,13 +52,19 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> with ProfessionalNavMixin<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, ProfessionalNavMixin<ProfilePage> {
   String _userName = '';
   @override
   void initState() {
     super.initState();
-    loadProfessionalStatus();
+    initProfessionalNav();
     _loadUserName();
+  }
+
+  @override
+  void dispose() {
+    disposeProfessionalNav();
+    super.dispose();
   }
 
   Future<void> _loadUserName() async {
@@ -760,10 +766,9 @@ class _ProfilePageState extends State<ProfilePage> with ProfessionalNavMixin<Pro
             currentIndex: 2,
             showDashboard: isProfessional,
             onTap: (index) {
-              if (index == 0) Navigator.pushReplacementNamed(context, '/home');
-              if (index == 1) Navigator.pushReplacementNamed(context, '/bookings');
-              if (index == 2) return;
-              if (index == 3) Navigator.pushReplacementNamed(context, '/dashboard');
+              if (index == 0) Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+              if (index == 1) Navigator.pushNamedAndRemoveUntil(context, '/bookings', (route) => false);
+              if (index == 3) Navigator.pushNamedAndRemoveUntil(context, '/dashboard', (route) => false);
             },
           ),
         );

@@ -25,23 +25,25 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with ProfessionalNavMixin<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver, ProfessionalNavMixin<HomePage> {
   final int _currentNavIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    loadProfessionalStatus();
+    initProfessionalNav();
     final currentState = context.read<HomeBloc>().state;
     if (currentState is! HomeLoaded) {
       context.read<HomeBloc>().add(HomeLoadRequested());
     }
-
-    
   }
 
- 
+  @override
+  void dispose() {
+    disposeProfessionalNav();
+    super.dispose();
+  }
+
   void _onCategoryTap(CategoryEntity category) {
     final serviceCategory = ServiceCategory.values.firstWhere(
       (e) => e.displayName == category.name,
@@ -105,9 +107,9 @@ class _HomePageState extends State<HomePage>
         showDashboard: isProfessional,
         onTap: (index) {
           if (index == 0) return;
-          if (index == 1) Navigator.pushReplacementNamed(context, '/bookings');
-          if (index == 2) Navigator.pushReplacementNamed(context, '/profile');
-          if (index == 3) Navigator.pushReplacementNamed(context, '/dashboard');
+          if (index == 1) Navigator.pushNamedAndRemoveUntil(context, '/bookings', (route) => false);
+          if (index == 2) Navigator.pushNamedAndRemoveUntil(context, '/profile', (route) => false);
+          if (index == 3) Navigator.pushNamedAndRemoveUntil(context, '/dashboard', (route) => false);
         },
       ),
     );
@@ -130,8 +132,7 @@ class _HomePageState extends State<HomePage>
             Text(state.message, style: AppTextStyles.bodyMedium),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () =>
-                  context.read<HomeBloc>().add(HomeLoadRequested()),
+              onPressed: () => context.read<HomeBloc>().add(HomeLoadRequested()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryOrange,
                 shape: RoundedRectangleBorder(
@@ -312,11 +313,11 @@ class _CategoriesGrid extends StatelessWidget {
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4,
           mainAxisSpacing: 16,
           crossAxisSpacing: 8,
-          childAspectRatio: 0.62,
+          childAspectRatio: MediaQuery.of(context).size.width < 360 ? 0.65 : 0.75,
         ),
         itemCount: categories.length,
         itemBuilder: (context, index) {

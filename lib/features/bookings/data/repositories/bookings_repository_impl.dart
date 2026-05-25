@@ -50,6 +50,7 @@ class BookingsRepositoryImpl implements BookingsRepository {
   Future<Either<Failure, Booking>> createBooking({
     required String professionalId,
     required String serviceName,
+    String? serviceNameAr,
     required String servicePrice,
     required DateTime scheduledDate,
     required String scheduledTime,
@@ -61,6 +62,7 @@ class BookingsRepositoryImpl implements BookingsRepository {
       final result = await remoteDataSource.createBooking(
         professionalId: professionalId,
         serviceName: serviceName,
+        serviceNameAr: serviceNameAr,
         servicePrice: servicePrice,
         scheduledDate: scheduledDate,
         scheduledTime: scheduledTime,
@@ -146,9 +148,20 @@ class BookingsRepositoryImpl implements BookingsRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, void>> submitPaymentAmount(String bookingId, double amount) async {
+    try {
+      await remoteDataSource.submitPaymentAmount(bookingId, amount);
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
   Failure _handleDioError(DioException e) {
-    if (e.type == DioExceptionType.connectionError ||
-        e.type == DioExceptionType.connectionTimeout) {
+    if (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout) {
       return NetworkFailure('Network error');
     }
     return ServerFailure(

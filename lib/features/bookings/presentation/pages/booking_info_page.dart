@@ -72,23 +72,17 @@ class _BookingInfoPageState extends State<BookingInfoPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline,
-                      color: AppColors.error, size: 48),
+                  const Icon(Icons.error_outline, color: AppColors.error, size: 48),
                   const SizedBox(height: 12),
-                  Text(state.message,
-                      style: const TextStyle(color: AppColors.textSecondary)),
+                  Text(state.message, style: const TextStyle(color: AppColors.textSecondary)),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => context
-                        .read<BookingsBloc>()
-                        .add(LoadBookingById(widget.bookingId)),
+                    onPressed: () => context.read<BookingsBloc>().add(LoadBookingById(widget.bookingId)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryOrange,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: Text(AppLocalizations.of(context)!.retry,
-                        style: const TextStyle(color: Colors.white)),
+                    child: Text(AppLocalizations.of(context)!.retry, style: const TextStyle(color: Colors.white)),
                   ),
                 ],
               ),
@@ -133,7 +127,8 @@ class _BookingInfoBody extends StatelessWidget {
                     children: [
                       _DetailRow(
                         icon: Icons.settings,
-                        text: localizeServiceName(booking.serviceName, AppLocalizations.of(context)!, nameAr: booking.serviceNameAr),
+                        text: localizeServiceName(booking.serviceName, AppLocalizations.of(context)!,
+                            nameAr: booking.serviceNameAr),
                       ),
                       _DetailRow(
                         icon: Icons.calendar_month_outlined,
@@ -401,7 +396,6 @@ class _DetailRow extends StatelessWidget {
 }
 
 // ─── Bottom actions ───────────────────────────────────────────────────────────
-
 class _BottomActions extends StatelessWidget {
   final Booking booking;
 
@@ -409,8 +403,11 @@ class _BottomActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final waitingForAmount =
+        booking.status == BookingStatus.completed && !booking.paymentConfirmed && !booking.professionalConfirmedPayment;
+
     final showConfirmPayment =
-        booking.status == BookingStatus.completed && !booking.paymentConfirmed;
+        booking.status == BookingStatus.completed && !booking.paymentConfirmed && booking.professionalConfirmedPayment;
 
     return Container(
       color: Colors.white,
@@ -418,19 +415,63 @@ class _BottomActions extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (waitingForAmount) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+              margin: const EdgeInsets.only(bottom: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF8F0),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE87722).withOpacity(0.4)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.hourglass_top_rounded, color: Color(0xFFE87722), size: 20),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Waiting for professional to set the payment amount...',
+                      style: TextStyle(fontSize: 13.5, color: Color(0xFFE87722), fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           if (showConfirmPayment) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+              margin: const EdgeInsets.only(bottom: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0F7FF),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF1A3A5C).withOpacity(0.2)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Agreed Amount',
+                    style: TextStyle(fontSize: 14, color: Color(0xFF1A3A5C), fontWeight: FontWeight.w500),
+                  ),
+                  Text(
+                    '${booking.agreedAmount!.toStringAsFixed(2)} JD',
+                    style: const TextStyle(fontSize: 18, color: Color(0xFF1A3A5C), fontWeight: FontWeight.w800),
+                  ),
+                ],
+              ),
+            ),
             SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: () => context
-                    .read<BookingsBloc>()
-                    .add(ConfirmPaymentEvent(booking.id)),
+                onPressed: () => context.read<BookingsBloc>().add(ConfirmPaymentEvent(booking.id)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryOrange,
+                  backgroundColor: Colors.green,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
                 ),
                 child: Text(
@@ -441,58 +482,57 @@ class _BottomActions extends StatelessWidget {
             ),
             const SizedBox(height: 10),
           ],
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Navigate back and trigger re-booking with same professional
-                    Navigator.pop(context);
-                    // TODO: Navigate to booking flow with professionalId pre-filled
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryOrange,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(0, 50),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    AppLocalizations.of(context)!.bookService,
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+          if (!waitingForAmount && !showConfirmPayment) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      // TODO: Navigate to booking flow with professionalId pre-filled
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryOrange,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(0, 50),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context)!.bookService,
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => BlocProvider.value(
-                          value: context.read<BookingsBloc>(),
-                          child: BookingFeedbackPage(booking: booking),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider.value(
+                            value: context.read<BookingsBloc>(),
+                            child: BookingFeedbackPage(booking: booking),
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primaryDark,
-                    minimumSize: const Size(0, 50),
-                    side: const BorderSide(color: AppColors.primaryDark),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: Text(
-                    AppLocalizations.of(context)!.writeReview,
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                      );
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primaryDark,
+                      minimumSize: const Size(0, 50),
+                      side: const BorderSide(color: AppColors.primaryDark),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text(
+                      AppLocalizations.of(context)!.writeReview,
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ],
       ),
     );

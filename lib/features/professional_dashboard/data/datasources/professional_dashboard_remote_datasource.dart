@@ -11,8 +11,7 @@ abstract class ProfessionalDashboardRemoteDataSource {
   Future<void> updateJobStatus(String jobId, String status);
 }
 
-class ProfessionalDashboardRemoteDataSourceImpl
-    implements ProfessionalDashboardRemoteDataSource {
+class ProfessionalDashboardRemoteDataSourceImpl implements ProfessionalDashboardRemoteDataSource {
   final Dio dio;
 
   ProfessionalDashboardRemoteDataSourceImpl({required this.dio});
@@ -35,9 +34,7 @@ class ProfessionalDashboardRemoteDataSourceImpl
       queryParameters: {'status': 'Pending'},
     );
     final List<dynamic> data = response.data['data'] as List;
-    return data
-        .map((json) => JobModel.fromJson(json as Map<String, dynamic>))
-        .toList();
+    return data.map((json) => JobModel.fromJson(json as Map<String, dynamic>)).toList();
   }
 
   // GET /bookings/professional?status=Accepted  (fetch each scheduled status separately
@@ -46,24 +43,21 @@ class ProfessionalDashboardRemoteDataSourceImpl
   @override
   Future<List<JobModel>> getScheduledJobs() async {
     final statuses = ['Accepted', 'OnTheWay', 'Arrived', 'InProgress'];
-
     final results = await Future.wait(
-      statuses.map(
-        (status) => dio.get(
-          '/bookings/professional',
-          queryParameters: {'status': status},
-        ),
-      ),
+      statuses.map((status) async {
+        try {
+          final response = await dio.get(
+            '/bookings/professional',
+            queryParameters: {'status': status},
+          );
+          final List<dynamic> data = response.data['data'] as List;
+          return data.map((json) => JobModel.fromJson(json as Map<String, dynamic>)).toList();
+        } catch (_) {
+          return <JobModel>[];
+        }
+      }),
     );
-
-    final jobs = <JobModel>[];
-    for (final response in results) {
-      final List<dynamic> data = response.data['data'] as List;
-      jobs.addAll(
-        data.map((json) => JobModel.fromJson(json as Map<String, dynamic>)),
-      );
-    }
-    return jobs;
+    return results.expand((list) => list).toList();
   }
 
   // POST /bookings/{id}/respond   body: { "accept": true }

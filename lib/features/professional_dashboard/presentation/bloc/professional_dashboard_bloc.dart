@@ -2,15 +2,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/usecases/dashboard_usecases.dart';
 import 'professional_dashboard_event.dart';
 import 'professional_dashboard_state.dart';
+import 'package:gp/features/bookings/domain/usecases/submit_payment_amount.dart';
 
-class ProfessionalDashboardBloc
-    extends Bloc<ProfessionalDashboardEvent, ProfessionalDashboardState> {
+class ProfessionalDashboardBloc extends Bloc<ProfessionalDashboardEvent, ProfessionalDashboardState> {
   final GetDashboardStats getDashboardStats;
   final GetIncomingRequests getIncomingRequests;
   final GetScheduledJobs getScheduledJobs;
   final AcceptJobRequest acceptJobRequest;
   final DeclineJobRequest declineJobRequest;
   final UpdateJobStatus updateJobStatus;
+  final SubmitPaymentAmount submitPaymentAmount;
 
   ProfessionalDashboardBloc({
     required this.getDashboardStats,
@@ -19,12 +20,14 @@ class ProfessionalDashboardBloc
     required this.acceptJobRequest,
     required this.declineJobRequest,
     required this.updateJobStatus,
+    required this.submitPaymentAmount,
   }) : super(DashboardInitial()) {
     on<LoadDashboard>(_onLoadDashboard);
     on<RefreshDashboard>(_onRefreshDashboard);
     on<AcceptRequest>(_onAcceptRequest);
     on<DeclineRequest>(_onDeclineRequest);
     on<UpdateStatus>(_onUpdateStatus);
+    on<SubmitPaymentAmountEvent>(_onSubmitPaymentAmount);
   }
 
   Future<void> _onLoadDashboard(
@@ -102,6 +105,20 @@ class ProfessionalDashboardBloc
         emit(const RequestActionSuccess('Request declined'));
         add(RefreshDashboard());
       },
+    );
+  }
+
+  Future<void> _onSubmitPaymentAmount(
+    SubmitPaymentAmountEvent event,
+    Emitter<ProfessionalDashboardState> emit,
+  ) async {
+    emit(PaymentAmountSubmitting());
+
+    final result = await submitPaymentAmount(event.jobId, event.amount);
+
+    result.fold(
+      (error) => emit(RequestActionError(error.message)),
+      (_) => emit(PaymentAmountSubmitted()),
     );
   }
 

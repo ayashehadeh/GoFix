@@ -15,9 +15,9 @@ class EarningsRemoteDataSourceImpl implements EarningsRemoteDataSource {
     final response = await dio.get('/bookings/earnings');
     final data = response.data['data'] ?? response.data;
     return {
-      'daily': EarningModel.fromJson(data['daily'] ?? {}),
-      'weekly': EarningModel.fromJson(data['weekly'] ?? {}),
-      'monthly': EarningModel.fromJson(data['monthly'] ?? {}),
+      'daily': EarningModel.fromJson(data['daily'] as Map<String, dynamic>),
+      'weekly': EarningModel.fromJson(data['weekly'] as Map<String, dynamic>),
+      'monthly': EarningModel.fromJson(data['monthly'] as Map<String, dynamic>),
     };
   }
 }

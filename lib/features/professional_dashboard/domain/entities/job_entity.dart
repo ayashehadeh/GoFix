@@ -2,10 +2,10 @@ import 'package:equatable/equatable.dart';
 
 enum JobStatus {
   pending,
-  scheduled,   // Accepted
-  onTheWay,    // OnTheWay
-  arrived,     // Arrived
-  inProgress,  // InProgress
+  scheduled,
+  onTheWay,
+  arrived,
+  inProgress,
   completed,
   declined,
 }
@@ -18,6 +18,8 @@ class JobEntity extends Equatable {
   final DateTime scheduledTime;
   final JobStatus status;
   final String? clientImage;
+  final String? description;
+  final List<String> imageUrls;
 
   const JobEntity({
     required this.id,
@@ -27,6 +29,8 @@ class JobEntity extends Equatable {
     required this.scheduledTime,
     required this.status,
     this.clientImage,
+    this.description,
+    this.imageUrls = const [],
   });
 
   @override
@@ -38,5 +42,7 @@ class JobEntity extends Equatable {
         scheduledTime,
         status,
         clientImage,
+        description,
+        imageUrls,
       ];
 }

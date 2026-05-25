@@ -14,11 +14,11 @@ class LoginHelper {
     if (!context.mounted) return;
 
     if (isProfessional) {
-      await UserTypeStorage.setAsProfessional(name); // ADD THIS
-      Navigator.of(context).pushReplacementNamed('/dashboard');
+      await UserTypeStorage.setAsProfessional(name);
+      Navigator.of(context).pushNamedAndRemoveUntil('/dashboard', (route) => false);
     } else {
-      await UserTypeStorage.clear(); // ADD THIS — clears if they were previously professional
-      Navigator.of(context).pushReplacementNamed('/home');
+      await UserTypeStorage.clear();
+      Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
     }
   }
 }

@@ -20,8 +20,7 @@ class UpcomingBookingInfoPage extends StatefulWidget {
   const UpcomingBookingInfoPage({super.key, required this.bookingId});
 
   @override
-  State<UpcomingBookingInfoPage> createState() =>
-      _UpcomingBookingInfoPageState();
+  State<UpcomingBookingInfoPage> createState() => _UpcomingBookingInfoPageState();
 }
 
 class _UpcomingBookingInfoPageState extends State<UpcomingBookingInfoPage> {
@@ -80,7 +79,9 @@ class _UpcomingBookingInfoPageState extends State<UpcomingBookingInfoPage> {
       body: BlocConsumer<BookingsBloc, BookingsState>(
         listener: (context, state) {
           if (state is BookingCancelledSuccess) {
-            Navigator.of(context).popUntil((route) => route.isFirst);
+            Navigator.of(context).popUntil(
+              (route) => route.settings.name == '/bookings' || route.isFirst,
+            );
           }
           if (state is ConfirmPaymentSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -89,7 +90,9 @@ class _UpcomingBookingInfoPageState extends State<UpcomingBookingInfoPage> {
                 backgroundColor: Colors.green,
               ),
             );
-            Navigator.of(context).popUntil((route) => route.isFirst);
+            Navigator.of(context).popUntil(
+              (route) => route.settings.name == '/bookings' || route.isFirst,
+            );
           }
           if (state is ConfirmPaymentError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -110,9 +113,7 @@ class _UpcomingBookingInfoPageState extends State<UpcomingBookingInfoPage> {
           if (state is BookingsError) {
             return _ErrorBody(
               message: state.message,
-              onRetry: () => context
-                  .read<BookingsBloc>()
-                  .add(LoadBookingById(widget.bookingId)),
+              onRetry: () => context.read<BookingsBloc>().add(LoadBookingById(widget.bookingId)),
             );
           }
 
@@ -156,20 +157,12 @@ class _UpcomingInfoBody extends StatelessWidget {
                     children: [
                       _DetailRow(
                           icon: Icons.settings,
-                          text: localizeServiceName(booking.serviceName, AppLocalizations.of(context)!, nameAr: booking.serviceNameAr)),
-                      _DetailRow(
-                          icon: Icons.calendar_month_outlined,
-                          text: booking.formattedDate),
-                      _DetailRow(
-                          icon: Icons.access_time_outlined,
-                          text: booking.scheduledTime),
-                      _DetailRow(
-                          icon: Icons.location_on_outlined,
-                          text: booking.address),
-                      _DetailRow(
-                          icon: Icons.attach_money,
-                          text: booking.servicePrice,
-                          isLast: true),
+                          text: localizeServiceName(booking.serviceName, AppLocalizations.of(context)!,
+                              nameAr: booking.serviceNameAr)),
+                      _DetailRow(icon: Icons.calendar_month_outlined, text: booking.formattedDate),
+                      _DetailRow(icon: Icons.access_time_outlined, text: booking.scheduledTime),
+                      _DetailRow(icon: Icons.location_on_outlined, text: booking.address),
+                      _DetailRow(icon: Icons.attach_money, text: booking.servicePrice, isLast: true),
                     ],
                   ),
                 ),
@@ -196,8 +189,7 @@ class _UpcomingInfoBody extends StatelessWidget {
                         const SizedBox(height: 14),
                         Row(
                           children: [
-                            const Icon(Icons.image_outlined,
-                                color: AppColors.primaryDark, size: 18),
+                            const Icon(Icons.image_outlined, color: AppColors.primaryDark, size: 18),
                             const SizedBox(width: 6),
                             Text(
                               '${booking.imageUrls.length} ${booking.imageUrls.length == 1 ? AppLocalizations.of(context)!.pictureAttachedSingular : AppLocalizations.of(context)!.picturesAttachedPlural}',
@@ -235,62 +227,106 @@ class _BottomActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final awaitingPayment =
-        booking.status == BookingStatus.completed && !booking.paymentConfirmed;
+    final isCompleted = booking.status == BookingStatus.completed;
+    final waitingForAmount = isCompleted && !booking.paymentConfirmed && !booking.professionalConfirmedPayment;
+    final canConfirm = isCompleted && !booking.paymentConfirmed && booking.professionalConfirmedPayment;
 
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
-      child: awaitingPayment
-          ? SizedBox(
+    if (waitingForAmount) {
+      return Container(
+        color: Colors.white,
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF8F0),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE87722).withOpacity(0.4)),
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.hourglass_top_rounded, color: Color(0xFFE87722), size: 20),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Waiting for professional to set the payment amount...',
+                  style: TextStyle(fontSize: 13.5, color: Color(0xFFE87722), fontWeight: FontWeight.w500),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (canConfirm) {
+      return Container(
+        color: Colors.white,
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+              margin: const EdgeInsets.only(bottom: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0F7FF),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF1A3A5C).withOpacity(0.2)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Agreed Amount',
+                    style: TextStyle(fontSize: 14, color: Color(0xFF1A3A5C), fontWeight: FontWeight.w500),
+                  ),
+                  Text(
+                    '${booking.agreedAmount!.toStringAsFixed(2)} JD',
+                    style: const TextStyle(fontSize: 18, color: Color(0xFF1A3A5C), fontWeight: FontWeight.w800),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton.icon(
-                onPressed: () => context
-                    .read<BookingsBloc>()
-                    .add(ConfirmPaymentEvent(booking.id)),
+                onPressed: () => context.read<BookingsBloc>().add(ConfirmPaymentEvent(booking.id)),
                 icon: const Icon(Icons.check_circle_outline, color: Colors.white),
                 label: Text(
                   AppLocalizations.of(context)!.confirmPayment,
-                  style: const TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.w700),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
                 ),
               ),
-            )
-          : Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => BlocProvider(
-                            create: (_) => di.sl<BookingsBloc>(),
-                            child: ModifyBookingPage(booking: booking),
-                          ),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryOrange,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(0, 50),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      AppLocalizations.of(context)!.modifyBooking,
-                      style: const TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Default: modify / cancel / chat buttons
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BlocProvider(
+                      create: (_) => di.sl<BookingsBloc>(),
+                      child: ModifyBookingPage(booking: booking),
                     ),
                   ),
                 ),
@@ -321,6 +357,29 @@ class _BottomActionBar extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+          const SizedBox(width: 10),
+          _IconActionButton(
+            icon: Icons.delete_outline_rounded,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider.value(
+                    value: context.read<BookingsBloc>(),
+                    child: CancelBookingPage(booking: booking),
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 10),
+          _IconActionButton(
+            icon: Icons.chat_bubble_outline_rounded,
+            onTap: () {},
+          ),
+        ],
+      ),
     );
   }
 }
@@ -517,8 +576,7 @@ class _DetailRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   text,
-                  style: const TextStyle(
-                      fontSize: 14, color: AppColors.primaryDark),
+                  style: const TextStyle(fontSize: 14, color: AppColors.primaryDark),
                 ),
               ),
             ],
@@ -544,18 +602,15 @@ class _ErrorBody extends StatelessWidget {
         children: [
           const Icon(Icons.error_outline, color: AppColors.error, size: 48),
           const SizedBox(height: 12),
-          Text(message,
-              style: const TextStyle(color: AppColors.textSecondary)),
+          Text(message, style: const TextStyle(color: AppColors.textSecondary)),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: onRetry,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryOrange,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: Text(AppLocalizations.of(context)!.retry,
-                style: const TextStyle(color: Colors.white)),
+            child: Text(AppLocalizations.of(context)!.retry, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),

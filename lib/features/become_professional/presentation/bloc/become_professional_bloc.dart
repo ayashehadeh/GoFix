@@ -3,6 +3,7 @@ import 'package:gp/features/become_professional/domain/usecases/get_cities.dart'
 import '../../domain/entities/document_type.dart';
 import '../../domain/entities/service_pricing.dart';
 import '../../domain/usecases/create_profile.dart';
+import '../../domain/usecases/update_profile.dart';
 import '../../domain/usecases/get_categories.dart';
 import '../../domain/usecases/get_service_areas.dart';
 import '../../domain/usecases/get_services_for_category.dart';
@@ -14,8 +15,7 @@ import '../../domain/usecases/upload_profile_picture.dart';
 import 'become_professional_event.dart';
 import 'become_professional_state.dart';
 
-class BecomeProfessionalBloc
-    extends Bloc<BecomeProfessionalEvent, BecomeProfessionalState> {
+class BecomeProfessionalBloc extends Bloc<BecomeProfessionalEvent, BecomeProfessionalState> {
   static const Map<int, ({double lat, double lon})> _cityCoordinatesById = {
     1: (lat: 31.9454, lon: 35.9284), // Amman
     2: (lat: 32.5569, lon: 35.7597), // Irbid
@@ -27,6 +27,7 @@ class BecomeProfessionalBloc
   final GetServiceAreas getServiceAreas;
   final GetServicesForCategory getServicesForCategory;
   final CreateProfile createProfile;
+  final UpdateProfile updateProfile;
   final SetServices setServices;
   final SetServiceAreas setServiceAreas;
   final UploadProfilePicture uploadProfilePicture;
@@ -34,11 +35,16 @@ class BecomeProfessionalBloc
   final SubmitApplication submitApplication;
   final GetCitiesFromProfessional getCitiesFromProfessional;
 
+  /// True when the bloc is being used by the Edit Profile wizard
+  /// (set in _onPreloadProfileData, which only runs in edit mode).
+  bool _isEditMode = false;
+
   BecomeProfessionalBloc({
     required this.getCategories,
     required this.getServiceAreas,
     required this.getServicesForCategory,
     required this.createProfile,
+    required this.updateProfile,
     required this.setServices,
     required this.setServiceAreas,
     required this.uploadProfilePicture,
@@ -75,18 +81,23 @@ class BecomeProfessionalBloc
     PreloadProfileData event,
     Emitter<BecomeProfessionalState> emit,
   ) {
+    _isEditMode = true;
+
     final p = event.professional;
 
     // Map ServiceCategory enum → integer id (mirrors backend _categoryId helper)
     final catId = _categoryIdFromEnum(p.category);
 
     // Map ServiceOffered → ServicePricing
-    final services = p.services.map((s) => ServicePricing(
-          serviceId: s.serviceId ?? 0,
-          serviceName: s.name,
-          minPrice: s.minPrice,
-          maxPrice: s.maxPrice,
-        )).toList();
+    final services = p.services
+        .map((s) => ServicePricing(
+              serviceId: s.serviceId ?? 0,
+              serviceName: s.name,
+              serviceNameAr: s.nameAr,
+              minPrice: s.minPrice,
+              maxPrice: s.maxPrice,
+            ))
+        .toList();
 
     // Derive cityId from first service area (areas carry their cityId)
     final cityId = p.serviceAreas.isNotEmpty ? p.serviceAreas.first.cityId : null;
@@ -266,13 +277,21 @@ class BecomeProfessionalBloc
 
     emit(state.copyWith(step1Status: ActionStatus.loading, clearError: true));
 
-    final profileResult = await createProfile(
-      categoryId: app.categoryId!,
-      experienceYears: app.experienceYears!,
-      latitude: coords?.lat,
-      longitude: coords?.lon,
-      bio: app.bio.trim(),
-    );
+    final profileResult = _isEditMode
+        ? await updateProfile(
+            categoryId: app.categoryId!,
+            experienceYears: app.experienceYears!,
+            latitude: coords?.lat,
+            longitude: coords?.lon,
+            bio: app.bio.trim(),
+          )
+        : await createProfile(
+            categoryId: app.categoryId!,
+            experienceYears: app.experienceYears!,
+            latitude: coords?.lat,
+            longitude: coords?.lon,
+            bio: app.bio.trim(),
+          );
 
     if (profileResult.isLeft()) {
       profileResult.fold(
@@ -314,9 +333,7 @@ class BecomeProfessionalBloc
     ServiceRemoved event,
     Emitter<BecomeProfessionalState> emit,
   ) {
-    final updated = state.application.services
-        .where((s) => s.serviceId != event.serviceId)
-        .toList();
+    final updated = state.application.services.where((s) => s.serviceId != event.serviceId).toList();
     emit(state.copyWith(
       application: state.application.copyWith(services: updated),
     ));
@@ -366,9 +383,8 @@ class BecomeProfessionalBloc
       DocumentType.certification => app.copyWith(certificationPath: event.filePath),
       DocumentType.goodConduct => app.copyWith(goodConductPath: event.filePath),
     };
-    final newDocStatus =
-        Map<DocumentType, ActionStatus>.from(state.documentUploadStatus)
-          ..[event.documentType] = ActionStatus.idle;
+    final newDocStatus = Map<DocumentType, ActionStatus>.from(state.documentUploadStatus)
+      ..[event.documentType] = ActionStatus.idle;
     emit(state.copyWith(
       application: updatedApp,
       documentUploadStatus: newDocStatus,
@@ -403,8 +419,7 @@ class BecomeProfessionalBloc
       documentType: event.documentType,
     );
     result.fold(
-      (f) => _setDocStatus(emit, event.documentType, ActionStatus.failure,
-          error: f.message),
+      (f) => _setDocStatus(emit, event.documentType, ActionStatus.failure, error: f.message),
       (_) => _setDocStatus(emit, event.documentType, ActionStatus.success),
     );
   }
@@ -416,9 +431,7 @@ class BecomeProfessionalBloc
     String? error,
     bool clearError = false,
   }) {
-    final newMap =
-        Map<DocumentType, ActionStatus>.from(state.documentUploadStatus)
-          ..[type] = status;
+    final newMap = Map<DocumentType, ActionStatus>.from(state.documentUploadStatus)..[type] = status;
     emit(state.copyWith(
       documentUploadStatus: newMap,
       errorMessage: error,
@@ -435,8 +448,7 @@ class BecomeProfessionalBloc
     if (!state.application.isStep4Valid) {
       emit(state.copyWith(
         submitStatus: ActionStatus.failure,
-        errorMessage:
-            'Please upload a profile picture and your ID before submitting.',
+        errorMessage: 'Please upload a profile picture and your ID before submitting.',
       ));
       return;
     }
