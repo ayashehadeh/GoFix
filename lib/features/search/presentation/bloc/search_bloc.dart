@@ -14,6 +14,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   final ClearRecentSearchesUseCase clearRecentSearches;
 
   List<RecentSearch> _recentSearches = [];
+  int? _selectedAreaId;
   String? _selectedAreaName;
   String? _selectedAreaCity;
   int? _selectedAreaProCount;
@@ -144,6 +145,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     AreaSelected event,
     Emitter<SearchState> emit,
   ) async {
+    _selectedAreaId = event.areaId;
     _selectedAreaName = event.areaName;
     _selectedAreaCity = event.city;
     _selectedAreaProCount = event.proCount;
@@ -154,7 +156,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       proCount: event.proCount,
     ));
 
-    final result = await getProfessionalsByArea(areaName: event.areaName);
+    final result = await getProfessionalsByArea(areaId: event.areaId);
     result.fold(
       (failure) => emit(SearchError(failure.message)),
       (pros) => emit(AreaProfessionalsLoaded(
@@ -171,7 +173,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     AreaCategoryFilterChanged event,
     Emitter<SearchState> emit,
   ) async {
-    if (_selectedAreaName == null) return;
+    if (_selectedAreaId == null) return;
     final current = state;
     if (current is! AreaProfessionalsLoaded) return;
 
@@ -182,7 +184,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     ));
 
     final result = await getProfessionalsByArea(
-      areaName: _selectedAreaName!,
+      areaId: _selectedAreaId!,
       category: event.category,
     );
     result.fold(

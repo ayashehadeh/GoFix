@@ -9,11 +9,11 @@ class GetProfessionalsByArea {
   const GetProfessionalsByArea(this.repository);
 
   Future<Either<Failure, List<Professional>>> call({
-    required String areaName,
+    required int areaId,
     ServiceCategory? category,
   }) =>
       repository.getProfessionalsByArea(
-        areaName: areaName,
+        areaId: areaId,
         category: category,
       );
 }

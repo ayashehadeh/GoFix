@@ -62,7 +62,30 @@ class AreaProfessionalsPage extends StatelessWidget {
           );
         }
 
-        // Fallback — pop back if state is unexpected
+        if (state is SearchError) {
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.wifi_off_outlined, size: 52, color: AppColors.divider),
+                  const SizedBox(height: 16),
+                  Text(
+                    state.message,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 20),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Go back'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
         return const Scaffold(
           body: Center(child: CircularProgressIndicator()),
         );
@@ -116,9 +139,6 @@ class _AreaHeader extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const Spacer(),
-              // Filter icon (future filter page hook)
-              const Icon(Icons.filter_list, color: Colors.white, size: 22),
             ],
           ),
           const SizedBox(height: 4),

@@ -61,19 +61,20 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<SearchBloc, SearchState>(
+      listenWhen: (previous, current) =>
+          current is AreaProfessionalsLoading &&
+          previous is! AreaProfessionalsLoading &&
+          previous is! AreaProfessionalsLoaded,
       listener: (context, state) {
-        if (state is AreaProfessionalsLoaded ||
-            state is AreaProfessionalsLoading) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => BlocProvider.value(
-                value: context.read<SearchBloc>(),
-                child: const AreaProfessionalsPage(),
-              ),
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BlocProvider.value(
+              value: context.read<SearchBloc>(),
+              child: const AreaProfessionalsPage(),
             ),
-          );
-        }
+          ),
+        );
       },
       child: Scaffold(
         backgroundColor: const Color(0xFFFCFCFC),
@@ -431,11 +432,35 @@ class _ResultsList extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        // Services — shown first so service searches surface the right result immediately
+        if (results.services.isNotEmpty) ...[
+          _SectionHeader(label: 'Services', count: results.services.length),
+          const SizedBox(height: 10),
+          ...results.services.map(
+            (service) => ServiceResultTile(
+              service: service,
+              query: results.query,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider(
+                    create: (_) => di.sl<ProfessionalsBloc>(),
+                    child: CategoryProfessionalsPage(
+                      category: service.category,
+                      serviceId: service.serviceId,
+                      serviceName: service.serviceName,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+
         // Professionals
         if (results.professionals.isNotEmpty) ...[
-          _SectionHeader(
-              label: 'Professionals',
-              count: results.professionals.length),
+          _SectionHeader(label: 'Professionals', count: results.professionals.length),
           const SizedBox(height: 10),
           ...results.professionals.map(
             (pro) => Padding(
@@ -459,34 +484,9 @@ class _ResultsList extends StatelessWidget {
           const SizedBox(height: 8),
         ],
 
-        // Services
-        if (results.services.isNotEmpty) ...[
-          _SectionHeader(
-              label: 'Services', count: results.services.length),
-          const SizedBox(height: 10),
-          ...results.services.map(
-            (service) => ServiceResultTile(
-              service: service,
-              query: results.query,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => BlocProvider(
-                    create: (_) => di.sl<ProfessionalsBloc>(),
-                    child: CategoryProfessionalsPage(
-                        category: service.category),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-        ],
-
         // Areas
         if (results.areas.isNotEmpty) ...[
-          _SectionHeader(
-              label: 'Areas', count: results.areas.length),
+          _SectionHeader(label: 'Areas', count: results.areas.length),
           const SizedBox(height: 10),
           ...results.areas.map(
             (area) => AreaResultTile(
@@ -494,6 +494,7 @@ class _ResultsList extends StatelessWidget {
               query: results.query,
               onTap: () => context.read<SearchBloc>().add(
                     AreaSelected(
+                      areaId: area.id,
                       areaName: area.name,
                       city: area.city,
                       proCount: area.proCount,
