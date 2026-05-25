@@ -38,8 +38,15 @@ class _CancelBookingPageState extends State<CancelBookingPage> {
         );
       },
     ).then((_) {
-      // If dismissed by tapping backdrop (not confirming), just go back
-      if (mounted) Navigator.of(context).maybePop();
+      // Only pop CancelBookingPage if the user dismissed without confirming.
+      // When cancellation succeeds, UpcomingBookingInfoPage's listener already
+      // calls popUntil(isFirst) — calling maybePop() here too would over-pop
+      // into an empty navigator and cause a black screen.
+      if (!mounted) return;
+      final state = context.read<BookingsBloc>().state;
+      if (state is! BookingCancelledSuccess) {
+        Navigator.of(context).maybePop();
+      }
     });
   }
 
@@ -88,11 +95,6 @@ class _CancelSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<BookingsBloc, BookingsState>(
       listener: (context, state) {
-        if (state is BookingCancelledSuccess) {
-          Navigator.of(context).pop(); // close sheet
-          // Pop entire booking stack back to My Bookings
-          Navigator.of(context).popUntil((route) => route.isFirst);
-        }
         if (state is BookingsError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -111,7 +113,7 @@ class _CancelSheet extends StatelessWidget {
             // ── Blurred + dimmed backdrop ──────────────────────────────────
             BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-              child: Container(color: Colors.black.withOpacity(0.25)),
+              child: Container(color: Colors.black.withValues(alpha: 0.25)),
             ),
 
             // ── Sheet ──────────────────────────────────────────────────────
@@ -251,7 +253,7 @@ class _ProfessionalCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -315,7 +317,7 @@ class _BookingDetailsSummary extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

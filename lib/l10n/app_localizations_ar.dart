@@ -498,6 +498,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get submitReview => 'إرسال المراجعة';
+  @override
+  String get updateBookingRequest => 'تحديث طلب الحجز';
 
   @override
   String get reviewSubmittedSuccess => 'تم إرسال المراجعة بنجاح';
@@ -1425,6 +1427,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get pmLabel => 'م';
+
+  @override
+  String get cannotBookPastDate => 'لا يمكنك حجز تاريخ مضى.';
+
+  @override
+  String get cannotBookPastTime => 'الوقت الذي اخترته قد مضى لهذا اليوم. يرجى اختيار وقت لاحق.';
 
   // ── Service names — Plumbing ─────────────────────────────────────────────────
 

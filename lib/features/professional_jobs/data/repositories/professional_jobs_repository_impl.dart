@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:gp/core/error/failures.dart';
 import '../../domain/entities/pro_job.dart';
 import '../../domain/repositories/professional_jobs_repository.dart';
@@ -24,8 +25,11 @@ class ProfessionalJobsRepositoryImpl implements ProfessionalJobsRepository {
     try {
       final jobs = await remoteDataSource.getPastJobs();
       return Right(jobs);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) return const Right([]);
+      return Left(ServerFailure(e.message ?? 'Something went wrong'));
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ServerFailure('Something went wrong'));
     }
   }
 

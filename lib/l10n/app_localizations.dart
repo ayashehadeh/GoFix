@@ -1013,6 +1013,9 @@ abstract class AppLocalizations {
   /// No description provided for @submitReview.
   String get submitReview;
 
+  /// No description provided for @updateBookingRequest.
+  String get updateBookingRequest;
+
   /// No description provided for @reviewSubmittedSuccess.
   String get reviewSubmittedSuccess;
 
@@ -1709,6 +1712,8 @@ abstract class AppLocalizations {
   String get picturesAttachedPlural;
   String get amLabel;
   String get pmLabel;
+  String get cannotBookPastDate;
+  String get cannotBookPastTime;
 
   // ── Categories ────────────────────────────────────────────────────────────────
   String get categoryPlumbing;

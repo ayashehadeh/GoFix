@@ -498,6 +498,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get submitReview => 'Submit Review';
+  @override
+  String get updateBookingRequest => 'Update Booking Request';
 
   @override
   String get reviewSubmittedSuccess => 'Review submitted successfully';
@@ -1426,6 +1428,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pmLabel => 'PM';
+
+  @override
+  String get cannotBookPastDate => 'You cannot book a date that has already passed.';
+
+  @override
+  String get cannotBookPastTime => 'The selected time has already passed for today. Please choose a future time.';
 
   // ── Service names — Plumbing ─────────────────────────────────────────────────
 

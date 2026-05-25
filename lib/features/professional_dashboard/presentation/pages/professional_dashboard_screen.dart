@@ -351,7 +351,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
         ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 220,
+          height: 240,
           child: state.incomingRequests.isEmpty
               ? Center(
                   child: Padding(
