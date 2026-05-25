@@ -179,6 +179,22 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                     ),
                     TextButton(
                       onPressed: () {
+                        final now = DateTime.now();
+                        final selectedDate = dates[selectedDateIndex];
+                        final isToday = selectedDate.year == now.year &&
+                            selectedDate.month == now.month &&
+                            selectedDate.day == now.day;
+                        if (isToday &&
+                            (tempHour < now.hour ||
+                                (tempHour == now.hour && tempMinute <= now.minute))) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(AppLocalizations.of(context)!.cannotBookPastTime),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                          return;
+                        }
                         setState(() {
                           selectedHour = tempHour;
                           selectedMinute = tempMinute;
@@ -395,25 +411,27 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                           children: [
                             const Icon(Icons.settings, color: orange, size: 22),
                             const SizedBox(width: 10),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  t.chooseDateTime,
-                                  style: const TextStyle(
-                                    color: darkBlue,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    t.chooseDateTime,
+                                    style: const TextStyle(
+                                      color: darkBlue,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  t.selectPreferredSlot,
-                                  style: const TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 12,
+                                  Text(
+                                    t.selectPreferredSlot,
+                                    style: const TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 12,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -433,66 +451,81 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        SizedBox(
-                          height: 90,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: dates.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(width: 8),
-                            itemBuilder: (context, index) {
-                              final isSelected = index == selectedDateIndex;
-                              return GestureDetector(
-                                onTap: () =>
-                                    setState(() => selectedDateIndex = index),
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
-                                  width: 72,
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? darkBlue
-                                        : const Color(0xFFF4F4F4),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        _dayLabels[dates[index].weekday - 1],
-                                        style: TextStyle(
-                                          color: isSelected
-                                              ? Colors.white70
-                                              : Colors.grey,
-                                          fontSize: 13,
-                                        ),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            const gap = 8.0;
+                            const visibleCards = 4.5;
+                            final cardWidth = (constraints.maxWidth - gap * (visibleCards - 1)) / visibleCards;
+                            final cardHeight = cardWidth * 1.45;
+                            final fontSizeSmall = (cardWidth * 0.18).clamp(11.0, 14.0);
+                            final fontSizeLarge = (cardWidth * 0.28).clamp(16.0, 22.0);
+                            final innerGap = (cardHeight * 0.04).clamp(2.0, 6.0);
+                            return SizedBox(
+                              height: cardHeight,
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: dates.length,
+                                separatorBuilder: (_, __) => SizedBox(width: gap),
+                                itemBuilder: (context, index) {
+                                  final isSelected = index == selectedDateIndex;
+                                  return GestureDetector(
+                                    onTap: () {
+                                      final today = DateTime.now();
+                                      final todayOnly = DateTime(today.year, today.month, today.day);
+                                      if (dates[index].isBefore(todayOnly)) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(AppLocalizations.of(context)!.cannotBookPastDate),
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                        return;
+                                      }
+                                      setState(() => selectedDateIndex = index);
+                                    },
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 200),
+                                      width: cardWidth,
+                                      height: cardHeight,
+                                      decoration: BoxDecoration(
+                                        color: isSelected ? darkBlue : const Color(0xFFF4F4F4),
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        dates[index].day.toString(),
-                                        style: TextStyle(
-                                          color: isSelected
-                                              ? Colors.white
-                                              : darkBlue,
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            _dayLabels[dates[index].weekday - 1],
+                                            style: TextStyle(
+                                              color: isSelected ? Colors.white70 : Colors.grey,
+                                              fontSize: fontSizeSmall,
+                                            ),
+                                          ),
+                                          SizedBox(height: innerGap),
+                                          Text(
+                                            dates[index].day.toString(),
+                                            style: TextStyle(
+                                              color: isSelected ? Colors.white : darkBlue,
+                                              fontSize: fontSizeLarge,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(height: innerGap),
+                                          Text(
+                                            _monthLabels[dates[index].month - 1],
+                                            style: TextStyle(
+                                              color: isSelected ? Colors.white70 : Colors.grey,
+                                              fontSize: fontSizeSmall,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        _monthLabels[dates[index].month - 1],
-                                        style: TextStyle(
-                                          color: isSelected
-                                              ? Colors.white70
-                                              : Colors.grey,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
                         ),
                         const SizedBox(height: 20),
                         Row(

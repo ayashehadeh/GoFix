@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../injection_container.dart' as di;
+import '../../../professionals/domain/usecases/profeessional_usecases/toggle_favorite.dart';
 import '../../domain/entities/booking.dart';
 import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
@@ -211,10 +213,28 @@ class _BookingInfoBody extends StatelessWidget {
 
 // ─── Professional card ────────────────────────────────────────────────────────
 
-class _ProfessionalCard extends StatelessWidget {
+class _ProfessionalCard extends StatefulWidget {
   final Booking booking;
 
   const _ProfessionalCard({required this.booking});
+
+  @override
+  State<_ProfessionalCard> createState() => _ProfessionalCardState();
+}
+
+class _ProfessionalCardState extends State<_ProfessionalCard> {
+  bool _isFavorite = false;
+
+  Future<void> _toggleFavorite() async {
+    setState(() => _isFavorite = !_isFavorite);
+    final result = await di.sl<ToggleFavorite>()(widget.booking.professionalId);
+    result.fold(
+      (failure) {
+        if (mounted) setState(() => _isFavorite = !_isFavorite);
+      },
+      (_) {},
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -236,10 +256,10 @@ class _ProfessionalCard extends StatelessWidget {
           CircleAvatar(
             radius: 28,
             backgroundColor: const Color(0xFFE0E8F0),
-            backgroundImage: booking.professionalImageUrl != null
-                ? NetworkImage(booking.professionalImageUrl!)
+            backgroundImage: widget.booking.professionalImageUrl != null
+                ? NetworkImage(widget.booking.professionalImageUrl!)
                 : null,
-            child: booking.professionalImageUrl == null
+            child: widget.booking.professionalImageUrl == null
                 ? const Icon(Icons.person,
                     color: AppColors.primaryDark, size: 28)
                 : null,
@@ -250,7 +270,7 @@ class _ProfessionalCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  booking.professionalName,
+                  widget.booking.professionalName,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -259,7 +279,7 @@ class _ProfessionalCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  booking.professionalRole,
+                  widget.booking.professionalRole,
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppColors.textSecondary,
@@ -268,13 +288,11 @@ class _ProfessionalCard extends StatelessWidget {
               ],
             ),
           ),
-          if (booking.isPast)
+          if (widget.booking.isPast)
             GestureDetector(
-              onTap: () {
-                // TODO: toggle favourite
-              },
-              child: const Icon(
-                Icons.favorite_border,
+              onTap: _toggleFavorite,
+              child: Icon(
+                _isFavorite ? Icons.favorite : Icons.favorite_border,
                 color: AppColors.primaryOrange,
                 size: 22,
               ),

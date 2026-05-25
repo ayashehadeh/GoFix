@@ -197,24 +197,6 @@ class _ProfileHeader extends StatelessWidget {
                       )
                     : null,
               ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryOrange,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.primaryDark, width: 2),
-                  ),
-                  child: const Icon(
-                    Icons.camera_alt,
-                    color: Colors.white,
-                    size: 14,
-                  ),
-                ),
-              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -767,8 +749,8 @@ class _EditProfileButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Reviews tab is read-only
-    if (selectedTab == 2) return const SizedBox.shrink();
+    // Reviews and Certifications tabs are read-only
+    if (selectedTab == 2 || selectedTab == 3) return const SizedBox.shrink();
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),

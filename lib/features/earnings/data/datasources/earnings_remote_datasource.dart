@@ -12,7 +12,7 @@ class EarningsRemoteDataSourceImpl implements EarningsRemoteDataSource {
 
   @override
   Future<Map<String, EarningModel>> getEarnings() async {
-    final response = await dio.get('/v1/earnings');
+    final response = await dio.get('/bookings/earnings');
     final data = response.data['data'] ?? response.data;
     return {
       'daily': EarningModel.fromJson(data['daily'] ?? {}),

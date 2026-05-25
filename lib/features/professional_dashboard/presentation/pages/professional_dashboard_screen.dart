@@ -256,7 +256,7 @@ class _ProfessionalDashboardScreenState
         ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 200,
+          height: 220,
           child: state.scheduledJobs.isEmpty
               ? Center(
                   child: Padding(
@@ -385,7 +385,7 @@ class _ProfessionalDashboardScreenState
         ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 220,
+          height: 240,
           child: state.incomingRequests.isEmpty
               ? Center(
                   child: Padding(

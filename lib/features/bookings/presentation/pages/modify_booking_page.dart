@@ -4,30 +4,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../injection_container.dart' as di;
+import '../../../professionals/domain/entities/service_offered.dart';
+import '../../../professionals/domain/usecases/profeessional_usecases/get_professional_by_id.dart';
 import '../../domain/entities/booking.dart';
 import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
 import '../bloc/bookings_state.dart';
 import 'modify_booking_success_page.dart';
 
-// ─── Service item model (local to this flow) ──────────────────────────────────
-
-class _ServiceItem {
-  final String name;
-  final String price;
-  const _ServiceItem({required this.name, required this.price});
-}
-
-const _kServices = [
-  _ServiceItem(name: 'Pipe Installation', price: '30-40 JD'),
-  _ServiceItem(name: 'Leak Repairs', price: '25-35 JD'),
-  _ServiceItem(name: 'Water Heater Service', price: '40-60 JD'),
-  _ServiceItem(name: 'Drain Cleaning', price: '25-30 JD'),
-  _ServiceItem(name: 'Bathroom Fixtures', price: '35-50 JD'),
-  _ServiceItem(name: 'Other', price: 'TBD'),
-];
-
-// ─── Date options (matches Step 2 in design) ──────────────────────────────────
+// ─── Date options (Step 2) ────────────────────────────────────────────────────
 
 const _kDates = [
   {'day': 'Sun', 'date': '8', 'month': 'Feb'},
@@ -39,7 +25,7 @@ const _kDates = [
   {'day': 'Sat', 'date': '14', 'month': 'Feb'},
 ];
 
-// ─── Root page (holds PageView + progress bar) ────────────────────────────────
+// ─── Root page ────────────────────────────────────────────────────────────────
 
 class ModifyBookingPage extends StatefulWidget {
   final Booking booking;
@@ -52,9 +38,8 @@ class ModifyBookingPage extends StatefulWidget {
 
 class _ModifyBookingPageState extends State<ModifyBookingPage> {
   final PageController _pageController = PageController();
-  int _currentStep = 0; // 0 = service, 1 = datetime/address, 2 = review
+  int _currentStep = 0;
 
-  // ── Shared state across all steps ─────────────────────────────────────────
   int? _selectedServiceIndex;
   String _description = '';
   int _selectedDateIndex = 1;
@@ -62,16 +47,34 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
   int _selectedMinute = 0;
   final TextEditingController _addressController = TextEditingController();
 
+  List<ServiceOffered>? _professionalServices; // null = still loading
+  bool _preSelected = false;
+
   @override
   void initState() {
     super.initState();
-    // Pre-fill from existing booking
     _description = widget.booking.description;
     _addressController.text = widget.booking.address;
-    // Try to pre-select the matching service
-    final existingIdx = _kServices.indexWhere(
-        (s) => s.name == widget.booking.serviceName);
-    if (existingIdx != -1) _selectedServiceIndex = existingIdx;
+    _loadServices();
+  }
+
+  Future<void> _loadServices() async {
+    final result = await di.sl<GetProfessionalById>()(widget.booking.professionalId);
+    result.fold(
+      (_) { if (mounted) setState(() => _professionalServices = []); },
+      (professional) {
+        if (!mounted) return;
+        setState(() {
+          _professionalServices = professional.services;
+          if (!_preSelected) {
+            _preSelected = true;
+            final idx = professional.services
+                .indexWhere((s) => s.name == widget.booking.serviceName);
+            if (idx != -1) _selectedServiceIndex = idx;
+          }
+        });
+      },
+    );
   }
 
   @override
@@ -107,151 +110,152 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
       'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12,
     };
     final d = _kDates[_selectedDateIndex];
-    return DateTime(
-      2025,
-      months[d['month']] ?? 1,
-      int.parse(d['date']!),
-    );
+    return DateTime(2025, months[d['month']] ?? 1, int.parse(d['date']!));
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<BookingsBloc, BookingsState>(
-      listener: (context, state) {
-        if (state is BookingModifiedSuccess) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const ModifyBookingSuccessPage(),
-            ),
-          );
-        }
-        if (state is BookingsError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: AppColors.error,
-            ),
-          );
-        }
-      },
-      builder: (context, state) {
-        final isLoading = state is BookingActionLoading;
-
-        return Scaffold(
-          backgroundColor: const Color(0xFFF5F6FA),
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 0,
-            leading: const BackButton(color: AppColors.primaryDark),
-            title: Builder(
-              builder: (ctx) => Text(
-                AppLocalizations.of(ctx)!.modifyBooking,
-                style: const TextStyle(
-                  color: AppColors.primaryDark,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
+          listener: (context, state) {
+            if (state is BookingModifiedSuccess) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const ModifyBookingSuccessPage()),
+              );
+            }
+            if (state is BookingsError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: AppColors.error,
                 ),
-              ),
-            ),
-            centerTitle: false,
-          ),
-          body: Column(
-            children: [
-              // Progress bar (3 segments)
-              _ProgressBar(currentStep: _currentStep),
+              );
+            }
+          },
+          builder: (context, bookingState) {
+            final isLoading = bookingState is BookingActionLoading;
+            final services = _professionalServices;
 
-              Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  physics: const NeverScrollableScrollPhysics(),
-                  onPageChanged: (i) => setState(() => _currentStep = i),
-                  children: [
-                    // Step 1 — Select service + description
-                    _Step1SelectService(
-                      booking: widget.booking,
-                      services: _kServices,
-                      selectedIndex: _selectedServiceIndex,
-                      description: _description,
-                      onServiceSelected: (i) =>
-                          setState(() => _selectedServiceIndex = i),
-                      onDescriptionChanged: (v) =>
-                          setState(() => _description = v),
-                      onContinue: () {
-                        if (_selectedServiceIndex == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(AppLocalizations.of(context)!.pleaseSelectService),
-                              backgroundColor: AppColors.error,
-                            ),
-                          );
-                          return;
-                        }
-                        _goToStep(1);
-                      },
+            return Scaffold(
+              backgroundColor: const Color(0xFFF5F6FA),
+              appBar: AppBar(
+                backgroundColor: Colors.white,
+                elevation: 0,
+                leading: const BackButton(color: AppColors.primaryDark),
+                title: Builder(
+                  builder: (ctx) => Text(
+                    AppLocalizations.of(ctx)!.modifyBooking,
+                    style: const TextStyle(
+                      color: AppColors.primaryDark,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
                     ),
-
-                    // Step 2 — Date, time, address
-                    _Step2DateTime(
-                      dates: _kDates,
-                      selectedDateIndex: _selectedDateIndex,
-                      selectedHour: _selectedHour,
-                      selectedMinute: _selectedMinute,
-                      addressController: _addressController,
-                      onDateSelected: (i) =>
-                          setState(() => _selectedDateIndex = i),
-                      onTimeChanged: (h, m) => setState(() {
-                        _selectedHour = h;
-                        _selectedMinute = m;
-                      }),
-                      onContinue: () {
-                        if (_addressController.text.trim().isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(AppLocalizations.of(context)!.pleaseEnterAddress),
-                              backgroundColor: AppColors.error,
-                            ),
-                          );
-                          return;
-                        }
-                        _goToStep(2);
-                      },
-                    ),
-
-                    // Step 3 — Review + submit
-                    _Step3Review(
-                      booking: widget.booking,
-                      selectedService: _selectedServiceIndex != null
-                          ? _kServices[_selectedServiceIndex!]
-                          : null,
-                      description: _description,
-                      dateStr: _selectedDateStr,
-                      timeStr: _selectedTimeStr,
-                      address: _addressController.text.trim(),
-                      isLoading: isLoading,
-                      onSubmit: () {
-                        final svc = _kServices[_selectedServiceIndex!];
-                        context.read<BookingsBloc>().add(
-                              ModifyBookingEvent(
-                                bookingId: widget.booking.id,
-                                serviceName: svc.name,
-                                servicePrice: svc.price,
-                                scheduledDate: _scheduledDateTime,
-                                scheduledTime: _selectedTimeStr,
-                                address: _addressController.text.trim(),
-                                description: _description,
-                              ),
-                            );
-                      },
-                    ),
-                  ],
+                  ),
                 ),
+                centerTitle: false,
               ),
-            ],
-          ),
+              body: Column(
+                children: [
+                  _ProgressBar(currentStep: _currentStep),
+                  Expanded(
+                    child: PageView(
+                      controller: _pageController,
+                      physics: const NeverScrollableScrollPhysics(),
+                      onPageChanged: (i) =>
+                          setState(() => _currentStep = i),
+                      children: [
+                        // Step 1 — Select service + description
+                        _Step1SelectService(
+                          booking: widget.booking,
+                          services: services,
+                          selectedIndex: _selectedServiceIndex,
+                          description: _description,
+                          onServiceSelected: (i) =>
+                              setState(() => _selectedServiceIndex = i),
+                          onDescriptionChanged: (v) =>
+                              setState(() => _description = v),
+                          onContinue: () {
+                            if (_selectedServiceIndex == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(AppLocalizations.of(
+                                          context)!
+                                      .pleaseSelectService),
+                                  backgroundColor: AppColors.error,
+                                ),
+                              );
+                              return;
+                            }
+                            _goToStep(1);
+                          },
+                        ),
+
+                        // Step 2 — Date, time, address
+                        _Step2DateTime(
+                          dates: _kDates,
+                          selectedDateIndex: _selectedDateIndex,
+                          selectedHour: _selectedHour,
+                          selectedMinute: _selectedMinute,
+                          addressController: _addressController,
+                          onDateSelected: (i) =>
+                              setState(() => _selectedDateIndex = i),
+                          onTimeChanged: (h, m) => setState(() {
+                            _selectedHour = h;
+                            _selectedMinute = m;
+                          }),
+                          onContinue: () {
+                            if (_addressController.text.trim().isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(AppLocalizations.of(
+                                          context)!
+                                      .pleaseEnterAddress),
+                                  backgroundColor: AppColors.error,
+                                ),
+                              );
+                              return;
+                            }
+                            _goToStep(2);
+                          },
+                        ),
+
+                        // Step 3 — Review + submit
+                        _Step3Review(
+                          booking: widget.booking,
+                          selectedService:
+                              (services != null && _selectedServiceIndex != null)
+                                  ? services[_selectedServiceIndex!]
+                                  : null,
+                          description: _description,
+                          dateStr: _selectedDateStr,
+                          timeStr: _selectedTimeStr,
+                          address: _addressController.text.trim(),
+                          isLoading: isLoading,
+                          onSubmit: () {
+                            final svc = services![_selectedServiceIndex!];
+                            context.read<BookingsBloc>().add(
+                                  ModifyBookingEvent(
+                                    bookingId: widget.booking.id,
+                                    serviceName: svc.name,
+                                    servicePrice: svc.priceDisplay,
+                                    scheduledDate: _scheduledDateTime,
+                                    scheduledTime: _selectedTimeStr,
+                                    address:
+                                        _addressController.text.trim(),
+                                    description: _description,
+                                  ),
+                                );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         );
-      },
-    );
   }
 }
 
@@ -295,7 +299,7 @@ class _ProgressBar extends StatelessWidget {
 
 class _Step1SelectService extends StatefulWidget {
   final Booking booking;
-  final List<_ServiceItem> services;
+  final List<ServiceOffered>? services; // null = loading
   final int? selectedIndex;
   final String description;
   final ValueChanged<int> onServiceSelected;
@@ -333,6 +337,9 @@ class _Step1SelectServiceState extends State<_Step1SelectService> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    final services = widget.services;
+
     return Column(
       children: [
         Expanded(
@@ -340,7 +347,6 @@ class _Step1SelectServiceState extends State<_Step1SelectService> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // Professional mini card
                 _ProfMiniCard(booking: widget.booking),
                 const SizedBox(height: 16),
 
@@ -357,13 +363,13 @@ class _Step1SelectServiceState extends State<_Step1SelectService> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(AppLocalizations.of(context)!.selectService,
+                              Text(t.selectService,
                                   style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.primaryDark,
                                   )),
-                              Text(AppLocalizations.of(context)!.chooseService,
+                              Text(t.chooseService,
                                   style: const TextStyle(
                                       fontSize: 11,
                                       color: AppColors.textSecondary)),
@@ -373,57 +379,81 @@ class _Step1SelectServiceState extends State<_Step1SelectService> {
                       ),
                       const SizedBox(height: 12),
                       const Divider(height: 1),
-                      ...widget.services.asMap().entries.map((entry) {
-                        final i = entry.key;
-                        final svc = entry.value;
-                        final isSelected = widget.selectedIndex == i;
-                        final isLast = i == widget.services.length - 1;
-                        return Column(
-                          children: [
-                            GestureDetector(
-                              onTap: () => widget.onServiceSelected(i),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 0, vertical: 14),
-                                color: isSelected
-                                    ? const Color(0xFFFFF3E0)
-                                    : Colors.transparent,
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        localizeServiceName(svc.name, AppLocalizations.of(context)!),
+
+                      // Services list or loading/empty state
+                      if (services == null)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                                color: AppColors.primaryOrange),
+                          ),
+                        )
+                      else if (services.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Text(
+                            t.noServicesListedYet,
+                            style: const TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondary),
+                          ),
+                        )
+                      else
+                        ...services.asMap().entries.map((entry) {
+                          final i = entry.key;
+                          final svc = entry.value;
+                          final isSelected = widget.selectedIndex == i;
+                          final isLast = i == services.length - 1;
+                          return Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () =>
+                                    widget.onServiceSelected(i),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 0, vertical: 14),
+                                  color: isSelected
+                                      ? const Color(0xFFFFF3E0)
+                                      : Colors.transparent,
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          localizeServiceName(svc.name,
+                                              t, nameAr: svc.nameAr),
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: isSelected
+                                                ? AppColors.primaryOrange
+                                                : AppColors.primaryDark,
+                                            fontWeight: isSelected
+                                                ? FontWeight.w600
+                                                : FontWeight.normal,
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        svc.priceDisplay,
                                         style: TextStyle(
                                           fontSize: 14,
+                                          fontWeight: FontWeight.w700,
                                           color: isSelected
                                               ? AppColors.primaryOrange
                                               : AppColors.primaryDark,
-                                          fontWeight: isSelected
-                                              ? FontWeight.w600
-                                              : FontWeight.normal,
                                         ),
                                       ),
-                                    ),
-                                    Text(
-                                      svc.price,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700,
-                                        color: isSelected
-                                            ? AppColors.primaryOrange
-                                            : AppColors.primaryDark,
-                                      ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                            if (!isLast)
-                              const Divider(
-                                  height: 1, color: Color(0xFFF0F0F0)),
-                          ],
-                        );
-                      }),
+                              if (!isLast)
+                                const Divider(
+                                    height: 1,
+                                    color: Color(0xFFF0F0F0)),
+                            ],
+                          );
+                        }),
                     ],
                   ),
                 ),
@@ -455,7 +485,7 @@ class _Step1SelectServiceState extends State<_Step1SelectService> {
                         maxLines: 5,
                         onChanged: widget.onDescriptionChanged,
                         decoration: InputDecoration(
-                          hintText: AppLocalizations.of(context)!.describeIssuePlaceholder,
+                          hintText: t.describeIssuePlaceholder,
                           hintStyle: const TextStyle(
                               fontSize: 13,
                               color: AppColors.textSecondary),
@@ -469,7 +499,6 @@ class _Step1SelectServiceState extends State<_Step1SelectService> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      // Attachment indicator (display-only from existing booking)
                       if (widget.booking.imageUrls.isNotEmpty)
                         Row(
                           children: [
@@ -540,14 +569,16 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: Text(AppLocalizations.of(context)!.cancel,
-                        style: const TextStyle(color: Colors.grey)),
+                        style:
+                            const TextStyle(color: Colors.grey)),
                   ),
                   Text(AppLocalizations.of(context)!.selectTime,
                       style: const TextStyle(
@@ -560,8 +591,8 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                       Navigator.pop(context);
                     },
                     child: Text(AppLocalizations.of(context)!.done,
-                        style:
-                            const TextStyle(color: AppColors.primaryOrange)),
+                        style: const TextStyle(
+                            color: AppColors.primaryOrange)),
                   ),
                 ],
               ),
@@ -623,7 +654,6 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Date & Time card
                 _CardShell(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -636,12 +666,16 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(AppLocalizations.of(context)!.chooseDateTime,
+                              Text(
+                                  AppLocalizations.of(context)!
+                                      .chooseDateTime,
                                   style: const TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.primaryDark)),
-                              Text(AppLocalizations.of(context)!.selectPreferredSlot,
+                              Text(
+                                  AppLocalizations.of(context)!
+                                      .selectPreferredSlot,
                                   style: const TextStyle(
                                       fontSize: 11,
                                       color: AppColors.textSecondary)),
@@ -650,8 +684,6 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                         ],
                       ),
                       const SizedBox(height: 20),
-
-                      // Select Date label
                       Row(
                         children: [
                           const Icon(Icons.calendar_month_outlined,
@@ -665,8 +697,6 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                         ],
                       ),
                       const SizedBox(height: 12),
-
-                      // Horizontal date chips
                       SizedBox(
                         height: 88,
                         child: ListView.separated(
@@ -687,7 +717,8 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                                   color: isSelected
                                       ? AppColors.primaryDark
                                       : const Color(0xFFF4F4F4),
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius:
+                                      BorderRadius.circular(12),
                                 ),
                                 child: Column(
                                   mainAxisAlignment:
@@ -721,10 +752,7 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                           },
                         ),
                       ),
-
                       const SizedBox(height: 20),
-
-                      // Select Time label
                       Row(
                         children: [
                           const Icon(Icons.access_time_outlined,
@@ -738,8 +766,6 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                         ],
                       ),
                       const SizedBox(height: 12),
-
-                      // Time display
                       GestureDetector(
                         onTap: _showTimePicker,
                         child: Row(
@@ -750,7 +776,8 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                                     .toString()
                                     .padLeft(2, '0')),
                             const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              padding:
+                                  EdgeInsets.symmetric(horizontal: 12),
                               child: Text(':',
                                   style: TextStyle(
                                       fontSize: 32,
@@ -768,8 +795,6 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // Address card
                 _CardShell(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -779,7 +804,8 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                           const Icon(Icons.location_on_outlined,
                               color: AppColors.primaryOrange, size: 20),
                           const SizedBox(width: 8),
-                          Text(AppLocalizations.of(context)!.chooseAddress,
+                          Text(
+                              AppLocalizations.of(context)!.chooseAddress,
                               style: const TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
@@ -791,7 +817,8 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                         controller: widget.addressController,
                         maxLines: 2,
                         decoration: InputDecoration(
-                          hintText: AppLocalizations.of(context)!.enterAddress,
+                          hintText:
+                              AppLocalizations.of(context)!.enterAddress,
                           hintStyle: const TextStyle(
                               fontSize: 13,
                               color: AppColors.textSecondary),
@@ -848,7 +875,7 @@ class _TimeBox extends StatelessWidget {
 
 class _Step3Review extends StatelessWidget {
   final Booking booking;
-  final _ServiceItem? selectedService;
+  final ServiceOffered? selectedService;
   final String description;
   final String dateStr;
   final String timeStr;
@@ -869,6 +896,9 @@ class _Step3Review extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+    final svc = selectedService;
+
     return Column(
       children: [
         Expanded(
@@ -876,12 +906,11 @@ class _Step3Review extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // Booking details review card
                 _CardShell(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(AppLocalizations.of(context)!.bookingDetails,
+                      Text(t.bookingDetails,
                           style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
@@ -890,21 +919,19 @@ class _Step3Review extends StatelessWidget {
                       _ReviewRow(
                           icon: Icons.settings,
                           text: localizeServiceName(
-                              selectedService?.name ?? booking.serviceName,
-                              AppLocalizations.of(context)!,
-                              nameAr: selectedService == null ? booking.serviceNameAr : null)),
+                              svc?.name ?? booking.serviceName,
+                              t,
+                              nameAr: svc?.nameAr ?? booking.serviceNameAr)),
                       _ReviewRow(
                           icon: Icons.calendar_month_outlined,
                           text: dateStr),
                       _ReviewRow(
-                          icon: Icons.access_time_outlined,
-                          text: timeStr),
+                          icon: Icons.access_time_outlined, text: timeStr),
                       _ReviewRow(
                           icon: Icons.location_on_outlined, text: address),
                       _ReviewRow(
                           icon: Icons.attach_money,
-                          text:
-                              selectedService?.price ?? booking.servicePrice),
+                          text: svc?.priceDisplay ?? booking.servicePrice),
                       _ReviewRow(
                           icon: Icons.person,
                           text: booking.professionalName,
@@ -913,8 +940,6 @@ class _Step3Review extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // Service description review card
                 _CardShell(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -924,7 +949,7 @@ class _Step3Review extends StatelessWidget {
                           const Icon(Icons.edit_outlined,
                               color: AppColors.primaryOrange, size: 18),
                           const SizedBox(width: 8),
-                          Text(AppLocalizations.of(context)!.serviceDescription,
+                          Text(t.serviceDescription,
                               style: const TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
@@ -965,8 +990,6 @@ class _Step3Review extends StatelessWidget {
             ),
           ),
         ),
-
-        // Update Booking Request button
         Container(
           color: Colors.white,
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
@@ -989,9 +1012,9 @@ class _Step3Review extends StatelessWidget {
                       child: CircularProgressIndicator(
                           color: Colors.white, strokeWidth: 2),
                     )
-                  : const Text(
-                      'Update Booking Request',
-                      style: TextStyle(
+                  : Text(
+                      t.updateBookingRequest,
+                      style: const TextStyle(
                           fontSize: 15, fontWeight: FontWeight.w700),
                     ),
             ),
@@ -1143,7 +1166,8 @@ class _ContinueButton extends StatelessWidget {
           ),
           child: Text(
             AppLocalizations.of(context)!.continue1,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            style:
+                const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
           ),
         ),
       ),

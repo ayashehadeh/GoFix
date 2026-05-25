@@ -12,7 +12,6 @@ import 'package:gp/features/earnings/domain/usecases/earnings_usecases.dart';
 import 'package:gp/features/earnings/domain/repositories/earnings_repository.dart';
 import 'package:gp/features/earnings/data/repositories/earnings_repository_impl.dart';
 import 'package:gp/features/earnings/data/datasources/earnings_remote_datasource.dart';
-import 'package:gp/features/earnings/data/datasources/mock_earnings_datasource.dart';
 // ── Home ──────────────────────────────────────────────────────────────────────
 import 'package:gp/features/home/data/data_sources/data_remote_datasource.dart';
 import 'package:gp/features/home/domain/use_cases/get_categories_usecase.dart';
@@ -483,7 +482,7 @@ Future<void> init() async {
       () => HomeRemoteDataSourceImpl(dio: sl()));
 
   sl.registerLazySingleton<EarningsRemoteDataSource>(
-    () => MockEarningsDataSource(), // ← Use mock instead of real API
+    () => EarningsRemoteDataSourceImpl(dio: sl()),
   );
 
   sl.registerLazySingleton<ProfessionalsRemoteDataSource>(
@@ -529,7 +528,7 @@ Future<void> init() async {
   sl.registerLazySingleton<AvailabilityLocalDataSource>(
       () => AvailabilityLocalDataSourceImpl(sharedPreferences: sl()));
   sl.registerLazySingleton<ProfessionalJobsRemoteDataSource>(
-      () => MockProfessionalJobsDataSource());
+      () => ProfessionalJobsRemoteDataSourceImpl(dio: sl()));
 
   // ── External ──────────────────────────────────────────────────────────────
   final sharedPreferences = await SharedPreferences.getInstance();
