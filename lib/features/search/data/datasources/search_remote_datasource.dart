@@ -9,7 +9,7 @@ abstract class SearchRemoteDataSource {
   Future<List<AreaResultModel>> searchAreas(String query);
   Future<List<ServiceResult>> searchServices(String query);
   Future<List<ProfessionalModel>> getProfessionalsByArea({
-    required String areaName,
+    required int areaId,
     ServiceCategory? category,
   });
 
@@ -94,14 +94,9 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
 
     // ── Areas ──────────────────────────────────────────────────────────────
     final rawAreas = data['areas'] as List? ?? [];
-    final areas = rawAreas.map((e) {
-      final map = e as Map<String, dynamic>;
-      return AreaResultModel(
-        name: map['name'] as String? ?? '',
-        city: map['city'] as String? ?? '',
-        proCount: (map['availableProfessionalCount'] as num? ?? 0).toInt(),
-      );
-    }).toList();
+    final areas = rawAreas
+        .map((e) => AreaResultModel.fromJson(e as Map<String, dynamic>))
+        .toList();
 
     // ── Services ───────────────────────────────────────────────────────────
     final rawServices = data['services'] as List? ?? [];
@@ -113,10 +108,10 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
         orElse: () => ServiceCategory.plumbing,
       );
       return ServiceResult(
+        serviceId: (map['id'] as num? ?? 0).toInt(),
         serviceName: map['name'] as String? ?? '',
         category: category,
-        proCount:
-            (map['availableProfessionalCount'] as num? ?? 0).toInt(),
+        proCount: (map['availableProfessionalCount'] as num? ?? 0).toInt(),
       );
     }).toList();
 
@@ -129,13 +124,13 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
 
   @override
   Future<List<ProfessionalModel>> getProfessionalsByArea({
-    required String areaName,
+    required int areaId,
     ServiceCategory? category,
   }) async {
     final response = await dio.get(
       '/professionals/by-area',
       queryParameters: {
-        'areaName': areaName,
+        'areaId': areaId,
         if (_categoryId(category) != null) 'categoryId': _categoryId(category),
       },
     );

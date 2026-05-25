@@ -19,8 +19,15 @@ import 'package:gp/injection_container.dart' as di;
 
 class CategoryProfessionalsPage extends StatefulWidget {
   final ServiceCategory category;
+  final int? serviceId;
+  final String? serviceName;
 
-  const CategoryProfessionalsPage({super.key, required this.category});
+  const CategoryProfessionalsPage({
+    super.key,
+    required this.category,
+    this.serviceId,
+    this.serviceName,
+  });
 
   @override
   State<CategoryProfessionalsPage> createState() => _CategoryProfessionalsPageState();
@@ -29,6 +36,7 @@ class CategoryProfessionalsPage extends StatefulWidget {
 class _CategoryProfessionalsPageState extends State<CategoryProfessionalsPage> {
   final TextEditingController _searchController = TextEditingController();
   List<Professional> _filteredList = [];
+  List<Professional> _baseList = [];
 
   @override
   void initState() {
@@ -42,10 +50,11 @@ class _CategoryProfessionalsPageState extends State<CategoryProfessionalsPage> {
     super.dispose();
   }
 
-  void _onSearch(String query, List<Professional> all) {
+  void _onSearch(String query) {
     setState(() {
-      _filteredList =
-          query.isEmpty ? all : all.where((p) => p.name.toLowerCase().contains(query.toLowerCase())).toList();
+      _filteredList = query.isEmpty
+          ? _baseList
+          : _baseList.where((p) => p.name.toLowerCase().contains(query.toLowerCase())).toList();
     });
   }
 
@@ -56,7 +65,12 @@ class _CategoryProfessionalsPageState extends State<CategoryProfessionalsPage> {
       body: BlocConsumer<ProfessionalsBloc, ProfessionalsState>(
         listener: (context, state) {
           if (state is ProfessionalsLoaded) {
-            setState(() => _filteredList = state.professionals);
+            setState(() {
+              _baseList = widget.serviceId != null
+                  ? state.professionals.where((p) => p.services.any((s) => s.serviceId == widget.serviceId)).toList()
+                  : state.professionals;
+              _filteredList = _baseList;
+            });
           }
         },
         builder: (context, state) {
@@ -123,7 +137,7 @@ class _CategoryProfessionalsPageState extends State<CategoryProfessionalsPage> {
                         Expanded(
                           child: TextField(
                             controller: _searchController,
-                            onChanged: (q) => _onSearch(q, state.professionals),
+                            onChanged: _onSearch,
                             decoration: InputDecoration(
                               hintText: AppLocalizations.of(context)!.search,
                               hintStyle: AppTextStyles.searchHint,

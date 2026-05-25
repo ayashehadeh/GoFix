@@ -30,12 +30,12 @@ class SearchRepositoryImpl implements SearchRepository {
 
   @override
   Future<Either<Failure, List<Professional>>> getProfessionalsByArea({
-    required String areaName,
+    required int areaId,
     ServiceCategory? category,
   }) async {
     try {
       final result = await remoteDataSource.getProfessionalsByArea(
-        areaName: areaName,
+        areaId: areaId,
         category: category,
       );
       return Right(result);

@@ -30,12 +30,12 @@ class ProfessionalModel extends Professional {
 
   factory ProfessionalModel.fromJson(Map<String, dynamic> json) {
     return ProfessionalModel(
-      id: json['id'] as String,
-      name: json['name'] as String,
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
       category: ServiceCategory.values.firstWhere(
         (e) =>
             e.displayName.toLowerCase() ==
-            (json['category'] as String).toLowerCase(),
+            (json['category'] as String? ?? '').toLowerCase(),
         orElse: () => ServiceCategory.plumbing,
       ),
       rating: (json['rating'] as num).toDouble(),
@@ -76,7 +76,7 @@ class ProfessionalModel extends Professional {
                 json['working_hours'] as List? ??
                 []))
             .map((e) => DaySchedule(
-                  day: e['day'] as String,
+                  day: e['day'] as String? ?? '',
                   openTime: e['openTime'] as String? ??
                       e['open_time'] as String? ??
                       '',
@@ -91,7 +91,7 @@ class ProfessionalModel extends Professional {
                 serviceId: (e['serviceId'] ?? e['service_id']) is num
                     ? (e['serviceId'] ?? e['service_id'])?.toInt()
                     : int.tryParse('${e['serviceId'] ?? e['service_id']}'),
-                name: e['name'] as String,
+                name: e['name'] as String? ?? '',
                 nameAr: e['nameAr'] as String? ?? e['name_ar'] as String?,
                 minPrice: (e['minPrice'] as num? ?? e['min_price'] as num? ?? 0)
                     .toDouble(),
