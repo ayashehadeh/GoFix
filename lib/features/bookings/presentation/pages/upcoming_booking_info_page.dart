@@ -329,33 +329,19 @@ class _BottomActionBar extends StatelessWidget {
                       child: ModifyBookingPage(booking: booking),
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                _IconActionButton(
-                  icon: Icons.delete_outline_rounded,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => BlocProvider.value(
-                          value: context.read<BookingsBloc>(),
-                          child: CancelBookingPage(booking: booking),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(width: 10),
-                _IconActionButton(
-                  icon: Icons.chat_bubble_outline_rounded,
-                  onTap: () => context.read<ChatBloc>().add(
-                        GetOrCreateChatEvent(
-                          professionalId: booking.professionalId,
-                          professionalName: booking.professionalName,
-                        ),
-                      ),
-                ),
-              ],
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryOrange,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 0,
+              ),
+              child: Text(
+                AppLocalizations.of(context)!.modifyBooking,
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+              ),
             ),
           ),
           const SizedBox(width: 10),
@@ -376,7 +362,12 @@ class _BottomActionBar extends StatelessWidget {
           const SizedBox(width: 10),
           _IconActionButton(
             icon: Icons.chat_bubble_outline_rounded,
-            onTap: () {},
+            onTap: () => context.read<ChatBloc>().add(
+                  GetOrCreateChatEvent(
+                    professionalId: booking.professionalId,
+                    professionalName: booking.professionalName,
+                  ),
+                ),
           ),
         ],
       ),

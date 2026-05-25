@@ -213,41 +213,41 @@ class _HomeHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  SvgPicture.asset(
-                    'assets/home_screen/location_on.svg',
-                    width: 18,
-                    height: 18,
-                    colorFilter: const ColorFilter.mode(
-                      AppColors.primaryOrange,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(AppLocalizations.of(context)!.location, style: AppTextStyles.locationLabel),
-                      isLoadingLocation
-                          ? const SizedBox(
-                              width: 120,
-                              height: 16,
-                              child: LinearProgressIndicator(
-                                color: AppColors.primaryOrange,
-                                backgroundColor: Colors.white24,
-                              ),
-                            )
-                          : Text(
-                              locationName,
-                              style: AppTextStyles.locationValue,
-                            ),
-                    ],
-                  ),
-                ],
+              SvgPicture.asset(
+                'assets/home_screen/location_on.svg',
+                width: 18,
+                height: 18,
+                colorFilter: const ColorFilter.mode(
+                  AppColors.primaryOrange,
+                  BlendMode.srcIn,
+                ),
               ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(AppLocalizations.of(context)!.location, style: AppTextStyles.locationLabel),
+                    isLoadingLocation
+                        ? const SizedBox(
+                            width: 120,
+                            height: 16,
+                            child: LinearProgressIndicator(
+                              color: AppColors.primaryOrange,
+                              backgroundColor: Colors.white24,
+                            ),
+                          )
+                        : Text(
+                            locationName,
+                            style: AppTextStyles.locationValue,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
               GestureDetector(
                 onTap: onNotificationTap,
                 child: SvgPicture.asset(
