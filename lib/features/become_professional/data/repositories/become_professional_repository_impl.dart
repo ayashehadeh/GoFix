@@ -137,6 +137,13 @@ class BecomeProfessionalRepositoryImpl implements BecomeProfessionalRepository {
     );
   }
 
+  @override
+  Future<Either<Failure, Unit>> cancelProfessional() {
+    return _wrapUnit(
+      () async => await remoteDataSource.cancelProfessional(),
+    );
+  }
+
   // ── Error handling ────────────────────────────────────────────────────────
 
   Future<Either<Failure, T>> _wrap<T>(Future<T> Function() fn) async {

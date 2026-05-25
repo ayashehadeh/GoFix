@@ -20,4 +20,21 @@ class UserInfoHelper {
       return '';
     }
   }
+
+  static Future<String> getEmail() async {
+    try {
+      final token = await TokenStorage.getToken();
+      if (token == null || token.isEmpty) return '';
+
+      final parts = token.split('.');
+      if (parts.length != 3) return '';
+
+      final decoded = utf8.decode(base64Url.decode(base64Url.normalize(parts[1])));
+      final map = json.decode(decoded) as Map<String, dynamic>;
+
+      return map['email'] as String? ?? '';
+    } catch (_) {
+      return '';
+    }
+  }
 }

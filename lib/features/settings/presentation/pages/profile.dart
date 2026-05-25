@@ -6,8 +6,10 @@ import 'package:gp/core/widgets/gofix_bottom_nav_bar.dart';
 import 'package:gp/features/become_professional/domain/entities/application_status_entity.dart';
 import 'package:gp/features/become_professional/domain/usecases/get_application_status.dart';
 import 'package:gp/features/become_professional/presentation/pages/in_queue_page.dart';
+import 'package:gp/features/become_professional/presentation/pages/already_professional_page.dart';
 import 'package:gp/features/become_professional/presentation/pages/stepper_screen.dart';
 import 'package:gp/features/settings/presentation/pages/personal_information_page.dart';
+import 'package:gp/features/settings/data/repositories/profile_repository_impl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/injection_container.dart' as di;
 import 'package:gp/l10n/app_localizations.dart';
@@ -54,11 +56,14 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, ProfessionalNavMixin<ProfilePage> {
   String _userName = '';
+  String _userEmail = '';
+  final _profileRepo = ProfileRepositoryImpl(dio: _dio);
+
   @override
   void initState() {
     super.initState();
     initProfessionalNav();
-    _loadUserName();
+    _loadUserInfo();
   }
 
   @override
@@ -67,10 +72,17 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
     super.dispose();
   }
 
-  Future<void> _loadUserName() async {
-    // ADD THIS METHOD
+  Future<void> _loadUserInfo() async {
     final name = await UserInfoHelper.getFullName();
     if (mounted) setState(() => _userName = name);
+
+    final result = await _profileRepo.getProfile();
+    result.fold(
+      (_) {},
+      (profile) {
+        if (mounted) setState(() => _userEmail = profile.email);
+      },
+    );
   }
 
   AccountBloc _createAccountBloc() => AccountBloc(
@@ -99,6 +111,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -113,7 +126,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: const Color.fromARGB(255, 255, 255, 255),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -191,6 +204,10 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
           navigator.push(
             MaterialPageRoute(builder: (_) => const StepperScreen()),
           );
+        } else if (status.status == ProfessionalStatus.approved) {
+          navigator.push(
+            MaterialPageRoute(builder: (_) => const AlreadyProfessionalPage()),
+          );
         } else {
           navigator.push(
             MaterialPageRoute(builder: (_) => const InQueuePage()),
@@ -218,12 +235,13 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
 
   void _showSendFeedback(BuildContext context) {
     final t = AppLocalizations.of(context)!;
-    int selectedStars = 4;
+    int selectedStars = 5;
     final feedbackCtrl = TextEditingController();
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -352,6 +370,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
     final t = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -444,6 +463,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
 
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -465,32 +485,32 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
               Text(t.chooseLanguage, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
               const SizedBox(height: 24),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: ['English', 'Arabic'].map((lang) {
                   final isSelected = selected == lang;
                   final label = lang == 'English' ? t.english : t.arabic;
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() => selected = lang),
-                      child: Container(
-                        margin: EdgeInsets.only(
-                          right: lang == 'English' ? 8 : 0,
-                          left: lang == 'Arabic' ? 8 : 0,
+                  return GestureDetector(
+                    onTap: () => setState(() => selected = lang),
+                    child: Container(
+                      width: 120,
+                      margin: EdgeInsets.only(
+                        right: lang == 'English' ? 8 : 0,
+                        left: lang == 'Arabic' ? 8 : 0,
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        color: isSelected ? AppColors.primaryOrange : Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(
+                          color: isSelected ? AppColors.primaryOrange : Colors.grey[300]!,
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        decoration: BoxDecoration(
-                          color: isSelected ? AppColors.primaryOrange : Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                          border: Border.all(
-                            color: isSelected ? AppColors.primaryOrange : Colors.grey[300]!,
-                          ),
-                        ),
-                        child: Text(
-                          label,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : AppColors.primaryDark,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      ),
+                      child: Text(
+                        label,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : AppColors.primaryDark,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -498,23 +518,20 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
                 }).toList(),
               ),
               const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: () {
-                    final locale = selected == 'Arabic' ? const Locale('ar') : const Locale('en');
-                    localeBloc.add(ChangeLocaleEvent(locale));
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryOrange,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                    elevation: 0,
-                  ),
-                  child: Text(t.done,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+              ElevatedButton(
+                onPressed: () {
+                  final locale = selected == 'Arabic' ? const Locale('ar') : const Locale('en');
+                  localeBloc.add(ChangeLocaleEvent(locale));
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryOrange,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  elevation: 0,
+                  minimumSize: const Size(260, 48),
                 ),
+                child: Text(t.done,
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
               ),
               const SizedBox(height: 8),
             ],
@@ -530,6 +547,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
     final t = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -677,13 +695,48 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        _userName.isNotEmpty ? _userName : '...',
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF062B4D),
-                        ),
+                      const SizedBox(height: 8),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          CircleAvatar(
+                            radius: 26,
+                            backgroundColor: AppColors.primaryOrange,
+                            child: Text(
+                              _userName.isNotEmpty
+                                  ? _userName.trim().split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join().toUpperCase()
+                                  : '?',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _userName.isNotEmpty
+                                    ? _userName.trim().split(' ').map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1).toLowerCase()}' : '').join(' ')
+                                    : '...',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF062B4D),
+                                ),
+                              ),
+                              Text(
+                                _userEmail.isNotEmpty ? _userEmail : '',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 20),
                       const Divider(),
@@ -744,7 +797,6 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
                                   ),
                                 ),
                               )),
-                      _menuItem(context, Icons.cancel, t.deleteAccount, onTap: () => _showDeleteAccount(context)),
                       _menuItem(context, Icons.logout, t.logOut, onTap: () => _showLogOut(context)),
                       const Divider(),
                       _sectionTitle(t.support),
@@ -756,6 +808,36 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
                       _sectionTitle(t.preferences),
                       _menuItem(context, Icons.language, t.language,
                           trailing: _currentLocaleLabel(), onTap: () => _showLanguageSelector(context)),
+                      const Divider(),
+                      Theme(
+                        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          tilePadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.more_horiz, color: Color(0xFF062B4D)),
+                          title: const Text(
+                            'More',
+                            style: TextStyle(fontSize: 16, color: Color(0xFF062B4D)),
+                          ),
+                          children: [
+                            InkWell(
+                              onTap: () => _showDeleteAccount(context),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.cancel, color: Colors.red),
+                                    const SizedBox(width: 15),
+                                    Text(t.deleteAccount,
+                                        style: const TextStyle(fontSize: 16, color: Colors.red)),
+                                    const Spacer(),
+                                    const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.red),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),

@@ -59,71 +59,71 @@ class _UpcomingBookingInfoPageState extends State<UpcomingBookingInfoPage> {
           }
         },
         child: Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: const BackButton(color: AppColors.primaryDark),
-        title: Builder(
-          builder: (ctx) => Text(
-            AppLocalizations.of(ctx)!.bookingDetails,
-            style: const TextStyle(
-              color: AppColors.primaryDark,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
+          backgroundColor: const Color(0xFFF5F6FA),
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: const BackButton(color: AppColors.primaryDark),
+            title: Builder(
+              builder: (ctx) => Text(
+                AppLocalizations.of(ctx)!.bookingDetails,
+                style: const TextStyle(
+                  color: AppColors.primaryDark,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
+            centerTitle: false,
           ),
-        ),
-        centerTitle: false,
-      ),
-      body: BlocConsumer<BookingsBloc, BookingsState>(
-        listener: (context, state) {
-          if (state is BookingCancelledSuccess) {
-            Navigator.of(context).popUntil(
-              (route) => route.settings.name == '/bookings' || route.isFirst,
-            );
-          }
-          if (state is ConfirmPaymentSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(AppLocalizations.of(context)!.paymentConfirmedMoved),
-                backgroundColor: Colors.green,
-              ),
-            );
-            Navigator.of(context).popUntil(
-              (route) => route.settings.name == '/bookings' || route.isFirst,
-            );
-          }
-          if (state is ConfirmPaymentError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is BookingsLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryOrange),
-            );
-          }
+          body: BlocConsumer<BookingsBloc, BookingsState>(
+            listener: (context, state) {
+              if (state is BookingCancelledSuccess) {
+                Navigator.of(context).popUntil(
+                  (route) => route.settings.name == '/bookings' || route.isFirst,
+                );
+              }
+              if (state is ConfirmPaymentSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context)!.paymentConfirmedMoved),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                Navigator.of(context).popUntil(
+                  (route) => route.settings.name == '/bookings' || route.isFirst,
+                );
+              }
+              if (state is ConfirmPaymentError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              if (state is BookingsLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(color: AppColors.primaryOrange),
+                );
+              }
 
-          if (state is BookingsError) {
-            return _ErrorBody(
-              message: state.message,
-              onRetry: () => context.read<BookingsBloc>().add(LoadBookingById(widget.bookingId)),
-            );
-          }
+              if (state is BookingsError) {
+                return _ErrorBody(
+                  message: state.message,
+                  onRetry: () => context.read<BookingsBloc>().add(LoadBookingById(widget.bookingId)),
+                );
+              }
 
-          if (state is BookingDetailLoaded) {
-            return _UpcomingInfoBody(booking: state.booking);
-          }
+              if (state is BookingDetailLoaded) {
+                return _UpcomingInfoBody(booking: state.booking);
+              }
 
-          return const SizedBox.shrink();
-        },
-      ),
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
     );
@@ -329,33 +329,19 @@ class _BottomActionBar extends StatelessWidget {
                       child: ModifyBookingPage(booking: booking),
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                _IconActionButton(
-                  icon: Icons.delete_outline_rounded,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => BlocProvider.value(
-                          value: context.read<BookingsBloc>(),
-                          child: CancelBookingPage(booking: booking),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(width: 10),
-                _IconActionButton(
-                  icon: Icons.chat_bubble_outline_rounded,
-                  onTap: () => context.read<ChatBloc>().add(
-                        GetOrCreateChatEvent(
-                          professionalId: booking.professionalId,
-                          professionalName: booking.professionalName,
-                        ),
-                      ),
-                ),
-              ],
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryOrange,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 0,
+              ),
+              child: Text(
+                AppLocalizations.of(context)!.modifyBooking,
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+              ),
             ),
           ),
           const SizedBox(width: 10),
@@ -376,7 +362,12 @@ class _BottomActionBar extends StatelessWidget {
           const SizedBox(width: 10),
           _IconActionButton(
             icon: Icons.chat_bubble_outline_rounded,
-            onTap: () {},
+            onTap: () => context.read<ChatBloc>().add(
+                  GetOrCreateChatEvent(
+                    professionalId: booking.professionalId,
+                    professionalName: booking.professionalName,
+                  ),
+                ),
           ),
         ],
       ),
@@ -452,12 +443,10 @@ class _ProfessionalCardState extends State<_ProfessionalCard> {
           CircleAvatar(
             radius: 28,
             backgroundColor: const Color(0xFFE0E8F0),
-            backgroundImage: widget.booking.professionalImageUrl != null
-                ? NetworkImage(widget.booking.professionalImageUrl!)
-                : null,
+            backgroundImage:
+                widget.booking.professionalImageUrl != null ? NetworkImage(widget.booking.professionalImageUrl!) : null,
             child: widget.booking.professionalImageUrl == null
-                ? const Icon(Icons.person,
-                    color: AppColors.primaryDark, size: 28)
+                ? const Icon(Icons.person, color: AppColors.primaryDark, size: 28)
                 : null,
           ),
           const SizedBox(width: 14),
