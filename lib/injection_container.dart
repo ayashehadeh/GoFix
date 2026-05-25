@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:gp/features/become_professional/domain/usecases/update_profile.dart';
+import 'package:gp/features/bookings/domain/usecases/submit_payment_amount.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gp/core/storage/token_storage.dart';
 import 'package:gp/features/become_professional/domain/usecases/get_cities.dart';
@@ -309,6 +310,7 @@ Future<void> init() async {
       acceptJobRequest: sl(),
       declineJobRequest: sl(),
       updateJobStatus: sl(),
+      submitPaymentAmount: sl(),
     ),
   );
 
@@ -356,6 +358,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => CancelBooking(sl()));
   sl.registerLazySingleton(() => SubmitReport(sl()));
   sl.registerLazySingleton(() => ConfirmPayment(sl()));
+  sl.registerLazySingleton(() => SubmitPaymentAmount(sl()));
 
   // ── Use Cases — Notifications ──────────────────────────────────────────────
   sl.registerLazySingleton(() => GetNotifications(sl()));
@@ -468,7 +471,7 @@ Future<void> init() async {
   sl.registerLazySingleton<HomeRemoteDataSource>(() => HomeRemoteDataSourceImpl(dio: sl()));
 
   sl.registerLazySingleton<EarningsRemoteDataSource>(
-    () => MockEarningsDataSource(), // ← Use mock instead of real API
+    () => EarningsRemoteDataSourceImpl(dio: sl()),
   );
 
   sl.registerLazySingleton<ProfessionalsRemoteDataSource>(() => ProfessionalsRemoteDataSourceImpl(dio: sl()));

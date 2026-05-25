@@ -4,7 +4,7 @@ import '../models/booking_model.dart';
 abstract class BookingsRemoteDataSource {
   Future<List<BookingModel>> getUpcomingBookings();
   Future<List<BookingModel>> getPastBookings();
-  Future<BookingModel> getBookingById(String id);
+  Future<BookingModel> getBookingById(String bookingId);
   Future<BookingModel> createBooking({
     required String professionalId,
     required String serviceName,
@@ -27,6 +27,7 @@ abstract class BookingsRemoteDataSource {
   });
   Future<void> cancelBooking(String id, {String? reason});
   Future<void> confirmPayment(String id);
+  Future<void> submitPaymentAmount(String bookingId, double amount);
   Future<void> submitReport({
     required String bookingId,
     required String description,
@@ -41,20 +42,20 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   @override
   Future<List<BookingModel>> getUpcomingBookings() async {
     final response = await dio.get('/bookings/upcoming');
-    final data = response.data['data'] as List;
-    return data.map((e) => BookingModel.fromJson(e)).toList();
+    final list = response.data['data'] as List;
+    return list.map((e) => BookingModel.fromJson(e)).toList();
   }
 
   @override
   Future<List<BookingModel>> getPastBookings() async {
     final response = await dio.get('/bookings/past');
-    final data = response.data['data'] as List;
-    return data.map((e) => BookingModel.fromJson(e)).toList();
+    final list = response.data['data'] as List;
+    return list.map((e) => BookingModel.fromJson(e)).toList();
   }
 
   @override
-  Future<BookingModel> getBookingById(String id) async {
-    final response = await dio.get('/bookings/$id');
+  Future<BookingModel> getBookingById(String bookingId) async {
+    final response = await dio.get('/bookings/$bookingId');
     return BookingModel.fromJson(response.data['data']);
   }
 
@@ -119,6 +120,14 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   @override
   Future<void> confirmPayment(String id) async {
     await dio.post('/bookings/$id/confirm-payment');
+  }
+
+  @override
+  Future<void> submitPaymentAmount(String bookingId, double amount) async {
+    await dio.post(
+      '/bookings/$bookingId/payment-amount',
+      data: {'amount': amount},
+    );
   }
 
   @override

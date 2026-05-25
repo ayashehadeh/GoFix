@@ -123,8 +123,9 @@ class _SplashRouterState extends State<_SplashRouter> {
   Future<void> _route() async {
     final isLoggedIn = await TokenStorage.isLoggedIn();
     if (!mounted) return;
+
     if (!isLoggedIn) {
-      Navigator.of(context).pushReplacementNamed('/login');
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
       return;
     }
 
@@ -138,11 +139,14 @@ class _SplashRouterState extends State<_SplashRouter> {
         await UserTypeStorage.clear();
       }
     } catch (_) {
-      isPro = await UserTypeStorage.isProfessional(); // offline fallback
+      isPro = await UserTypeStorage.isProfessional();
     }
 
     if (!mounted) return;
-    Navigator.of(context).pushReplacementNamed(isPro ? '/dashboard' : '/home');
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      isPro ? '/dashboard' : '/home',
+      (route) => false,
+    );
   }
 
   @override

@@ -107,9 +107,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
         showDashboard: isProfessional,
         onTap: (index) {
           if (index == 0) return;
-          if (index == 1) Navigator.pushReplacementNamed(context, '/bookings');
-          if (index == 2) Navigator.pushReplacementNamed(context, '/profile');
-          if (index == 3) Navigator.pushReplacementNamed(context, '/dashboard');
+          if (index == 1) Navigator.pushNamedAndRemoveUntil(context, '/bookings', (route) => false);
+          if (index == 2) Navigator.pushNamedAndRemoveUntil(context, '/profile', (route) => false);
+          if (index == 3) Navigator.pushNamedAndRemoveUntil(context, '/dashboard', (route) => false);
         },
       ),
     );
@@ -313,11 +313,11 @@ class _CategoriesGrid extends StatelessWidget {
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4,
           mainAxisSpacing: 16,
           crossAxisSpacing: 8,
-          childAspectRatio: 0.75,
+          childAspectRatio: MediaQuery.of(context).size.width < 360 ? 0.65 : 0.75,
         ),
         itemCount: categories.length,
         itemBuilder: (context, index) {

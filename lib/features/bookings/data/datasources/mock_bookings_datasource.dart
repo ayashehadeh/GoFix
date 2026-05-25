@@ -258,6 +258,11 @@ class MockBookingsDataSource implements BookingsRemoteDataSource {
   }
 
   @override
+  Future<void> submitPaymentAmount(String bookingId, double amount) async {
+    await Future.delayed(const Duration(milliseconds: 400));
+  }
+
+  @override
   Future<void> submitReport({
     required String bookingId,
     required String description,

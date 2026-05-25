@@ -38,3 +38,13 @@ class UpdateStatus extends ProfessionalDashboardEvent {
   @override
   List<Object?> get props => [jobId, status];
 }
+
+class SubmitPaymentAmountEvent extends ProfessionalDashboardEvent {
+  final String jobId;
+  final double amount;
+
+  const SubmitPaymentAmountEvent(this.jobId, this.amount);
+
+  @override
+  List<Object?> get props => [jobId, amount];
+}

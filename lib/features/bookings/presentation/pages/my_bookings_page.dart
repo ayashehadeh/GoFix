@@ -113,9 +113,9 @@ class _MyBookingsPageState extends State<MyBookingsPage>
         currentIndex: 1,
         showDashboard: isProfessional,
         onTap: (index) {
-          if (index == 0) Navigator.pushReplacementNamed(context, '/home');
-          if (index == 2) Navigator.pushReplacementNamed(context, '/profile');
-          if (index == 3) Navigator.pushReplacementNamed(context, '/dashboard');
+          if (index == 0) Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+          if (index == 2) Navigator.pushNamedAndRemoveUntil(context, '/profile', (route) => false);
+          if (index == 3) Navigator.pushNamedAndRemoveUntil(context, '/dashboard', (route) => false);
         },
       ),
     );
