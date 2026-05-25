@@ -51,9 +51,8 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
   static const Color errorRed = Color(0xFFD32F2F);
   static const Color lightGrey = Color(0xFFF5F5F5);
 
-  late final List<ServiceItem> _services = widget.services
-      .map((s) => ServiceItem(name: s.name, nameAr: s.nameAr, price: s.priceDisplay))
-      .toList();
+  late final List<ServiceItem> _services =
+      widget.services.map((s) => ServiceItem(name: s.name, nameAr: s.nameAr, price: s.priceDisplay)).toList();
 
   @override
   void dispose() {
@@ -96,6 +95,7 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
             create: (_) => di.sl<AddressBloc>(),
             child: BookServiceScreen(
               serviceName: _services[_selectedServiceIndex!].name,
+              serviceNameAr: _services[_selectedServiceIndex!].nameAr,
               servicePrice: _services[_selectedServiceIndex!].price,
               description: _descriptionController.text.trim(),
               images: List.from(_pickedImages),
@@ -244,9 +244,7 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: _showServiceError
-                ? Border.all(color: errorRed, width: 1.5)
-                : null,
+            border: _showServiceError ? Border.all(color: errorRed, width: 1.5) : null,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
@@ -294,57 +292,53 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
                   ),
                 )
               else
-              Column(
-                children: List.generate(_services.length, (index) {
-                  final service = _services[index];
-                  final isSelected = _selectedServiceIndex == index;
-                  final isLast = index == _services.length - 1;
-                  return Column(
-                    children: [
-                      GestureDetector(
-                        onTap: () => setState(() {
-                          _selectedServiceIndex = index;
-                          _showServiceError = false;
-                        }),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                          color: isSelected
-                              ? const Color(0xFFFFF3E0)
-                              : Colors.transparent,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                localizeServiceName(service.name, t, nameAr: service.nameAr),
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: isSelected ? orange : darkBlue,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.normal,
+                Column(
+                  children: List.generate(_services.length, (index) {
+                    final service = _services[index];
+                    final isSelected = _selectedServiceIndex == index;
+                    final isLast = index == _services.length - 1;
+                    return Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () => setState(() {
+                            _selectedServiceIndex = index;
+                            _showServiceError = false;
+                          }),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                            color: isSelected ? const Color(0xFFFFF3E0) : Colors.transparent,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  localizeServiceName(service.name, t, nameAr: service.nameAr),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: isSelected ? orange : darkBlue,
+                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                service.price,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: isSelected ? orange : darkBlue,
+                                Text(
+                                  service.price,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: isSelected ? orange : darkBlue,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      if (!isLast) const Divider(height: 1),
-                    ],
-                  );
-                }),
-              ),
+                        if (!isLast) const Divider(height: 1),
+                      ],
+                    );
+                  }),
+                ),
             ],
           ),
         ),
@@ -369,9 +363,7 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: (_showDescriptionError || _showPictureError)
-                ? Border.all(color: errorRed, width: 1.5)
-                : null,
+            border: (_showDescriptionError || _showPictureError) ? Border.all(color: errorRed, width: 1.5) : null,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
@@ -413,9 +405,7 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
                     fontSize: 13,
                   ),
                   filled: true,
-                  fillColor: _showDescriptionError
-                      ? const Color(0xFFFFF3F3)
-                      : const Color(0xFFF8F8F8),
+                  fillColor: _showDescriptionError ? const Color(0xFFFFF3F3) : const Color(0xFFF8F8F8),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide.none,

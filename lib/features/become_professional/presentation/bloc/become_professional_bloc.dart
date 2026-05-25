@@ -93,6 +93,7 @@ class BecomeProfessionalBloc extends Bloc<BecomeProfessionalEvent, BecomeProfess
         .map((s) => ServicePricing(
               serviceId: s.serviceId ?? 0,
               serviceName: s.name,
+              serviceNameAr: s.nameAr,
               minPrice: s.minPrice,
               maxPrice: s.maxPrice,
             ))

@@ -4,8 +4,7 @@ import 'bookings_remote_datasource.dart';
 
 class MockBookingsDataSource implements BookingsRemoteDataSource {
   // ─── Shared description used across the booking detail screens ─────────────
-  static const String _pipeDesc =
-      'Pipe under the kitchen sink has been leaking for 2 days. '
+  static const String _pipeDesc = 'Pipe under the kitchen sink has been leaking for 2 days. '
       'Water is dripping onto the cabinet floor. Need it fixed as soon as possible.';
 
   // ─── In-memory mutable lists so cancel / modify / create all work live ─────
@@ -40,8 +39,7 @@ class MockBookingsDataSource implements BookingsRemoteDataSource {
       scheduledDate: DateTime(2025, 2, 2),
       scheduledTime: '10:00 AM',
       address: 'Villa 12, Sweifieh',
-      description:
-          'The living room circuit breaker keeps tripping whenever the AC is turned on.',
+      description: 'The living room circuit breaker keeps tripping whenever the AC is turned on.',
       imageUrls: [],
       status: BookingStatus.confirmed,
       createdAt: DateTime(2025, 1, 29),
@@ -59,8 +57,7 @@ class MockBookingsDataSource implements BookingsRemoteDataSource {
       scheduledDate: DateTime(2025, 1, 2),
       scheduledTime: '11:00 AM',
       address: 'Apartment 4B, Khalda',
-      description:
-          'Need help assembling a new wardrobe and a king-size bed frame.',
+      description: 'Need help assembling a new wardrobe and a king-size bed frame.',
       imageUrls: [],
       status: BookingStatus.inProgress,
       createdAt: DateTime(2025, 1, 1),
@@ -98,8 +95,7 @@ class MockBookingsDataSource implements BookingsRemoteDataSource {
       scheduledDate: DateTime(2025, 2, 2),
       scheduledTime: '09:00 AM',
       address: 'Villa 12, Sweifieh',
-      description:
-          'Replace all ceiling lights in the hallway with LED fixtures.',
+      description: 'Replace all ceiling lights in the hallway with LED fixtures.',
       imageUrls: [],
       status: BookingStatus.cancelled,
       createdAt: DateTime(2025, 1, 28),
@@ -117,8 +113,7 @@ class MockBookingsDataSource implements BookingsRemoteDataSource {
       scheduledDate: DateTime(2025, 1, 2),
       scheduledTime: '02:00 PM',
       address: 'Apartment 4B, Khalda',
-      description:
-          "The bedroom door hinge is broken and the door won't close properly.",
+      description: "The bedroom door hinge is broken and the door won't close properly.",
       imageUrls: [],
       status: BookingStatus.completed,
       createdAt: DateTime(2024, 12, 28),
@@ -159,6 +154,7 @@ class MockBookingsDataSource implements BookingsRemoteDataSource {
   Future<BookingModel> createBooking({
     required String professionalId,
     required String serviceName,
+    String? serviceNameAr,
     required String servicePrice,
     required DateTime scheduledDate,
     required String scheduledTime,
@@ -174,6 +170,7 @@ class MockBookingsDataSource implements BookingsRemoteDataSource {
       professionalRole: 'Professional Plumber',
       professionalImageUrl: null,
       serviceName: serviceName,
+      serviceNameAr: serviceNameAr,
       servicePrice: servicePrice,
       scheduledDate: scheduledDate,
       scheduledTime: scheduledTime,

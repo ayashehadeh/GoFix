@@ -13,6 +13,7 @@ import 'package:gp/l10n/app_localizations.dart';
 
 class BookServiceScreen extends StatefulWidget {
   final String serviceName;
+  final String? serviceNameAr;
   final String servicePrice;
   final String description;
   final List<File> images;
@@ -20,10 +21,10 @@ class BookServiceScreen extends StatefulWidget {
   final String workerRole;
   final String professionalId;
 
-
   const BookServiceScreen({
     super.key,
     required this.serviceName,
+    this.serviceNameAr,
     required this.servicePrice,
     required this.description,
     required this.images,
@@ -57,7 +58,6 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     },
   );
 
-
   @override
   void initState() {
     super.initState();
@@ -77,7 +77,8 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
         children: [
           const SizedBox(height: 12),
           Container(
-            width: 40, height: 4,
+            width: 40,
+            height: 4,
             decoration: BoxDecoration(
               color: Colors.grey.shade300,
               borderRadius: BorderRadius.circular(2),
@@ -111,19 +112,12 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
           else
             ...addresses.map((addr) => ListTile(
                   leading: Icon(
-                    addr.type == AddressType.apartment
-                        ? Icons.apartment
-                        : Icons.home_outlined,
+                    addr.type == AddressType.apartment ? Icons.apartment : Icons.home_outlined,
                     color: orange,
                   ),
-                  title: Text(addr.displayTitle,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w600, color: darkBlue)),
-                  subtitle: Text(addr.displaySubtitle,
-                      style: const TextStyle(fontSize: 12)),
-                  trailing: _selectedAddress?.id == addr.id
-                      ? const Icon(Icons.check_circle, color: orange)
-                      : null,
+                  title: Text(addr.displayTitle, style: const TextStyle(fontWeight: FontWeight.w600, color: darkBlue)),
+                  subtitle: Text(addr.displaySubtitle, style: const TextStyle(fontSize: 12)),
+                  trailing: _selectedAddress?.id == addr.id ? const Icon(Icons.check_circle, color: orange) : null,
                   onTap: () {
                     setState(() {
                       _selectedAddress = addr;
@@ -273,9 +267,8 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
           '${_dayLabels[selectedDate.weekday - 1]}, ${selectedDate.day} ${_monthLabels[selectedDate.month - 1]} ${selectedDate.year}';
       final hour = selectedHour % 12 == 0 ? 12 : selectedHour % 12;
       final t2 = AppLocalizations.of(context)!;
-    final amPm = selectedHour < 12 ? t2.amLabel : t2.pmLabel;
-      final timeStr =
-          '${hour.toString().padLeft(2, '0')}:${selectedMinute.toString().padLeft(2, '0')} $amPm';
+      final amPm = selectedHour < 12 ? t2.amLabel : t2.pmLabel;
+      final timeStr = '${hour.toString().padLeft(2, '0')}:${selectedMinute.toString().padLeft(2, '0')} $amPm';
 
       Navigator.push(
         context,
@@ -284,6 +277,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
             create: (_) => di.sl<BookingsBloc>(),
             child: BookDetailsScreen(
               serviceName: widget.serviceName,
+              serviceNameAr: widget.serviceNameAr,
               servicePrice: widget.servicePrice,
               description: widget.description,
               images: widget.images,
@@ -304,13 +298,27 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
     _dayLabels = [
-      t.dayMonShort, t.dayTueShort, t.dayWedShort, t.dayThuShort,
-      t.dayFriShort, t.daySatShort, t.daySunShort,
+      t.dayMonShort,
+      t.dayTueShort,
+      t.dayWedShort,
+      t.dayThuShort,
+      t.dayFriShort,
+      t.daySatShort,
+      t.daySunShort,
     ];
     _monthLabels = [
-      t.monthJan, t.monthFeb, t.monthMar, t.monthApr, t.monthMay,
-      t.monthJun, t.monthJul, t.monthAugShort, t.monthSep,
-      t.monthOct, t.monthNov, t.monthDec,
+      t.monthJan,
+      t.monthFeb,
+      t.monthMar,
+      t.monthApr,
+      t.monthMay,
+      t.monthJun,
+      t.monthJul,
+      t.monthAugShort,
+      t.monthSep,
+      t.monthOct,
+      t.monthNov,
+      t.monthDec,
     ];
     return Scaffold(
       backgroundColor: lightGrey,
@@ -438,20 +446,16 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
                             itemCount: dates.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(width: 8),
+                            separatorBuilder: (_, __) => const SizedBox(width: 8),
                             itemBuilder: (context, index) {
                               final isSelected = index == selectedDateIndex;
                               return GestureDetector(
-                                onTap: () =>
-                                    setState(() => selectedDateIndex = index),
+                                onTap: () => setState(() => selectedDateIndex = index),
                                 child: AnimatedContainer(
                                   duration: const Duration(milliseconds: 200),
                                   width: 72,
                                   decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? darkBlue
-                                        : const Color(0xFFF4F4F4),
+                                    color: isSelected ? darkBlue : const Color(0xFFF4F4F4),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Column(
@@ -460,9 +464,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                                       Text(
                                         _dayLabels[dates[index].weekday - 1],
                                         style: TextStyle(
-                                          color: isSelected
-                                              ? Colors.white70
-                                              : Colors.grey,
+                                          color: isSelected ? Colors.white70 : Colors.grey,
                                           fontSize: 13,
                                         ),
                                       ),
@@ -470,9 +472,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                                       Text(
                                         dates[index].day.toString(),
                                         style: TextStyle(
-                                          color: isSelected
-                                              ? Colors.white
-                                              : darkBlue,
+                                          color: isSelected ? Colors.white : darkBlue,
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -481,9 +481,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                                       Text(
                                         _monthLabels[dates[index].month - 1],
                                         style: TextStyle(
-                                          color: isSelected
-                                              ? Colors.white70
-                                              : Colors.grey,
+                                          color: isSelected ? Colors.white70 : Colors.grey,
                                           fontSize: 13,
                                         ),
                                       ),
@@ -588,9 +586,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
-                                border: _showAddressError
-                                    ? Border.all(color: errorRed, width: 1.5)
-                                    : null,
+                                border: _showAddressError ? Border.all(color: errorRed, width: 1.5) : null,
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withValues(alpha: 0.05),
@@ -621,21 +617,16 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                                     width: double.infinity,
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: _showAddressError
-                                          ? const Color(0xFFFFF3F3)
-                                          : const Color(0xFFF8F8F8),
+                                      color: _showAddressError ? const Color(0xFFFFF3F3) : const Color(0xFFF8F8F8),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: _selectedAddress == null
                                         ? Row(
                                             children: [
-                                              Icon(Icons.location_on_outlined,
-                                                  color: Colors.grey.shade400, size: 18),
+                                              Icon(Icons.location_on_outlined, color: Colors.grey.shade400, size: 18),
                                               const SizedBox(width: 8),
                                               Text(
-                                                addrState is AddressLoading
-                                                    ? t.loadingAddresses
-                                                    : t.tapToSelectAddress,
+                                                addrState is AddressLoading ? t.loadingAddresses : t.tapToSelectAddress,
                                                 style: TextStyle(
                                                   color: Colors.grey.shade400,
                                                   fontSize: 13,
@@ -675,8 +666,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                                                   ],
                                                 ),
                                               ),
-                                              const Icon(Icons.edit_outlined,
-                                                  color: orange, size: 16),
+                                              const Icon(Icons.edit_outlined, color: orange, size: 16),
                                             ],
                                           ),
                                   ),
