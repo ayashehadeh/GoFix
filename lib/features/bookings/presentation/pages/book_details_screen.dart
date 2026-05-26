@@ -19,6 +19,8 @@ class BookDetailsScreen extends StatelessWidget {
   final String date;
   final String time;
   final String address;
+  final double? latitude;
+  final double? longitude;
   final String workerName;
   final String professionalId;
   final DateTime scheduledDate;
@@ -33,6 +35,8 @@ class BookDetailsScreen extends StatelessWidget {
     required this.date,
     required this.time,
     required this.address,
+    this.latitude,
+    this.longitude,
     required this.workerName,
     required this.professionalId,
     required this.scheduledDate,
@@ -295,6 +299,8 @@ class BookDetailsScreen extends StatelessWidget {
                                     scheduledDate: scheduledDate,
                                     scheduledTime: time,
                                     address: address,
+                                    latitude: latitude,
+                                    longitude: longitude,
                                     description: description,
                                     imageUrls: const [],
                                   ),

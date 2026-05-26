@@ -6,6 +6,8 @@ class JobModel extends JobEntity {
     required super.clientName,
     required super.serviceType,
     required super.location,
+    super.latitude,
+    super.longitude,
     required super.scheduledTime,
     required super.status,
     super.clientImage,
@@ -19,6 +21,8 @@ class JobModel extends JobEntity {
       clientName: json['clientName'] as String? ?? '',
       serviceType: json['serviceName'] as String? ?? '',
       location: json['address'] as String? ?? '',
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
       scheduledTime: DateTime.tryParse(
             json['scheduledDate'] as String? ?? '',
           ) ??

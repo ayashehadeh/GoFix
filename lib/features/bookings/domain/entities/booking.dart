@@ -50,6 +50,8 @@ class Booking extends Equatable {
   final DateTime scheduledDate;
   final String scheduledTime;
   final String address;
+  final double? latitude;
+  final double? longitude;
   final String description;
   final List<String> imageUrls;
   final BookingStatus status;
@@ -72,6 +74,8 @@ class Booking extends Equatable {
     required this.scheduledDate,
     required this.scheduledTime,
     required this.address,
+    this.latitude,
+    this.longitude,
     required this.description,
     required this.imageUrls,
     required this.status,
@@ -115,6 +119,8 @@ class Booking extends Equatable {
         scheduledDate,
         scheduledTime,
         address,
+        latitude,
+        longitude,
         description,
         imageUrls,
         status,
