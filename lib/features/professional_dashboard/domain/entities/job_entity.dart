@@ -15,6 +15,8 @@ class JobEntity extends Equatable {
   final String clientName;
   final String serviceType;
   final String location;
+  final double? latitude;
+  final double? longitude;
   final DateTime scheduledTime;
   final JobStatus status;
   final String? clientImage;
@@ -26,6 +28,8 @@ class JobEntity extends Equatable {
     required this.clientName,
     required this.serviceType,
     required this.location,
+    this.latitude,
+    this.longitude,
     required this.scheduledTime,
     required this.status,
     this.clientImage,
@@ -39,6 +43,8 @@ class JobEntity extends Equatable {
         clientName,
         serviceType,
         location,
+        latitude,
+        longitude,
         scheduledTime,
         status,
         clientImage,

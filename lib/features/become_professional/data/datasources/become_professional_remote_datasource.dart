@@ -35,6 +35,7 @@ abstract class BecomeProfessionalRemoteDataSource {
   });
 
   Future<void> submitApplication();
+  Future<void> cancelProfessional();
   Future<void> updateProfile({
     required int categoryId,
     required int experienceYears,
@@ -244,6 +245,14 @@ class BecomeProfessionalRemoteDataSourceImpl implements BecomeProfessionalRemote
   Future<void> submitApplication() async {
     await dio.post(
       '/professionals/profile/submit',
+      options: Options(headers: await _authHeaders()),
+    );
+  }
+
+  @override
+  Future<void> cancelProfessional() async {
+    await dio.delete(
+      '/professionals/profile',
       options: Options(headers: await _authHeaders()),
     );
   }

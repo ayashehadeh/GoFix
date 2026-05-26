@@ -38,6 +38,8 @@ class CreateBookingEvent extends BookingsEvent {
   final DateTime scheduledDate;
   final String scheduledTime;
   final String address;
+  final double? latitude;
+  final double? longitude;
   final String description;
   final List<String> imageUrls;
 
@@ -49,6 +51,8 @@ class CreateBookingEvent extends BookingsEvent {
     required this.scheduledDate,
     required this.scheduledTime,
     required this.address,
+    this.latitude,
+    this.longitude,
     required this.description,
     required this.imageUrls,
   });
@@ -62,6 +66,8 @@ class CreateBookingEvent extends BookingsEvent {
         scheduledDate,
         scheduledTime,
         address,
+        latitude,
+        longitude,
         description,
         imageUrls,
       ];

@@ -19,11 +19,25 @@ class EditAddressScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(t.deleteAddress),
-        content: Text(t.deleteAddressConfirm),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          t.deleteAddress,
+          style: const TextStyle(
+            color: AppColors.primaryDark,
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Text(
+          t.deleteAddressConfirm,
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary),
             child: Text(t.cancel),
           ),
           TextButton(
@@ -31,7 +45,8 @@ class EditAddressScreen extends StatelessWidget {
               Navigator.pop(context);
               context.read<AddressBloc>().add(DeleteAddressEvent(address.id));
             },
-            child: Text(t.delete, style: const TextStyle(color: AppColors.error)),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: Text(t.delete, style: const TextStyle(fontWeight: FontWeight.w700)),
           ),
         ],
       ),

@@ -5,18 +5,20 @@ import 'package:gp/features/professionals/domain/entities/service_category.dart'
 // ─── Area result ──────────────────────────────────────────────────────────────
 
 class AreaResult extends Equatable {
+  final int id;
   final String name;
   final String city;
   final int proCount;
 
   const AreaResult({
+    required this.id,
     required this.name,
     required this.city,
     required this.proCount,
   });
 
   @override
-  List<Object?> get props => [name, city, proCount];
+  List<Object?> get props => [id, name, city, proCount];
 }
 
 // ─── Service result ───────────────────────────────────────────────────────────
@@ -24,18 +26,20 @@ class AreaResult extends Equatable {
 // Tapping it navigates to the category professionals page for that service's category.
 
 class ServiceResult extends Equatable {
+  final int serviceId;
   final String serviceName;
   final ServiceCategory category;
-  final int proCount; // how many pros offer this service
+  final int proCount;
 
   const ServiceResult({
+    required this.serviceId,
     required this.serviceName,
     required this.category,
     required this.proCount,
   });
 
   @override
-  List<Object?> get props => [serviceName, category, proCount];
+  List<Object?> get props => [serviceId, serviceName, category, proCount];
 }
 
 // ─── Unified search result ────────────────────────────────────────────────────

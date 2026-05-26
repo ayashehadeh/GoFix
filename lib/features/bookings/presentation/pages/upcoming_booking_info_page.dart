@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../injection_container.dart' as di;
 import '../../../chat/presentation/bloc/chat_bloc.dart';
@@ -59,71 +60,71 @@ class _UpcomingBookingInfoPageState extends State<UpcomingBookingInfoPage> {
           }
         },
         child: Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: const BackButton(color: AppColors.primaryDark),
-        title: Builder(
-          builder: (ctx) => Text(
-            AppLocalizations.of(ctx)!.bookingDetails,
-            style: const TextStyle(
-              color: AppColors.primaryDark,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
+          backgroundColor: const Color(0xFFF5F6FA),
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: const BackButton(color: AppColors.primaryDark),
+            title: Builder(
+              builder: (ctx) => Text(
+                AppLocalizations.of(ctx)!.bookingDetails,
+                style: const TextStyle(
+                  color: AppColors.primaryDark,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
+            centerTitle: false,
           ),
-        ),
-        centerTitle: false,
-      ),
-      body: BlocConsumer<BookingsBloc, BookingsState>(
-        listener: (context, state) {
-          if (state is BookingCancelledSuccess) {
-            Navigator.of(context).popUntil(
-              (route) => route.settings.name == '/bookings' || route.isFirst,
-            );
-          }
-          if (state is ConfirmPaymentSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(AppLocalizations.of(context)!.paymentConfirmedMoved),
-                backgroundColor: Colors.green,
-              ),
-            );
-            Navigator.of(context).popUntil(
-              (route) => route.settings.name == '/bookings' || route.isFirst,
-            );
-          }
-          if (state is ConfirmPaymentError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is BookingsLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryOrange),
-            );
-          }
+          body: BlocConsumer<BookingsBloc, BookingsState>(
+            listener: (context, state) {
+              if (state is BookingCancelledSuccess) {
+                Navigator.of(context).popUntil(
+                  (route) => route.settings.name == '/bookings' || route.isFirst,
+                );
+              }
+              if (state is ConfirmPaymentSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context)!.paymentConfirmedMoved),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                Navigator.of(context).popUntil(
+                  (route) => route.settings.name == '/bookings' || route.isFirst,
+                );
+              }
+              if (state is ConfirmPaymentError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              if (state is BookingsLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(color: AppColors.primaryOrange),
+                );
+              }
 
-          if (state is BookingsError) {
-            return _ErrorBody(
-              message: state.message,
-              onRetry: () => context.read<BookingsBloc>().add(LoadBookingById(widget.bookingId)),
-            );
-          }
+              if (state is BookingsError) {
+                return _ErrorBody(
+                  message: state.message,
+                  onRetry: () => context.read<BookingsBloc>().add(LoadBookingById(widget.bookingId)),
+                );
+              }
 
-          if (state is BookingDetailLoaded) {
-            return _UpcomingInfoBody(booking: state.booking);
-          }
+              if (state is BookingDetailLoaded) {
+                return _UpcomingInfoBody(booking: state.booking);
+              }
 
-          return const SizedBox.shrink();
-        },
-      ),
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
     );
@@ -161,7 +162,7 @@ class _UpcomingInfoBody extends StatelessWidget {
                               nameAr: booking.serviceNameAr)),
                       _DetailRow(icon: Icons.calendar_month_outlined, text: booking.formattedDate),
                       _DetailRow(icon: Icons.access_time_outlined, text: booking.scheduledTime),
-                      _DetailRow(icon: Icons.location_on_outlined, text: booking.address),
+                      _DetailRow(icon: Icons.location_on_outlined, text: booking.address, onTap: () => _launchMaps(booking.address, latitude: booking.latitude, longitude: booking.longitude)),
                       _DetailRow(icon: Icons.attach_money, text: booking.servicePrice, isLast: true),
                     ],
                   ),
@@ -443,12 +444,10 @@ class _ProfessionalCardState extends State<_ProfessionalCard> {
           CircleAvatar(
             radius: 28,
             backgroundColor: const Color(0xFFE0E8F0),
-            backgroundImage: widget.booking.professionalImageUrl != null
-                ? NetworkImage(widget.booking.professionalImageUrl!)
-                : null,
+            backgroundImage:
+                widget.booking.professionalImageUrl != null ? NetworkImage(widget.booking.professionalImageUrl!) : null,
             child: widget.booking.professionalImageUrl == null
-                ? const Icon(Icons.person,
-                    color: AppColors.primaryDark, size: 28)
+                ? const Icon(Icons.person, color: AppColors.primaryDark, size: 28)
                 : null,
           ),
           const SizedBox(width: 14),
@@ -547,35 +546,56 @@ class _DetailRow extends StatelessWidget {
   final IconData icon;
   final String text;
   final bool isLast;
+  final VoidCallback? onTap;
 
   const _DetailRow({
     required this.icon,
     required this.text,
     this.isLast = false,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Row(
-            children: [
-              Icon(icon, color: AppColors.primaryOrange, size: 20),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Text(
-                  text,
-                  style: const TextStyle(fontSize: 14, color: AppColors.primaryDark),
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              children: [
+                Icon(icon, color: AppColors.primaryOrange, size: 20),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.primaryDark,
+                      decoration: onTap != null ? TextDecoration.underline : null,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                if (onTap != null)
+                  const Icon(Icons.open_in_new, size: 14, color: AppColors.primaryOrange),
+              ],
+            ),
           ),
         ),
         if (!isLast) const Divider(height: 1, color: Color(0xFFF0F0F0)),
       ],
     );
+  }
+}
+
+Future<void> _launchMaps(String address, {double? latitude, double? longitude}) async {
+  final uri = (latitude != null && longitude != null)
+      ? Uri.parse('https://www.google.com/maps/?q=$latitude,$longitude')
+      : Uri.parse('https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(address)}');
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 }
 

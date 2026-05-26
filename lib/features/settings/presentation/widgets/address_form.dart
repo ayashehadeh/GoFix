@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/core/theme/app_text_styles.dart';
 import 'package:gp/features/settings/domain/entities/address_entity.dart';
@@ -118,12 +119,21 @@ class _AddressFormState extends State<AddressForm> {
               children: [
                 Expanded(
                   child: _FormField(
-                      label: 'Apartment number', controller: _aptNumberCtrl),
+                    label: 'Apartment number',
+                    controller: _aptNumberCtrl,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  ),
                 ),
                 const SizedBox(width: 12),
                 SizedBox(
                   width: 80,
-                  child: _FormField(label: 'Floor', controller: _floorCtrl),
+                  child: _FormField(
+                    label: 'Floor',
+                    controller: _floorCtrl,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  ),
                 ),
               ],
             ),
@@ -205,11 +215,15 @@ class _FormField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final bool required;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
 
   const _FormField({
     required this.label,
     required this.controller,
     this.required = false,
+    this.keyboardType,
+    this.inputFormatters,
   });
 
   @override
@@ -217,6 +231,8 @@ class _FormField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       style: AppTextStyles.bodyMedium,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       validator: required
           ? (val) => val == null || val.isEmpty ? 'Required' : null
           : null,

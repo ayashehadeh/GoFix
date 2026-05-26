@@ -758,6 +758,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get inQueueTitle => 'أنت في قائمة الانتظار!';
+  String get alreadyProfessionalTitle => 'أنت محترف بالفعل!';
+  String get alreadyProfessionalMessage => 'لديك حساب محترف نشط على GoFix. استمر في تقديم خدمة رائعة!';
+  String get cancelProfessionalTitle => 'إلغاء وضع المحترف؟';
+  String get cancelProfessionalMessage => 'سيؤدي هذا إلى إزالة ملفك المهني ولن تظهر للعملاء بعد الآن. لا يمكن التراجع عن هذا الإجراء.';
+  String get cancelProfessionalConfirm => 'نعم، إلغاء';
+  String get cancelProfessionalButton => 'إلغاء وضع المحترف';
 
   @override
   String get inQueueMessage => 'لقد تلقينا طلبك وسنراجعه خلال 24-48 ساعة. ستتلقى إشعاراً بمجرد الموافقة على ملفك الشخصي.';

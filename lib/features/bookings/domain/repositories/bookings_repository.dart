@@ -15,6 +15,8 @@ abstract class BookingsRepository {
     required DateTime scheduledDate,
     required String scheduledTime,
     required String address,
+    double? latitude,
+    double? longitude,
     required String description,
     required List<String> imageUrls,
   });

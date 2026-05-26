@@ -758,6 +758,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inQueueTitle => "You're In the Queue!";
+  String get alreadyProfessionalTitle => "You're Already a Professional!";
+  String get alreadyProfessionalMessage => "You have an active professional account on GoFix. Keep delivering great service!";
+  String get cancelProfessionalTitle => 'Cancel Professional Status?';
+  String get cancelProfessionalMessage => 'This will remove your professional profile and you will no longer appear to customers. This action cannot be undone.';
+  String get cancelProfessionalConfirm => 'Yes, Cancel';
+  String get cancelProfessionalButton => 'Cancel Professional Status';
 
   @override
   String get inQueueMessage => "We've received your application and will review it within 24-48 hours. You'll get a notification once your profile is approved and ready to go live.";

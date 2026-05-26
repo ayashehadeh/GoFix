@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../domain/entities/job_entity.dart';
 import '../bloc/professional_dashboard_bloc.dart';
 import '../bloc/professional_dashboard_event.dart';
@@ -408,7 +409,7 @@ class _JobDetailsCard extends StatelessWidget {
             icon: Icons.access_time_outlined,
             text: DateFormat('h:mm a').format(job.scheduledTime),
           ),
-          _Row(icon: Icons.location_on_outlined, text: job.location, isLast: true),
+          _Row(icon: Icons.location_on_outlined, text: job.location, isLast: true, onTap: () => _launchMaps(job.location, latitude: job.latitude, longitude: job.longitude)),
         ],
       ),
     );
@@ -499,24 +500,49 @@ class _Row extends StatelessWidget {
   final IconData icon;
   final String text;
   final bool isLast;
-  const _Row({required this.icon, required this.text, this.isLast = false});
+  final VoidCallback? onTap;
+  const _Row({required this.icon, required this.text, this.isLast = false, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            children: [
-              Icon(icon, color: const Color(0xFFFF8C1A), size: 18),
-              const SizedBox(width: 12),
-              Expanded(child: Text(text, style: const TextStyle(fontSize: 13, color: Color(0xFF062B4D)))),
-            ],
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                Icon(icon, color: const Color(0xFFFF8C1A), size: 18),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: const Color(0xFF062B4D),
+                      decoration: onTap != null ? TextDecoration.underline : null,
+                    ),
+                  ),
+                ),
+                if (onTap != null)
+                  const Icon(Icons.open_in_new, size: 13, color: Color(0xFFFF8C1A)),
+              ],
+            ),
           ),
         ),
         if (!isLast) const Divider(height: 1, color: Color(0xFFF0F0F0)),
       ],
     );
+  }
+}
+
+Future<void> _launchMaps(String address, {double? latitude, double? longitude}) async {
+  final uri = (latitude != null && longitude != null)
+      ? Uri.parse('https://www.google.com/maps/?q=$latitude,$longitude')
+      : Uri.parse('https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(address)}');
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../injection_container.dart' as di;
 import '../../../professionals/domain/usecases/profeessional_usecases/toggle_favorite.dart';
@@ -141,6 +142,7 @@ class _BookingInfoBody extends StatelessWidget {
                       _DetailRow(
                         icon: Icons.location_on_outlined,
                         text: booking.address,
+                        onTap: () => _launchMaps(booking.address, latitude: booking.latitude, longitude: booking.longitude),
                       ),
                       _DetailRow(
                         icon: Icons.attach_money,
@@ -362,38 +364,56 @@ class _DetailRow extends StatelessWidget {
   final IconData icon;
   final String text;
   final bool isLast;
+  final VoidCallback? onTap;
 
   const _DetailRow({
     required this.icon,
     required this.text,
     this.isLast = false,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Row(
-            children: [
-              Icon(icon, color: AppColors.primaryOrange, size: 20),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Text(
-                  text,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.primaryDark,
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              children: [
+                Icon(icon, color: AppColors.primaryOrange, size: 20),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.primaryDark,
+                      decoration: onTap != null ? TextDecoration.underline : null,
+                    ),
                   ),
                 ),
-              ),
-            ],
+                if (onTap != null)
+                  const Icon(Icons.open_in_new, size: 14, color: AppColors.primaryOrange),
+              ],
+            ),
           ),
         ),
         if (!isLast) const Divider(height: 1, color: Color(0xFFF0F0F0)),
       ],
     );
+  }
+}
+
+Future<void> _launchMaps(String address, {double? latitude, double? longitude}) async {
+  final uri = (latitude != null && longitude != null)
+      ? Uri.parse('https://www.google.com/maps/?q=$latitude,$longitude')
+      : Uri.parse('https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(address)}');
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 }
 

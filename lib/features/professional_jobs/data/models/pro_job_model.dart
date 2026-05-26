@@ -8,6 +8,8 @@ class ProJobModel extends ProJob {
     super.clientPhone,
     required super.serviceType,
     required super.location,
+    super.latitude,
+    super.longitude,
     required super.scheduledTime,
     required super.price,
     super.agreedAmount,
@@ -24,6 +26,8 @@ class ProJobModel extends ProJob {
       clientPhone: json['clientPhone'] as String?,
       serviceType: json['serviceType'] ?? json['service_type'] ?? '',
       location: json['location'] ?? '',
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
       scheduledTime: json['scheduledTime'] != null
           ? DateTime.parse(json['scheduledTime'] as String)
           : DateTime.parse(json['scheduled_time'] as String),

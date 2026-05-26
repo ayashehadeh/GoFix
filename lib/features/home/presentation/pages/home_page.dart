@@ -12,6 +12,8 @@ import '../../../bookings/presentation/bloc/active_booking_cubit.dart';
 import '../../../bookings/presentation/bloc/bookings_bloc.dart';
 import '../../../bookings/presentation/pages/upcoming_booking_info_page.dart';
 import '../../../notifications/presentation/bloc/notifications_bloc.dart';
+import '../../../notifications/presentation/bloc/notifications_event.dart';
+import '../../../notifications/presentation/bloc/notifications_state.dart';
 import '../../../notifications/presentation/pages/notifications_page.dart';
 import '../../../professionals/domain/entities/service_category.dart';
 import '../../../professionals/presentation/bloc/professionals_bloc.dart';
@@ -33,6 +35,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver, ProfessionalNavMixin<HomePage> {
   final int _currentNavIndex = 0;
   late final ActiveBookingCubit _activeBookingCubit;
+  late final NotificationsBloc _notificationsBloc;
 
   @override
   void initState() {
@@ -43,11 +46,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
       context.read<HomeBloc>().add(HomeLoadRequested());
     }
     _activeBookingCubit = sl<ActiveBookingCubit>()..load();
+    _notificationsBloc = sl<NotificationsBloc>()..add(LoadNotifications());
   }
 
   @override
   void dispose() {
     _activeBookingCubit.close();
+    _notificationsBloc.close();
     disposeProfessionalNav();
     super.dispose();
   }
@@ -57,7 +62,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
       (e) => e.displayName == category.name,
       orElse: () => ServiceCategory.plumbing,
     );
-
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -85,8 +89,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => BlocProvider(
-          create: (_) => sl<NotificationsBloc>(),
+        builder: (_) => BlocProvider.value(
+          value: _notificationsBloc,
           child: const NotificationsPage(),
         ),
       ),
@@ -118,31 +122,54 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
                       builder: (_) => BlocProvider(
                         create: (_) => sl<SearchBloc>(),
                         child: const SearchPage(),
+    return BlocProvider.value(
+      value: _notificationsBloc,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: BlocBuilder<HomeBloc, HomeState>(
+          builder: (context, state) {
+            return Column(
+              children: [
+                BlocBuilder<NotificationsBloc, NotificationsState>(
+                  builder: (context, notifState) {
+                    final hasUnread = notifState is NotificationsLoaded && notifState.unreadCount > 0;
+                    return _HomeHeader(
+                      locationName: state is HomeLoaded ? state.locationName : '...',
+                      isLoadingLocation: state is HomeLoading,
+                      hasUnread: hasUnread,
+                      onSearchTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider(
+                            create: (_) => sl<SearchBloc>(),
+                            child: const SearchPage(),
+                          ),
+                        ),
                       ),
-                    ),
-                  );
-                },
-                onNotificationTap: _onNotificationTap,
-              ),
-              Expanded(child: _buildBody(state)),
-            ],
-          );
-        },
-      ),
-      bottomNavigationBar: GoFixBottomNavBar(
-        currentIndex: _currentNavIndex,
-        showDashboard: isProfessional,
-        onTap: (index) {
-          if (index == 0) return;
-          if (index == 1) Navigator.pushNamedAndRemoveUntil(context, '/bookings', (route) => false);
-          if (index == 2) Navigator.pushNamedAndRemoveUntil(context, '/profile', (route) => false);
-          if (index == 3) Navigator.pushNamedAndRemoveUntil(context, '/dashboard', (route) => false);
-        },
+                      onNotificationTap: _onNotificationTap,
+                    );
+                  },
+                ),
+                Expanded(child: _buildBody(context, state)),
+              ],
+            );
+          },
+        ),
+        bottomNavigationBar: GoFixBottomNavBar(
+          currentIndex: _currentNavIndex,
+          showDashboard: isProfessional,
+          onTap: (index) {
+            if (index == 0) return;
+            if (index == 1) Navigator.pushNamedAndRemoveUntil(context, '/bookings', (route) => false);
+            if (index == 2) Navigator.pushNamedAndRemoveUntil(context, '/profile', (route) => false);
+            if (index == 3) Navigator.pushNamedAndRemoveUntil(context, '/dashboard', (route) => false);
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildBody(HomeState state) {
+  Widget _buildBody(BuildContext context, HomeState state) {
     if (state is HomeLoading) {
       return const Center(
         child: CircularProgressIndicator(color: AppColors.primaryOrange),
@@ -162,9 +189,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
               onPressed: () => context.read<HomeBloc>().add(HomeLoadRequested()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryOrange,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: Text(AppLocalizations.of(context)!.retry, style: const TextStyle(color: Colors.white)),
             ),
@@ -211,12 +236,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
 class _HomeHeader extends StatelessWidget {
   final String locationName;
   final bool isLoadingLocation;
+  final bool hasUnread;
   final VoidCallback onSearchTap;
   final VoidCallback onNotificationTap;
 
   const _HomeHeader({
     required this.locationName,
     required this.isLoadingLocation,
+    required this.hasUnread,
     required this.onSearchTap,
     required this.onNotificationTap,
   });
@@ -278,14 +305,30 @@ class _HomeHeader extends StatelessWidget {
               const SizedBox(width: 12),
               GestureDetector(
                 onTap: onNotificationTap,
-                child: SvgPicture.asset(
-                  'assets/home_screen/notifications.svg',
-                  width: 32,
-                  height: 32,
-                  colorFilter: const ColorFilter.mode(
-                    Colors.white,
-                    BlendMode.srcIn,
-                  ),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    SvgPicture.asset(
+                      'assets/home_screen/notifications.svg',
+                      width: 32,
+                      height: 32,
+                      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                    ),
+                    if (hasUnread)
+                      Positioned(
+                        top: -2,
+                        right: -2,
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryOrange,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppColors.primaryDark, width: 1.5),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ],
@@ -306,10 +349,7 @@ class _HomeHeader extends StatelessWidget {
                     'assets/home_screen/search.svg',
                     width: 20,
                     height: 20,
-                    colorFilter: const ColorFilter.mode(
-                      AppColors.primaryDark,
-                      BlendMode.srcIn,
-                    ),
+                    colorFilter: const ColorFilter.mode(AppColors.primaryDark, BlendMode.srcIn),
                   ),
                   const SizedBox(width: 10),
                   Text(AppLocalizations.of(context)!.search, style: AppTextStyles.searchHint),

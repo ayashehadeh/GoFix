@@ -20,16 +20,25 @@ import 'package:gp/features/professionals/domain/entities/service_category.dart'
 String _localizeDay(String day, AppLocalizations l10n) {
   String translate(String name) {
     switch (name.trim()) {
-      case 'Sunday':    return l10n.dayFullSunday;
-      case 'Monday':    return l10n.dayFullMonday;
-      case 'Tuesday':   return l10n.dayFullTuesday;
-      case 'Wednesday': return l10n.dayFullWednesday;
-      case 'Thursday':  return l10n.dayFullThursday;
-      case 'Friday':    return l10n.dayFullFriday;
-      case 'Saturday':  return l10n.dayFullSaturday;
-      default:          return name;
+      case 'Sunday':
+        return l10n.dayFullSunday;
+      case 'Monday':
+        return l10n.dayFullMonday;
+      case 'Tuesday':
+        return l10n.dayFullTuesday;
+      case 'Wednesday':
+        return l10n.dayFullWednesday;
+      case 'Thursday':
+        return l10n.dayFullThursday;
+      case 'Friday':
+        return l10n.dayFullFriday;
+      case 'Saturday':
+        return l10n.dayFullSaturday;
+      default:
+        return name;
     }
   }
+
   return day.split(' - ').map(translate).join(' - ');
 }
 
@@ -38,22 +47,29 @@ String _localizeTime(String time, AppLocalizations l10n) =>
 
 String _localizeCategoryName(AppLocalizations l10n, ServiceCategory cat) {
   switch (cat) {
-    case ServiceCategory.plumbing:        return l10n.categoryPlumbing;
-    case ServiceCategory.electricalWork:  return l10n.categoryElectricalWork;
-    case ServiceCategory.acRepair:        return l10n.categoryAcRepair;
-    case ServiceCategory.carpentry:       return l10n.categoryCarpentry;
-    case ServiceCategory.painting:        return l10n.categoryPainting;
-    case ServiceCategory.cleaning:        return l10n.categoryCleaning;
-    case ServiceCategory.movingServices:  return l10n.categoryMovingServices;
-    case ServiceCategory.applianceRepair: return l10n.categoryApplianceRepair;
+    case ServiceCategory.plumbing:
+      return l10n.categoryPlumbing;
+    case ServiceCategory.electricalWork:
+      return l10n.categoryElectricalWork;
+    case ServiceCategory.acRepair:
+      return l10n.categoryAcRepair;
+    case ServiceCategory.carpentry:
+      return l10n.categoryCarpentry;
+    case ServiceCategory.painting:
+      return l10n.categoryPainting;
+    case ServiceCategory.cleaning:
+      return l10n.categoryCleaning;
+    case ServiceCategory.movingServices:
+      return l10n.categoryMovingServices;
+    case ServiceCategory.applianceRepair:
+      return l10n.categoryApplianceRepair;
   }
 }
 
 class ProfessionalDetailPage extends StatefulWidget {
   final String professionalId;
 
-  const ProfessionalDetailPage(
-      {super.key, required this.professionalId, required String id});
+  const ProfessionalDetailPage({super.key, required this.professionalId, required String id});
 
   @override
   State<ProfessionalDetailPage> createState() => _ProfessionalDetailPageState();
@@ -61,7 +77,6 @@ class ProfessionalDetailPage extends StatefulWidget {
 
 class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
   int _selectedTab = 0;
-
 
   @override
   void initState() {
@@ -124,8 +139,7 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
             builder: (context, state) {
               if (state is ProfessionalsLoading) {
                 return const Center(
-                  child:
-                      CircularProgressIndicator(color: AppColors.primaryOrange),
+                  child: CircularProgressIndicator(color: AppColors.primaryOrange),
                 );
               }
 
@@ -133,14 +147,10 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                 return Center(child: Text(state.message));
               }
 
-              if (state is ProfessionalDetailLoaded ||
-                  state is ReviewsLoading) {
-                final professional = state is ProfessionalDetailLoaded
-                    ? state.professional
-                    : (state as ReviewsLoading).professional;
-                final reviews = state is ProfessionalDetailLoaded
-                    ? state.reviews
-                    : <Review>[];
+              if (state is ProfessionalDetailLoaded || state is ReviewsLoading) {
+                final professional =
+                    state is ProfessionalDetailLoaded ? state.professional : (state as ReviewsLoading).professional;
+                final reviews = state is ProfessionalDetailLoaded ? state.reviews : <Review>[];
 
                 return Column(
                   children: [
@@ -174,22 +184,16 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                                   vertical: 10,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: selected
-                                      ? AppColors.primaryOrange
-                                      : AppColors.white,
+                                  color: selected ? AppColors.primaryOrange : AppColors.white,
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
-                                    color: selected
-                                        ? AppColors.primaryOrange
-                                        : AppColors.divider,
+                                    color: selected ? AppColors.primaryOrange : AppColors.divider,
                                   ),
                                 ),
                                 child: Text(
                                   tabs[index],
                                   style: TextStyle(
-                                    color: selected
-                                        ? Colors.white
-                                        : AppColors.textPrimary,
+                                    color: selected ? Colors.white : AppColors.textPrimary,
                                     fontWeight: FontWeight.w600,
                                     fontSize: 13,
                                   ),
@@ -314,9 +318,7 @@ class _DetailHeader extends StatelessWidget {
               GestureDetector(
                 onTap: onFavorite,
                 child: Icon(
-                  professional.isFavorite
-                      ? Icons.favorite
-                      : Icons.favorite_border,
+                  professional.isFavorite ? Icons.favorite : Icons.favorite_border,
                   color: AppColors.primaryOrange,
                   size: 24,
                 ),
@@ -327,9 +329,7 @@ class _DetailHeader extends StatelessWidget {
           CircleAvatar(
             radius: 46,
             backgroundColor: AppColors.surface,
-            backgroundImage: professional.profileImageUrl != null
-                ? NetworkImage(professional.profileImageUrl!)
-                : null,
+            backgroundImage: professional.profileImageUrl != null ? NetworkImage(professional.profileImageUrl!) : null,
             child: professional.profileImageUrl == null
                 ? const Icon(
                     Icons.person,
@@ -365,9 +365,7 @@ class _DetailHeader extends StatelessWidget {
                 ),
                 _StatItem(
                   icon: Icons.bookmark_border,
-                  value: professional.distanceKm != null
-                      ? professional.distanceKm!.toStringAsFixed(1)
-                      : 'N/A',
+                  value: professional.distanceKm != null ? professional.distanceKm!.toStringAsFixed(1) : 'N/A',
                   label: l.kmAwayLabel,
                 ),
                 _StatItem(
@@ -530,7 +528,8 @@ class _ServicesTab extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(localizeServiceName(service.name, AppLocalizations.of(context)!, nameAr: service.nameAr), style: AppTextStyles.bodySmall),
+                    Text(localizeServiceName(service.name, AppLocalizations.of(context)!, nameAr: service.nameAr),
+                        style: AppTextStyles.bodySmall),
                     Text(
                       service.priceDisplay,
                       style: AppTextStyles.bodySmall.copyWith(
@@ -588,9 +587,7 @@ class _ReviewsTab extends StatelessWidget {
                 child: Column(
                   children: [5, 4, 3, 2, 1].map((star) {
                     final count = professional.ratingBreakdown[star] ?? 0;
-                    final total = professional.reviewCount == 0
-                        ? 1
-                        : professional.reviewCount;
+                    final total = professional.reviewCount == 0 ? 1 : professional.reviewCount;
                     return Row(
                       children: [
                         Text('$star', style: AppTextStyles.bodySmall),
@@ -640,9 +637,7 @@ class _ReviewItem extends StatelessWidget {
             CircleAvatar(
               radius: 18,
               backgroundColor: AppColors.surface,
-              backgroundImage: review.reviewerImageUrl != null
-                  ? NetworkImage(review.reviewerImageUrl!)
-                  : null,
+              backgroundImage: review.reviewerImageUrl != null ? NetworkImage(review.reviewerImageUrl!) : null,
               child: review.reviewerImageUrl == null
                   ? const Icon(
                       Icons.person,
@@ -811,9 +806,7 @@ class _VerificationRow extends StatelessWidget {
             ),
           ),
           Text(
-            verified
-                ? AppLocalizations.of(context)!.verifiedLabel
-                : AppLocalizations.of(context)!.notVerifiedLabel,
+            verified ? AppLocalizations.of(context)!.verifiedLabel : AppLocalizations.of(context)!.notVerifiedLabel,
             style: AppTextStyles.bodySmall,
           ),
         ],
@@ -837,6 +830,8 @@ class _BottomActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool canBook = professional.isAvailable;
+
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       decoration: BoxDecoration(
@@ -849,70 +844,107 @@ class _BottomActions extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: ElevatedButton(
-              onPressed: onBookNow,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryOrange,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
+          // ── Unavailability notice ─────────────────────────────────────
+          if (!canBook)
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF3F3),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.error.withOpacity(0.3)),
               ),
-              child: Text(
-                AppLocalizations.of(context)!.bookNow,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          GestureDetector(
-            onTap: () {
-              context.read<ChatBloc>().add(
-                    GetOrCreateChatEvent(
-                      professionalId: professional.id.toString(),
-                      professionalName: professional.name,
+              child: Row(
+                children: [
+                  Icon(Icons.block_rounded, color: AppColors.error, size: 16),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'This professional is not accepting bookings right now.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.error,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  );
-            },
-            child: Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.divider, width: 1.5),
-              ),
-              child: const Icon(
-                Icons.chat_bubble_outline,
-                color: AppColors.primaryDark,
-                size: 22,
+                  ),
+                ],
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          GestureDetector(
-            onTap: onCall,
-            child: Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.divider, width: 1.5),
+
+          // ── Action buttons ────────────────────────────────────────────
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: canBook ? onBookNow : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: canBook ? AppColors.primaryOrange : AppColors.divider,
+                    disabledBackgroundColor: AppColors.divider,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    canBook ? AppLocalizations.of(context)!.bookNow : 'Unavailable',
+                    style: TextStyle(
+                      color: canBook ? Colors.white : AppColors.textSecondary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
               ),
-              child: const Icon(
-                Icons.phone,
-                color: AppColors.primaryDark,
-                size: 22,
+              const SizedBox(width: 10),
+              GestureDetector(
+                onTap: () {
+                  context.read<ChatBloc>().add(
+                        GetOrCreateChatEvent(
+                          professionalId: professional.id.toString(),
+                          professionalName: professional.name,
+                        ),
+                      );
+                },
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.divider, width: 1.5),
+                  ),
+                  child: const Icon(
+                    Icons.chat_bubble_outline,
+                    color: AppColors.primaryDark,
+                    size: 22,
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 10),
+              GestureDetector(
+                onTap: onCall,
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.divider, width: 1.5),
+                  ),
+                  child: const Icon(
+                    Icons.phone_outlined,
+                    color: AppColors.primaryDark,
+                    size: 22,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

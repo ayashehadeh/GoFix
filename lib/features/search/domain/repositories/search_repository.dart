@@ -17,7 +17,7 @@ abstract class SearchRepository {
 
   /// Professionals that serve a given area, optionally filtered by category.
   Future<Either<Failure, List<Professional>>> getProfessionalsByArea({
-    required String areaName,
+    required int areaId,
     ServiceCategory? category,
   });
 
