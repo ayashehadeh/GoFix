@@ -6,6 +6,8 @@ import '../bloc/professional_jobs_state.dart';
 import '../widgets/pro_job_list_card.dart';
 import 'job_info_page.dart';
 import '../../domain/entities/pro_job.dart';
+import 'package:gp/features/professional_dashboard/presentation/bloc/professional_dashboard_bloc.dart';
+import 'package:gp/injection_container.dart' as di;
 
 class MyJobsPage extends StatefulWidget {
   const MyJobsPage({super.key});
@@ -94,8 +96,11 @@ class _MyJobsPageState extends State<MyJobsPage> {
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => BlocProvider.value(
-                                  value: context.read<ProfessionalJobsBloc>(),
+                                builder: (_) => MultiBlocProvider(
+                                  providers: [
+                                    BlocProvider.value(value: context.read<ProfessionalJobsBloc>()),
+                                    BlocProvider(create: (_) => di.sl<ProfessionalDashboardBloc>()),
+                                  ],
                                   child: JobInfoPage(job: job),
                                 ),
                               ),

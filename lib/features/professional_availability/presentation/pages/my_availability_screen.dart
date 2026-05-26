@@ -54,8 +54,7 @@ class _MyAvailabilityView extends StatelessWidget {
             await UserTypeStorage.setAsProfessional('');
             Future.delayed(const Duration(milliseconds: 500), () {
               if (context.mounted) {
-                Navigator.of(context)
-                    .pushNamedAndRemoveUntil('/dashboard', (_) => false);
+                Navigator.of(context).pushNamedAndRemoveUntil('/dashboard', (_) => false);
               }
             });
           } else if (state is AvailabilityError) {
@@ -120,8 +119,7 @@ class _AvailabilityForm extends StatelessWidget {
 
                 // ── Availability Toggle ───────────────────────────────────
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -143,9 +141,7 @@ class _AvailabilityForm extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            state.isAvailable
-                                ? 'Clients can book you'
-                                : 'Clients cannot book you',
+                            state.isAvailable ? 'Clients can book you' : 'Clients cannot book you',
                             style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.textSecondary,
@@ -162,19 +158,163 @@ class _AvailabilityForm extends StatelessWidget {
                                 color: AppColors.primaryOrange,
                               ),
                             )
-                          : Switch(
+                          : // Replace the Switch widget's onChanged:
+                          Switch(
                               value: state.isAvailable,
-                              onChanged: (value) {
+                              onChanged: (value) async {
+                                if (!value) {
+                                  // Turning OFF — show confirmation
+                                  final confirmed = await showModalBottomSheet<bool>(
+                                    context: context,
+                                    backgroundColor: Colors.white,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                    ),
+                                    builder: (ctx) => Padding(
+                                      padding: const EdgeInsets.fromLTRB(24, 20, 24, 36),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          // Handle bar
+                                          Center(
+                                            child: Container(
+                                              width: 40,
+                                              height: 4,
+                                              margin: const EdgeInsets.only(bottom: 20),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.divider,
+                                                borderRadius: BorderRadius.circular(2),
+                                              ),
+                                            ),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(8),
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.primaryOrange.withOpacity(0.1),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child:
+                                                    Icon(Icons.block_rounded, color: AppColors.primaryOrange, size: 20),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              const Text(
+                                                'Stop accepting bookings?',
+                                                style: TextStyle(
+                                                  fontSize: 17,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: AppColors.primaryDark,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 14),
+                                          const Text(
+                                            "Clients won't be able to send you new booking requests until you turn this back on.",
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              color: AppColors.textSecondary,
+                                              height: 1.5,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 24),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: OutlinedButton(
+                                                  onPressed: () => Navigator.pop(ctx, false),
+                                                  style: OutlinedButton.styleFrom(
+                                                    padding: const EdgeInsets.symmetric(vertical: 13),
+                                                    side: const BorderSide(color: AppColors.divider),
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(12),
+                                                    ),
+                                                  ),
+                                                  child: const Text(
+                                                    'Cancel',
+                                                    style: TextStyle(
+                                                      color: AppColors.primaryDark,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: ElevatedButton(
+                                                  onPressed: () => Navigator.pop(ctx, true),
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: AppColors.primaryOrange,
+                                                    padding: const EdgeInsets.symmetric(vertical: 13),
+                                                    elevation: 0,
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(12),
+                                                    ),
+                                                  ),
+                                                  child: const Text(
+                                                    'Turn Off',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+
+                                  if (confirmed != true) return; // user cancelled
+                                }
+
+                                // Turning ON, or confirmed turn-off
                                 context.read<AvailabilityBloc>().add(
-                                      ToggleAvailabilityEvent(
-                                          isAvailable: value),
+                                      ToggleAvailabilityEvent(isAvailable: value),
                                     );
                               },
-                              activeThumbColor: AppColors.primaryOrange,
+                              activeTrackColor: AppColors.primaryOrange,
+                              activeThumbColor: Colors.white,
+                              inactiveTrackColor: const Color(0xFFDEDEDE),
+                              inactiveThumbColor: Colors.white,
                             ),
                     ],
                   ),
                 ),
+                // After the toggle card's closing ), add:
+                if (!state.isAvailable) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryOrange.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.primaryOrange.withValues(alpha: 0.35)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.info_outline_rounded, color: AppColors.primaryOrange, size: 18),
+                        const SizedBox(width: 10),
+                        const Expanded(
+                          child: Text(
+                            "You're currently not accepting bookings. Clients cannot send you new requests.",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.primaryDark,
+                              height: 1.5,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 28),
 
                 // ── Working Days + Per-Day Hours ──────────────────────────
@@ -195,8 +335,7 @@ class _AvailabilityForm extends StatelessWidget {
                 const SizedBox(height: 6),
                 const Text(
                   'Tap a day to enable it, then set your hours.',
-                  style:
-                      TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 16),
 
@@ -204,23 +343,19 @@ class _AvailabilityForm extends StatelessWidget {
                 ...AvailabilityEntity.orderedDays.map((day) {
                   final isWorking = state.isWorkingDay(day);
                   final schedule = state.scheduleFor(day);
-                  final shortLabel = AvailabilityEntity.shortDayLabels[
-                      AvailabilityEntity.orderedDays.indexOf(day)];
+                  final shortLabel = AvailabilityEntity.shortDayLabels[AvailabilityEntity.orderedDays.indexOf(day)];
 
                   return _DayRow(
                     day: day,
                     shortLabel: shortLabel,
                     isWorking: isWorking,
                     schedule: schedule,
-                    onToggle: () => context
-                        .read<AvailabilityBloc>()
-                        .add(ToggleWorkingDay(day: day)),
-                    onTimeChanged: (open, close) =>
-                        context.read<AvailabilityBloc>().add(UpdateDaySchedule(
-                              day: day,
-                              openTime: open,
-                              closeTime: close,
-                            )),
+                    onToggle: () => context.read<AvailabilityBloc>().add(ToggleWorkingDay(day: day)),
+                    onTimeChanged: (open, close) => context.read<AvailabilityBloc>().add(UpdateDaySchedule(
+                          day: day,
+                          openTime: open,
+                          closeTime: close,
+                        )),
                   );
                 }),
               ],
@@ -235,25 +370,18 @@ class _AvailabilityForm extends StatelessWidget {
             width: double.infinity,
             height: 52,
             child: ElevatedButton(
-              onPressed: isSaving
-                  ? null
-                  : () => context
-                      .read<AvailabilityBloc>()
-                      .add(SaveWorkingHoursEvent()),
+              onPressed: isSaving ? null : () => context.read<AvailabilityBloc>().add(SaveWorkingHoursEvent()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryOrange,
-                disabledBackgroundColor:
-                    AppColors.primaryOrange.withOpacity(0.6),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                disabledBackgroundColor: AppColors.primaryOrange.withOpacity(0.6),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 elevation: 0,
               ),
               child: isSaving
                   ? const SizedBox(
                       width: 22,
                       height: 22,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
                   : const Text(
                       'Save Schedule',
@@ -317,9 +445,7 @@ class _DayRow extends StatelessWidget {
                     width: 42,
                     height: 42,
                     decoration: BoxDecoration(
-                      color: isWorking
-                          ? AppColors.primaryOrange
-                          : AppColors.surface,
+                      color: isWorking ? AppColors.primaryOrange : const Color(0xFFF0F0F0),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     alignment: Alignment.center,
@@ -328,8 +454,7 @@ class _DayRow extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color:
-                            isWorking ? Colors.white : AppColors.textSecondary,
+                        color: isWorking ? Colors.white : AppColors.textSecondary,
                       ),
                     ),
                   ),
@@ -344,9 +469,7 @@ class _DayRow extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: isWorking
-                                ? AppColors.primaryDark
-                                : AppColors.textSecondary,
+                            color: isWorking ? AppColors.primaryDark : AppColors.textSecondary,
                           ),
                         ),
                         if (isWorking && schedule != null)
@@ -369,12 +492,8 @@ class _DayRow extends StatelessWidget {
                     ),
                   ),
                   Icon(
-                    isWorking
-                        ? Icons.check_circle
-                        : Icons.radio_button_unchecked,
-                    color: isWorking
-                        ? AppColors.primaryOrange
-                        : AppColors.textSecondary,
+                    isWorking ? Icons.check_circle : Icons.radio_button_unchecked,
+                    color: isWorking ? AppColors.primaryOrange : AppColors.textSecondary,
                     size: 22,
                   ),
                 ],
@@ -389,15 +508,13 @@ class _DayRow extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
-                  const Icon(Icons.access_time,
-                      size: 16, color: AppColors.primaryOrange),
+                  const Icon(Icons.access_time, size: 16, color: AppColors.primaryOrange),
                   const SizedBox(width: 8),
                   _TimeButton(
                     label: 'From',
                     time: schedule!.openTime,
                     onTap: () async {
-                      final picked =
-                          await _pickTime(context, schedule!.openTime);
+                      final picked = await _pickTime(context, schedule!.openTime);
                       if (picked != null) {
                         onTimeChanged(picked, schedule!.closeTime);
                       }
@@ -405,16 +522,13 @@ class _DayRow extends StatelessWidget {
                   ),
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: Text('–',
-                        style: TextStyle(
-                            color: AppColors.textSecondary, fontSize: 16)),
+                    child: Text('–', style: TextStyle(color: AppColors.textSecondary, fontSize: 16)),
                   ),
                   _TimeButton(
                     label: 'To',
                     time: schedule!.closeTime,
                     onTap: () async {
-                      final picked =
-                          await _pickTime(context, schedule!.closeTime);
+                      final picked = await _pickTime(context, schedule!.closeTime);
                       if (picked != null) {
                         onTimeChanged(schedule!.openTime, picked);
                       }
