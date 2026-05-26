@@ -300,6 +300,8 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
               date: dateStr,
               time: timeStr,
               address: '${_selectedAddress!.displayTitle}, ${_selectedAddress!.displaySubtitle}',
+              latitude: _selectedAddress!.latitude,
+              longitude: _selectedAddress!.longitude,
               workerName: widget.workerName,
               professionalId: widget.professionalId, // ADD
               scheduledDate: selectedDate,

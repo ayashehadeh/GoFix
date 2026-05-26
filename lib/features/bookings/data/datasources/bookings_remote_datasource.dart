@@ -13,6 +13,8 @@ abstract class BookingsRemoteDataSource {
     required DateTime scheduledDate,
     required String scheduledTime,
     required String address,
+    double? latitude,
+    double? longitude,
     required String description,
     required List<String> imageUrls,
   });
@@ -68,6 +70,8 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
     required DateTime scheduledDate,
     required String scheduledTime,
     required String address,
+    double? latitude,
+    double? longitude,
     required String description,
     required List<String> imageUrls,
   }) async {
@@ -81,6 +85,8 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
         'scheduledDate': scheduledDate.toIso8601String(),
         'scheduledTime': scheduledTime,
         'address': address,
+        if (latitude != null) 'latitude': latitude,
+        if (longitude != null) 'longitude': longitude,
         'description': description,
         'imageUrls': imageUrls,
       },

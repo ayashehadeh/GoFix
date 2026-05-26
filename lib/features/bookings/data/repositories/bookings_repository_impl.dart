@@ -55,6 +55,8 @@ class BookingsRepositoryImpl implements BookingsRepository {
     required DateTime scheduledDate,
     required String scheduledTime,
     required String address,
+    double? latitude,
+    double? longitude,
     required String description,
     required List<String> imageUrls,
   }) async {
@@ -67,6 +69,8 @@ class BookingsRepositoryImpl implements BookingsRepository {
         scheduledDate: scheduledDate,
         scheduledTime: scheduledTime,
         address: address,
+        latitude: latitude,
+        longitude: longitude,
         description: description,
         imageUrls: imageUrls,
       );

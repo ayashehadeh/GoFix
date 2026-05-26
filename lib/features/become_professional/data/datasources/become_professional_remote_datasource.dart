@@ -251,8 +251,10 @@ class BecomeProfessionalRemoteDataSourceImpl implements BecomeProfessionalRemote
 
   @override
   Future<void> cancelProfessional() async {
-    // TODO: replace with real endpoint when available
-    throw UnimplementedError('cancelProfessional endpoint not yet available');
+    await dio.delete(
+      '/professionals/profile',
+      options: Options(headers: await _authHeaders()),
+    );
   }
 
   @override

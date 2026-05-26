@@ -130,6 +130,8 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
       scheduledDate: event.scheduledDate,
       scheduledTime: event.scheduledTime,
       address: event.address,
+      latitude: event.latitude,
+      longitude: event.longitude,
       description: event.description,
       imageUrls: event.imageUrls,
     );
