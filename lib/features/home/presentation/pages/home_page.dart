@@ -7,6 +7,10 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/gofix_bottom_nav_bar.dart';
 import '../../../../injection_container.dart';
+import '../../../bookings/domain/entities/booking.dart';
+import '../../../bookings/presentation/bloc/active_booking_cubit.dart';
+import '../../../bookings/presentation/bloc/bookings_bloc.dart';
+import '../../../bookings/presentation/pages/upcoming_booking_info_page.dart';
 import '../../../notifications/presentation/bloc/notifications_bloc.dart';
 import '../../../notifications/presentation/bloc/notifications_event.dart';
 import '../../../notifications/presentation/bloc/notifications_state.dart';
@@ -16,6 +20,7 @@ import '../../../professionals/presentation/bloc/professionals_bloc.dart';
 import '../../../professionals/presentation/pages/category_professionals_page.dart';
 import '../../domain/entities/category_entity.dart';
 import '../bloc/home_bloc.dart';
+import '../widgets/active_booking_card.dart';
 import '../widgets/category_card.dart';
 import 'package:gp/features/search/presentation/bloc/search_bloc.dart';
 import 'package:gp/features/search/presentation/pages/search_page.dart';
@@ -29,6 +34,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver, ProfessionalNavMixin<HomePage> {
   final int _currentNavIndex = 0;
+  late final ActiveBookingCubit _activeBookingCubit;
   late final NotificationsBloc _notificationsBloc;
 
   @override
@@ -39,11 +45,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
     if (currentState is! HomeLoaded) {
       context.read<HomeBloc>().add(HomeLoadRequested());
     }
+    _activeBookingCubit = sl<ActiveBookingCubit>()..load();
     _notificationsBloc = sl<NotificationsBloc>()..add(LoadNotifications());
   }
 
   @override
   void dispose() {
+    _activeBookingCubit.close();
     _notificationsBloc.close();
     disposeProfessionalNav();
     super.dispose();
@@ -65,6 +73,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
     );
   }
 
+  void _onActiveBookingTap(Booking booking) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider(
+          create: (_) => sl<BookingsBloc>(),
+          child: UpcomingBookingInfoPage(bookingId: booking.id),
+        ),
+      ),
+    );
+  }
+
   void _onNotificationTap() {
     Navigator.push(
       context,
@@ -79,6 +99,29 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider<ActiveBookingCubit>.value(
+      value: _activeBookingCubit,
+      child: _buildScaffold(context),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: BlocBuilder<HomeBloc, HomeState>(
+        builder: (context, state) {
+          return Column(
+            children: [
+              _HomeHeader(
+                locationName: state is HomeLoaded ? state.locationName : '...',
+                isLoadingLocation: state is HomeLoading,
+                onSearchTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider(
+                        create: (_) => sl<SearchBloc>(),
+                        child: const SearchPage(),
     return BlocProvider.value(
       value: _notificationsBloc,
       child: Scaffold(
@@ -176,6 +219,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
                 categories: state.categories,
                 onCategoryTap: _onCategoryTap,
               ),
+              if (!isProfessional) _ActiveBookingSection(onBookingTap: _onActiveBookingTap),
               const SizedBox(height: 24),
             ],
           ),
@@ -224,35 +268,41 @@ class _HomeHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  SvgPicture.asset(
-                    'assets/home_screen/location_on.svg',
-                    width: 18,
-                    height: 18,
-                    colorFilter: const ColorFilter.mode(AppColors.primaryOrange, BlendMode.srcIn),
-                  ),
-                  const SizedBox(width: 6),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(AppLocalizations.of(context)!.location, style: AppTextStyles.locationLabel),
-                      isLoadingLocation
-                          ? const SizedBox(
-                              width: 120,
-                              height: 16,
-                              child: LinearProgressIndicator(
-                                color: AppColors.primaryOrange,
-                                backgroundColor: Colors.white24,
-                              ),
-                            )
-                          : Text(locationName, style: AppTextStyles.locationValue),
-                    ],
-                  ),
-                ],
+              SvgPicture.asset(
+                'assets/home_screen/location_on.svg',
+                width: 18,
+                height: 18,
+                colorFilter: const ColorFilter.mode(
+                  AppColors.primaryOrange,
+                  BlendMode.srcIn,
+                ),
               ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(AppLocalizations.of(context)!.location, style: AppTextStyles.locationLabel),
+                    isLoadingLocation
+                        ? const SizedBox(
+                            width: 120,
+                            height: 16,
+                            child: LinearProgressIndicator(
+                              color: AppColors.primaryOrange,
+                              backgroundColor: Colors.white24,
+                            ),
+                          )
+                        : Text(
+                            locationName,
+                            style: AppTextStyles.locationValue,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
               GestureDetector(
                 onTap: onNotificationTap,
                 child: Stack(
@@ -345,6 +395,41 @@ class _CategoriesGrid extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+// ─── Active Booking Section ───────────────────────────────────────────────────
+
+class _ActiveBookingSection extends StatelessWidget {
+  final void Function(Booking) onBookingTap;
+
+  const _ActiveBookingSection({required this.onBookingTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ActiveBookingCubit, ActiveBookingState>(
+      builder: (context, state) {
+        if (state is! ActiveBookingLoaded) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                AppLocalizations.of(context)!.activeBooking,
+                style: AppTextStyles.sectionTitle,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ActiveBookingCard(
+              booking: state.booking,
+              onTap: () => onBookingTap(state.booking),
+            ),
+          ],
+        );
+      },
     );
   }
 }

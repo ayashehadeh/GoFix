@@ -46,12 +46,15 @@ class CategoryCard extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           final cardWidth = constraints.maxWidth;
+          final cardHeight = constraints.maxHeight;
+          const spacing = 6.0;
           final circleSize = (cardWidth * 0.85).clamp(44.0, 72.0);
           final iconSize = (circleSize * 0.5).clamp(22.0, 36.0);
           final fontSize = (cardWidth * 0.13).clamp(9.0, 12.0);
+          final textHeight = (cardHeight - circleSize - spacing).clamp(0.0, double.infinity);
 
           return Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
                 width: circleSize,
@@ -79,13 +82,16 @@ class CategoryCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 6),
-              Text(
-                _localizedName(l10n),
-                style: AppTextStyles.categoryLabel.copyWith(fontSize: fontSize),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              const SizedBox(height: spacing),
+              SizedBox(
+                height: textHeight,
+                child: Text(
+                  _localizedName(l10n),
+                  style: AppTextStyles.categoryLabel.copyWith(fontSize: fontSize),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           );

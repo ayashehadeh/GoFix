@@ -439,6 +439,9 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get completeJob => 'إنهاء العمل';
 
+  @override
+  String get activeBooking => 'الحجز النشط';
+
   // ── Filter page ──────────────────────────────────────────────────────────────
 
   @override

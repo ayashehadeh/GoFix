@@ -68,6 +68,7 @@ import 'package:gp/features/bookings/domain/usecases/cancel_booking.dart';
 import 'package:gp/features/bookings/domain/usecases/submit_report.dart';
 import 'package:gp/features/bookings/domain/usecases/confirm_payment.dart';
 import 'package:gp/features/bookings/presentation/bloc/bookings_bloc.dart';
+import 'package:gp/features/bookings/presentation/bloc/active_booking_cubit.dart';
 
 // ── Notifications ─────────────────────────────────────────────────────────────
 import 'package:gp/features/notifications/data/datasources/notifications_remote_datasource.dart';
@@ -221,6 +222,10 @@ Future<void> init() async {
       submitReport: sl(),
       confirmPayment: sl(),
     ),
+  );
+
+  sl.registerFactory(
+    () => ActiveBookingCubit(getUpcomingBookings: sl()),
   );
 
   sl.registerFactory(

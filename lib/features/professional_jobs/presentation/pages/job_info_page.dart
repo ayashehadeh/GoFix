@@ -89,10 +89,19 @@ class _JobDetailsCard extends StatelessWidget {
           const SizedBox(height: 12),
           _Row(icon: Icons.build_outlined, text: job.serviceType),
           _Row(icon: Icons.person_outline, text: job.clientName),
+          if ((job.status == ProJobStatus.arrived || job.status == ProJobStatus.inProgress) &&
+              job.clientPhone != null && job.clientPhone!.isNotEmpty)
+            _Row(icon: Icons.phone_outlined, text: job.clientPhone!),
           _Row(icon: Icons.calendar_month_outlined, text: job.formattedDate),
           _Row(icon: Icons.access_time_outlined, text: job.formattedTime),
-          _Row(icon: Icons.location_on_outlined, text: job.location, onTap: () => _launchMaps(job.location, latitude: job.latitude, longitude: job.longitude)),
-          _Row(icon: Icons.attach_money, text: job.price, isLast: true),
+          _Row(icon: Icons.location_on_outlined, text: job.location),
+          _Row(
+            icon: Icons.attach_money,
+            text: job.agreedAmount != null
+                ? '${job.agreedAmount!.toStringAsFixed(2)} JD'
+                : job.price,
+            isLast: true,
+          ),
         ],
       ),
     );

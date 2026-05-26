@@ -147,5 +147,6 @@
   "markOnTheWay": "تحديد كـ في الطريق",
   "markArrived": "تحديد كـ وصلت",
   "startJob": "بدء العمل",
-  "completeJob": "إنهاء العمل"
+  "completeJob": "إنهاء العمل",
+  "activeBooking": "الحجز النشط"
 }

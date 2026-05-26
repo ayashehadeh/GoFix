@@ -9,6 +9,7 @@ import 'package:gp/features/bookings/presentation/pages/book_details_screen.dart
 import 'package:gp/features/settings/domain/entities/address_entity.dart';
 import 'package:gp/features/settings/presentation/bloc/address_bloc.dart';
 import 'package:gp/injection_container.dart' as di;
+import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/l10n/app_localizations.dart';
 
 class BookServiceScreen extends StatefulWidget {
@@ -270,7 +271,22 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     setState(() {
       _showAddressError = _selectedAddress == null;
     });
-    return !_showAddressError;
+    if (_showAddressError) return false;
+
+    final selectedDate = dates[selectedDateIndex];
+    final today = DateTime.now();
+    final todayOnly = DateTime(today.year, today.month, today.day);
+    if (selectedDate.isBefore(todayOnly)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.cannotBookPastDate),
+          backgroundColor: AppColors.primaryOrange,
+        ),
+      );
+      return false;
+    }
+
+    return true;
   }
 
   List<String> _dayLabels = [];
@@ -479,20 +495,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                                 itemBuilder: (context, index) {
                                   final isSelected = index == selectedDateIndex;
                                   return GestureDetector(
-                                    onTap: () {
-                                      final today = DateTime.now();
-                                      final todayOnly = DateTime(today.year, today.month, today.day);
-                                      if (dates[index].isBefore(todayOnly)) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text(AppLocalizations.of(context)!.cannotBookPastDate),
-                                            behavior: SnackBarBehavior.floating,
-                                          ),
-                                        );
-                                        return;
-                                      }
-                                      setState(() => selectedDateIndex = index);
-                                    },
+                                    onTap: () => setState(() => selectedDateIndex = index),
                                     child: AnimatedContainer(
                                       duration: const Duration(milliseconds: 200),
                                       width: cardWidth,

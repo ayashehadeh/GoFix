@@ -146,7 +146,9 @@ class _BookingInfoBody extends StatelessWidget {
                       ),
                       _DetailRow(
                         icon: Icons.attach_money,
-                        text: booking.servicePrice,
+                        text: booking.agreedAmount != null
+                            ? '${booking.agreedAmount!.toStringAsFixed(2)} JD'
+                            : booking.servicePrice,
                         isLast: true,
                       ),
                     ],

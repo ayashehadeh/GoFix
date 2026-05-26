@@ -31,12 +31,14 @@ class ProJob extends Equatable {
   final String id;
   final String clientName;
   final String clientImageUrl;
+  final String? clientPhone;
   final String serviceType;
   final String location;
   final double? latitude;
   final double? longitude;
   final DateTime scheduledTime;
   final String price;
+  final double? agreedAmount;
   final String description;
   final int pictureCount;
   final ProJobStatus status;
@@ -45,12 +47,14 @@ class ProJob extends Equatable {
     required this.id,
     required this.clientName,
     required this.clientImageUrl,
+    this.clientPhone,
     required this.serviceType,
     required this.location,
     this.latitude,
     this.longitude,
     required this.scheduledTime,
     required this.price,
+    this.agreedAmount,
     required this.description,
     required this.pictureCount,
     required this.status,
@@ -80,12 +84,14 @@ class ProJob extends Equatable {
       id: id,
       clientName: clientName,
       clientImageUrl: clientImageUrl,
+      clientPhone: clientPhone,
       serviceType: serviceType,
       location: location,
       latitude: latitude,
       longitude: longitude,
       scheduledTime: scheduledTime,
       price: price,
+      agreedAmount: agreedAmount,
       description: description,
       pictureCount: pictureCount,
       status: status ?? this.status,
@@ -94,8 +100,8 @@ class ProJob extends Equatable {
 
   @override
   List<Object?> get props => [
-        id, clientName, clientImageUrl, serviceType,
-        location, latitude, longitude, scheduledTime,
-        price, description, pictureCount, status,
+        id, clientName, clientImageUrl, clientPhone, serviceType,
+        location, scheduledTime, price, agreedAmount, description,
+        pictureCount, status,
       ];
 }

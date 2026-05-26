@@ -13,17 +13,11 @@ import '../bloc/bookings_event.dart';
 import '../bloc/bookings_state.dart';
 import 'modify_booking_success_page.dart';
 
-// ─── Date options (Step 2) ────────────────────────────────────────────────────
-
-const _kDates = [
-  {'day': 'Sun', 'date': '8', 'month': 'Feb'},
-  {'day': 'Mon', 'date': '9', 'month': 'Feb'},
-  {'day': 'Tue', 'date': '10', 'month': 'Feb'},
-  {'day': 'Wed', 'date': '11', 'month': 'Feb'},
-  {'day': 'Thu', 'date': '12', 'month': 'Feb'},
-  {'day': 'Fri', 'date': '13', 'month': 'Feb'},
-  {'day': 'Sat', 'date': '14', 'month': 'Feb'},
-];
+List<DateTime> _generateBookingDates() {
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  return List.generate(7, (i) => today.add(Duration(days: i)));
+}
 
 // ─── Root page ────────────────────────────────────────────────────────────────
 
@@ -46,6 +40,7 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
   int _selectedHour = 7;
   int _selectedMinute = 0;
   final TextEditingController _addressController = TextEditingController();
+  final List<DateTime> _dates = _generateBookingDates();
 
   List<ServiceOffered>? _professionalServices; // null = still loading
   bool _preSelected = false;
@@ -94,8 +89,10 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
   }
 
   String get _selectedDateStr {
-    final d = _kDates[_selectedDateIndex];
-    return '${d['day']}, ${d['date']} ${d['month']} 2025';
+    final d = _dates[_selectedDateIndex];
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${days[d.weekday - 1]}, ${d.day} ${months[d.month - 1]} ${d.year}';
   }
 
   String get _selectedTimeStr {
@@ -105,12 +102,8 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
   }
 
   DateTime get _scheduledDateTime {
-    const months = {
-      'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
-      'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12,
-    };
-    final d = _kDates[_selectedDateIndex];
-    return DateTime(2025, months[d['month']] ?? 1, int.parse(d['date']!));
+    final d = _dates[_selectedDateIndex];
+    return DateTime(d.year, d.month, d.day, _selectedHour, _selectedMinute);
   }
 
   @override
@@ -193,7 +186,7 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
 
                         // Step 2 — Date, time, address
                         _Step2DateTime(
-                          dates: _kDates,
+                          dates: _dates,
                           selectedDateIndex: _selectedDateIndex,
                           selectedHour: _selectedHour,
                           selectedMinute: _selectedMinute,
@@ -205,6 +198,18 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
                             _selectedMinute = m;
                           }),
                           onContinue: () {
+                            final selectedDate = _dates[_selectedDateIndex];
+                            final today = DateTime.now();
+                            final todayOnly = DateTime(today.year, today.month, today.day);
+                            if (selectedDate.isBefore(todayOnly)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(AppLocalizations.of(context)!.cannotBookPastDate),
+                                  backgroundColor: AppColors.primaryOrange,
+                                ),
+                              );
+                              return;
+                            }
                             if (_addressController.text.trim().isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -530,7 +535,7 @@ class _Step1SelectServiceState extends State<_Step1SelectService> {
 // ─── Step 2 — Date, time, address ─────────────────────────────────────────────
 
 class _Step2DateTime extends StatefulWidget {
-  final List<Map<String, String>> dates;
+  final List<DateTime> dates;
   final int selectedDateIndex;
   final int selectedHour;
   final int selectedMinute;
@@ -707,6 +712,12 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                           itemBuilder: (_, i) {
                             final isSelected =
                                 i == widget.selectedDateIndex;
+                            const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                            const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                            final date = widget.dates[i];
+                            final today = DateTime.now();
+                            final todayOnly = DateTime(today.year, today.month, today.day);
+                            final isPast = date.isBefore(todayOnly);
                             return GestureDetector(
                               onTap: () => widget.onDateSelected(i),
                               child: AnimatedContainer(
@@ -716,7 +727,9 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                                 decoration: BoxDecoration(
                                   color: isSelected
                                       ? AppColors.primaryDark
-                                      : const Color(0xFFF4F4F4),
+                                      : isPast
+                                          ? const Color(0xFFE0E0E0)
+                                          : const Color(0xFFF4F4F4),
                                   borderRadius:
                                       BorderRadius.circular(12),
                                 ),
@@ -724,27 +737,33 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.center,
                                   children: [
-                                    Text(widget.dates[i]['day']!,
+                                    Text(dayLabels[date.weekday - 1],
                                         style: TextStyle(
                                             fontSize: 12,
                                             color: isSelected
                                                 ? Colors.white70
-                                                : Colors.grey)),
+                                                : isPast
+                                                    ? Colors.grey.shade400
+                                                    : Colors.grey)),
                                     const SizedBox(height: 4),
-                                    Text(widget.dates[i]['date']!,
+                                    Text(date.day.toString(),
                                         style: TextStyle(
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold,
                                             color: isSelected
                                                 ? Colors.white
-                                                : AppColors.primaryDark)),
+                                                : isPast
+                                                    ? Colors.grey.shade400
+                                                    : AppColors.primaryDark)),
                                     const SizedBox(height: 4),
-                                    Text(widget.dates[i]['month']!,
+                                    Text(monthLabels[date.month - 1],
                                         style: TextStyle(
                                             fontSize: 12,
                                             color: isSelected
                                                 ? Colors.white70
-                                                : Colors.grey)),
+                                                : isPast
+                                                    ? Colors.grey.shade400
+                                                    : Colors.grey)),
                                   ],
                                 ),
                               ),
