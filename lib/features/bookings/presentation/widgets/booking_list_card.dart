@@ -92,7 +92,9 @@ class BookingListCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    booking.servicePrice,
+                    booking.agreedAmount != null
+                        ? '${booking.agreedAmount!.toStringAsFixed(2)} JD'
+                        : booking.servicePrice,
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,

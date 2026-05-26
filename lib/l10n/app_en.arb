@@ -147,5 +147,6 @@
   "markOnTheWay": "Mark as On The Way",
   "markArrived": "Mark as Arrived",
   "startJob": "Start Job",
-  "completeJob": "Complete Job"
+  "completeJob": "Complete Job",
+  "activeBooking": "Active Booking"
 }

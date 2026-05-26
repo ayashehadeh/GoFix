@@ -953,6 +953,12 @@ abstract class AppLocalizations {
   /// **'Complete Job'**
   String get completeJob;
 
+  /// No description provided for @activeBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Booking'**
+  String get activeBooking;
+
   // ── Filter page ──────────────────────────────────────────────────────────────
 
   /// No description provided for @applyFilters.

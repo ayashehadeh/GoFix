@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../domain/entities/booking.dart';
 import '../../domain/usecases/get_upcoming_bookings.dart';
 import '../../domain/usecases/get_past_bookings.dart';
 import '../../domain/usecases/get_booking_by_id.dart';
@@ -53,11 +54,14 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
       (upcoming) {
         pastResult.fold(
           (failure) => emit(BookingsError(failure.message)),
-          (past) => emit(BookingsLoaded(
-            upcomingBookings: upcoming,
-            pastBookings: past,
-            isUpcomingTab: true,
-          )),
+          (past) {
+            final corrected = _correctBookingLists(upcoming, past);
+            emit(BookingsLoaded(
+              upcomingBookings: corrected.$1,
+              pastBookings: corrected.$2,
+              isUpcomingTab: true,
+            ));
+          },
         );
       },
     );
@@ -81,14 +85,31 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
       (upcoming) {
         pastResult.fold(
           (failure) => emit(BookingsError(failure.message)),
-          (past) => emit(BookingsLoaded(
-            upcomingBookings: upcoming,
-            pastBookings: past,
-            isUpcomingTab: false,
-          )),
+          (past) {
+            final corrected = _correctBookingLists(upcoming, past);
+            emit(BookingsLoaded(
+              upcomingBookings: corrected.$1,
+              pastBookings: corrected.$2,
+              isUpcomingTab: false,
+            ));
+          },
         );
       },
     );
+  }
+
+  /// Re-sorts bookings from both API lists using the entity's own [Booking.isUpcoming]
+  /// and [Booking.isPast] computed properties. This ensures that a booking marked
+  /// completed but awaiting payment confirmation stays in upcoming regardless of
+  /// what the backend endpoint returned.
+  (List<Booking>, List<Booking>) _correctBookingLists(
+    List<Booking> apiUpcoming,
+    List<Booking> apiPast,
+  ) {
+    final all = [...apiUpcoming, ...apiPast];
+    final upcoming = all.where((b) => b.isUpcoming).toList();
+    final past = all.where((b) => b.isPast).toList();
+    return (upcoming, past);
   }
 
   Future<void> _onLoadBookingById(

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
+import '../../../../injection_container.dart' as di;
+import '../../../professionals/domain/usecases/review_usecases/add_review.dart';
 import '../../domain/entities/booking.dart';
 import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
@@ -214,9 +216,24 @@ class _ReviewSheetState extends State<_ReviewSheet> {
       return;
     }
     setState(() => _submitting = true);
-    // Small delay to show loading state, then call onSuccess
-    await Future.delayed(const Duration(milliseconds: 600));
-    if (mounted) widget.onSuccess();
+
+    final result = await di.sl<AddReview>()(
+      professionalId: widget.booking.professionalId,
+      bookingId: widget.booking.id,
+      rating: _stars.toDouble(),
+      comment: _ctrl.text.trim(),
+    );
+
+    if (!mounted) return;
+    result.fold(
+      (failure) {
+        setState(() => _submitting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(failure.message), backgroundColor: Colors.red),
+        );
+      },
+      (_) => widget.onSuccess(),
+    );
   }
 
   @override
