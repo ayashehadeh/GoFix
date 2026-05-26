@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/widgets/payment_amount_sheet.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../bloc/professional_jobs_bloc.dart';
@@ -175,7 +176,7 @@ class _BottomActions extends StatelessWidget {
               child: SizedBox(
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () => _showStatusSheet(context),
+                  onPressed: () => _showStatusSheet(context, pageContext: context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF8C1A),
                     foregroundColor: Colors.white,
@@ -213,14 +214,14 @@ class _BottomActions extends StatelessWidget {
     );
   }
 
-  void _showStatusSheet(BuildContext context) {
+  void _showStatusSheet(BuildContext context, {required BuildContext pageContext}) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (sheetCtx) => BlocProvider.value(
         value: context.read<ProfessionalJobsBloc>(),
-        child: _StatusSheet(job: job),
+        child: _StatusSheet(job: job, pageContext: pageContext),
       ),
     );
   }
@@ -230,7 +231,8 @@ class _BottomActions extends StatelessWidget {
 
 class _StatusSheet extends StatefulWidget {
   final ProJob job;
-  const _StatusSheet({required this.job});
+  final BuildContext pageContext;
+  const _StatusSheet({required this.job, required this.pageContext});
 
   @override
   State<_StatusSheet> createState() => _StatusSheetState();
@@ -238,6 +240,14 @@ class _StatusSheet extends StatefulWidget {
 
 class _StatusSheetState extends State<_StatusSheet> {
   ProJobStatus? _selected;
+
+  Set<ProJobStatus> _allowedStatuses(ProJobStatus current) => switch (current) {
+        ProJobStatus.confirmed  => {ProJobStatus.onTheWay, ProJobStatus.cancelled},
+        ProJobStatus.onTheWay   => {ProJobStatus.arrived},
+        ProJobStatus.arrived    => {ProJobStatus.inProgress},
+        ProJobStatus.inProgress => {ProJobStatus.completed},
+        _                       => {},
+      };
 
   List<_StatusOption> _buildOptions(AppLocalizations l10n) => [
     _StatusOption(
@@ -326,11 +336,16 @@ class _StatusSheetState extends State<_StatusSheet> {
                     const SizedBox(height: 20),
 
                     // Status options
-                    ..._buildOptions(AppLocalizations.of(ctx)!).map((opt) => _StatusTile(
-                          option: opt,
-                          isSelected: _selected == opt.status,
-                          onTap: () => setState(() => _selected = opt.status),
-                        )),
+                    ..._buildOptions(AppLocalizations.of(ctx)!).map((opt) {
+                          final allowed = _allowedStatuses(widget.job.status);
+                          final isEnabled = allowed.contains(opt.status);
+                          return _StatusTile(
+                            option: opt,
+                            isSelected: _selected == opt.status,
+                            isEnabled: isEnabled,
+                            onTap: isEnabled ? () => setState(() => _selected = opt.status) : () {},
+                          );
+                        }),
                     const SizedBox(height: 16),
 
                     // Confirm button
@@ -341,12 +356,23 @@ class _StatusSheetState extends State<_StatusSheet> {
                         onPressed: (_selected == null || isLoading)
                             ? null
                             : () {
-                                ctx
-                                    .read<ProfessionalJobsBloc>()
-                                    .add(UpdateProJobStatusEvent(
-                                      jobId: widget.job.id,
-                                      newStatus: _selected!,
-                                    ));
+                                if (_selected == ProJobStatus.completed) {
+                                  Navigator.of(ctx).pop();
+                                  showPaymentAmountSheet(
+                                    widget.pageContext,
+                                    jobId: widget.job.id,
+                                    onSuccess: () {
+                                      if (widget.pageContext.mounted) {
+                                        Navigator.of(widget.pageContext).pop();
+                                      }
+                                    },
+                                  );
+                                } else {
+                                  ctx.read<ProfessionalJobsBloc>().add(UpdateProJobStatusEvent(
+                                        jobId: widget.job.id,
+                                        newStatus: _selected!,
+                                      ));
+                                }
                               },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFF8C1A),
@@ -395,24 +421,27 @@ class _StatusOption {
 class _StatusTile extends StatelessWidget {
   final _StatusOption option;
   final bool isSelected;
+  final bool isEnabled;
   final VoidCallback onTap;
 
   const _StatusTile({
     required this.option,
     required this.isSelected,
+    required this.isEnabled,
     required this.onTap,
   });
 
   Color get _iconColor {
-    if (option.status == ProJobStatus.cancelled) return Colors.red;
-    if (option.status == ProJobStatus.completed) return Colors.green;
+    if (option.status == ProJobStatus.cancelled) return Colors.grey;
     return const Color(0xFFFF8C1A);
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
+    return Opacity(
+      opacity: isEnabled ? 1.0 : 0.4,
+      child: GestureDetector(
+      onTap: isEnabled ? onTap : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         margin: const EdgeInsets.only(bottom: 10),
@@ -450,7 +479,7 @@ class _StatusTile extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }
 

@@ -25,6 +25,7 @@ class Professional extends Equatable {
   final List<ProfessionalDocument> documents;
   final bool isVerified;
   final bool isIdentityVerified;
+  final bool isAvailable;
 
   const Professional({
     required this.id,
@@ -46,19 +47,17 @@ class Professional extends Equatable {
     required this.documents,
     required this.isVerified,
     required this.isIdentityVerified,
+    this.isAvailable = true,
   });
 
   /// Only certification type documents
-  List<ProfessionalDocument> get certifications =>
-      documents.where((d) => d.isCertification).toList();
+  List<ProfessionalDocument> get certifications => documents.where((d) => d.isCertification).toList();
 
   /// e.g. "8 Years Exp."
   String get experienceLabel => '$experienceYears Years Exp.';
 
   /// e.g. "1.2 KM Away"
-  String get distanceLabel => distanceKm != null
-      ? '${distanceKm!.toStringAsFixed(1)} KM Away'
-      : '-- KM Away';
+  String get distanceLabel => distanceKm != null ? '${distanceKm!.toStringAsFixed(1)} KM Away' : '-- KM Away';
 
   /// Convenience: just the area names as strings (for display)
   List<String> get serviceAreaNames => serviceAreas.map((a) => a.name).toList();
@@ -68,6 +67,7 @@ class Professional extends Equatable {
     double? distanceKm,
     List<ServiceArea>? serviceAreas,
     String? profileImageUrl,
+    bool? isAvailable,
   }) {
     return Professional(
       id: id,
@@ -89,14 +89,31 @@ class Professional extends Equatable {
       documents: documents,
       isVerified: isVerified,
       isIdentityVerified: isIdentityVerified,
+      isAvailable: isAvailable ?? this.isAvailable,
     );
   }
 
   @override
   List<Object?> get props => [
-        id, name, category, rating, reviewCount, ratingBreakdown,
-        experienceYears, distanceKm, isFavorite, profileImageUrl,
-        phone, email, bio, serviceAreas, workingHours, services,
-        documents, isVerified, isIdentityVerified,
+        id,
+        name,
+        category,
+        rating,
+        reviewCount,
+        ratingBreakdown,
+        experienceYears,
+        distanceKm,
+        isFavorite,
+        profileImageUrl,
+        phone,
+        email,
+        bio,
+        serviceAreas,
+        workingHours,
+        services,
+        documents,
+        isVerified,
+        isIdentityVerified,
+        isAvailable
       ];
 }

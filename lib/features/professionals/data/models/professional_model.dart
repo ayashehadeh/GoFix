@@ -26,6 +26,7 @@ class ProfessionalModel extends Professional {
     required super.documents,
     required super.isVerified,
     required super.isIdentityVerified,
+    super.isAvailable = true, // ← ADD
   });
 
   factory ProfessionalModel.fromJson(Map<String, dynamic> json) {
@@ -33,38 +34,26 @@ class ProfessionalModel extends Professional {
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? '',
       category: ServiceCategory.values.firstWhere(
-        (e) =>
-            e.displayName.toLowerCase() ==
-            (json['category'] as String? ?? '').toLowerCase(),
+        (e) => e.displayName.toLowerCase() == (json['category'] as String? ?? '').toLowerCase(),
         orElse: () => ServiceCategory.plumbing,
       ),
       rating: (json['rating'] as num).toDouble(),
-      reviewCount:
-          (json['reviewCount'] as num? ?? json['review_count'] as num? ?? 0)
-              .toInt(),
-      ratingBreakdown: (json['ratingBreakdown'] as Map<String, dynamic>? ??
-              json['rating_breakdown'] as Map<String, dynamic>? ??
-              {})
-          .map((k, v) => MapEntry(int.parse(k), (v as num).toInt())),
-      experienceYears: (json['experienceYears'] as num? ??
-              json['experience_years'] as num? ??
-              0)
-          .toInt(),
+      reviewCount: (json['reviewCount'] as num? ?? json['review_count'] as num? ?? 0).toInt(),
+      ratingBreakdown:
+          (json['ratingBreakdown'] as Map<String, dynamic>? ?? json['rating_breakdown'] as Map<String, dynamic>? ?? {})
+              .map((k, v) => MapEntry(int.parse(k), (v as num).toInt())),
+      experienceYears: (json['experienceYears'] as num? ?? json['experience_years'] as num? ?? 0).toInt(),
       distanceKm: (json['distanceKm'] ?? json['distance_km']) != null
           ? ((json['distanceKm'] ?? json['distance_km']) as num).toDouble()
           : null,
-      isFavorite:
-          json['isFavorite'] as bool? ?? json['is_favorite'] as bool? ?? false,
-      profileImageUrl: json['profileImageUrl'] as String? ??
-          json['profile_image_url'] as String?,
+      isFavorite: json['isFavorite'] as bool? ?? json['is_favorite'] as bool? ?? false,
+      profileImageUrl: json['profileImageUrl'] as String? ?? json['profile_image_url'] as String?,
       phone: json['phone'] as String? ?? '',
       email: json['email'] as String? ?? '',
       bio: json['bio'] as String? ?? '',
 
       // ── Service areas — backend now returns objects with id/name/cityId ──
-      serviceAreas: ((json['serviceAreas'] as List?) ??
-              (json['service_areas'] as List?) ??
-              [])
+      serviceAreas: ((json['serviceAreas'] as List?) ?? (json['service_areas'] as List?) ?? [])
           .map((e) => e is String
               // legacy plain-string fallback — safe to remove once backend is live
               ? ServiceAreaModel(id: 0, name: e, cityId: 0)
@@ -72,17 +61,11 @@ class ProfessionalModel extends Professional {
           .toList(),
 
       workingHours: WorkingHours(
-        schedules: ((json['workingHours'] as List? ??
-                json['working_hours'] as List? ??
-                []))
+        schedules: ((json['workingHours'] as List? ?? json['working_hours'] as List? ?? []))
             .map((e) => DaySchedule(
                   day: e['day'] as String? ?? '',
-                  openTime: e['openTime'] as String? ??
-                      e['open_time'] as String? ??
-                      '',
-                  closeTime: e['closeTime'] as String? ??
-                      e['close_time'] as String? ??
-                      '',
+                  openTime: e['openTime'] as String? ?? e['open_time'] as String? ?? '',
+                  closeTime: e['closeTime'] as String? ?? e['close_time'] as String? ?? '',
                 ))
             .toList(),
       ),
@@ -93,8 +76,7 @@ class ProfessionalModel extends Professional {
                     : int.tryParse('${e['serviceId'] ?? e['service_id']}'),
                 name: e['name'] as String? ?? '',
                 nameAr: e['nameAr'] as String? ?? e['name_ar'] as String?,
-                minPrice: (e['minPrice'] as num? ?? e['min_price'] as num? ?? 0)
-                    .toDouble(),
+                minPrice: (e['minPrice'] as num? ?? e['min_price'] as num? ?? 0).toDouble(),
                 maxPrice: (e['maxPrice'] ?? e['max_price']) != null
                     ? ((e['maxPrice'] ?? e['max_price']) as num).toDouble()
                     : null,
@@ -104,28 +86,23 @@ class ProfessionalModel extends Professional {
       documents: ((json['certifications'] as List?) ?? [])
           .map((e) => ProfessionalDocument(
                 id: (e['id'] as num).toInt(),
-                documentType: e['documentType'] as String? ??
-                    e['document_type'] as String? ??
-                    'certification',
+                documentType: e['documentType'] as String? ?? e['document_type'] as String? ?? 'certification',
                 name: e['name'] as String? ?? '',
                 issuedBy: e['issuedBy'] as String? ?? e['issued_by'] as String?,
                 issuedYear: (e['issuedYear'] ?? e['issued_year']) != null
                     ? ((e['issuedYear'] ?? e['issued_year']) as num).toInt()
                     : null,
-                fileUrl:
-                    e['fileUrl'] as String? ?? e['file_url'] as String? ?? '',
+                fileUrl: e['fileUrl'] as String? ?? e['file_url'] as String? ?? '',
                 fileName: e['fileName'] as String? ?? e['file_name'] as String?,
                 fileType: e['fileType'] as String? ?? e['file_type'] as String?,
-                uploadedAt: DateTime.parse(e['uploadedAt'] as String? ??
-                    e['uploaded_at'] as String? ??
-                    DateTime.now().toIso8601String()),
+                uploadedAt: DateTime.parse(
+                    e['uploadedAt'] as String? ?? e['uploaded_at'] as String? ?? DateTime.now().toIso8601String()),
               ))
           .toList(),
-      isVerified:
-          json['isVerified'] as bool? ?? json['is_verified'] as bool? ?? false,
-      isIdentityVerified: json['isIdentityVerified'] as bool? ??
-          json['is_identity_verified'] as bool? ??
-          false,
+      isVerified: json['isVerified'] as bool? ?? json['is_verified'] as bool? ?? false,
+      isIdentityVerified: json['isIdentityVerified'] as bool? ?? json['is_identity_verified'] as bool? ?? false,
+      isAvailable: // ← ADD
+          json['isAvailable'] as bool? ?? true, // ← ADD (default true = safe fallback)
     );
   }
 
@@ -135,8 +112,7 @@ class ProfessionalModel extends Professional {
         'category': category.name,
         'rating': rating,
         'review_count': reviewCount,
-        'rating_breakdown':
-            ratingBreakdown.map((k, v) => MapEntry(k.toString(), v)),
+        'rating_breakdown': ratingBreakdown.map((k, v) => MapEntry(k.toString(), v)),
         'experience_years': experienceYears,
         'distance_km': distanceKm,
         'is_favorite': isFavorite,
@@ -145,9 +121,7 @@ class ProfessionalModel extends Professional {
         'email': email,
         'bio': bio,
         // ── Serialize as objects, not plain strings ──
-        'service_areas': serviceAreas
-            .map((a) => (a as ServiceAreaModel).toJson())
-            .toList(),
+        'service_areas': serviceAreas.map((a) => (a as ServiceAreaModel).toJson()).toList(),
         'working_hours': workingHours.schedules
             .map((e) => {
                   'day': e.day,
@@ -177,5 +151,6 @@ class ProfessionalModel extends Professional {
             .toList(),
         'is_verified': isVerified,
         'is_identity_verified': isIdentityVerified,
+        'is_available': isAvailable, // ← ADD
       };
 }
