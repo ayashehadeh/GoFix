@@ -106,22 +106,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
   }
 
   Widget _buildScaffold(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: BlocBuilder<HomeBloc, HomeState>(
-        builder: (context, state) {
-          return Column(
-            children: [
-              _HomeHeader(
-                locationName: state is HomeLoaded ? state.locationName : '...',
-                isLoadingLocation: state is HomeLoading,
-                onSearchTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BlocProvider(
-                        create: (_) => sl<SearchBloc>(),
-                        child: const SearchPage(),
     return BlocProvider.value(
       value: _notificationsBloc,
       child: Scaffold(
