@@ -11,8 +11,7 @@ abstract class ProfessionalJobsRemoteDataSource {
   });
 }
 
-class ProfessionalJobsRemoteDataSourceImpl
-    implements ProfessionalJobsRemoteDataSource {
+class ProfessionalJobsRemoteDataSourceImpl implements ProfessionalJobsRemoteDataSource {
   final Dio dio;
 
   const ProfessionalJobsRemoteDataSourceImpl({required this.dio});
@@ -21,18 +20,14 @@ class ProfessionalJobsRemoteDataSourceImpl
   Future<List<ProJobModel>> getUpcomingJobs() async {
     final response = await dio.get('/bookings/professional/jobs/upcoming');
     final data = response.data['data'] as List;
-    return data
-        .map((e) => ProJobModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return data.map((e) => ProJobModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   @override
   Future<List<ProJobModel>> getPastJobs() async {
     final response = await dio.get('/bookings/professional/jobs/past');
     final data = response.data['data'] as List;
-    return data
-        .map((e) => ProJobModel.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return data.map((e) => ProJobModel.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   @override
@@ -46,8 +41,7 @@ class ProfessionalJobsRemoteDataSourceImpl
     );
     // Re-fetch the updated job to get ProJobDto format
     final response = await dio.get('/bookings/professional/jobs/$jobId');
-    return ProJobModel.fromJson(
-        response.data['data'] as Map<String, dynamic>);
+    return ProJobModel.fromJson(response.data['data'] as Map<String, dynamic>);
   }
 
   String _statusToString(ProJobStatus status) {
@@ -68,9 +62,7 @@ class ProfessionalJobsRemoteDataSourceImpl
 
 /// Mock implementation — all data matches the design exactly.
 /// Completed / Cancelled jobs are automatically moved from upcoming → past.
-class MockProfessionalJobsDataSource
-    implements ProfessionalJobsRemoteDataSource {
-
+class MockProfessionalJobsDataSource implements ProfessionalJobsRemoteDataSource {
   // ── In-memory mutable lists ─────────────────────────────────────────────────
 
   final List<ProJobModel> _upcoming = [
@@ -82,10 +74,8 @@ class MockProfessionalJobsDataSource
       location: 'AlJubaiha',
       scheduledTime: DateTime(2025, 2, 5, 15, 0),
       price: '30 JD',
-      description:
-          'Pipe under the kitchen sink has been leaking for 2 days. '
+      description: 'Pipe under the kitchen sink has been leaking for 2 days. '
           'Water is dripping onto the cabinet floor. Need it fixed as soon as possible.',
-      pictureCount: 1,
       status: ProJobStatus.pending,
     ),
     ProJobModel(
@@ -97,7 +87,6 @@ class MockProfessionalJobsDataSource
       scheduledTime: DateTime(2025, 2, 2, 10, 0),
       price: '20 JD',
       description: 'Water leak from the bathroom ceiling.',
-      pictureCount: 0,
       status: ProJobStatus.confirmed,
     ),
     ProJobModel(
@@ -109,7 +98,6 @@ class MockProfessionalJobsDataSource
       scheduledTime: DateTime(2025, 1, 2, 11, 0),
       price: '50 JD',
       description: 'Water heater is not working properly.',
-      pictureCount: 0,
       status: ProJobStatus.inProgress,
     ),
   ];
@@ -124,7 +112,6 @@ class MockProfessionalJobsDataSource
       scheduledTime: DateTime(2025, 2, 5, 15, 0),
       price: '30 JD',
       description: 'Full pipe replacement in kitchen.',
-      pictureCount: 1,
       status: ProJobStatus.completed,
     ),
     ProJobModel(
@@ -135,8 +122,8 @@ class MockProfessionalJobsDataSource
       location: 'Sweifieh',
       scheduledTime: DateTime(2025, 2, 2, 9, 0),
       price: '20 JD',
+      // AFTER — j5
       description: 'Leak under bathroom sink.',
-      pictureCount: 0,
       status: ProJobStatus.cancelled,
     ),
     ProJobModel(
@@ -147,8 +134,8 @@ class MockProfessionalJobsDataSource
       location: 'Khalda',
       scheduledTime: DateTime(2025, 1, 2, 14, 0),
       price: '50 JD',
+      // AFTER — j6
       description: 'Water heater annual maintenance.',
-      pictureCount: 0,
       status: ProJobStatus.completed,
     ),
   ];
@@ -178,6 +165,7 @@ class MockProfessionalJobsDataSource
     if (index == -1) throw Exception('Job $jobId not found');
 
     final existing = _upcoming[index];
+    // AFTER
     final updated = ProJobModel(
       id: existing.id,
       clientName: existing.clientName,
@@ -187,7 +175,7 @@ class MockProfessionalJobsDataSource
       scheduledTime: existing.scheduledTime,
       price: existing.price,
       description: existing.description,
-      pictureCount: existing.pictureCount,
+      imageUrls: existing.imageUrls,
       status: newStatus,
     );
 

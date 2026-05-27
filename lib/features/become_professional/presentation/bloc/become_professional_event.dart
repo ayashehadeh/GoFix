@@ -124,12 +124,16 @@ class UploadProfilePictureWithPathRequested extends BecomeProfessionalEvent {
 class UploadDocumentWithPathRequested extends BecomeProfessionalEvent {
   final DocumentType documentType;
   final String filePath;
+  final String? name;
+  final int? issuedYear;
   const UploadDocumentWithPathRequested({
     required this.documentType,
     required this.filePath,
+    this.name,
+    this.issuedYear,
   });
   @override
-  List<Object?> get props => [documentType, filePath];
+  List<Object?> get props => [documentType, filePath, name, issuedYear];
 }
 
 /// Final submission — calls POST /api/professionals/profile/submit.

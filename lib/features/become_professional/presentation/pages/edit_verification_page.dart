@@ -21,6 +21,10 @@ class EditVerificationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final certifications = professional.documents
+        .where((d) => d.isCertification)
+        .toList();
+
     return BlocBuilder<BecomeProfessionalBloc, BecomeProfessionalState>(
       builder: (context, state) {
         return Column(
@@ -36,7 +40,7 @@ class EditVerificationPage extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             const Text(
-              'Replace any of the documents on file. Required items are starred.',
+              'Your existing certifications are shown below. You can add new ones but cannot modify existing ones.',
               style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 20),
@@ -57,44 +61,33 @@ class EditVerificationPage extends StatelessWidget {
                     ),
                   ),
 
+                  // ── Existing certifications (read-only) ───────────────
+                  if (certifications.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Your Certifications',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryDark,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...certifications.map((doc) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: _CertCard(doc: doc),
+                        )),
+                  ],
+
+                  // ── Add new certification ─────────────────────────────
                   const SizedBox(height: 10),
-                  // ── Certification ─────────────────────────────────────
                   _DocRow(
-                    label: 'Upload Certification',
-                    existingFileName: _fileNameForType(professional.documents, 'certification'),
+                    label: 'Add New Certification',
                     sessionUploaded: state.statusFor(DocumentType.certification) == ActionStatus.success,
                     onTap: () => _openUpload(
                       context,
-                      title: 'Upload Certification',
+                      title: 'Add New Certification',
                       documentType: DocumentType.certification,
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-                  // ── Info note ─────────────────────────────────────────
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.divider),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(Icons.info_outline, size: 16, color: AppColors.textSecondary),
-                        const SizedBox(width: 8),
-                        const Expanded(
-                          child: Text(
-                            'Replacing a verified document will pause that badge while we re-review (usually within 24 hours).',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: AppColors.textSecondary,
-                              height: 1.4,
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                 ],
@@ -129,17 +122,86 @@ class EditVerificationPage extends StatelessWidget {
     );
   }
 
-  String? _fileNameForType(List<ProfessionalDocument> docs, String type) {
-    try {
-      final doc = docs.firstWhere((d) => d.documentType == type);
-      return doc.fileName ?? _fileNameFromUrl(doc.fileUrl);
-    } catch (_) {
-      return null;
-    }
-  }
-
   String _fileNameFromUrl(String url) {
     return url.split('/').last.split('?').first;
+  }
+}
+
+// ─── Read-only certification card ────────────────────────────────────────────
+
+class _CertCard extends StatelessWidget {
+  final ProfessionalDocument doc;
+
+  const _CertCard({required this.doc});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.primaryOrange.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.workspace_premium_outlined,
+              color: AppColors.primaryOrange,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  doc.name,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryDark,
+                  ),
+                ),
+                if (doc.issuedYear != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    'Issued ${doc.issuedYear}',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: AppColors.divider.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text(
+              'On File',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

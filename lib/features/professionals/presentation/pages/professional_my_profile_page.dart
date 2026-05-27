@@ -749,8 +749,8 @@ class _EditProfileButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Reviews and Certifications tabs are read-only
-    if (selectedTab == 2 || selectedTab == 3) return const SizedBox.shrink();
+    // Reviews tab (2) is read-only; certifications tab (3) is editable
+    if (selectedTab == 2) return const SizedBox.shrink();
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),

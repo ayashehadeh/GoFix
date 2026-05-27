@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../entities/job_entity.dart';
+import 'package:gp/features/professional_jobs/domain/entities/pro_job.dart';
 import '../entities/dashboard_stats_entity.dart';
 import '../repositories/professional_dashboard_repository.dart';
 
@@ -18,7 +18,7 @@ class GetIncomingRequests {
 
   GetIncomingRequests(this.repository);
 
-  Future<Either<String, List<JobEntity>>> call() async {
+  Future<Either<String, List<ProJob>>> call() async {
     return await repository.getIncomingRequests();
   }
 }
@@ -28,7 +28,7 @@ class GetScheduledJobs {
 
   GetScheduledJobs(this.repository);
 
-  Future<Either<String, List<JobEntity>>> call() async {
+  Future<Either<String, List<ProJob>>> call() async {
     return await repository.getScheduledJobs();
   }
 }

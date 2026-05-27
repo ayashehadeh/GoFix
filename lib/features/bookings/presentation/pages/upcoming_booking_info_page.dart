@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/widgets/fullscreen_image_viewer.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -162,7 +163,11 @@ class _UpcomingInfoBody extends StatelessWidget {
                               nameAr: booking.serviceNameAr)),
                       _DetailRow(icon: Icons.calendar_month_outlined, text: booking.formattedDate),
                       _DetailRow(icon: Icons.access_time_outlined, text: booking.scheduledTime),
-                      _DetailRow(icon: Icons.location_on_outlined, text: booking.address, onTap: () => _launchMaps(booking.address, latitude: booking.latitude, longitude: booking.longitude)),
+                      _DetailRow(
+                          icon: Icons.location_on_outlined,
+                          text: booking.address,
+                          onTap: () =>
+                              _launchMaps(booking.address, latitude: booking.latitude, longitude: booking.longitude)),
                       _DetailRow(icon: Icons.attach_money, text: booking.servicePrice, isLast: true),
                     ],
                   ),
@@ -183,7 +188,7 @@ class _UpcomingInfoBody extends StatelessWidget {
                           color: Color(0xFF4A4A4A),
                           height: 1.6,
                         ),
-                      ),
+                      ), // AFTER — in upcoming_booking_info_page.dart
                       if (booking.imageUrls.isNotEmpty) ...[
                         const SizedBox(height: 14),
                         const Divider(height: 1, color: Color(0xFFF0F0F0)),
@@ -201,6 +206,44 @@ class _UpcomingInfoBody extends StatelessWidget {
                               ),
                             ),
                           ],
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: booking.imageUrls.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final url = entry.value;
+                            return GestureDetector(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => FullscreenImageViewer(
+                                    imageUrls: booking.imageUrls,
+                                    initialIndex: index,
+                                  ),
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  url,
+                                  width: 72,
+                                  height: 72,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    width: 72,
+                                    height: 72,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF0F0F0),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Icon(Icons.broken_image_outlined, color: Colors.grey, size: 28),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
                         ),
                       ],
                     ],
@@ -578,8 +621,7 @@ class _DetailRow extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (onTap != null)
-                  const Icon(Icons.open_in_new, size: 14, color: AppColors.primaryOrange),
+                if (onTap != null) const Icon(Icons.open_in_new, size: 14, color: AppColors.primaryOrange),
               ],
             ),
           ),
