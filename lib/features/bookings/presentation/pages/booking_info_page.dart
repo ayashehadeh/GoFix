@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/widgets/fullscreen_image_viewer.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -142,7 +143,8 @@ class _BookingInfoBody extends StatelessWidget {
                       _DetailRow(
                         icon: Icons.location_on_outlined,
                         text: booking.address,
-                        onTap: () => _launchMaps(booking.address, latitude: booking.latitude, longitude: booking.longitude),
+                        onTap: () =>
+                            _launchMaps(booking.address, latitude: booking.latitude, longitude: booking.longitude),
                       ),
                       _DetailRow(
                         icon: Icons.attach_money,
@@ -171,6 +173,7 @@ class _BookingInfoBody extends StatelessWidget {
                           height: 1.6,
                         ),
                       ),
+                      // AFTER — in booking_info_page.dart
                       if (booking.imageUrls.isNotEmpty) ...[
                         const SizedBox(height: 14),
                         const Divider(height: 1, color: Color(0xFFF0F0F0)),
@@ -192,6 +195,44 @@ class _BookingInfoBody extends StatelessWidget {
                               ),
                             ),
                           ],
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: booking.imageUrls.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final url = entry.value;
+                            return GestureDetector(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => FullscreenImageViewer(
+                                    imageUrls: booking.imageUrls,
+                                    initialIndex: index,
+                                  ),
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  url,
+                                  width: 72,
+                                  height: 72,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    width: 72,
+                                    height: 72,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF0F0F0),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Icon(Icons.broken_image_outlined, color: Colors.grey, size: 28),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
                         ),
                       ],
                     ],
@@ -255,12 +296,10 @@ class _ProfessionalCardState extends State<_ProfessionalCard> {
           CircleAvatar(
             radius: 28,
             backgroundColor: const Color(0xFFE0E8F0),
-            backgroundImage: widget.booking.professionalImageUrl != null
-                ? NetworkImage(widget.booking.professionalImageUrl!)
-                : null,
+            backgroundImage:
+                widget.booking.professionalImageUrl != null ? NetworkImage(widget.booking.professionalImageUrl!) : null,
             child: widget.booking.professionalImageUrl == null
-                ? const Icon(Icons.person,
-                    color: AppColors.primaryDark, size: 28)
+                ? const Icon(Icons.person, color: AppColors.primaryDark, size: 28)
                 : null,
           ),
           const SizedBox(width: 14),
@@ -396,8 +435,7 @@ class _DetailRow extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (onTap != null)
-                  const Icon(Icons.open_in_new, size: 14, color: AppColors.primaryOrange),
+                if (onTap != null) const Icon(Icons.open_in_new, size: 14, color: AppColors.primaryOrange),
               ],
             ),
           ),

@@ -2,9 +2,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/features/professional_jobs/domain/entities/pro_job.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../domain/entities/job_entity.dart';
 import '../bloc/professional_dashboard_bloc.dart';
 import '../bloc/professional_dashboard_event.dart';
 import '../bloc/professional_dashboard_state.dart';
@@ -13,7 +13,7 @@ import '../../../professional_jobs/presentation/bloc/professional_jobs_bloc.dart
 import 'package:gp/injection_container.dart' as di;
 
 class JobRequestInfoPage extends StatefulWidget {
-  final JobEntity job;
+  final ProJob job;
 
   const JobRequestInfoPage({super.key, required this.job});
 
@@ -75,7 +75,6 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Accept Request
                   SizedBox(
                     width: double.infinity,
                     height: 52,
@@ -99,8 +98,6 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                     ),
                   ),
                   const SizedBox(height: 12),
-
-                  // Decline Request
                   SizedBox(
                     width: double.infinity,
                     height: 52,
@@ -124,8 +121,6 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
     );
   }
 
-  // ── Decline sheet ───────────────────────────────────────────────────────────
-
   void _showDeclineSheet(BuildContext context) {
     final reasonCtrl = TextEditingController();
     final bloc = context.read<ProfessionalDashboardBloc>();
@@ -138,7 +133,7 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
         children: [
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-            child: Container(color: Colors.black.withOpacity(0.25)),
+            child: Container(color: Colors.black.withValues(alpha: 0.25)),
           ),
           Align(
             alignment: Alignment.bottomCenter,
@@ -159,7 +154,6 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Handle
                     Center(
                       child: Container(
                         width: 40,
@@ -185,8 +179,6 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                       style: const TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                     const SizedBox(height: 24),
-
-                    // Reason field
                     Row(
                       children: [
                         const Icon(Icons.edit_outlined, color: Color(0xFFFF8C1A), size: 16),
@@ -213,8 +205,6 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                       ),
                     ),
                     const SizedBox(height: 24),
-
-                    // Done button
                     SizedBox(
                       width: double.infinity,
                       height: 52,
@@ -243,8 +233,6 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
     );
   }
 
-  // ── Result sheet (accept / decline) ────────────────────────────────────────
-
   void _showResultSheet(BuildContext context, {required bool accepted}) {
     showModalBottomSheet(
       context: context,
@@ -256,7 +244,7 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
         children: [
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-            child: Container(color: Colors.black.withOpacity(0.25)),
+            child: Container(color: Colors.black.withValues(alpha: 0.25)),
           ),
           Align(
             alignment: Alignment.bottomCenter,
@@ -270,7 +258,6 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Handle
                   Container(
                     width: 40,
                     height: 4,
@@ -280,7 +267,6 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-
                   Text(
                     accepted
                         ? AppLocalizations.of(sheetCtx)!.requestAccepted
@@ -300,9 +286,7 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                     style: const TextStyle(fontSize: 14, color: Colors.grey, height: 1.6),
                   ),
                   const SizedBox(height: 28),
-
                   if (accepted) ...[
-                    // Celebration illustration
                     Container(
                       width: 140,
                       height: 140,
@@ -315,14 +299,11 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                       ),
                     ),
                     const SizedBox(height: 28),
-
-                    // View My Jobs button
                     SizedBox(
                       width: double.infinity,
                       height: 52,
                       child: ElevatedButton(
                         onPressed: () {
-                          // Pop: result sheet + job info page + dashboard
                           Navigator.of(sheetCtx).pop();
                           Navigator.of(context).pop();
                           Navigator.of(context).push(
@@ -345,7 +326,6 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
                       ),
                     ),
                   ] else ...[
-                    // Decline — just a Done button back to dashboard
                     SizedBox(
                       width: double.infinity,
                       height: 52,
@@ -378,7 +358,7 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
 // ─── Job details card ─────────────────────────────────────────────────────────
 
 class _JobDetailsCard extends StatelessWidget {
-  final JobEntity job;
+  final ProJob job;
   const _JobDetailsCard({required this.job});
 
   @override
@@ -390,7 +370,7 @@ class _JobDetailsCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2)),
         ],
       ),
       child: Column(
@@ -409,7 +389,12 @@ class _JobDetailsCard extends StatelessWidget {
             icon: Icons.access_time_outlined,
             text: DateFormat('h:mm a').format(job.scheduledTime),
           ),
-          _Row(icon: Icons.location_on_outlined, text: job.location, isLast: true, onTap: () => _launchMaps(job.location, latitude: job.latitude, longitude: job.longitude)),
+          _Row(
+            icon: Icons.location_on_outlined,
+            text: job.location,
+            isLast: true,
+            onTap: () => _launchMaps(job.location, latitude: job.latitude, longitude: job.longitude),
+          ),
         ],
       ),
     );
@@ -419,7 +404,7 @@ class _JobDetailsCard extends StatelessWidget {
 // ─── Service description card ─────────────────────────────────────────────────
 
 class _ServiceDescriptionCard extends StatelessWidget {
-  final JobEntity job;
+  final ProJob job;
   const _ServiceDescriptionCard({required this.job});
 
   @override
@@ -431,7 +416,7 @@ class _ServiceDescriptionCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2)),
         ],
       ),
       child: Column(
@@ -447,7 +432,7 @@ class _ServiceDescriptionCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            (job.description != null && job.description!.isNotEmpty) ? job.description! : 'No description provided.',
+            job.description.isNotEmpty ? job.description : 'No description provided.',
             style: const TextStyle(fontSize: 13, color: Colors.grey, height: 1.6),
           ),
           if (job.imageUrls.isNotEmpty) ...[
@@ -494,6 +479,7 @@ class _ServiceDescriptionCard extends StatelessWidget {
     );
   }
 }
+
 // ─── Detail row ───────────────────────────────────────────────────────────────
 
 class _Row extends StatelessWidget {

@@ -1,36 +1,43 @@
 import '../models/job_model.dart';
 import '../models/dashboard_stats_model.dart';
-import '../../domain/entities/job_entity.dart';
+import 'package:gp/features/professional_jobs/domain/entities/pro_job.dart';
 import 'professional_dashboard_remote_datasource.dart';
 
 class MockProfessionalDashboardDataSource
     implements ProfessionalDashboardRemoteDataSource {
-  // ── In-memory mutable lists so accept/decline actually work ───────────────
-
   final List<JobModel> _pending = [
     JobModel(
       id: '1',
       clientName: 'Hamza Omar',
+      clientImageUrl: '',
       serviceType: 'Leak Repair',
       location: 'Khalda',
       scheduledTime: DateTime.now().add(const Duration(hours: 2)),
-      status: JobStatus.pending,
+      price: '',
+      description: '',
+      status: ProJobStatus.pending,
     ),
     JobModel(
       id: '2',
       clientName: 'Sara Ahmed',
+      clientImageUrl: '',
       serviceType: 'Pipe Installation',
       location: 'Amman',
       scheduledTime: DateTime.now().add(const Duration(hours: 5)),
-      status: JobStatus.pending,
+      price: '',
+      description: '',
+      status: ProJobStatus.pending,
     ),
     JobModel(
       id: '3',
       clientName: 'Omar Khaled',
+      clientImageUrl: '',
       serviceType: 'Water Heater Repair',
       location: 'Swefieh',
       scheduledTime: DateTime.now().add(const Duration(hours: 8)),
-      status: JobStatus.pending,
+      price: '',
+      description: '',
+      status: ProJobStatus.pending,
     ),
   ];
 
@@ -38,26 +45,35 @@ class MockProfessionalDashboardDataSource
     JobModel(
       id: '4',
       clientName: 'Ali Emad',
+      clientImageUrl: '',
       serviceType: 'Leak Repair',
       location: 'Khalda',
       scheduledTime: DateTime.now().add(const Duration(hours: 1)),
-      status: JobStatus.scheduled,
+      price: '',
+      description: '',
+      status: ProJobStatus.confirmed,
     ),
     JobModel(
       id: '5',
       clientName: 'Mohammed Khalil',
+      clientImageUrl: '',
       serviceType: 'Bathroom Renovation',
       location: 'Swefieh',
       scheduledTime: DateTime.now().add(const Duration(days: 1)),
-      status: JobStatus.scheduled,
+      price: '',
+      description: '',
+      status: ProJobStatus.confirmed,
     ),
     JobModel(
       id: '6',
       clientName: 'Layla Hassan',
+      clientImageUrl: '',
       serviceType: 'Kitchen Plumbing',
       location: 'Abdoun',
       scheduledTime: DateTime.now().add(const Duration(days: 2)),
-      status: JobStatus.scheduled,
+      price: '',
+      description: '',
+      status: ProJobStatus.confirmed,
     ),
   ];
 
@@ -90,17 +106,18 @@ class MockProfessionalDashboardDataSource
     if (index == -1) return;
     final job = _pending[index];
     _pending.removeAt(index);
-    // Move to scheduled list
     _scheduled.insert(
       0,
       JobModel(
         id: job.id,
         clientName: job.clientName,
+        clientImageUrl: job.clientImageUrl,
         serviceType: job.serviceType,
         location: job.location,
         scheduledTime: job.scheduledTime,
-        status: JobStatus.scheduled,
-        clientImage: job.clientImage,
+        price: job.price,
+        description: job.description,
+        status: ProJobStatus.confirmed,
       ),
     );
   }
@@ -120,14 +137,16 @@ class MockProfessionalDashboardDataSource
     _scheduled[index] = JobModel(
       id: job.id,
       clientName: job.clientName,
+      clientImageUrl: job.clientImageUrl,
       serviceType: job.serviceType,
       location: job.location,
       scheduledTime: job.scheduledTime,
-      status: JobStatus.values.firstWhere(
-        (s) => s.name == status,
-        orElse: () => JobStatus.scheduled,
+      price: job.price,
+      description: job.description,
+      status: ProJobStatus.values.firstWhere(
+        (s) => s.name.toLowerCase() == status.toLowerCase(),
+        orElse: () => ProJobStatus.confirmed,
       ),
-      clientImage: job.clientImage,
     );
   }
 }

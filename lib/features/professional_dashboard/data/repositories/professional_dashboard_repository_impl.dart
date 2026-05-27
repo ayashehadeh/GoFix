@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../../domain/entities/job_entity.dart';
+import 'package:gp/features/professional_jobs/domain/entities/pro_job.dart';
 import '../../domain/entities/dashboard_stats_entity.dart';
 import '../../domain/repositories/professional_dashboard_repository.dart';
 import '../datasources/professional_dashboard_remote_datasource.dart';
@@ -21,7 +21,7 @@ class ProfessionalDashboardRepositoryImpl
   }
 
   @override
-  Future<Either<String, List<JobEntity>>> getIncomingRequests() async {
+  Future<Either<String, List<ProJob>>> getIncomingRequests() async {
     try {
       final requests = await remoteDataSource.getIncomingRequests();
       return Right(requests);
@@ -31,7 +31,7 @@ class ProfessionalDashboardRepositoryImpl
   }
 
   @override
-  Future<Either<String, List<JobEntity>>> getScheduledJobs() async {
+  Future<Either<String, List<ProJob>>> getScheduledJobs() async {
     try {
       final jobs = await remoteDataSource.getScheduledJobs();
       return Right(jobs);

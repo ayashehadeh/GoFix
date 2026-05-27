@@ -417,6 +417,8 @@ class BecomeProfessionalBloc extends Bloc<BecomeProfessionalEvent, BecomeProfess
     final result = await uploadDocument(
       filePath: event.filePath,
       documentType: event.documentType,
+      name: event.name,
+      issuedYear: event.issuedYear,
     );
     result.fold(
       (f) => _setDocStatus(emit, event.documentType, ActionStatus.failure, error: f.message),

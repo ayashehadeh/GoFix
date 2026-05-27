@@ -1,3 +1,5 @@
+// lib/features/professional_jobs/data/models/pro_job_model.dart
+
 import '../../domain/entities/pro_job.dart';
 
 class ProJobModel extends ProJob {
@@ -14,7 +16,7 @@ class ProJobModel extends ProJob {
     required super.price,
     super.agreedAmount,
     required super.description,
-    required super.pictureCount,
+    super.imageUrls, // ← was: required super.pictureCount
     required super.status,
   });
 
@@ -34,7 +36,7 @@ class ProJobModel extends ProJob {
       price: json['price'] ?? '',
       agreedAmount: (json['agreedAmount'] as num?)?.toDouble(),
       description: json['description'] ?? '',
-      pictureCount: json['pictureCount'] ?? json['picture_count'] ?? 0,
+      imageUrls: List<String>.from(json['imageUrls'] as List? ?? []), // ← was: pictureCount int
       status: _parseStatus(json['status'] as String?),
     );
   }
@@ -50,21 +52,28 @@ class ProJobModel extends ProJob {
         'price': price,
         if (agreedAmount != null) 'agreedAmount': agreedAmount,
         'description': description,
-        'pictureCount': pictureCount,
+        'imageUrls': imageUrls, // ← was: 'pictureCount': pictureCount
         'status': status.name,
       };
 
   static ProJobStatus _parseStatus(String? s) {
     switch (s?.toLowerCase()) {
       case 'ontheway':
-      case 'on_the_way':   return ProJobStatus.onTheWay;
-      case 'arrived':      return ProJobStatus.arrived;
+      case 'on_the_way':
+        return ProJobStatus.onTheWay;
+      case 'arrived':
+        return ProJobStatus.arrived;
       case 'inprogress':
-      case 'in_progress':  return ProJobStatus.inProgress;
-      case 'completed':    return ProJobStatus.completed;
-      case 'cancelled':    return ProJobStatus.cancelled;
-      case 'confirmed':    return ProJobStatus.confirmed;
-      default:             return ProJobStatus.pending;
+      case 'in_progress':
+        return ProJobStatus.inProgress;
+      case 'completed':
+        return ProJobStatus.completed;
+      case 'cancelled':
+        return ProJobStatus.cancelled;
+      case 'confirmed':
+        return ProJobStatus.confirmed;
+      default:
+        return ProJobStatus.pending;
     }
   }
 }

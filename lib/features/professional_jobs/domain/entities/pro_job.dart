@@ -1,30 +1,38 @@
+// lib/features/professional_jobs/domain/entities/pro_job.dart
+
 import 'package:equatable/equatable.dart';
 
 enum ProJobStatus {
-  pending,    // incoming request not yet accepted
-  confirmed,  // accepted, scheduled
-  onTheWay,   // professional heading to client
-  arrived,    // professional at client's location
-  inProgress, // job started
-  completed,  // job done → moves to past
-  cancelled,  // cancelled → moves to past
+  pending,
+  confirmed,
+  onTheWay,
+  arrived,
+  inProgress,
+  completed,
+  cancelled,
 }
 
 extension ProJobStatusX on ProJobStatus {
   String get label {
     switch (this) {
-      case ProJobStatus.pending:    return 'Pending';
-      case ProJobStatus.confirmed:  return 'Confirmed';
-      case ProJobStatus.onTheWay:   return 'On the Way';
-      case ProJobStatus.arrived:    return 'Arrived';
-      case ProJobStatus.inProgress: return 'In Progress';
-      case ProJobStatus.completed:  return 'Completed';
-      case ProJobStatus.cancelled:  return 'Cancelled';
+      case ProJobStatus.pending:
+        return 'Pending';
+      case ProJobStatus.confirmed:
+        return 'Confirmed';
+      case ProJobStatus.onTheWay:
+        return 'On the Way';
+      case ProJobStatus.arrived:
+        return 'Arrived';
+      case ProJobStatus.inProgress:
+        return 'In Progress';
+      case ProJobStatus.completed:
+        return 'Completed';
+      case ProJobStatus.cancelled:
+        return 'Cancelled';
     }
   }
 
-  bool get isActive =>
-      this != ProJobStatus.completed && this != ProJobStatus.cancelled;
+  bool get isActive => this != ProJobStatus.completed && this != ProJobStatus.cancelled;
 }
 
 class ProJob extends Equatable {
@@ -40,7 +48,7 @@ class ProJob extends Equatable {
   final String price;
   final double? agreedAmount;
   final String description;
-  final int pictureCount;
+  final List<String> imageUrls;
   final ProJobStatus status;
 
   const ProJob({
@@ -56,9 +64,11 @@ class ProJob extends Equatable {
     required this.price,
     this.agreedAmount,
     required this.description,
-    required this.pictureCount,
+    this.imageUrls = const [],
     required this.status,
   });
+
+  int get pictureCount => imageUrls.length;
 
   String get formattedDate {
     return '${_monthName(scheduledTime.month)} ${scheduledTime.day}, ${scheduledTime.year}';
@@ -72,10 +82,7 @@ class ProJob extends Equatable {
   }
 
   String _monthName(int month) {
-    const months = [
-      '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
+    const months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return months[month];
   }
 
@@ -93,15 +100,24 @@ class ProJob extends Equatable {
       price: price,
       agreedAmount: agreedAmount,
       description: description,
-      pictureCount: pictureCount,
+      imageUrls: imageUrls,
       status: status ?? this.status,
     );
   }
 
   @override
   List<Object?> get props => [
-        id, clientName, clientImageUrl, clientPhone, serviceType,
-        location, scheduledTime, price, agreedAmount, description,
-        pictureCount, status,
+        id,
+        clientName,
+        clientImageUrl,
+        clientPhone,
+        serviceType,
+        location,
+        scheduledTime,
+        price,
+        agreedAmount,
+        description,
+        imageUrls,
+        status,
       ];
 }
