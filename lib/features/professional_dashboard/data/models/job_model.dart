@@ -24,8 +24,8 @@ class JobModel extends ProJob {
       clientName: json['clientName'] as String? ?? '',
       clientImageUrl: json['professionalImageUrl'] as String? ?? '',
       clientPhone: json['clientPhone'] as String?,
-      serviceType: json['serviceType'] as String? ?? '',
-      location: json['location'] as String? ?? '',
+      serviceType: json['serviceType'] as String? ?? json['serviceName'] as String? ?? '',
+      location: json['location'] as String? ?? json['address'] as String? ?? '',
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
       scheduledTime: DateTime.tryParse(
