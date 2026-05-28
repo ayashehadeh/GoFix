@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/features/professional_jobs/domain/entities/pro_job.dart';
 import '../../domain/usecases/dashboard_usecases.dart';
 import 'professional_dashboard_event.dart';
 import 'professional_dashboard_state.dart';
@@ -64,7 +65,9 @@ class ProfessionalDashboardBloc extends Bloc<ProfessionalDashboardEvent, Profess
                 emit(DashboardLoaded(
                   stats: stats,
                   incomingRequests: requests,
-                  scheduledJobs: jobs,
+                  scheduledJobs: jobs
+                      .where((j) => j.status != ProJobStatus.pending)
+                      .toList(),
                 ));
               },
             );
