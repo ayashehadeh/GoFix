@@ -9,6 +9,7 @@ import 'package:gp/features/become_professional/presentation/pages/edit_details_
 import 'package:gp/features/become_professional/presentation/pages/edit_services_screen.dart';
 import 'package:gp/features/professionals/domain/entities/professional.dart';
 import 'package:gp/features/professionals/domain/entities/review.dart';
+import 'package:gp/core/widgets/skeletons/professional_detail_skeleton.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_event.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_state.dart';
@@ -63,9 +64,7 @@ class _ProfessionalMyProfilePageState
       body: BlocBuilder<ProfessionalsBloc, ProfessionalsState>(
         builder: (context, state) {
           if (state is ProfessionalsLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryOrange),
-            );
+            return const ProfessionalDetailSkeleton();
           }
 
           if (state is ProfessionalsError) {
@@ -89,9 +88,7 @@ class _ProfessionalMyProfilePageState
           }
 
           if (professional == null) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryOrange),
-            );
+            return const ProfessionalDetailSkeleton();
           }
 
           return Column(

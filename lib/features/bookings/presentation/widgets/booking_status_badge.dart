@@ -9,42 +9,42 @@ class BookingStatusBadge extends StatelessWidget {
   Color get _backgroundColor {
     switch (status) {
       case BookingStatus.pending:
-        return const Color(0xFFFFF3E0);
+        return const Color(0xFFF5EFEB);
       case BookingStatus.confirmed:
       case BookingStatus.accepted:
-        return const Color(0xFFE3F2FD);
+        return const Color(0xFFE8F0F8);
       case BookingStatus.onTheWay:
-        return const Color(0xFFF3E5F5);
+        return const Color(0xFFFFF3E8);
       case BookingStatus.arrived:
-        return const Color(0xFFE0F7FA);
+        return const Color(0xFFE8F0F8);
       case BookingStatus.inProgress:
-        return const Color(0xFFE8F5E9);
+        return const Color(0xFFFFF3E8);
       case BookingStatus.completed:
-        return const Color(0xFFEEEEEE);
+        return const Color(0xFFE8F0F8);
       case BookingStatus.cancelled:
       case BookingStatus.declined:
-        return const Color(0xFFFFEBEE);
+        return const Color(0xFFF0F0F0);
     }
   }
 
   Color get _textColor {
     switch (status) {
       case BookingStatus.pending:
-        return const Color(0xFFE65100);
+        return const Color(0xFF795548);
       case BookingStatus.confirmed:
       case BookingStatus.accepted:
-        return const Color(0xFF0D47A1);
+        return const Color(0xFF1A3A5C);
       case BookingStatus.onTheWay:
-        return const Color(0xFF4A148C);
+        return const Color(0xFFE87722);
       case BookingStatus.arrived:
-        return const Color(0xFF006064);
+        return const Color(0xFF1A3A5C);
       case BookingStatus.inProgress:
-        return const Color(0xFF1B5E20);
+        return const Color(0xFFE87722);
       case BookingStatus.completed:
-        return const Color(0xFF424242);
+        return const Color(0xFF1A3A5C);
       case BookingStatus.cancelled:
       case BookingStatus.declined:
-        return const Color(0xFFB71C1C);
+        return const Color(0xFF757575);
     }
   }
 

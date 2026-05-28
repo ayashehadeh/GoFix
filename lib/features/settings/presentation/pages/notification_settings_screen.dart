@@ -6,6 +6,7 @@ import 'package:gp/features/settings/domain/entities/notification_settings_entit
 import 'package:gp/features/settings/presentation/bloc/notification_settings_bloc.dart';
 import 'package:gp/features/settings/presentation/widgets/notification_tile.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:shimmer/shimmer.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -27,28 +28,29 @@ class _NotificationSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.chevron_left, color: Colors.black, size: 28),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: const BackButton(color: AppColors.primaryDark),
         title: Text(
-          AppLocalizations.of(context)!.notificationSettings,
-          style: AppTextStyles.heading2,
+          t.notificationSettings,
+          style: const TextStyle(
+            color: AppColors.primaryDark,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
         ),
-        centerTitle: true,
+        centerTitle: false,
       ),
       body: BlocBuilder<NotificationSettingsBloc, NotificationSettingsState>(
         builder: (context, state) {
           if (state is NotificationSettingsLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryOrange),
-            );
+            return _buildSkeleton();
           }
+
           if (state is NotificationSettingsError) {
             return Center(
               child: Text(state.message, style: AppTextStyles.bodySmall),
@@ -66,34 +68,86 @@ class _NotificationSettingsScreenState
 
           if (settings == null) return const SizedBox();
 
-          final t = AppLocalizations.of(context)!;
           final items = _buildItems(settings, t);
 
-          return ListView.separated(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            itemCount: items.length,
-            separatorBuilder: (_, __) =>
-                const Divider(height: 1, indent: 16, endIndent: 16),
-            itemBuilder: (context, index) {
-              final item = items[index];
-              return NotificationTile(
-                title: item.title,
-                subtitle: item.subtitle,
-                value: item.value,
-                onChanged: (val) {
-                  context.read<NotificationSettingsBloc>().add(
-                        ToggleNotificationEvent(key: item.key, value: val),
-                      );
-                },
-              );
-            },
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: List.generate(items.length, (index) {
+                    final item = items[index];
+                    final isLast = index == items.length - 1;
+                    return Column(
+                      children: [
+                        NotificationTile(
+                          title: item.title,
+                          subtitle: item.subtitle,
+                          value: item.value,
+                          onChanged: (val) {
+                            context.read<NotificationSettingsBloc>().add(
+                                  ToggleNotificationEvent(
+                                      key: item.key, value: val),
+                                );
+                          },
+                        ),
+                        if (!isLast)
+                          const Divider(
+                              height: 1, indent: 16, endIndent: 16),
+                      ],
+                    );
+                  }),
+                ),
+              ),
+            ],
           );
         },
       ),
     );
   }
 
-  List<_NotificationItemData> _buildItems(NotificationSettingsEntity s, AppLocalizations t) => [
+  Widget _buildSkeleton() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey.shade300,
+            highlightColor: Colors.grey.shade100,
+            child: Column(
+              children: List.generate(5, (i) => _SkeletonTile(isLast: i == 4)),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<_NotificationItemData> _buildItems(
+          NotificationSettingsEntity s, AppLocalizations t) =>
+      [
         _NotificationItemData(
           key: 'bookingConfirmations',
           title: t.bookingConfirmations,
@@ -139,4 +193,71 @@ class _NotificationItemData {
     required this.subtitle,
     required this.value,
   });
+}
+
+// ─── Skeleton tile ────────────────────────────────────────────────────────────
+
+class _SkeletonTile extends StatelessWidget {
+  final bool isLast;
+  const _SkeletonTile({required this.isLast});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 140,
+                      height: 13,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 7),
+                    Container(
+                      width: double.infinity,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      width: 180,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Container(
+                width: 44,
+                height: 26,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (!isLast)
+          Container(height: 1, color: Colors.white),
+      ],
+    );
+  }
 }

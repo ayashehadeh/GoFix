@@ -6,6 +6,7 @@ import 'package:gp/features/settings/presentation/bloc/address_bloc.dart';
 import 'package:gp/features/settings/presentation/pages/confirm_location_screen.dart';
 import 'package:gp/features/settings/presentation/pages/edit_address_screen.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:shimmer/shimmer.dart';
 
 class AddressesScreen extends StatefulWidget {
   const AddressesScreen({super.key});
@@ -71,8 +72,58 @@ class _AddressesScreenState extends State<AddressesScreen> {
         },
         builder: (context, state) {
           if (state is AddressLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryOrange),
+            return ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: 4,
+              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              itemBuilder: (_, __) => Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Shimmer.fromColors(
+                  baseColor: Colors.grey.shade300,
+                  highlightColor: Colors.grey.shade100,
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 100,
+                              height: 13,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                            const SizedBox(height: 7),
+                            Container(
+                              width: double.infinity,
+                              height: 11,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             );
           }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/skeletons/notification_list_skeleton.dart';
 import '../../../../core/storage/user_type_storage.dart';
 import '../../domain/entities/notification_item.dart';
 import '../bloc/notifications_bloc.dart';
@@ -54,11 +55,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
             child: BlocBuilder<NotificationsBloc, NotificationsState>(
               builder: (context, state) {
                 if (state is NotificationsLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primaryOrange,
-                    ),
-                  );
+                  return const NotificationListSkeleton();
                 }
 
                 if (state is NotificationsError) {

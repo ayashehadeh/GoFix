@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/core/storage/user_type_storage.dart';
+import 'package:gp/core/widgets/skeletons/availability_skeleton.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/availability_entity.dart';
@@ -68,9 +69,7 @@ class _MyAvailabilityView extends StatelessWidget {
         },
         builder: (context, state) {
           if (state is AvailabilityLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryOrange),
-            );
+            return const AvailabilitySkeleton();
           }
           if (state is AvailabilityLoaded) {
             return _AvailabilityForm(state: state);
