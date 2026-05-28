@@ -11,20 +11,21 @@ class ProJobListCard extends StatelessWidget {
     required this.onTap,
   });
 
-  Color get _statusColor {
+  ({Color bg, Color text}) get _chipColors {
     switch (job.status) {
-      case ProJobStatus.pending:    return const Color(0xFFFF8C1A);
-      case ProJobStatus.confirmed:  return const Color(0xFF2196F3);
-      case ProJobStatus.onTheWay:   return const Color(0xFF9C27B0);
-      case ProJobStatus.arrived:    return const Color(0xFF00BCD4);
-      case ProJobStatus.inProgress: return const Color(0xFF4CAF50);
-      case ProJobStatus.completed:  return const Color(0xFF607D8B);
-      case ProJobStatus.cancelled:  return const Color(0xFFF44336);
+      case ProJobStatus.pending:    return (bg: const Color(0xFFF5EFEB), text: const Color(0xFF795548));
+      case ProJobStatus.confirmed:  return (bg: const Color(0xFFE8F0F8), text: const Color(0xFF1A3A5C));
+      case ProJobStatus.onTheWay:   return (bg: const Color(0xFFFFF3E8), text: const Color(0xFFE87722));
+      case ProJobStatus.arrived:    return (bg: const Color(0xFFE8F0F8), text: const Color(0xFF1A3A5C));
+      case ProJobStatus.inProgress: return (bg: const Color(0xFFFFF3E8), text: const Color(0xFFE87722));
+      case ProJobStatus.completed:  return (bg: const Color(0xFFE8F0F8), text: const Color(0xFF1A3A5C));
+      case ProJobStatus.cancelled:  return (bg: const Color(0xFFF0F0F0), text: const Color(0xFF757575));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final chip = _chipColors;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -32,9 +33,10 @@ class ProJobListCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
+          border: const Border(left: BorderSide(color: Color(0xFF012249), width: 3)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -42,36 +44,9 @@ class ProJobListCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Status bar on the left
-            Container(
-              width: 36,
-              height: 80,
-              decoration: BoxDecoration(
-                color: _statusColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  bottomLeft: Radius.circular(12),
-                ),
-              ),
-              child: RotatedBox(
-                quarterTurns: 3,
-                child: Center(
-                  child: Text(
-                    job.status.label,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
             // Avatar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               child: CircleAvatar(
                 radius: 24,
                 backgroundColor: const Color(0xFFE0E8F0),
@@ -79,32 +54,49 @@ class ProJobListCard extends StatelessWidget {
                     ? NetworkImage(job.clientImageUrl)
                     : null,
                 child: job.clientImageUrl.isEmpty
-                    ? const Icon(Icons.person,
-                        color: Color(0xFF062B4D), size: 24)
+                    ? const Icon(Icons.person, color: Color(0xFF062B4D), size: 24)
                     : null,
               ),
             ),
 
-            // Name + service
+            // Name + service + status
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    job.clientName,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF062B4D),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      job.clientName,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF062B4D),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    job.serviceType,
-                    style: const TextStyle(
-                        fontSize: 13, color: Colors.grey),
-                  ),
-                ],
+                    const SizedBox(height: 3),
+                    Text(
+                      job.serviceType,
+                      style: const TextStyle(fontSize: 13, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: chip.bg,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        job.status.label,
+                        style: TextStyle(
+                          color: chip.text,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
 
@@ -116,8 +108,7 @@ class ProJobListCard extends StatelessWidget {
                 children: [
                   Text(
                     job.formattedDate,
-                    style: const TextStyle(
-                        fontSize: 11, color: Colors.grey),
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
                   ),
                   const SizedBox(height: 4),
                   Text(

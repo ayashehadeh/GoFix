@@ -275,10 +275,11 @@ class _StatusSheetState extends State<_StatusSheet> {
   ProJobStatus? _selected;
 
   Set<ProJobStatus> _allowedStatuses(ProJobStatus current) => switch (current) {
+        ProJobStatus.pending => {ProJobStatus.onTheWay, ProJobStatus.cancelled},
         ProJobStatus.confirmed => {ProJobStatus.onTheWay, ProJobStatus.cancelled},
-        ProJobStatus.onTheWay => {ProJobStatus.arrived},
-        ProJobStatus.arrived => {ProJobStatus.inProgress},
-        ProJobStatus.inProgress => {ProJobStatus.completed},
+        ProJobStatus.onTheWay => {ProJobStatus.arrived, ProJobStatus.cancelled},
+        ProJobStatus.arrived => {ProJobStatus.inProgress, ProJobStatus.cancelled},
+        ProJobStatus.inProgress => {ProJobStatus.completed, ProJobStatus.cancelled},
         _ => {},
       };
 

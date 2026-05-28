@@ -6,6 +6,7 @@ import 'package:gp/features/professional_jobs/presentation/pages/job_info_page.d
 import 'package:gp/features/professional_jobs/domain/entities/pro_job.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/features/professional_jobs/presentation/pages/my_jobs_page.dart';
+import 'incoming_requests_page.dart';
 import 'package:intl/intl.dart';
 import '../bloc/professional_dashboard_bloc.dart';
 import '../bloc/professional_dashboard_event.dart';
@@ -15,6 +16,7 @@ import '../../../professional_availability/presentation/pages/my_availability_sc
 import '../../../earnings/presentation/bloc/earnings_bloc.dart';
 import '../../../earnings/presentation/pages/earnings_page.dart';
 import '../../../../core/widgets/gofix_bottom_nav_bar.dart';
+import '../../../../core/widgets/skeletons/dashboard_skeleton.dart';
 import '../../../../injection_container.dart' as di;
 import '../../../../core/widgets/payment_amount_sheet.dart';
 import 'package:gp/core/utils/user_info_helper.dart';
@@ -65,7 +67,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
           },
           builder: (context, state) {
             if (state is DashboardLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const DashboardSkeleton();
             }
 
             if (state is DashboardError) {
@@ -290,6 +292,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
           if (showSeeAll)
             TextButton(
               onPressed: onSeeAll,
+              style: TextButton.styleFrom(foregroundColor: const Color(0xFFE87722)),
               child: Text(AppLocalizations.of(context)!.seeAll),
             ),
         ],
@@ -306,6 +309,15 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
         _buildSectionHeader(
           AppLocalizations.of(context)!.scheduledJobsTitle,
           showSeeAll: state.scheduledJobs.isNotEmpty,
+          onSeeAll: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => BlocProvider(
+                create: (_) => di.sl<ProfessionalJobsBloc>(),
+                child: const MyJobsPage(),
+              ),
+            ),
+          ),
         ),
         const SizedBox(height: 14),
         SizedBox(
@@ -340,21 +352,20 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
     final chip = _statusChipData(job.status);
     return GestureDetector(
         onTap: () {
+          final bloc = context.read<ProfessionalDashboardBloc>();
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => MultiBlocProvider(
                 providers: [
                   BlocProvider(create: (_) => di.sl<ProfessionalJobsBloc>()),
-                  BlocProvider.value(value: context.read<ProfessionalDashboardBloc>()),
+                  BlocProvider.value(value: bloc),
                 ],
                 child: JobInfoPage(job: job),
               ),
             ),
           ).then((_) {
-            if (context.mounted) {
-              context.read<ProfessionalDashboardBloc>().add(RefreshDashboard());
-            }
+            if (context.mounted) bloc.add(RefreshDashboard());
           });
         },
         child: Container(
@@ -481,6 +492,19 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
         _buildSectionHeader(
           AppLocalizations.of(context)!.incomingRequestsTitle,
           showSeeAll: state.incomingRequests.isNotEmpty,
+          onSeeAll: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => BlocProvider.value(
+                value: context.read<ProfessionalDashboardBloc>(),
+                child: const IncomingRequestsPage(),
+              ),
+            ),
+          ).then((_) {
+            if (mounted) {
+              context.read<ProfessionalDashboardBloc>().add(RefreshDashboard());
+            }
+          }),
         ),
         const SizedBox(height: 14),
         SizedBox(
@@ -501,18 +525,17 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
   Widget _buildRequestCard(ProJob request) {
     return GestureDetector(
       onTap: () {
+        final bloc = context.read<ProfessionalDashboardBloc>();
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => BlocProvider.value(
-              value: context.read<ProfessionalDashboardBloc>(),
+              value: bloc,
               child: JobRequestInfoPage(job: request),
             ),
           ),
         ).then((_) {
-          if (context.mounted) {
-            context.read<ProfessionalDashboardBloc>().add(RefreshDashboard());
-          }
+          if (context.mounted) bloc.add(RefreshDashboard());
         });
       },
       child: Container(
@@ -870,9 +893,9 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
   void _showStatusUpdateDialog(String jobId, ProJobStatus currentStatus) {
     final Set<String> allowedKeys = switch (currentStatus) {
       ProJobStatus.confirmed => {'OnTheWay', 'Cancelled'},
-      ProJobStatus.onTheWay => {'Arrived'},
-      ProJobStatus.arrived => {'InProgress'},
-      ProJobStatus.inProgress => {'Completed'},
+      ProJobStatus.onTheWay => {'Arrived', 'Cancelled'},
+      ProJobStatus.arrived => {'InProgress', 'Cancelled'},
+      ProJobStatus.inProgress => {'Completed', 'Cancelled'},
       _ => {},
     };
 

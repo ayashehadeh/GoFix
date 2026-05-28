@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gp/core/constants/app_colors.dart';
+import 'package:gp/core/favorites/favorites_cache.dart';
 import 'package:gp/core/theme/app_text_styles.dart';
 import 'package:gp/features/professionals/domain/entities/professional.dart';
 import 'package:gp/features/professionals/presentation/widgets/star_rating.dart';
@@ -49,14 +50,17 @@ class ProfessionalCard extends StatelessWidget {
                 ),
                 StarRating(rating: professional.rating, size: 16),
                 const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: onFavoriteTap,
-                  child: Icon(
-                    professional.isFavorite
-                        ? Icons.favorite
-                        : Icons.favorite_border,
-                    color: AppColors.primaryOrange,
-                    size: 20,
+                ValueListenableBuilder<Set<String>>(
+                  valueListenable: FavoritesCache.instance.notifier,
+                  builder: (_, ids, __) => GestureDetector(
+                    onTap: onFavoriteTap,
+                    child: Icon(
+                      ids.contains(professional.id)
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: AppColors.primaryOrange,
+                      size: 20,
+                    ),
                   ),
                 ),
               ],
@@ -80,7 +84,7 @@ class ProfessionalCard extends StatelessWidget {
             Row(
               children: [
                 const Icon(
-                  Icons.bookmark_border,
+                  Icons.near_me,
                   color: AppColors.primaryOrange,
                   size: 16,
                 ),

@@ -7,6 +7,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../injection_container.dart' as di;
 import '../../../professionals/domain/entities/service_offered.dart';
 import '../../../professionals/domain/usecases/profeessional_usecases/get_professional_by_id.dart';
+import '../../../settings/domain/entities/address_entity.dart';
+import '../../../settings/presentation/bloc/address_bloc.dart';
 import '../../domain/entities/booking.dart';
 import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
@@ -39,7 +41,7 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
   int _selectedDateIndex = 1;
   int _selectedHour = 7;
   int _selectedMinute = 0;
-  final TextEditingController _addressController = TextEditingController();
+  AddressEntity? _selectedAddress;
   final List<DateTime> _dates = _generateBookingDates();
 
   List<ServiceOffered>? _professionalServices; // null = still loading
@@ -49,8 +51,8 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
   void initState() {
     super.initState();
     _description = widget.booking.description;
-    _addressController.text = widget.booking.address;
     _loadServices();
+    context.read<AddressBloc>().add(const GetAddressesEvent());
   }
 
   Future<void> _loadServices() async {
@@ -75,7 +77,6 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
   @override
   void dispose() {
     _pageController.dispose();
-    _addressController.dispose();
     super.dispose();
   }
 
@@ -190,13 +191,15 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
                           selectedDateIndex: _selectedDateIndex,
                           selectedHour: _selectedHour,
                           selectedMinute: _selectedMinute,
-                          addressController: _addressController,
+                          selectedAddress: _selectedAddress,
                           onDateSelected: (i) =>
                               setState(() => _selectedDateIndex = i),
                           onTimeChanged: (h, m) => setState(() {
                             _selectedHour = h;
                             _selectedMinute = m;
                           }),
+                          onAddressSelected: (addr) =>
+                              setState(() => _selectedAddress = addr),
                           onContinue: () {
                             final selectedDate = _dates[_selectedDateIndex];
                             final today = DateTime.now();
@@ -210,12 +213,12 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
                               );
                               return;
                             }
-                            if (_addressController.text.trim().isEmpty) {
+                            if (_selectedAddress == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(AppLocalizations.of(
                                           context)!
-                                      .pleaseEnterAddress),
+                                      .pleaseSelectYourAddress),
                                   backgroundColor: AppColors.error,
                                 ),
                               );
@@ -235,7 +238,9 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
                           description: _description,
                           dateStr: _selectedDateStr,
                           timeStr: _selectedTimeStr,
-                          address: _addressController.text.trim(),
+                          address: _selectedAddress != null
+                              ? '${_selectedAddress!.displayTitle}, ${_selectedAddress!.displaySubtitle}'
+                              : '',
                           isLoading: isLoading,
                           onSubmit: () {
                             final svc = services![_selectedServiceIndex!];
@@ -247,7 +252,7 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
                                     scheduledDate: _scheduledDateTime,
                                     scheduledTime: _selectedTimeStr,
                                     address:
-                                        _addressController.text.trim(),
+                                        '${_selectedAddress!.displayTitle}, ${_selectedAddress!.displaySubtitle}',
                                     description: _description,
                                   ),
                                 );
@@ -539,9 +544,10 @@ class _Step2DateTime extends StatefulWidget {
   final int selectedDateIndex;
   final int selectedHour;
   final int selectedMinute;
-  final TextEditingController addressController;
+  final AddressEntity? selectedAddress;
   final ValueChanged<int> onDateSelected;
   final void Function(int hour, int minute) onTimeChanged;
+  final ValueChanged<AddressEntity> onAddressSelected;
   final VoidCallback onContinue;
 
   const _Step2DateTime({
@@ -549,9 +555,10 @@ class _Step2DateTime extends StatefulWidget {
     required this.selectedDateIndex,
     required this.selectedHour,
     required this.selectedMinute,
-    required this.addressController,
+    required this.selectedAddress,
     required this.onDateSelected,
     required this.onTimeChanged,
+    required this.onAddressSelected,
     required this.onContinue,
   });
 
@@ -560,6 +567,80 @@ class _Step2DateTime extends StatefulWidget {
 }
 
 class _Step2DateTimeState extends State<_Step2DateTime> {
+  void _showAddressPicker(List<AddressEntity> addresses) {
+    final t = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 12),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                t.selectAddress,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryDark,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (addresses.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                t.noSavedAddresses,
+                style: const TextStyle(color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+            )
+          else
+            ...addresses.map((addr) => ListTile(
+                  leading: Icon(
+                    addr.type == AddressType.apartment
+                        ? Icons.apartment
+                        : Icons.home_outlined,
+                    color: AppColors.primaryOrange,
+                  ),
+                  title: Text(addr.displayTitle,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primaryDark)),
+                  subtitle: Text(addr.displaySubtitle,
+                      style: const TextStyle(fontSize: 12)),
+                  trailing: widget.selectedAddress?.id == addr.id
+                      ? const Icon(Icons.check_circle,
+                          color: AppColors.primaryOrange)
+                      : null,
+                  onTap: () {
+                    widget.onAddressSelected(addr);
+                    Navigator.pop(context);
+                  },
+                )),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
   void _showTimePicker() {
     int tempH = widget.selectedHour;
     int tempM = widget.selectedMinute;
@@ -814,44 +895,102 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                _CardShell(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.location_on_outlined,
-                              color: AppColors.primaryOrange, size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                              AppLocalizations.of(context)!.chooseAddress,
-                              style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.primaryDark)),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: widget.addressController,
-                        maxLines: 2,
-                        decoration: InputDecoration(
-                          hintText:
-                              AppLocalizations.of(context)!.enterAddress,
-                          hintStyle: const TextStyle(
-                              fontSize: 13,
-                              color: AppColors.textSecondary),
-                          filled: true,
-                          fillColor: const Color(0xFFF8F9FA),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.all(12),
+                BlocBuilder<AddressBloc, AddressState>(
+                  builder: (context, addrState) {
+                    final addresses = addrState is AddressLoaded
+                        ? addrState.addresses
+                        : addrState is AddressActionSuccess
+                            ? addrState.addresses
+                            : <AddressEntity>[];
+                    return GestureDetector(
+                      onTap: () => _showAddressPicker(addresses),
+                      child: _CardShell(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.location_on_outlined,
+                                    color: AppColors.primaryOrange, size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                    AppLocalizations.of(context)!.chooseAddress,
+                                    style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.primaryDark)),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF8F9FA),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: widget.selectedAddress == null
+                                  ? Row(
+                                      children: [
+                                        Icon(Icons.location_on_outlined,
+                                            color: Colors.grey.shade400,
+                                            size: 18),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          addrState is AddressLoading
+                                              ? AppLocalizations.of(context)!.loadingAddresses
+                                              : AppLocalizations.of(context)!.tapToSelectAddress,
+                                          style: TextStyle(
+                                              color: Colors.grey.shade400,
+                                              fontSize: 13),
+                                        ),
+                                      ],
+                                    )
+                                  : Row(
+                                      children: [
+                                        Icon(
+                                          widget.selectedAddress!.type ==
+                                                  AddressType.apartment
+                                              ? Icons.apartment
+                                              : Icons.home_outlined,
+                                          color: AppColors.primaryOrange,
+                                          size: 18,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                widget.selectedAddress!
+                                                    .displayTitle,
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: AppColors.primaryDark,
+                                                    fontSize: 13),
+                                              ),
+                                              Text(
+                                                widget.selectedAddress!
+                                                    .displaySubtitle,
+                                                style: const TextStyle(
+                                                    color: Colors.grey,
+                                                    fontSize: 12),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const Icon(Icons.edit_outlined,
+                                            color: AppColors.primaryOrange,
+                                            size: 16),
+                                      ],
+                                    ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 24),
               ],

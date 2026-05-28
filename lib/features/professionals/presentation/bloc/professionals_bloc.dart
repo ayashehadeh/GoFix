@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/favorites/favorites_cache.dart';
 import 'package:gp/features/professionals/domain/entities/professional.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/get_professionals_by_category.dart';
 import 'package:gp/features/professionals/domain/usecases/profeessional_usecases/get_professional_by_id.dart';
@@ -90,10 +91,15 @@ class ProfessionalsBloc extends Bloc<ProfessionalsEvent, ProfessionalsState> {
     final result = await getProfessionalsByCategory(event.category);
     result.fold(
       (failure) => emit(ProfessionalsError(failure.message)),
-      (professionals) => emit(ProfessionalsLoaded(
-        professionals: professionals,
-        category: event.category,
-      )),
+      (professionals) {
+        for (final p in professionals) {
+          FavoritesCache.instance.set(p.id, p.isFavorite);
+        }
+        emit(ProfessionalsLoaded(
+          professionals: professionals,
+          category: event.category,
+        ));
+      },
     );
   }
 
@@ -125,10 +131,13 @@ class ProfessionalsBloc extends Bloc<ProfessionalsEvent, ProfessionalsState> {
         final reviewsResult = await getReviewsByProfessional(event.professionalId);
         reviewsResult.fold(
           (failure) => emit(ProfessionalsError(failure.message)),
-          (reviews) => emit(ProfessionalDetailLoaded(
-            professional: professionalWithAreas,
-            reviews: reviews,
-          )),
+          (reviews) {
+            FavoritesCache.instance.set(professionalWithAreas.id, professionalWithAreas.isFavorite);
+            emit(ProfessionalDetailLoaded(
+              professional: professionalWithAreas,
+              reviews: reviews,
+            ));
+          },
         );
       },
     );
@@ -156,6 +165,7 @@ class ProfessionalsBloc extends Bloc<ProfessionalsEvent, ProfessionalsState> {
     ToggleFavoriteEvent event,
     Emitter<ProfessionalsState> emit,
   ) async {
+    FavoritesCache.instance.toggle(event.professionalId);
     if (state is ProfessionalsLoaded) {
       final current = state as ProfessionalsLoaded;
       final updated = current.professionals.map((p) {
@@ -170,10 +180,13 @@ class ProfessionalsBloc extends Bloc<ProfessionalsEvent, ProfessionalsState> {
       ));
       final result = await toggleFavorite(event.professionalId);
       result.fold(
-        (failure) => emit(ProfessionalsLoaded(
-          professionals: current.professionals,
-          category: current.category,
-        )),
+        (failure) {
+          FavoritesCache.instance.toggle(event.professionalId); // revert
+          emit(ProfessionalsLoaded(
+            professionals: current.professionals,
+            category: current.category,
+          ));
+        },
         (_) => null,
       );
     } else if (state is ProfessionalDetailLoaded) {
@@ -187,10 +200,20 @@ class ProfessionalsBloc extends Bloc<ProfessionalsEvent, ProfessionalsState> {
       ));
       final result = await toggleFavorite(event.professionalId);
       result.fold(
-        (failure) => emit(ProfessionalDetailLoaded(
-          professional: current.professional,
-          reviews: current.reviews,
-        )),
+        (failure) {
+          FavoritesCache.instance.toggle(event.professionalId); // revert
+          emit(ProfessionalDetailLoaded(
+            professional: current.professional,
+            reviews: current.reviews,
+          ));
+        },
+        (_) => null,
+      );
+    } else {
+      // toggled from a context with no bloc state (e.g. booking page)
+      final result = await toggleFavorite(event.professionalId);
+      result.fold(
+        (failure) => FavoritesCache.instance.toggle(event.professionalId), // revert
         (_) => null,
       );
     }

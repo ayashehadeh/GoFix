@@ -9,6 +9,7 @@ import 'package:gp/features/professionals/domain/entities/service_category.dart'
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_event.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_state.dart';
+import 'package:gp/core/widgets/skeletons/category_professionals_skeleton.dart';
 import 'package:gp/features/professionals/presentation/pages/filter_page.dart';
 import 'package:gp/features/professionals/presentation/pages/professional_detail_page.dart';
 import 'package:gp/features/professionals/presentation/widgets/professional_card.dart';
@@ -87,7 +88,7 @@ class _CategoryProfessionalsPageState extends State<CategoryProfessionalsPage> {
 
   Widget _buildBody(ProfessionalsState state) {
     if (state is ProfessionalsLoading) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.primaryOrange));
+      return const CategoryProfessionalsSkeleton();
     }
 
     if (state is ProfessionalsError) {
