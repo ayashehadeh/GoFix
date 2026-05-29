@@ -9,6 +9,7 @@ abstract class ProfessionalJobsRemoteDataSource {
     required String jobId,
     required ProJobStatus newStatus,
   });
+  Future<void> cancelJob(String jobId, {String? reason});
 }
 
 class ProfessionalJobsRemoteDataSourceImpl implements ProfessionalJobsRemoteDataSource {
@@ -42,6 +43,15 @@ class ProfessionalJobsRemoteDataSourceImpl implements ProfessionalJobsRemoteData
     // Re-fetch the updated job to get ProJobDto format
     final response = await dio.get('/bookings/professional/jobs/$jobId');
     return ProJobModel.fromJson(response.data['data'] as Map<String, dynamic>);
+  }
+
+  @override
+  Future<void> cancelJob(String jobId, {String? reason}) async {
+    await dio.delete(
+      '/bookings/professional/jobs/$jobId',
+      data: {'reason': reason ?? ''},
+      options: Options(contentType: 'application/json'),
+    );
   }
 
   String _statusToString(ProJobStatus status) {
@@ -165,7 +175,6 @@ class MockProfessionalJobsDataSource implements ProfessionalJobsRemoteDataSource
     if (index == -1) throw Exception('Job $jobId not found');
 
     final existing = _upcoming[index];
-    // AFTER
     final updated = ProJobModel(
       id: existing.id,
       clientName: existing.clientName,
@@ -180,14 +189,32 @@ class MockProfessionalJobsDataSource implements ProfessionalJobsRemoteDataSource
     );
 
     if (!newStatus.isActive) {
-      // Completed or Cancelled → move to past list
       _upcoming.removeAt(index);
       _past.insert(0, updated);
     } else {
-      // Just update status in upcoming
       _upcoming[index] = updated;
     }
 
     return updated;
+  }
+
+  @override
+  Future<void> cancelJob(String jobId, {String? reason}) async {
+    await Future.delayed(const Duration(milliseconds: 600));
+    final index = _upcoming.indexWhere((j) => j.id == jobId);
+    if (index == -1) throw Exception('Job $jobId not found');
+    final existing = _upcoming.removeAt(index);
+    _past.insert(0, ProJobModel(
+      id: existing.id,
+      clientName: existing.clientName,
+      clientImageUrl: existing.clientImageUrl,
+      serviceType: existing.serviceType,
+      location: existing.location,
+      scheduledTime: existing.scheduledTime,
+      price: existing.price,
+      description: existing.description,
+      imageUrls: existing.imageUrls,
+      status: ProJobStatus.cancelled,
+    ));
   }
 }

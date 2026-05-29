@@ -167,7 +167,7 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     Emitter<BookingsState> emit,
   ) async {
     emit(BookingActionLoading());
-    final result = await cancelBooking(event.bookingId);
+    final result = await cancelBooking(event.bookingId, reason: event.reason);
     result.fold(
       (failure) => emit(BookingsError(failure.message)),
       (_) => emit(BookingCancelledSuccess()),

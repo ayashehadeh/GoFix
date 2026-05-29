@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/booking.dart';
 import '../../domain/usecases/get_upcoming_bookings.dart';
+import '../../domain/usecases/get_past_bookings.dart';
 
 // ── States ────────────────────────────────────────────────────────────────────
 
@@ -26,26 +27,50 @@ class ActiveBookingError extends ActiveBookingState {
 
 class ActiveBookingCubit extends Cubit<ActiveBookingState> {
   final GetUpcomingBookings getUpcomingBookings;
+  final GetPastBookings getPastBookings;
 
-  ActiveBookingCubit({required this.getUpcomingBookings})
-      : super(ActiveBookingInitial());
+  ActiveBookingCubit({
+    required this.getUpcomingBookings,
+    required this.getPastBookings,
+  }) : super(ActiveBookingInitial());
 
   Future<void> load() async {
     emit(ActiveBookingLoading());
-    final result = await getUpcomingBookings();
-    result.fold(
-      (failure) => emit(ActiveBookingError(failure.message)),
-      (bookings) {
-        // Guard: exclude anything the backend may have returned that is
-        // already fully done (completed + payment confirmed).
-        final active = bookings.where((b) => b.isUpcoming).toList();
-        if (active.isEmpty) {
-          emit(ActiveBookingEmpty());
-        } else {
-          emit(ActiveBookingLoaded(_pickMostActive(active)));
-        }
-      },
+
+    // Step 1: upcoming bookings — primary source, same as before.
+    final upcomingResult = await getUpcomingBookings();
+
+    String? errorMessage;
+    final allBookings = <Booking>[];
+
+    upcomingResult.fold(
+      (failure) => errorMessage = failure.message,
+      (bookings) => allBookings.addAll(bookings),
     );
+
+    // Step 2: only check past if upcoming returned nothing active. This catches
+    // completed-but-unpaid bookings that the backend may have moved to past.
+    final active = allBookings.where((b) => b.isUpcoming).toList();
+    if (active.isEmpty) {
+      final pastResult = await getPastBookings();
+      pastResult.fold(
+        (failure) => null, // past failure is non-fatal
+        (bookings) => allBookings.addAll(bookings),
+      );
+    }
+
+    final finalActive = allBookings.where((b) => b.isUpcoming).toList();
+
+    if (finalActive.isEmpty) {
+      if (errorMessage != null && allBookings.isEmpty) {
+        emit(ActiveBookingError(errorMessage!));
+      } else {
+        emit(ActiveBookingEmpty());
+      }
+      return;
+    }
+
+    emit(ActiveBookingLoaded(_pickMostActive(finalActive)));
   }
 
   // Picks the booking in the most urgent active state.

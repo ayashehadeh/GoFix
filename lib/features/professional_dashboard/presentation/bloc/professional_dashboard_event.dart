@@ -32,11 +32,12 @@ class DeclineRequest extends ProfessionalDashboardEvent {
 class UpdateStatus extends ProfessionalDashboardEvent {
   final String jobId;
   final String status;
+  final String? reason;
 
-  const UpdateStatus(this.jobId, this.status);
+  const UpdateStatus(this.jobId, this.status, {this.reason});
 
   @override
-  List<Object?> get props => [jobId, status];
+  List<Object?> get props => [jobId, status, reason];
 }
 
 class SubmitPaymentAmountEvent extends ProfessionalDashboardEvent {

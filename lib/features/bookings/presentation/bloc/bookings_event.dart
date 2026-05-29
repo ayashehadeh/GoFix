@@ -75,10 +75,11 @@ class CreateBookingEvent extends BookingsEvent {
 
 class CancelBookingEvent extends BookingsEvent {
   final String bookingId;
-  CancelBookingEvent(this.bookingId);
+  final String? reason;
+  CancelBookingEvent(this.bookingId, {this.reason});
 
   @override
-  List<Object?> get props => [bookingId];
+  List<Object?> get props => [bookingId, reason];
 }
 
 class ConfirmPaymentEvent extends BookingsEvent {

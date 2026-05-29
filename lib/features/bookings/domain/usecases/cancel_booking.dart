@@ -6,6 +6,6 @@ class CancelBooking {
   final BookingsRepository repository;
   const CancelBooking(this.repository);
 
-  Future<Either<Failure, void>> call(String bookingId) =>
-      repository.cancelBooking(bookingId);
+  Future<Either<Failure, void>> call(String bookingId, {String? reason}) =>
+      repository.cancelBooking(bookingId, reason: reason);
 }

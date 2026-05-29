@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/core/utils/snackbar_helper.dart';
+import 'package:gp/core/widgets/cancel_reason_dialog.dart';
 import 'package:gp/core/widgets/fullscreen_image_viewer.dart';
 import 'package:gp/core/widgets/payment_amount_sheet.dart';
 import 'package:gp/l10n/app_localizations.dart';
@@ -87,7 +88,14 @@ class _JobDetailsCard extends StatelessWidget {
           if ((job.status == ProJobStatus.arrived || job.status == ProJobStatus.inProgress) &&
               job.clientPhone != null &&
               job.clientPhone!.isNotEmpty)
-            _Row(icon: Icons.phone_outlined, text: job.clientPhone!),
+            _Row(
+              icon: Icons.phone_outlined,
+              text: job.clientPhone!,
+              onTap: () async {
+                final uri = Uri(scheme: 'tel', path: job.clientPhone);
+                if (await canLaunchUrl(uri)) launchUrl(uri);
+              },
+            ),
           _Row(icon: Icons.calendar_month_outlined, text: job.formattedDate),
           _Row(icon: Icons.access_time_outlined, text: job.formattedTime),
           _Row(
@@ -400,6 +408,12 @@ class _StatusSheetState extends State<_StatusSheet> {
                                       }
                                     },
                                   );
+                                } else if (_selected == ProJobStatus.cancelled) {
+                                  showCancelReasonDialog(ctx, onConfirm: (reason) {
+                                    ctx.read<ProfessionalJobsBloc>().add(
+                                      CancelProJobEvent(jobId: widget.job.id, reason: reason),
+                                    );
+                                  });
                                 } else {
                                   ctx.read<ProfessionalJobsBloc>().add(UpdateProJobStatusEvent(
                                         jobId: widget.job.id,
@@ -432,6 +446,7 @@ class _StatusSheetState extends State<_StatusSheet> {
       },
     );
   }
+
 }
 
 class _StatusOption {

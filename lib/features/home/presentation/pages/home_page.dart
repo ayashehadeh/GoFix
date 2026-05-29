@@ -192,6 +192,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (!isProfessional) _ActiveBookingSection(onBookingTap: _onActiveBookingTap),
               const SizedBox(height: 24),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -202,7 +203,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
                 categories: state.categories,
                 onCategoryTap: _onCategoryTap,
               ),
-              if (!isProfessional) _ActiveBookingSection(onBookingTap: _onActiveBookingTap),
               const SizedBox(height: 24),
             ],
           ),

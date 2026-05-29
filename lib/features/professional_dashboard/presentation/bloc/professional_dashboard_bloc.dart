@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/features/professional_jobs/domain/entities/pro_job.dart';
 import '../../domain/usecases/dashboard_usecases.dart';
@@ -12,6 +13,7 @@ class ProfessionalDashboardBloc extends Bloc<ProfessionalDashboardEvent, Profess
   final AcceptJobRequest acceptJobRequest;
   final DeclineJobRequest declineJobRequest;
   final UpdateJobStatus updateJobStatus;
+  final CancelJobProfessional cancelJobProfessional;
   final SubmitPaymentAmount submitPaymentAmount;
 
   ProfessionalDashboardBloc({
@@ -21,6 +23,7 @@ class ProfessionalDashboardBloc extends Bloc<ProfessionalDashboardEvent, Profess
     required this.acceptJobRequest,
     required this.declineJobRequest,
     required this.updateJobStatus,
+    required this.cancelJobProfessional,
     required this.submitPaymentAmount,
   }) : super(DashboardInitial()) {
     on<LoadDashboard>(_onLoadDashboard);
@@ -131,7 +134,12 @@ class ProfessionalDashboardBloc extends Bloc<ProfessionalDashboardEvent, Profess
   ) async {
     emit(RequestActionLoading());
 
-    final result = await updateJobStatus(event.jobId, event.status);
+    final Either<String, void> result;
+    if (event.status == 'Cancelled') {
+      result = await cancelJobProfessional(event.jobId, reason: event.reason);
+    } else {
+      result = await updateJobStatus(event.jobId, event.status);
+    }
 
     result.fold(
       (error) => emit(RequestActionError(error)),

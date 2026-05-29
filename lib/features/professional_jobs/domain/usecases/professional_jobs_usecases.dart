@@ -29,3 +29,11 @@ class UpdateProJobStatus {
   }) =>
       repository.updateJobStatus(jobId: jobId, newStatus: newStatus);
 }
+
+class CancelProJob {
+  final ProfessionalJobsRepository repository;
+  const CancelProJob(this.repository);
+
+  Future<Either<Failure, void>> call(String jobId, {String? reason}) =>
+      repository.cancelJob(jobId, reason: reason);
+}

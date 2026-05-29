@@ -9,4 +9,5 @@ abstract class ProfessionalDashboardRepository {
   Future<Either<String, void>> acceptJobRequest(String jobId);
   Future<Either<String, void>> declineJobRequest(String jobId);
   Future<Either<String, void>> updateJobStatus(String jobId, String status);
+  Future<Either<String, void>> cancelJob(String jobId, {String? reason});
 }
