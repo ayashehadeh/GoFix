@@ -113,15 +113,35 @@ class _SplashRouter extends StatefulWidget {
   State<_SplashRouter> createState() => _SplashRouterState();
 }
 
-class _SplashRouterState extends State<_SplashRouter> {
+class _SplashRouterState extends State<_SplashRouter>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _rotateCtrl;
+
   @override
   void initState() {
     super.initState();
+    _rotateCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat();
+
     _route();
   }
 
+  @override
+  void dispose() {
+    _rotateCtrl.dispose();
+    super.dispose();
+  }
+
   Future<void> _route() async {
-    final isLoggedIn = await TokenStorage.isLoggedIn();
+    // Always show splash for at least 5 seconds
+    final results = await Future.wait([
+      TokenStorage.isLoggedIn(),
+      Future.delayed(const Duration(seconds: 5)),
+    ]);
+    final isLoggedIn = results[0] as bool;
+
     if (!mounted) return;
 
     if (!isLoggedIn) {
@@ -164,15 +184,12 @@ class _SplashRouterState extends State<_SplashRouter> {
     return Scaffold(
       backgroundColor: const Color(0xFF062B54),
       body: Center(
-        child: Container(
-          width: 200,
-          height: 200,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-          ),
-          child: ClipOval(
-            child: Image.asset('assets/logo.png', fit: BoxFit.cover),
+        child: RotationTransition(
+          turns: _rotateCtrl,
+          child: Image.asset(
+            'assets/logo2.png',
+            width: 180,
+            height: 180,
           ),
         ),
       ),
