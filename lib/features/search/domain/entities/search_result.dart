@@ -7,18 +7,22 @@ import 'package:gp/features/professionals/domain/entities/service_category.dart'
 class AreaResult extends Equatable {
   final int id;
   final String name;
+  final String? nameAr;
   final String city;
+  final String? cityNameAr;
   final int proCount;
 
   const AreaResult({
     required this.id,
     required this.name,
+    this.nameAr,
     required this.city,
+    this.cityNameAr,
     required this.proCount,
   });
 
   @override
-  List<Object?> get props => [id, name, city, proCount];
+  List<Object?> get props => [id, name, nameAr, city, cityNameAr, proCount];
 }
 
 // ─── Service result ───────────────────────────────────────────────────────────

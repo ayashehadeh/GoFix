@@ -4,6 +4,7 @@ class ServiceAreaModel extends ServiceArea {
   const ServiceAreaModel({
     required super.id,
     required super.name,
+    super.nameAr,
     required super.cityId,
     super.cityName,
   });
@@ -31,6 +32,7 @@ class ServiceAreaModel extends ServiceArea {
     return ServiceAreaModel(
       id: (json['id'] as num).toInt(),
       name: json['name'] as String? ?? '',
+      nameAr: json['nameAr'] as String?,
       cityId: cityId,
       cityName: cityName,
     );
@@ -39,6 +41,7 @@ class ServiceAreaModel extends ServiceArea {
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
+        if (nameAr != null) 'nameAr': nameAr,
         'cityId': cityId,
         if (cityName != null) 'cityName': cityName,
       };
