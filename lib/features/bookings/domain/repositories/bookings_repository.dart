@@ -6,6 +6,7 @@ abstract class BookingsRepository {
   Future<Either<Failure, List<Booking>>> getUpcomingBookings();
   Future<Either<Failure, List<Booking>>> getPastBookings();
   Future<Either<Failure, Booking>> getBookingById(String bookingId);
+  Future<Either<Failure, List<String>>> getBookedSlots(String professionalId, DateTime date);
 
   Future<Either<Failure, Booking>> createBooking({
     required String professionalId,

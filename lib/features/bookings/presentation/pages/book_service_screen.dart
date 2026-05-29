@@ -2,10 +2,11 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/features/bookings/domain/repositories/bookings_repository.dart';
 import 'package:gp/features/bookings/presentation/bloc/bookings_bloc.dart';
 import 'package:gp/features/bookings/presentation/pages/book_details_screen.dart';
+import 'package:gp/features/professionals/domain/entities/working_hours.dart' as wh;
 import 'package:gp/features/settings/domain/entities/address_entity.dart';
 import 'package:gp/features/settings/presentation/bloc/address_bloc.dart';
 import 'package:gp/injection_container.dart' as di;
@@ -21,6 +22,7 @@ class BookServiceScreen extends StatefulWidget {
   final String workerName;
   final String workerRole;
   final String professionalId;
+  final wh.WorkingHours workingHours;
 
   const BookServiceScreen({
     super.key,
@@ -32,6 +34,7 @@ class BookServiceScreen extends StatefulWidget {
     required this.workerName,
     required this.workerRole,
     required this.professionalId,
+    required this.workingHours,
   });
 
   @override
@@ -39,30 +42,174 @@ class BookServiceScreen extends StatefulWidget {
 }
 
 class _BookServiceScreenState extends State<BookServiceScreen> {
-  int selectedDateIndex = 1;
-  int selectedHour = 7;
-  int selectedMinute = 0;
+  // Sunday=index 0, Monday=1, …, Saturday=6  (matches date.weekday % 7)
+  static const _dayNames = [
+    'Sunday', 'Monday', 'Tuesday', 'Wednesday',
+    'Thursday', 'Friday', 'Saturday',
+  ];
+
+  int selectedDateIndex = 0;
+  int? _selectedSlotHour;
+  Set<int> _bookedHours = {};
+  bool _loadingSlots = false;
 
   AddressEntity? _selectedAddress;
   bool _showAddressError = false;
+  bool _showSlotError = false;
 
-  static const Color darkBlue = Color(0xFF1A2B4A);
-  static const Color orange = Color(0xFFFF8C00);
-  static const Color errorRed = Color(0xFFD32F2F);
-  static const Color lightGrey = Color(0xFFF5F5F5);
+  static const Color _darkBlue = Color(0xFF1A2B4A);
+  static const Color _orange = Color(0xFFFF8C00);
+  static const Color _errorRed = Color(0xFFD32F2F);
+  static const Color _lightGrey = Color(0xFFF5F5F5);
 
-  late final List<DateTime> dates = List.generate(
-    7,
-    (index) {
-      final now = DateTime.now();
-      return DateTime(now.year, now.month, now.day).add(Duration(days: index));
-    },
-  );
+  // 14 days so there are always enough available working days visible
+  late final List<DateTime> dates = List.generate(14, (i) {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day).add(Duration(days: i));
+  });
 
   @override
   void initState() {
     super.initState();
     context.read<AddressBloc>().add(const GetAddressesEvent());
+    selectedDateIndex = _firstAvailableDateIndex();
+    _loadBookedSlots(dates[selectedDateIndex]);
+  }
+
+  // ── Day availability helpers ────────────────────────────────────────────────
+
+  int _firstAvailableDateIndex() {
+    for (int i = 0; i < dates.length; i++) {
+      if (_isDayWorking(dates[i])) return i;
+    }
+    return 0;
+  }
+
+  bool _isDayWorking(DateTime date) {
+    if (widget.workingHours.schedules.isEmpty) return true;
+    final dayName = _dayNames[date.weekday % 7];
+    return widget.workingHours.schedules.any(
+      (s) => _dayMatchesSchedule(dayName, s.day),
+    );
+  }
+
+  bool _dayMatchesSchedule(String dayName, String scheduleDayField) {
+    final parts = scheduleDayField.split(' - ').map((p) => p.trim()).toList();
+    if (parts.length == 1) return parts[0] == dayName;
+    // Range like "Sunday - Thursday"
+    final startIdx = _dayNames.indexOf(parts[0]);
+    final endIdx = _dayNames.indexOf(parts[1]);
+    final currentIdx = _dayNames.indexOf(dayName);
+    if (startIdx < 0 || endIdx < 0 || currentIdx < 0) return false;
+    if (startIdx <= endIdx) return currentIdx >= startIdx && currentIdx <= endIdx;
+    // Wrap-around range (e.g. "Saturday - Monday")
+    return currentIdx >= startIdx || currentIdx <= endIdx;
+  }
+
+  wh.DaySchedule? _getScheduleForDate(DateTime date) {
+    if (widget.workingHours.schedules.isEmpty) return null;
+    final dayName = _dayNames[date.weekday % 7];
+    try {
+      return widget.workingHours.schedules
+          .firstWhere((s) => _dayMatchesSchedule(dayName, s.day));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // ── Time parsing ────────────────────────────────────────────────────────────
+
+  int _parseTimeToHour(String time) {
+    time = time.trim().toUpperCase();
+    if (time.contains('AM') || time.contains('PM')) {
+      final isPM = time.contains('PM');
+      final digits = time.replaceAll('AM', '').replaceAll('PM', '').trim();
+      var hour = int.tryParse(digits.split(':')[0].trim()) ?? 0;
+      if (isPM && hour != 12) hour += 12;
+      if (!isPM && hour == 12) hour = 0;
+      return hour;
+    }
+    // 24-h format "08:00"
+    return int.tryParse(time.split(':')[0].trim()) ?? 0;
+  }
+
+  int? _parseHourFromTimeString(String time) {
+    final match = RegExp(r'(\d{1,2}):(\d{2})').firstMatch(time);
+    if (match == null) return null;
+    int hour = int.parse(match.group(1)!);
+    final upper = time.toUpperCase();
+    if (upper.contains('PM') && hour != 12) hour += 12;
+    if (upper.contains('AM') && hour == 12) hour = 0;
+    return hour;
+  }
+
+  // ── Slot generation ─────────────────────────────────────────────────────────
+
+  List<int> _getSlotsForDate(DateTime date) {
+    final schedule = _getScheduleForDate(date);
+    final int open, close;
+    if (schedule == null) {
+      open = 8;
+      close = 18;
+    } else {
+      open = _parseTimeToHour(schedule.openTime);
+      close = _parseTimeToHour(schedule.closeTime);
+    }
+    if (open >= close) return [];
+    return List.generate(close - open, (i) => open + i);
+  }
+
+  bool _isSlotInPast(DateTime date, int hour) {
+    final now = DateTime.now();
+    final isToday =
+        date.year == now.year && date.month == now.month && date.day == now.day;
+    return isToday && hour <= now.hour;
+  }
+
+  // English AM/PM kept for backend storage consistency
+  String _slotToBackendString(int hour) {
+    final h12 = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+    final ampm = hour < 12 ? 'AM' : 'PM';
+    return '${h12.toString().padLeft(2, '0')}:00 $ampm';
+  }
+
+  String _slotToDisplayString(int hour, AppLocalizations t) {
+    final h12 = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+    final ampm = hour < 12 ? t.amLabel : t.pmLabel;
+    return '${h12.toString().padLeft(2, '0')}:00 $ampm';
+  }
+
+  // ── Booked slots API ────────────────────────────────────────────────────────
+
+  Future<void> _loadBookedSlots(DateTime date) async {
+    setState(() {
+      _loadingSlots = true;
+      _bookedHours = {};
+    });
+    final repo = di.sl<BookingsRepository>();
+    final result = await repo.getBookedSlots(widget.professionalId, date);
+    result.fold(
+      (_) {}, // on error, show all slots as available
+      (slots) {
+        setState(() {
+          _bookedHours =
+              slots.map(_parseHourFromTimeString).whereType<int>().toSet();
+        });
+      },
+    );
+    if (mounted) setState(() => _loadingSlots = false);
+  }
+
+  // ── Event handlers ──────────────────────────────────────────────────────────
+
+  void _onDateTap(int index) {
+    if (!_isDayWorking(dates[index])) return;
+    setState(() {
+      selectedDateIndex = index;
+      _selectedSlotHour = null;
+      _showSlotError = false;
+    });
+    _loadBookedSlots(dates[index]);
   }
 
   void _showAddressPicker(List<AddressEntity> addresses) {
@@ -95,7 +242,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: darkBlue,
+                  color: _darkBlue,
                 ),
               ),
             ),
@@ -111,172 +258,47 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
               ),
             )
           else
-            ...addresses.map((addr) => ListTile(
-                  leading: Icon(
-                    addr.type == AddressType.apartment ? Icons.apartment : Icons.home_outlined,
-                    color: orange,
-                  ),
-                  title: Text(addr.displayTitle, style: const TextStyle(fontWeight: FontWeight.w600, color: darkBlue)),
-                  subtitle: Text(addr.displaySubtitle, style: const TextStyle(fontSize: 12)),
-                  trailing: _selectedAddress?.id == addr.id ? const Icon(Icons.check_circle, color: orange) : null,
-                  onTap: () {
-                    setState(() {
-                      _selectedAddress = addr;
-                      _showAddressError = false;
-                    });
-                    Navigator.pop(context);
-                  },
-                )),
+            ...addresses.map(
+              (addr) => ListTile(
+                leading: Icon(
+                  addr.type == AddressType.apartment
+                      ? Icons.apartment
+                      : Icons.home_outlined,
+                  color: _orange,
+                ),
+                title: Text(addr.displayTitle,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, color: _darkBlue)),
+                subtitle: Text(addr.displaySubtitle,
+                    style: const TextStyle(fontSize: 12)),
+                trailing: _selectedAddress?.id == addr.id
+                    ? const Icon(Icons.check_circle, color: _orange)
+                    : null,
+                onTap: () {
+                  setState(() {
+                    _selectedAddress = addr;
+                    _showAddressError = false;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+            ),
           const SizedBox(height: 16),
         ],
       ),
     );
   }
 
-  void _showTimePicker() {
-    final t = AppLocalizations.of(context)!;
-    int tempHour = selectedHour;
-    int tempMinute = selectedMinute;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return SizedBox(
-          height: 300,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(
-                        t.cancel,
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                    Text(
-                      t.selectTime,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: darkBlue,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        final now = DateTime.now();
-                        final selectedDate = dates[selectedDateIndex];
-                        final isToday = selectedDate.year == now.year &&
-                            selectedDate.month == now.month &&
-                            selectedDate.day == now.day;
-                        if (isToday &&
-                            (tempHour < now.hour ||
-                                (tempHour == now.hour && tempMinute <= now.minute))) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(AppLocalizations.of(context)!.cannotBookPastTime),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                          return;
-                        }
-                        setState(() {
-                          selectedHour = tempHour;
-                          selectedMinute = tempMinute;
-                        });
-                        Navigator.pop(context);
-                      },
-                      child: Text(
-                        t.done,
-                        style: const TextStyle(color: orange),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: CupertinoPicker(
-                        itemExtent: 48,
-                        scrollController: FixedExtentScrollController(
-                          initialItem: tempHour,
-                        ),
-                        onSelectedItemChanged: (val) => tempHour = val,
-                        children: List.generate(
-                          24,
-                          (i) => Center(
-                            child: Text(
-                              i.toString().padLeft(2, '0'),
-                              style: const TextStyle(
-                                fontSize: 22,
-                                color: darkBlue,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Text(
-                      ':',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: darkBlue,
-                      ),
-                    ),
-                    Expanded(
-                      child: CupertinoPicker(
-                        itemExtent: 48,
-                        scrollController: FixedExtentScrollController(
-                          initialItem: tempMinute,
-                        ),
-                        onSelectedItemChanged: (val) => tempMinute = val,
-                        children: List.generate(
-                          60,
-                          (i) => Center(
-                            child: Text(
-                              i.toString().padLeft(2, '0'),
-                              style: const TextStyle(
-                                fontSize: 22,
-                                color: darkBlue,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   bool _validate() {
     setState(() {
       _showAddressError = _selectedAddress == null;
+      _showSlotError = _selectedSlotHour == null;
     });
-    if (_showAddressError) return false;
+    if (_showAddressError || _showSlotError) return false;
 
     final selectedDate = dates[selectedDateIndex];
     final today = DateTime.now();
-    final todayOnly = DateTime(today.year, today.month, today.day);
-    if (selectedDate.isBefore(todayOnly)) {
+    if (selectedDate.isBefore(DateTime(today.year, today.month, today.day))) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context)!.cannotBookPastDate),
@@ -285,7 +307,6 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
       );
       return false;
     }
-
     return true;
   }
 
@@ -293,77 +314,61 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
   List<String> _monthLabels = [];
 
   void _onContinue() {
-    if (_validate()) {
-      final selectedDate = dates[selectedDateIndex];
-      final dateStr =
-          '${_dayLabels[selectedDate.weekday - 1]}, ${selectedDate.day} ${_monthLabels[selectedDate.month - 1]} ${selectedDate.year}';
-      final hour = selectedHour % 12 == 0 ? 12 : selectedHour % 12;
-      final t2 = AppLocalizations.of(context)!;
-      final amPm = selectedHour < 12 ? t2.amLabel : t2.pmLabel;
-      final timeStr = '${hour.toString().padLeft(2, '0')}:${selectedMinute.toString().padLeft(2, '0')} $amPm';
+    if (!_validate()) return;
+    final selectedDate = dates[selectedDateIndex];
+    final dateStr =
+        '${_dayLabels[selectedDate.weekday - 1]}, ${selectedDate.day} ${_monthLabels[selectedDate.month - 1]} ${selectedDate.year}';
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => BlocProvider(
-            create: (_) => di.sl<BookingsBloc>(),
-            child: BookDetailsScreen(
-              serviceName: widget.serviceName,
-              serviceNameAr: widget.serviceNameAr,
-              servicePrice: widget.servicePrice,
-              description: widget.description,
-              images: widget.images,
-              date: dateStr,
-              time: timeStr,
-              address: '${_selectedAddress!.displayTitle}, ${_selectedAddress!.displaySubtitle}',
-              latitude: _selectedAddress!.latitude,
-              longitude: _selectedAddress!.longitude,
-              workerName: widget.workerName,
-              professionalId: widget.professionalId, // ADD
-              scheduledDate: selectedDate,
-            ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (_) => di.sl<BookingsBloc>(),
+          child: BookDetailsScreen(
+            serviceName: widget.serviceName,
+            serviceNameAr: widget.serviceNameAr,
+            servicePrice: widget.servicePrice,
+            description: widget.description,
+            images: widget.images,
+            date: dateStr,
+            time: _slotToBackendString(_selectedSlotHour!),
+            address:
+                '${_selectedAddress!.displayTitle}, ${_selectedAddress!.displaySubtitle}',
+            latitude: _selectedAddress!.latitude,
+            longitude: _selectedAddress!.longitude,
+            workerName: widget.workerName,
+            professionalId: widget.professionalId,
+            scheduledDate: selectedDate,
           ),
         ),
-      );
-    }
+      ),
+    );
   }
+
+  // ── Build ───────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
     _dayLabels = [
-      t.dayMonShort,
-      t.dayTueShort,
-      t.dayWedShort,
-      t.dayThuShort,
-      t.dayFriShort,
-      t.daySatShort,
-      t.daySunShort,
+      t.dayMonShort, t.dayTueShort, t.dayWedShort, t.dayThuShort,
+      t.dayFriShort, t.daySatShort, t.daySunShort,
     ];
     _monthLabels = [
-      t.monthJan,
-      t.monthFeb,
-      t.monthMar,
-      t.monthApr,
-      t.monthMay,
-      t.monthJun,
-      t.monthJul,
-      t.monthAugShort,
-      t.monthSep,
-      t.monthOct,
-      t.monthNov,
-      t.monthDec,
+      t.monthJan, t.monthFeb, t.monthMar, t.monthApr, t.monthMay, t.monthJun,
+      t.monthJul, t.monthAugShort, t.monthSep, t.monthOct, t.monthNov, t.monthDec,
     ];
+
     return Scaffold(
-      backgroundColor: lightGrey,
+      backgroundColor: _lightGrey,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: const BackButton(color: darkBlue),
+        leading: const BackButton(color: _darkBlue),
         title: Text(
           t.bookAService,
           style: const TextStyle(
-            color: darkBlue,
+            color: _darkBlue,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -371,41 +376,17 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
       ),
       body: Column(
         children: [
-          // Step 2 active
+          // Step 2 progress bar
           Container(
             color: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                Expanded(
-                  child: Container(
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: darkBlue,
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ),
-                ),
+                Expanded(child: _progressBar(_darkBlue)),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: Container(
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: orange,
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ),
-                ),
+                Expanded(child: _progressBar(_orange)),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: Container(
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: darkBlue,
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ),
-                ),
+                Expanded(child: _progressBar(_darkBlue)),
               ],
             ),
           ),
@@ -415,7 +396,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  // Date & Time Card
+                  // ── Date & Time Card ───────────────────────────────
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
@@ -424,7 +405,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -433,189 +414,90 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Card header
                         Row(
                           children: [
-                            const Icon(Icons.settings, color: orange, size: 22),
+                            const Icon(Icons.settings, color: _orange, size: 22),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    t.chooseDateTime,
-                                    style: const TextStyle(
-                                      color: darkBlue,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    t.selectPreferredSlot,
-                                    style: const TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 12,
-                                    ),
-                                  ),
+                                  Text(t.chooseDateTime,
+                                      style: const TextStyle(
+                                          color: _darkBlue,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold)),
+                                  Text(t.selectPreferredSlot,
+                                      style: const TextStyle(
+                                          color: Colors.grey, fontSize: 12)),
                                 ],
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 20),
+
+                        // Date label
                         Row(
                           children: [
-                            const Icon(Icons.calendar_month, color: orange, size: 22),
+                            const Icon(Icons.calendar_month, color: _orange, size: 22),
                             const SizedBox(width: 8),
-                            Text(
-                              t.selectDate,
-                              style: const TextStyle(
-                                color: darkBlue,
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            Text(t.selectDate,
+                                style: const TextStyle(
+                                    color: _darkBlue,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold)),
                           ],
                         ),
                         const SizedBox(height: 12),
-                        LayoutBuilder(
-                          builder: (context, constraints) {
-                            const gap = 8.0;
-                            const visibleCards = 4.5;
-                            final cardWidth = (constraints.maxWidth - gap * (visibleCards - 1)) / visibleCards;
-                            final cardHeight = cardWidth * 1.45;
-                            final fontSizeSmall = (cardWidth * 0.18).clamp(11.0, 14.0);
-                            final fontSizeLarge = (cardWidth * 0.28).clamp(16.0, 22.0);
-                            final innerGap = (cardHeight * 0.04).clamp(2.0, 6.0);
-                            return SizedBox(
-                              height: cardHeight,
-                              child: ListView.separated(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: dates.length,
-                                separatorBuilder: (_, __) => SizedBox(width: gap),
-                                itemBuilder: (context, index) {
-                                  final isSelected = index == selectedDateIndex;
-                                  return GestureDetector(
-                                    onTap: () => setState(() => selectedDateIndex = index),
-                                    child: AnimatedContainer(
-                                      duration: const Duration(milliseconds: 200),
-                                      width: cardWidth,
-                                      height: cardHeight,
-                                      decoration: BoxDecoration(
-                                        color: isSelected ? darkBlue : const Color(0xFFF4F4F4),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            _dayLabels[dates[index].weekday - 1],
-                                            style: TextStyle(
-                                              color: isSelected ? Colors.white70 : Colors.grey,
-                                              fontSize: fontSizeSmall,
-                                            ),
-                                          ),
-                                          SizedBox(height: innerGap),
-                                          Text(
-                                            dates[index].day.toString(),
-                                            style: TextStyle(
-                                              color: isSelected ? Colors.white : darkBlue,
-                                              fontSize: fontSizeLarge,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          SizedBox(height: innerGap),
-                                          Text(
-                                            _monthLabels[dates[index].month - 1],
-                                            style: TextStyle(
-                                              color: isSelected ? Colors.white70 : Colors.grey,
-                                              fontSize: fontSizeSmall,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            );
-                          },
-                        ),
+
+                        // Date picker row
+                        _buildDatePicker(),
+
                         const SizedBox(height: 20),
+
+                        // Time label + loading indicator
                         Row(
                           children: [
-                            const Icon(Icons.access_time, color: orange, size: 22),
+                            const Icon(Icons.access_time, color: _orange, size: 22),
                             const SizedBox(width: 8),
-                            Text(
-                              t.selectTime,
-                              style: const TextStyle(
-                                color: darkBlue,
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        GestureDetector(
-                          onTap: _showTimePicker,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 110,
-                                height: 70,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFF4F4F4),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  selectedHour.toString().padLeft(2, '0'),
-                                  style: const TextStyle(
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold,
-                                    color: darkBlue,
-                                  ),
-                                ),
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 12),
-                                child: Text(
-                                  ':',
-                                  style: TextStyle(
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold,
-                                    color: darkBlue,
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                width: 110,
-                                height: 70,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFF4F4F4),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                alignment: Alignment.center,
-                                child: Text(
-                                  selectedMinute.toString().padLeft(2, '0'),
-                                  style: const TextStyle(
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.bold,
-                                    color: darkBlue,
-                                  ),
-                                ),
+                            Text(t.selectTime,
+                                style: const TextStyle(
+                                    color: _darkBlue,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold)),
+                            if (_loadingSlots) ...[
+                              const SizedBox(width: 10),
+                              const SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2, color: _orange),
                               ),
                             ],
-                          ),
+                          ],
                         ),
+                        const SizedBox(height: 12),
+
+                        // Slot grid
+                        _buildSlotGrid(t),
+
+                        if (_showSlotError)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 6),
+                            child: Text(
+                              t.pleaseSelectATimeSlot,
+                              style: const TextStyle(color: _errorRed, fontSize: 12),
+                            ),
+                          ),
                       ],
                     ),
                   ),
 
                   const SizedBox(height: 16),
 
-                  // Address Card
+                  // ── Address Card ───────────────────────────────────
                   BlocBuilder<AddressBloc, AddressState>(
                     builder: (context, addrState) {
                       final addresses = addrState is AddressLoaded
@@ -634,7 +516,9 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(12),
-                                border: _showAddressError ? Border.all(color: errorRed, width: 1.5) : null,
+                                border: _showAddressError
+                                    ? Border.all(color: _errorRed, width: 1.5)
+                                    : null,
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withValues(alpha: 0.05),
@@ -648,16 +532,14 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                                 children: [
                                   Row(
                                     children: [
-                                      const Icon(Icons.map_outlined, color: orange, size: 22),
+                                      const Icon(Icons.map_outlined,
+                                          color: _orange, size: 22),
                                       const SizedBox(width: 10),
-                                      Text(
-                                        t.chooseAddress,
-                                        style: const TextStyle(
-                                          color: darkBlue,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                      Text(t.chooseAddress,
+                                          style: const TextStyle(
+                                              color: _darkBlue,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold)),
                                     ],
                                   ),
                                   const SizedBox(height: 12),
@@ -665,56 +547,65 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                                     width: double.infinity,
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: _showAddressError ? const Color(0xFFFFF3F3) : const Color(0xFFF8F8F8),
+                                      color: _showAddressError
+                                          ? const Color(0xFFFFF3F3)
+                                          : const Color(0xFFF8F8F8),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: _selectedAddress == null
                                         ? Row(
                                             children: [
-                                              Icon(Icons.location_on_outlined, color: Colors.grey.shade400, size: 18),
+                                              Icon(Icons.location_on_outlined,
+                                                  color: Colors.grey.shade400,
+                                                  size: 18),
                                               const SizedBox(width: 8),
                                               Text(
-                                                addrState is AddressLoading ? t.loadingAddresses : t.tapToSelectAddress,
+                                                addrState is AddressLoading
+                                                    ? t.loadingAddresses
+                                                    : t.tapToSelectAddress,
                                                 style: TextStyle(
-                                                  color: Colors.grey.shade400,
-                                                  fontSize: 13,
-                                                ),
+                                                    color: Colors.grey.shade400,
+                                                    fontSize: 13),
                                               ),
                                             ],
                                           )
                                         : Row(
                                             children: [
                                               Icon(
-                                                _selectedAddress!.type == AddressType.apartment
+                                                _selectedAddress!.type ==
+                                                        AddressType.apartment
                                                     ? Icons.apartment
                                                     : Icons.home_outlined,
-                                                color: orange,
+                                                color: _orange,
                                                 size: 18,
                                               ),
                                               const SizedBox(width: 8),
                                               Expanded(
                                                 child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      _selectedAddress!.displayTitle,
+                                                      _selectedAddress!
+                                                          .displayTitle,
                                                       style: const TextStyle(
-                                                        fontWeight: FontWeight.w600,
-                                                        color: darkBlue,
-                                                        fontSize: 13,
-                                                      ),
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          color: _darkBlue,
+                                                          fontSize: 13),
                                                     ),
                                                     Text(
-                                                      _selectedAddress!.displaySubtitle,
+                                                      _selectedAddress!
+                                                          .displaySubtitle,
                                                       style: const TextStyle(
-                                                        color: Colors.grey,
-                                                        fontSize: 12,
-                                                      ),
+                                                          color: Colors.grey,
+                                                          fontSize: 12),
                                                     ),
                                                   ],
                                                 ),
                                               ),
-                                              const Icon(Icons.edit_outlined, color: orange, size: 16),
+                                              const Icon(Icons.edit_outlined,
+                                                  color: _orange, size: 16),
                                             ],
                                           ),
                                   ),
@@ -727,7 +618,8 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
                               padding: const EdgeInsets.only(top: 6, left: 4),
                               child: Text(
                                 t.pleaseSelectYourAddress,
-                                style: const TextStyle(color: errorRed, fontSize: 12),
+                                style: const TextStyle(
+                                    color: _errorRed, fontSize: 12),
                               ),
                             ),
                         ],
@@ -741,7 +633,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
             ),
           ),
 
-          // Continue Button
+          // Continue button
           Container(
             color: Colors.white,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -751,26 +643,194 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
               child: ElevatedButton(
                 onPressed: _onContinue,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: orange,
+                  backgroundColor: _orange,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                      borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
                 ),
                 child: Text(
                   t.continue1,
                   style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
-                  ),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5),
                 ),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  // ── Sub-widgets ─────────────────────────────────────────────────────────────
+
+  Widget _progressBar(Color color) => Container(
+        height: 6,
+        decoration: BoxDecoration(
+            color: color, borderRadius: BorderRadius.circular(3)),
+      );
+
+  Widget _buildDatePicker() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const gap = 8.0;
+        const visibleCards = 4.5;
+        final cardWidth =
+            (constraints.maxWidth - gap * (visibleCards - 1)) / visibleCards;
+        final cardHeight = cardWidth * 1.45;
+        final fontSizeSmall = (cardWidth * 0.18).clamp(11.0, 14.0);
+        final fontSizeLarge = (cardWidth * 0.28).clamp(16.0, 22.0);
+        final innerGap = (cardHeight * 0.04).clamp(2.0, 6.0);
+
+        return SizedBox(
+          height: cardHeight,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: dates.length,
+            separatorBuilder: (_, __) => SizedBox(width: gap),
+            itemBuilder: (context, index) {
+              final isSelected = index == selectedDateIndex;
+              final isWorking = _isDayWorking(dates[index]);
+
+              Color bgColor;
+              Color dayColor, numColor, monColor;
+              if (isSelected) {
+                bgColor = _darkBlue;
+                dayColor = numColor = monColor = Colors.white70;
+                numColor = Colors.white;
+              } else if (isWorking) {
+                bgColor = const Color(0xFFF4F4F4);
+                dayColor = monColor = Colors.grey;
+                numColor = _darkBlue;
+              } else {
+                bgColor = const Color(0xFFEAEAEA);
+                dayColor = numColor = monColor =
+                    Colors.grey.withValues(alpha: 0.45);
+              }
+
+              return GestureDetector(
+                onTap: () => _onDateTap(index),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: cardWidth,
+                  height: cardHeight,
+                  decoration: BoxDecoration(
+                    color: bgColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        _dayLabels[dates[index].weekday - 1],
+                        style:
+                            TextStyle(color: dayColor, fontSize: fontSizeSmall),
+                      ),
+                      SizedBox(height: innerGap),
+                      Text(
+                        dates[index].day.toString(),
+                        style: TextStyle(
+                          color: numColor,
+                          fontSize: fontSizeLarge,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: innerGap),
+                      Text(
+                        _monthLabels[dates[index].month - 1],
+                        style:
+                            TextStyle(color: monColor, fontSize: fontSizeSmall),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSlotGrid(AppLocalizations t) {
+    if (!_isDayWorking(dates[selectedDateIndex])) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Text(
+          t.professionalNotAvailableOnThisDay,
+          style: const TextStyle(color: Colors.grey, fontSize: 13),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    final slots = _getSlotsForDate(dates[selectedDateIndex]);
+    if (slots.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Text(
+          t.noSlotsAvailable,
+          style: const TextStyle(color: Colors.grey, fontSize: 13),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: slots.map((hour) {
+        final isBooked = _bookedHours.contains(hour);
+        final isPast = _isSlotInPast(dates[selectedDateIndex], hour);
+        final isUnavailable = isBooked || isPast;
+        final isSelected = _selectedSlotHour == hour;
+
+        return GestureDetector(
+          onTap: isUnavailable
+              ? null
+              : () => setState(() {
+                    _selectedSlotHour = hour;
+                    _showSlotError = false;
+                  }),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? _darkBlue
+                  : isUnavailable
+                      ? const Color(0xFFEEEEEE)
+                      : const Color(0xFFF4F4F4),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: isSelected
+                    ? _darkBlue
+                    : const Color(0xFFDDDDDD),
+                width: 1,
+              ),
+            ),
+            child: Text(
+              _slotToDisplayString(hour, t),
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight:
+                    isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected
+                    ? Colors.white
+                    : isUnavailable
+                        ? Colors.grey.withValues(alpha: 0.45)
+                        : _darkBlue,
+                decoration: isUnavailable
+                    ? TextDecoration.lineThrough
+                    : TextDecoration.none,
+                decorationColor: Colors.grey.withValues(alpha: 0.45),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }

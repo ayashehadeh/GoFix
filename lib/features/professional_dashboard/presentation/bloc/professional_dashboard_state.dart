@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:gp/core/error/app_error_state.dart';
+import '../../domain/entities/job_entity.dart';
 import 'package:gp/features/professional_jobs/domain/entities/pro_job.dart';
 import '../../domain/entities/dashboard_stats_entity.dart';
 
@@ -28,7 +30,7 @@ class DashboardLoaded extends ProfessionalDashboardState {
   List<Object?> get props => [stats, incomingRequests, scheduledJobs];
 }
 
-class DashboardError extends ProfessionalDashboardState {
+class DashboardError extends ProfessionalDashboardState with AppErrorState {
   final String message;
 
   const DashboardError(this.message);
@@ -48,7 +50,7 @@ class RequestActionSuccess extends ProfessionalDashboardState {
   List<Object?> get props => [message];
 }
 
-class RequestActionError extends ProfessionalDashboardState {
+class RequestActionError extends ProfessionalDashboardState with AppErrorState {
   final String message;
 
   const RequestActionError(this.message);

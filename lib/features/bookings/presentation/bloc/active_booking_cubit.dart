@@ -36,10 +36,13 @@ class ActiveBookingCubit extends Cubit<ActiveBookingState> {
     result.fold(
       (failure) => emit(ActiveBookingError(failure.message)),
       (bookings) {
-        if (bookings.isEmpty) {
+        // Guard: exclude anything the backend may have returned that is
+        // already fully done (completed + payment confirmed).
+        final active = bookings.where((b) => b.isUpcoming).toList();
+        if (active.isEmpty) {
           emit(ActiveBookingEmpty());
         } else {
-          emit(ActiveBookingLoaded(_pickMostActive(bookings)));
+          emit(ActiveBookingLoaded(_pickMostActive(active)));
         }
       },
     );

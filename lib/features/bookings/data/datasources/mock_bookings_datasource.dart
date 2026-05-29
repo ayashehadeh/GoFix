@@ -149,6 +149,12 @@ class MockBookingsDataSource implements BookingsRemoteDataSource {
     return _findById(bookingId);
   }
 
+  @override
+  Future<List<String>> getBookedSlotsForProfessional(String professionalId, DateTime date) async {
+    await Future.delayed(const Duration(milliseconds: 200));
+    return [];
+  }
+
   /// Creates a new booking and prepends it to the upcoming list.
   @override
   Future<BookingModel> createBooking({

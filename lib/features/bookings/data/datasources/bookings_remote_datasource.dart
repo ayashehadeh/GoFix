@@ -5,6 +5,7 @@ abstract class BookingsRemoteDataSource {
   Future<List<BookingModel>> getUpcomingBookings();
   Future<List<BookingModel>> getPastBookings();
   Future<BookingModel> getBookingById(String bookingId);
+  Future<List<String>> getBookedSlotsForProfessional(String professionalId, DateTime date);
   Future<BookingModel> createBooking({
     required String professionalId,
     required String serviceName,
@@ -59,6 +60,17 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
   Future<BookingModel> getBookingById(String bookingId) async {
     final response = await dio.get('/bookings/$bookingId');
     return BookingModel.fromJson(response.data['data']);
+  }
+
+  @override
+  Future<List<String>> getBookedSlotsForProfessional(String professionalId, DateTime date) async {
+    final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    final response = await dio.get(
+      '/professionals/$professionalId/booked-slots',
+      queryParameters: {'date': dateStr},
+    );
+    final list = response.data['data'] as List;
+    return list.map((e) => e.toString()).toList();
   }
 
   @override

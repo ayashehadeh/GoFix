@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:gp/core/error/app_error_state.dart';
 import '../../domain/entities/pro_job.dart';
 
 abstract class ProfessionalJobsState extends Equatable {
@@ -45,7 +46,7 @@ class JobStatusUpdateSuccess extends ProfessionalJobsState {
   List<Object?> get props => [updatedJob, movedToPast];
 }
 
-class ProfessionalJobsError extends ProfessionalJobsState {
+class ProfessionalJobsError extends ProfessionalJobsState with AppErrorState {
   final String message;
   ProfessionalJobsError(this.message);
   @override

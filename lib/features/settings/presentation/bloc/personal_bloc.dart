@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:gp/core/error/app_error_state.dart';
 import 'package:gp/features/settings/domain/entities/profile_entity.dart';
 import 'package:gp/features/settings/domain/repositories/profile_repository.dart';
 
@@ -68,7 +69,7 @@ class ProfileLoaded extends ProfileState {
   List<Object?> get props => [profile, isUpdate];
 }
 
-class ProfileError extends ProfileState {
+class ProfileError extends ProfileState with AppErrorState {
   final String message;
   ProfileError(this.message);
   @override

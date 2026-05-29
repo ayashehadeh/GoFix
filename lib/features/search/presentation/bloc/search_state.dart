@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:gp/core/error/app_error_state.dart';
 import 'package:gp/features/professionals/domain/entities/professional.dart';
 import 'package:gp/features/professionals/domain/entities/service_category.dart';
 import 'package:gp/features/search/domain/entities/search_result.dart';
@@ -101,7 +102,7 @@ class AreaProfessionalsLoaded extends SearchState {
       [areaName, city, proCount, professionals, activeCategory];
 }
 
-class SearchError extends SearchState {
+class SearchError extends SearchState with AppErrorState {
   final String message;
   final List<String> recentSearches;
   SearchError(this.message, {this.recentSearches = const []});

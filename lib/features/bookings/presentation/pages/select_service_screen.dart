@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/features/professionals/domain/entities/service_offered.dart';
+import 'package:gp/features/professionals/domain/entities/working_hours.dart';
 import 'package:gp/features/settings/presentation/bloc/address_bloc.dart';
 import 'package:gp/injection_container.dart' as di;
 import 'package:gp/l10n/app_localizations.dart';
@@ -23,6 +24,7 @@ class SelectServiceScreen extends StatefulWidget {
   final String professionalRole;
   final String professionalId;
   final List<ServiceOffered> services;
+  final WorkingHours workingHours;
 
   const SelectServiceScreen({
     super.key,
@@ -30,6 +32,7 @@ class SelectServiceScreen extends StatefulWidget {
     required this.professionalRole,
     required this.professionalId,
     required this.services,
+    required this.workingHours,
   });
 
   @override
@@ -97,6 +100,7 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
               workerName: widget.professionalName,
               workerRole: widget.professionalRole,
               professionalId: widget.professionalId,
+              workingHours: widget.workingHours,
             ),
           ),
         ),

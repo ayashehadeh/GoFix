@@ -9,8 +9,8 @@ import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 import '../widgets/app_error_dialog.dart';
 import '../widgets/blur_validated_field.dart';
-import 'created.dart';
 import 'signin_page.dart';
+import 'verify_email_page.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -90,7 +90,12 @@ class _SignupState extends State<Signup> {
       listener: (context, state) {
         if (state is AuthRegistered) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const Created()),
+            MaterialPageRoute(
+              builder: (_) => BlocProvider.value(
+                value: context.read<AuthBloc>(),
+                child: VerifyEmailPage(email: state.user.email),
+              ),
+            ),
           );
         }
         if (state is AuthError) {

@@ -1101,6 +1101,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ok => 'OK';
 
+  @override
+  String get errorTitle => 'Something went wrong';
+
+  @override
+  String get errorMessage => 'Please try again later.';
+
   // ── Feedback / Review / Report ───────────────────────────────────────────────
 
   @override
@@ -1391,6 +1397,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadingAddresses => 'Loading addresses...';
 
   @override
+  String get pleaseSelectATimeSlot => 'Please select a time slot.';
+
+  @override
+  String get professionalNotAvailableOnThisDay => 'This professional is not available on this day.';
+
+  @override
+  String get noSlotsAvailable => 'No available time slots for this day.';
+
+  @override
   String get tapToSelectAddress => 'Tap to select your address';
 
   @override
@@ -1593,4 +1608,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noServiceAreasAdded => 'No service areas added.';
+
+  // ── Email verification (personal info) ───────────────────────────────────────
+
+  @override
+  String get emailVerificationTitle => 'Email Verification';
+
+  @override
+  String get emailNotVerified => 'Your email address is not verified';
+
+  @override
+  String get sendVerificationCode => 'Send Verification Code';
+
+  @override
+  String get codeSentToEmail => 'A 6-digit code has been sent to your email';
+
+  @override
+  String get enterVerificationCode => 'Enter 6-digit code';
+
+  @override
+  String get verifyCode => 'Verify';
+
+  @override
+  String get emailVerifiedTitle => 'Email Verified!';
+
+  @override
+  String get emailVerifiedMessage => 'Your email address has been successfully verified.';
+
+  @override
+  String get invalidVerificationCode => 'Invalid code. Please try again.';
 }

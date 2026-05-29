@@ -1101,6 +1101,12 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get ok => 'حسناً';
 
+  @override
+  String get errorTitle => 'حدث خطأ ما';
+
+  @override
+  String get errorMessage => 'يرجى المحاولة مرة أخرى لاحقاً.';
+
   // ── Feedback / Review / Report ───────────────────────────────────────────────
 
   @override
@@ -1390,6 +1396,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loadingAddresses => 'جاري تحميل العناوين...';
 
   @override
+  String get pleaseSelectATimeSlot => 'يرجى اختيار وقت للحجز.';
+
+  @override
+  String get professionalNotAvailableOnThisDay => 'المحترف غير متاح في هذا اليوم.';
+
+  @override
+  String get noSlotsAvailable => 'لا توجد أوقات متاحة لهذا اليوم.';
+
+  @override
   String get tapToSelectAddress => 'اضغط لاختيار عنوانك';
 
   @override
@@ -1592,4 +1607,33 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noServiceAreasAdded => 'لم تتم إضافة مناطق خدمة.';
+
+  // ── Email verification (personal info) ───────────────────────────────────────
+
+  @override
+  String get emailVerificationTitle => 'التحقق من البريد الإلكتروني';
+
+  @override
+  String get emailNotVerified => 'بريدك الإلكتروني غير موثق';
+
+  @override
+  String get sendVerificationCode => 'إرسال رمز التحقق';
+
+  @override
+  String get codeSentToEmail => 'تم إرسال رمز مكون من 6 أرقام إلى بريدك الإلكتروني';
+
+  @override
+  String get enterVerificationCode => 'أدخل الرمز المكون من 6 أرقام';
+
+  @override
+  String get verifyCode => 'تحقق';
+
+  @override
+  String get emailVerifiedTitle => 'تم التحقق من البريد الإلكتروني!';
+
+  @override
+  String get emailVerifiedMessage => 'تم التحقق من بريدك الإلكتروني بنجاح.';
+
+  @override
+  String get invalidVerificationCode => 'الرمز غير صحيح. يرجى المحاولة مرة أخرى.';
 }

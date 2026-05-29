@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/error/app_error_state.dart';
 import 'package:gp/features/settings/domain/entities/set_password_entity.dart';
 import 'package:gp/features/settings/domain/usecases/set_new_password_usecase.dart';
 
@@ -57,7 +58,7 @@ class SetPasswordSuccess extends SetPasswordState {
   const SetPasswordSuccess();
 }
 
-class SetPasswordError extends SetPasswordState {
+class SetPasswordError extends SetPasswordState with AppErrorState {
   final String message;
   const SetPasswordError(this.message);
   @override

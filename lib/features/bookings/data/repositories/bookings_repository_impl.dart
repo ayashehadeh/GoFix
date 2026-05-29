@@ -47,6 +47,18 @@ class BookingsRepositoryImpl implements BookingsRepository {
   }
 
   @override
+  Future<Either<Failure, List<String>>> getBookedSlots(String professionalId, DateTime date) async {
+    try {
+      final result = await remoteDataSource.getBookedSlotsForProfessional(professionalId, date);
+      return Right(result);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, Booking>> createBooking({
     required String professionalId,
     required String serviceName,

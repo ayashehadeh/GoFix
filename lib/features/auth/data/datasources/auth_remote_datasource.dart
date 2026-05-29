@@ -23,6 +23,10 @@ abstract class AuthRemoteDataSource {
     required String newPassword,
     required String confirmPassword,
   });
+
+  Future<void> sendVerificationEmail();
+
+  Future<void> verifyEmail({required String code});
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -88,5 +92,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'confirmPassword': confirmPassword,
       },
     );
+  }
+
+  @override
+  Future<void> sendVerificationEmail() async {
+    await dio.post('/auth/send-verification-email');
+  }
+
+  @override
+  Future<void> verifyEmail({required String code}) async {
+    await dio.post('/auth/verify-email', data: {'code': code});
   }
 }

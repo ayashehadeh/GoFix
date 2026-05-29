@@ -321,7 +321,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
         ),
         const SizedBox(height: 14),
         SizedBox(
-          height: 185,
+          height: MediaQuery.of(context).size.height * 0.245,
           child: state.scheduledJobs.isEmpty
               ? _buildEmptyState(Icons.event_note_outlined, AppLocalizations.of(context)!.noScheduledJobsYet)
               : ListView.builder(
@@ -350,6 +350,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
 
   Widget _buildScheduledJobCard(ProJob job) {
     final chip = _statusChipData(job.status);
+    final screenWidth = MediaQuery.of(context).size.width;
     return GestureDetector(
         onTap: () {
           final bloc = context.read<ProfessionalDashboardBloc>();
@@ -379,11 +380,28 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
               BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 12, offset: const Offset(0, 4))
             ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+        ).then((_) {
+          if (context.mounted) {
+            context.read<ProfessionalDashboardBloc>().add(RefreshDashboard());
+          }
+        });
+      },
+      child: Container(
+      width: screenWidth * 0.72,
+      margin: const EdgeInsets.only(right: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: const Border(left: BorderSide(color: Color(0xFF1A3A5C), width: 3)),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 12, offset: const Offset(0, 4))],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
               children: [
                 Row(
                   children: [
@@ -436,20 +454,27 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
                         style: TextStyle(color: Colors.grey[600], fontSize: 13)),
                   ],
                 ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => _showStatusUpdateDialog(job.id, job.status),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE87722),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      elevation: 0,
-                    ),
-                    child: Text(AppLocalizations.of(context)!.updateStatus,
-                        style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
-                  ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Icon(Icons.access_time, size: 15, color: Colors.grey[500]),
+                const SizedBox(width: 4),
+                Text(DateFormat('MMM d, h:mm a').format(job.scheduledTime),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => _showStatusUpdateDialog(job.id, job.status),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFE87722),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  elevation: 0,
                 ),
               ],
             ),
@@ -508,7 +533,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
         ),
         const SizedBox(height: 14),
         SizedBox(
-          height: 205,
+          height: MediaQuery.of(context).size.height * 0.26,
           child: state.incomingRequests.isEmpty
               ? _buildEmptyState(Icons.inbox_outlined, AppLocalizations.of(context)!.noIncomingRequests)
               : ListView.builder(
@@ -522,7 +547,8 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
     );
   }
 
-  Widget _buildRequestCard(ProJob request) {
+  Widget _buildRequestCard(JobEntity request) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: () {
         final bloc = context.read<ProfessionalDashboardBloc>();
@@ -539,7 +565,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
         });
       },
       child: Container(
-        width: 280,
+        width: screenWidth * 0.72,
         margin: const EdgeInsets.only(right: 16),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -858,24 +884,21 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
                       ),
                     ),
                     const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(sheetCtx).pop();
-                          bloc.add(DeclineRequest(jobId));
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE87722),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          AppLocalizations.of(sheetCtx)!.done,
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                        ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(sheetCtx).pop();
+                        bloc.add(DeclineRequest(jobId));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE87722),
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 52),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        AppLocalizations.of(sheetCtx)!.done,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
@@ -1003,31 +1026,28 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
                       );
                     }),
                     const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: selected == null
-                            ? null
-                            : () {
-                                Navigator.pop(sheetCtx);
-                                if (selected == 'Completed') {
-                                  _showPaymentAmountSheet(jobId);
-                                } else {
-                                  context.read<ProfessionalDashboardBloc>().add(UpdateStatus(jobId, selected!));
-                                }
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE87722),
-                          foregroundColor: Colors.white,
-                          disabledBackgroundColor: Colors.grey.shade300,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          AppLocalizations.of(sheetCtx)!.confirmUpdate,
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                        ),
+                    ElevatedButton(
+                      onPressed: selected == null
+                          ? null
+                          : () {
+                              Navigator.pop(sheetCtx);
+                              if (selected == 'Completed') {
+                                _showPaymentAmountSheet(jobId);
+                              } else {
+                                context.read<ProfessionalDashboardBloc>().add(UpdateStatus(jobId, selected!));
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE87722),
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: Colors.grey.shade300,
+                        minimumSize: const Size(double.infinity, 52),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        AppLocalizations.of(sheetCtx)!.confirmUpdate,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],

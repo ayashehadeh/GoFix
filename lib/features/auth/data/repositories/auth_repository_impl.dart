@@ -97,6 +97,30 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, void>> sendVerificationEmail() async {
+    try {
+      await remoteDataSource.sendVerificationEmail();
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(_dioFailure(e, 'Failed to send verification email.'));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> verifyEmail({required String code}) async {
+    try {
+      await remoteDataSource.verifyEmail(code: code);
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(_dioFailure(e, 'Email verification failed.'));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
   // ── Helper ──────────────────────────────────────────────────────────────────
 
   ServerFailure _dioFailure(DioException e, String fallback) {

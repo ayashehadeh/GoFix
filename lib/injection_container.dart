@@ -176,11 +176,15 @@ Future<void> init() async {
         register: sl(),
         forgotPassword: sl(),
         resetPassword: sl(),
+        sendVerificationEmail: sl(),
+        verifyEmail: sl(),
       ));
   sl.registerLazySingleton(() => LoginUseCase(sl()));
   sl.registerLazySingleton(() => RegisterUseCase(sl()));
   sl.registerLazySingleton(() => ForgotPasswordUseCase(sl()));
   sl.registerLazySingleton(() => ResetPasswordUseCase(sl()));
+  sl.registerLazySingleton(() => SendVerificationEmailUseCase(sl()));
+  sl.registerLazySingleton(() => VerifyEmailUseCase(sl()));
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(remoteDataSource: sl()),
   );

@@ -8,17 +8,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final RegisterUseCase register;
   final ForgotPasswordUseCase forgotPassword;
   final ResetPasswordUseCase resetPassword;
+  final SendVerificationEmailUseCase sendVerificationEmail;
+  final VerifyEmailUseCase verifyEmail;
 
   AuthBloc({
     required this.login,
     required this.register,
     required this.forgotPassword,
     required this.resetPassword,
+    required this.sendVerificationEmail,
+    required this.verifyEmail,
   }) : super(AuthInitial()) {
     on<LoginSubmitted>(_onLogin);
     on<RegisterSubmitted>(_onRegister);
     on<ForgotPasswordSubmitted>(_onForgotPassword);
     on<ResetPasswordSubmitted>(_onResetPassword);
+    on<SendVerificationEmailSubmitted>(_onSendVerificationEmail);
+    on<VerifyEmailSubmitted>(_onVerifyEmail);
     on<AuthReset>((_, emit) => emit(AuthInitial()));
   }
 
@@ -71,6 +77,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.fold(
       (failure) => emit(AuthError(failure.message)),
       (_) => emit(AuthPasswordReset()),
+    );
+  }
+
+  Future<void> _onSendVerificationEmail(
+      SendVerificationEmailSubmitted event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    final result = await sendVerificationEmail();
+    result.fold(
+      (failure) => emit(AuthError(failure.message)),
+      (_) => emit(AuthEmailVerificationSent()),
+    );
+  }
+
+  Future<void> _onVerifyEmail(
+      VerifyEmailSubmitted event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    final result = await verifyEmail(code: event.code);
+    result.fold(
+      (failure) => emit(AuthError(failure.message)),
+      (_) => emit(AuthEmailVerified()),
     );
   }
 }

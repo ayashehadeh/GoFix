@@ -228,6 +228,7 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
                                   '${t.professionalPrefix} ${_localizeCategoryName(t, professional.category)}',
                               professionalId: professional.id,
                               services: professional.services,
+                              workingHours: professional.workingHours,
                             ),
                           ),
                         );
