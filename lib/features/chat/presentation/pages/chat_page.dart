@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/skeletons/chat_skeleton.dart';
 import '../bloc/chat_bloc.dart';
 import '../../domain/entities/chat_entity.dart';
 
@@ -204,9 +205,7 @@ class _ChatPageState extends State<ChatPage> {
             messages = state.messages;
           }
           if (state is ChatLoading && messages.isEmpty) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryOrange),
-            );
+            return const ChatSkeleton();
           }
           return Column(
             children: [

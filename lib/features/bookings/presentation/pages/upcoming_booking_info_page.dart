@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/widgets/fullscreen_image_viewer.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/skeletons/booking_job_detail_skeleton.dart';
 import '../../../../injection_container.dart' as di;
 import '../../../chat/presentation/bloc/chat_bloc.dart';
+import '../../../settings/presentation/bloc/address_bloc.dart';
 import '../../../chat/presentation/pages/chat_page.dart';
-import '../../../professionals/domain/usecases/profeessional_usecases/toggle_favorite.dart';
 import '../../domain/entities/booking.dart';
 import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
@@ -106,9 +108,7 @@ class _UpcomingBookingInfoPageState extends State<UpcomingBookingInfoPage> {
             },
             builder: (context, state) {
               if (state is BookingsLoading) {
-                return const Center(
-                  child: CircularProgressIndicator(color: AppColors.primaryOrange),
-                );
+                return const BookingJobDetailSkeleton();
               }
 
               if (state is BookingsError) {
@@ -162,7 +162,11 @@ class _UpcomingInfoBody extends StatelessWidget {
                               nameAr: booking.serviceNameAr)),
                       _DetailRow(icon: Icons.calendar_month_outlined, text: booking.formattedDate),
                       _DetailRow(icon: Icons.access_time_outlined, text: booking.scheduledTime),
-                      _DetailRow(icon: Icons.location_on_outlined, text: booking.address, onTap: () => _launchMaps(booking.address, latitude: booking.latitude, longitude: booking.longitude)),
+                      _DetailRow(
+                          icon: Icons.location_on_outlined,
+                          text: booking.address,
+                          onTap: () =>
+                              _launchMaps(booking.address, latitude: booking.latitude, longitude: booking.longitude)),
                       _DetailRow(icon: Icons.attach_money, text: booking.servicePrice, isLast: true),
                     ],
                   ),
@@ -183,7 +187,7 @@ class _UpcomingInfoBody extends StatelessWidget {
                           color: Color(0xFF4A4A4A),
                           height: 1.6,
                         ),
-                      ),
+                      ), // AFTER — in upcoming_booking_info_page.dart
                       if (booking.imageUrls.isNotEmpty) ...[
                         const SizedBox(height: 14),
                         const Divider(height: 1, color: Color(0xFFF0F0F0)),
@@ -201,6 +205,44 @@ class _UpcomingInfoBody extends StatelessWidget {
                               ),
                             ),
                           ],
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: booking.imageUrls.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final url = entry.value;
+                            return GestureDetector(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => FullscreenImageViewer(
+                                    imageUrls: booking.imageUrls,
+                                    initialIndex: index,
+                                  ),
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  url,
+                                  width: 72,
+                                  height: 72,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    width: 72,
+                                    height: 72,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF0F0F0),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Icon(Icons.broken_image_outlined, color: Colors.grey, size: 28),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
                         ),
                       ],
                     ],
@@ -240,18 +282,18 @@ class _BottomActionBar extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
           decoration: BoxDecoration(
-            color: const Color(0xFFFFF8F0),
+            color: AppColors.primaryOrange.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE87722).withOpacity(0.4)),
+            border: Border.all(color: AppColors.primaryOrange.withValues(alpha: 0.3)),
           ),
           child: const Row(
             children: [
-              Icon(Icons.hourglass_top_rounded, color: Color(0xFFE87722), size: 20),
+              Icon(Icons.hourglass_top_rounded, color: AppColors.primaryOrange, size: 20),
               SizedBox(width: 10),
               Expanded(
                 child: Text(
                   'Waiting for professional to set the payment amount...',
-                  style: TextStyle(fontSize: 13.5, color: Color(0xFFE87722), fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 13.5, color: AppColors.primaryOrange, fontWeight: FontWeight.w500),
                 ),
               ),
             ],
@@ -272,20 +314,20 @@ class _BottomActionBar extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               margin: const EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFFF0F7FF),
+                color: AppColors.primaryOrange.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF1A3A5C).withOpacity(0.2)),
+                border: Border.all(color: AppColors.primaryOrange.withValues(alpha: 0.3)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
                     'Agreed Amount',
-                    style: TextStyle(fontSize: 14, color: Color(0xFF1A3A5C), fontWeight: FontWeight.w500),
+                    style: TextStyle(fontSize: 14, color: AppColors.primaryDark, fontWeight: FontWeight.w500),
                   ),
                   Text(
                     '${booking.agreedAmount!.toStringAsFixed(2)} JD',
-                    style: const TextStyle(fontSize: 18, color: Color(0xFF1A3A5C), fontWeight: FontWeight.w800),
+                    style: const TextStyle(fontSize: 18, color: AppColors.primaryOrange, fontWeight: FontWeight.w800),
                   ),
                 ],
               ),
@@ -293,18 +335,17 @@ class _BottomActionBar extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               height: 50,
-              child: ElevatedButton.icon(
+              child: ElevatedButton(
                 onPressed: () => context.read<BookingsBloc>().add(ConfirmPaymentEvent(booking.id)),
-                icon: const Icon(Icons.check_circle_outline, color: Colors.white),
-                label: Text(
-                  AppLocalizations.of(context)!.confirmPayment,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
+                  backgroundColor: AppColors.primaryOrange,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
+                ),
+                child: Text(
+                  AppLocalizations.of(context)!.confirmPayment,
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                 ),
               ),
             ),
@@ -313,63 +354,112 @@ class _BottomActionBar extends StatelessWidget {
       );
     }
 
-    // Default: modify / cancel / chat buttons
+    void goToCancel() => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BlocProvider.value(
+              value: context.read<BookingsBloc>(),
+              child: CancelBookingPage(booking: booking),
+            ),
+          ),
+        );
+
+    void goToChat() => context.read<ChatBloc>().add(
+          GetOrCreateChatEvent(
+            professionalId: booking.professionalId,
+            professionalName: booking.professionalName,
+          ),
+        );
+
+    final isPending = booking.status == BookingStatus.pending;
+    final isCancellable = isPending ||
+        booking.status == BookingStatus.confirmed ||
+        booking.status == BookingStatus.accepted;
+
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
       child: Row(
         children: [
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BlocProvider(
-                      create: (_) => di.sl<BookingsBloc>(),
-                      child: ModifyBookingPage(booking: booking),
+          if (isPending) ...[
+            // Modify + cancel icon + chat icon
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MultiBlocProvider(
+                        providers: [
+                          BlocProvider(create: (_) => di.sl<BookingsBloc>()),
+                          BlocProvider(create: (_) => di.sl<AddressBloc>()),
+                        ],
+                        child: ModifyBookingPage(booking: booking),
+                      ),
                     ),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryOrange,
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 0,
-              ),
-              child: Text(
-                AppLocalizations.of(context)!.modifyBooking,
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryOrange,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 0,
+                ),
+                child: Text(
+                  AppLocalizations.of(context)!.modifyBooking,
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          _IconActionButton(
-            icon: Icons.delete_outline_rounded,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => BlocProvider.value(
-                    value: context.read<BookingsBloc>(),
-                    child: CancelBookingPage(booking: booking),
-                  ),
+            const SizedBox(width: 10),
+            _IconActionButton(icon: Icons.delete_outline_rounded, onTap: goToCancel),
+            const SizedBox(width: 10),
+            _IconActionButton(icon: Icons.chat_bubble_outline_rounded, onTap: goToChat),
+          ] else if (isCancellable) ...[
+            // Cancel button (full-width) + chat icon
+            Expanded(
+              child: OutlinedButton(
+                onPressed: goToCancel,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primaryDark,
+                  minimumSize: const Size(double.infinity, 50),
+                  side: const BorderSide(color: AppColors.primaryDark),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-              );
-            },
-          ),
-          const SizedBox(width: 10),
-          _IconActionButton(
-            icon: Icons.chat_bubble_outline_rounded,
-            onTap: () => context.read<ChatBloc>().add(
-                  GetOrCreateChatEvent(
-                    professionalId: booking.professionalId,
-                    professionalName: booking.professionalName,
-                  ),
+                child: Text(
+                  AppLocalizations.of(context)!.cancelBooking,
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                 ),
-          ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            _IconActionButton(icon: Icons.chat_bubble_outline_rounded, onTap: goToChat),
+          ] else ...[
+            // inProgress and beyond — chat only (full-width)
+            Expanded(
+              child: OutlinedButton(
+                onPressed: goToChat,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primaryDark,
+                  minimumSize: const Size(double.infinity, 50),
+                  side: const BorderSide(color: AppColors.primaryDark),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Chat with Professional',
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -401,28 +491,10 @@ class _IconActionButton extends StatelessWidget {
 
 // ─── Shared sub-widgets ───────────────────────────────────────────────────────
 
-class _ProfessionalCard extends StatefulWidget {
+class _ProfessionalCard extends StatelessWidget {
   final Booking booking;
 
   const _ProfessionalCard({required this.booking});
-
-  @override
-  State<_ProfessionalCard> createState() => _ProfessionalCardState();
-}
-
-class _ProfessionalCardState extends State<_ProfessionalCard> {
-  bool _isFavorite = false;
-
-  Future<void> _toggleFavorite() async {
-    setState(() => _isFavorite = !_isFavorite);
-    final result = await di.sl<ToggleFavorite>()(widget.booking.professionalId);
-    result.fold(
-      (failure) {
-        if (mounted) setState(() => _isFavorite = !_isFavorite);
-      },
-      (_) {},
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -445,8 +517,8 @@ class _ProfessionalCardState extends State<_ProfessionalCard> {
             radius: 28,
             backgroundColor: const Color(0xFFE0E8F0),
             backgroundImage:
-                widget.booking.professionalImageUrl != null ? NetworkImage(widget.booking.professionalImageUrl!) : null,
-            child: widget.booking.professionalImageUrl == null
+                booking.professionalImageUrl != null ? NetworkImage(booking.professionalImageUrl!) : null,
+            child: booking.professionalImageUrl == null
                 ? const Icon(Icons.person, color: AppColors.primaryDark, size: 28)
                 : null,
           ),
@@ -456,7 +528,7 @@ class _ProfessionalCardState extends State<_ProfessionalCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.booking.professionalName,
+                  booking.professionalName,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -465,21 +537,13 @@ class _ProfessionalCardState extends State<_ProfessionalCard> {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  widget.booking.professionalRole,
+                  booking.professionalRole,
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppColors.textSecondary,
                   ),
                 ),
               ],
-            ),
-          ),
-          GestureDetector(
-            onTap: _toggleFavorite,
-            child: Icon(
-              _isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: AppColors.primaryOrange,
-              size: 22,
             ),
           ),
         ],
@@ -578,8 +642,7 @@ class _DetailRow extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (onTap != null)
-                  const Icon(Icons.open_in_new, size: 14, color: AppColors.primaryOrange),
+                if (onTap != null) const Icon(Icons.open_in_new, size: 14, color: AppColors.primaryOrange),
               ],
             ),
           ),

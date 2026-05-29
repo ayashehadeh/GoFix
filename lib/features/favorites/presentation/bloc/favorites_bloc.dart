@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/favorites/favorites_cache.dart';
 import '../../domain/entities/favorite_entity.dart';
 import '../../domain/usecases/favorites_usecases.dart';
 
@@ -88,7 +89,10 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     final result = await getFavoritesList();
     result.fold(
       (failure) => emit(FavoritesError(failure.message)),
-      (favorites) => emit(FavoritesLoaded(favorites)),
+      (favorites) {
+        FavoritesCache.instance.setAll(favorites.map((f) => f.id));
+        emit(FavoritesLoaded(favorites));
+      },
     );
   }
 
@@ -98,12 +102,16 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     final result = await getFavoritesList();
     result.fold(
       (failure) => emit(FavoritesError(failure.message)),
-      (favorites) => emit(FavoritesLoaded(favorites)),
+      (favorites) {
+        FavoritesCache.instance.setAll(favorites.map((f) => f.id));
+        emit(FavoritesLoaded(favorites));
+      },
     );
   }
 
   Future<void> _onRemove(
       RemoveFavoriteEvent event, Emitter<FavoritesState> emit) async {
+    FavoritesCache.instance.toggle(event.professionalId);
     if (state is FavoritesLoaded) {
       final current = state as FavoritesLoaded;
       final updated = current.favorites
@@ -126,7 +134,10 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     final result = await getFavoritesList();
     result.fold(
       (failure) => emit(FavoritesError(failure.message)),
-      (favorites) => emit(FavoritesLoaded(favorites)),
+      (favorites) {
+        FavoritesCache.instance.setAll(favorites.map((f) => f.id));
+        emit(FavoritesLoaded(favorites));
+      },
     );
   }
 }

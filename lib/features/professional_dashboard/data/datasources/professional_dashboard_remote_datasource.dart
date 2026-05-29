@@ -37,27 +37,13 @@ class ProfessionalDashboardRemoteDataSourceImpl implements ProfessionalDashboard
     return data.map((json) => JobModel.fromJson(json as Map<String, dynamic>)).toList();
   }
 
-  // GET /bookings/professional?status=Accepted  (fetch each scheduled status separately
-  // then combine, since the backend filters by a single status at a time)
-  // Response: { success, message, data: [ ...BookingDto ] }
+  // GET /bookings/professional/jobs/upcoming
+  // Response: { success, message, data: [ ...ProJobDto ] }
   @override
   Future<List<JobModel>> getScheduledJobs() async {
-    final statuses = ['Accepted', 'OnTheWay', 'Arrived', 'InProgress'];
-    final results = await Future.wait(
-      statuses.map((status) async {
-        try {
-          final response = await dio.get(
-            '/bookings/professional',
-            queryParameters: {'status': status},
-          );
-          final List<dynamic> data = response.data['data'] as List;
-          return data.map((json) => JobModel.fromJson(json as Map<String, dynamic>)).toList();
-        } catch (_) {
-          return <JobModel>[];
-        }
-      }),
-    );
-    return results.expand((list) => list).toList();
+    final response = await dio.get('/bookings/professional/jobs/upcoming');
+    final List<dynamic> data = response.data['data'] as List;
+    return data.map((json) => JobModel.fromJson(json as Map<String, dynamic>)).toList();
   }
 
   // POST /bookings/{id}/respond   body: { "accept": true }

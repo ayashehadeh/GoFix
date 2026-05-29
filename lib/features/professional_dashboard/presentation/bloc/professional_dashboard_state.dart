@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:gp/core/error/app_error_state.dart';
 import '../../domain/entities/job_entity.dart';
+import 'package:gp/features/professional_jobs/domain/entities/pro_job.dart';
 import '../../domain/entities/dashboard_stats_entity.dart';
 
 abstract class ProfessionalDashboardState extends Equatable {
@@ -16,8 +17,8 @@ class DashboardLoading extends ProfessionalDashboardState {}
 
 class DashboardLoaded extends ProfessionalDashboardState {
   final DashboardStatsEntity stats;
-  final List<JobEntity> incomingRequests;
-  final List<JobEntity> scheduledJobs;
+  final List<ProJob> incomingRequests;
+  final List<ProJob> scheduledJobs;
 
   const DashboardLoaded({
     required this.stats,

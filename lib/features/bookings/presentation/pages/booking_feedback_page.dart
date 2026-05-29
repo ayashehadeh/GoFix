@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
@@ -59,10 +58,13 @@ class _BookingFeedbackPageState extends State<BookingFeedbackPage> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
       isScrollControlled: true,
       isDismissible: sheet == _Sheet.choose,
       enableDrag: sheet == _Sheet.choose,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
       builder: (sheetCtx) {
         switch (sheet) {
           case _Sheet.choose:
@@ -146,42 +148,26 @@ class _ChooseSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
-    return Stack(
-      children: [
-        BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-          child: Container(color: Colors.black.withOpacity(0.25)),
-        ),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(24, 28, 24, 48),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _Handle(),
-                Text(t.leaveFeedback,
-                    style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF062B4D))),
-                const SizedBox(height: 8),
-                Text(t.whatWouldYouDo,
-                    style: const TextStyle(fontSize: 14, color: Colors.grey)),
-                const SizedBox(height: 32),
-                _PrimaryBtn(label: t.writeReview, onTap: onReviewChosen),
-                const SizedBox(height: 14),
-                _OutlineBtn(label: t.reportAnIssue, onTap: onReportChosen),
-              ],
-            ),
-          ),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 28, 24, 48),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _Handle(),
+          Text(t.leaveFeedback,
+              style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF062B4D))),
+          const SizedBox(height: 8),
+          Text(t.whatWouldYouDo,
+              style: const TextStyle(fontSize: 14, color: Colors.grey)),
+          const SizedBox(height: 32),
+          _PrimaryBtn(label: t.writeReview, onTap: onReviewChosen),
+          const SizedBox(height: 14),
+          _OutlineBtn(label: t.reportAnIssue, onTap: onReportChosen),
+        ],
+      ),
     );
   }
 }
@@ -240,102 +226,85 @@ class _ReviewSheetState extends State<_ReviewSheet> {
   Widget build(BuildContext context) {
     final loading = _submitting;
     final t = AppLocalizations.of(context)!;
-    return Stack(
-      children: [
-        BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-          child: Container(color: Colors.black.withOpacity(0.25)),
-        ),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.only(
-              left: 24,
-              right: 24,
-              top: 28,
-              bottom: MediaQuery.of(context).viewInsets.bottom + 40,
-            ),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _Handle(),
-                  Text(t.writeReview,
-                      style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF062B4D))),
-                  const SizedBox(height: 6),
-                  Text(t.howWasService,
-                      style: const TextStyle(fontSize: 14, color: Colors.grey)),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: List.generate(5, (i) {
-                      final s = i + 1;
-                      return GestureDetector(
-                        onTap: () => setState(() {
-                          _stars = s;
-                          _starError = false;
-                        }),
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 6),
-                          child: Icon(
-                            s <= _stars
-                                ? Icons.star_rounded
-                                : Icons.star_outline_rounded,
-                            color: const Color(0xFFFF8C1A),
-                            size: 38,
-                          ),
-                        ),
-                      );
-                    }),
-                  ),
-                  if (_starError) ...[
-                    const SizedBox(height: 6),
-                    Text(t.selectRatingError,
-                        style: const TextStyle(fontSize: 12, color: Colors.red)),
-                  ],
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: _ctrl,
-                    maxLines: 4,
-                    decoration: InputDecoration(
-                      prefixIcon: const Padding(
-                        padding: EdgeInsets.only(left: 12, right: 8, top: 12),
-                        child: Icon(Icons.edit_outlined,
-                            color: Color(0xFFFF8C1A), size: 18),
-                      ),
-                      prefixIconConstraints: const BoxConstraints(),
-                      hintText: t.writeFeedbackHint,
-                      hintStyle:
-                          const TextStyle(fontSize: 13, color: Colors.grey),
-                      filled: true,
-                      fillColor: const Color(0xFFF8F9FA),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.all(14),
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 28,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 40,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _Handle(),
+            Text(t.writeReview,
+                style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF062B4D))),
+            const SizedBox(height: 6),
+            Text(t.howWasService,
+                style: const TextStyle(fontSize: 14, color: Colors.grey)),
+            const SizedBox(height: 20),
+            Row(
+              children: List.generate(5, (i) {
+                final s = i + 1;
+                return GestureDetector(
+                  onTap: () => setState(() {
+                    _stars = s;
+                    _starError = false;
+                  }),
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: Icon(
+                      s <= _stars
+                          ? Icons.star_rounded
+                          : Icons.star_outline_rounded,
+                      color: const Color(0xFFFF8C1A),
+                      size: 38,
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  _PrimaryBtn(
-                    label: t.submitReview,
-                    loading: loading,
-                    onTap: () => _submit(context),
-                  ),
-                ],
+                );
+              }),
+            ),
+            if (_starError) ...[
+              const SizedBox(height: 6),
+              Text(t.selectRatingError,
+                  style: const TextStyle(fontSize: 12, color: Colors.red)),
+            ],
+            const SizedBox(height: 20),
+            TextField(
+              controller: _ctrl,
+              maxLines: 4,
+              decoration: InputDecoration(
+                prefixIcon: const Padding(
+                  padding: EdgeInsets.only(left: 12, right: 8, top: 12),
+                  child: Icon(Icons.edit_outlined,
+                      color: Color(0xFFFF8C1A), size: 18),
+                ),
+                prefixIconConstraints: const BoxConstraints(),
+                hintText: t.writeFeedbackHint,
+                hintStyle: const TextStyle(fontSize: 13, color: Colors.grey),
+                filled: true,
+                fillColor: const Color(0xFFF8F9FA),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.all(14),
               ),
             ),
-          ),
+            const SizedBox(height: 24),
+            _PrimaryBtn(
+              label: t.submitReview,
+              loading: loading,
+              onTap: () => _submit(context),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -386,86 +355,70 @@ class _ReportSheetState extends State<_ReportSheet> {
       builder: (ctx, state) {
         final loading = state is BookingActionLoading;
         final t = AppLocalizations.of(ctx)!;
-        return Stack(
-          children: [
-            BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-              child: Container(color: Colors.black.withOpacity(0.25)),
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 28,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 40,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _Handle(),
+                Text(t.reportAnIssue,
+                    style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF062B4D))),
+                const SizedBox(height: 6),
+                Text(t.reportHelpText,
+                    style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                const SizedBox(height: 24),
+                _FieldLabel(t.describeIssue),
+                const SizedBox(height: 8),
+                _ReportField(
+                  ctrl: _title,
+                  hint: t.issueTitleHint,
+                  maxLines: 1,
+                  hasError: _titleErr,
+                  errText: t.describeIssueError,
+                  onChange: (_) {
+                    if (_titleErr) setState(() => _titleErr = false);
+                  },
+                ),
+                const SizedBox(height: 18),
+                _FieldLabel(t.provideDetails),
+                const SizedBox(height: 8),
+                _ReportField(
+                  ctrl: _details,
+                  hint: t.provideDetailsHint,
+                  maxLines: 4,
+                  hasError: _detailsErr,
+                  errText: t.provideDetailsError,
+                  onChange: (_) {
+                    if (_detailsErr) setState(() => _detailsErr = false);
+                  },
+                ),
+                const SizedBox(height: 24),
+                _PrimaryBtn(
+                  label: t.submitReport,
+                  loading: loading,
+                  onTap: () {
+                    if (_validate()) {
+                      ctx.read<BookingsBloc>().add(SubmitReportEvent(
+                            bookingId: widget.booking.id,
+                            description:
+                                '${_title.text.trim()}\n\n${_details.text.trim()}',
+                          ));
+                    }
+                  },
+                ),
+              ],
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.only(
-                  left: 24,
-                  right: 24,
-                  top: 28,
-                  bottom: MediaQuery.of(context).viewInsets.bottom + 40,
-                ),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-                ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _Handle(),
-                      Text(t.reportAnIssue,
-                          style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF062B4D))),
-                      const SizedBox(height: 6),
-                      Text(t.reportHelpText,
-                          style: const TextStyle(fontSize: 14, color: Colors.grey)),
-                      const SizedBox(height: 24),
-                      _FieldLabel(t.describeIssue),
-                      const SizedBox(height: 8),
-                      _ReportField(
-                        ctrl: _title,
-                        hint: t.issueTitleHint,
-                        maxLines: 1,
-                        hasError: _titleErr,
-                        errText: t.describeIssueError,
-                        onChange: (_) {
-                          if (_titleErr) setState(() => _titleErr = false);
-                        },
-                      ),
-                      const SizedBox(height: 18),
-                      _FieldLabel(t.provideDetails),
-                      const SizedBox(height: 8),
-                      _ReportField(
-                        ctrl: _details,
-                        hint: t.provideDetailsHint,
-                        maxLines: 4,
-                        hasError: _detailsErr,
-                        errText: t.provideDetailsError,
-                        onChange: (_) {
-                          if (_detailsErr) setState(() => _detailsErr = false);
-                        },
-                      ),
-                      const SizedBox(height: 24),
-                      _PrimaryBtn(
-                        label: t.submitReport,
-                        loading: loading,
-                        onTap: () {
-                          if (_validate()) {
-                            ctx.read<BookingsBloc>().add(SubmitReportEvent(
-                                  bookingId: widget.booking.id,
-                                  description:
-                                      '${_title.text.trim()}\n\n${_details.text.trim()}',
-                                ));
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         );
       },
     );

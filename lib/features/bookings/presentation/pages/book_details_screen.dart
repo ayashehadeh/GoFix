@@ -1,16 +1,18 @@
 // lib/features/bookings/presentation/pages/book_details_screen.dart
 
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/features/bookings/presentation/pages/booking_success_screen.dart';
+import 'package:gp/injection_container.dart' as di;
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
 import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
 import '../bloc/bookings_state.dart';
 
-class BookDetailsScreen extends StatelessWidget {
+class BookDetailsScreen extends StatefulWidget {
   final String serviceName;
   final String? serviceNameAr;
   final String servicePrice;
@@ -42,9 +44,71 @@ class BookDetailsScreen extends StatelessWidget {
     required this.scheduledDate,
   });
 
+  @override
+  State<BookDetailsScreen> createState() => _BookDetailsScreenState();
+}
+
+class _BookDetailsScreenState extends State<BookDetailsScreen> {
   static const Color darkBlue = Color(0xFF1A2B4A);
   static const Color orange = Color(0xFFFF8C00);
   static const Color lightGrey = Color(0xFFF5F5F5);
+
+  bool _isUploading = false;
+
+  Future<void> _submitBooking(BuildContext context) async {
+    setState(() => _isUploading = true);
+
+    List<String> imageUrls = [];
+
+    try {
+      if (widget.images.isNotEmpty) {
+        final dio = di.sl<Dio>();
+        final formData = FormData();
+        for (final file in widget.images) {
+          final fileName = file.path.split('/').last;
+          formData.files.add(MapEntry(
+            'files',
+            await MultipartFile.fromFile(file.path, filename: fileName),
+          ));
+        }
+        final response = await dio.post(
+          '/bookings/images',
+          data: formData,
+        );
+        final data = response.data['data'] as List;
+        imageUrls = data.cast<String>();
+      }
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to upload images. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      setState(() => _isUploading = false);
+      return;
+    }
+
+    if (!mounted) return;
+    context.read<BookingsBloc>().add(
+          CreateBookingEvent(
+            professionalId: widget.professionalId,
+            serviceName: widget.serviceName,
+            serviceNameAr: widget.serviceNameAr,
+            servicePrice: widget.servicePrice,
+            scheduledDate: widget.scheduledDate,
+            scheduledTime: widget.time,
+            address: widget.address,
+            latitude: widget.latitude,
+            longitude: widget.longitude,
+            description: widget.description,
+            imageUrls: imageUrls,
+          ),
+        );
+
+    setState(() => _isUploading = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +122,6 @@ class BookDetailsScreen extends StatelessWidget {
             ),
           );
         }
-
         if (state is BookingsError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -69,7 +132,7 @@ class BookDetailsScreen extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        final isLoading = state is BookingActionLoading;
+        final isLoading = _isUploading || state is BookingActionLoading;
 
         return Scaffold(
           backgroundColor: lightGrey,
@@ -78,7 +141,7 @@ class BookDetailsScreen extends StatelessWidget {
             elevation: 0,
             leading: const BackButton(color: darkBlue),
             title: Text(
-              AppLocalizations.of(context)!.bookAService,
+              AppLocalizations.of(context)!.bookingDetails,
               style: const TextStyle(
                 color: darkBlue,
                 fontWeight: FontWeight.bold,
@@ -88,45 +151,6 @@ class BookDetailsScreen extends StatelessWidget {
           ),
           body: Column(
             children: [
-              // Step 3 active
-              Container(
-                color: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: darkBlue,
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Container(
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: darkBlue,
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Container(
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: orange,
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(16),
@@ -161,27 +185,27 @@ class BookDetailsScreen extends StatelessWidget {
                             const SizedBox(height: 16),
                             _buildDetailRow(
                               icon: Icons.settings,
-                              text: localizeServiceName(serviceName, AppLocalizations.of(context)!),
+                              text: localizeServiceName(widget.serviceName, AppLocalizations.of(context)!),
                             ),
                             _buildDetailRow(
                               icon: Icons.calendar_month,
-                              text: date,
+                              text: widget.date,
                             ),
                             _buildDetailRow(
                               icon: Icons.access_time,
-                              text: time,
+                              text: widget.time,
                             ),
                             _buildDetailRow(
                               icon: Icons.map_outlined,
-                              text: address,
+                              text: widget.address,
                             ),
                             _buildDetailRow(
                               icon: Icons.attach_money,
-                              text: servicePrice,
+                              text: widget.servicePrice,
                             ),
                             _buildDetailRow(
                               icon: Icons.person,
-                              text: workerName,
+                              text: widget.workerName,
                               isLast: true,
                             ),
                           ],
@@ -224,27 +248,23 @@ class BookDetailsScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              description,
+                              widget.description,
                               style: const TextStyle(
                                 color: Color(0xFF4A4A4A),
                                 fontSize: 14,
                                 height: 1.6,
                               ),
                             ),
-                            if (images.isNotEmpty) ...[
+                            if (widget.images.isNotEmpty) ...[
                               const SizedBox(height: 16),
                               const Divider(height: 1),
                               const SizedBox(height: 16),
                               Row(
                                 children: [
-                                  const Icon(
-                                    Icons.image,
-                                    color: darkBlue,
-                                    size: 22,
-                                  ),
+                                  const Icon(Icons.image, color: darkBlue, size: 22),
                                   const SizedBox(width: 8),
                                   Text(
-                                    '${images.length} ${images.length == 1 ? AppLocalizations.of(context)!.pictureAttachedSingular : AppLocalizations.of(context)!.picturesAttachedPlural}',
+                                    '${widget.images.length} ${widget.images.length == 1 ? AppLocalizations.of(context)!.pictureAttachedSingular : AppLocalizations.of(context)!.picturesAttachedPlural}',
                                     style: const TextStyle(
                                       color: darkBlue,
                                       fontSize: 14,
@@ -256,7 +276,7 @@ class BookDetailsScreen extends StatelessWidget {
                               Wrap(
                                 spacing: 8,
                                 runSpacing: 8,
-                                children: images.map((file) {
+                                children: widget.images.map((file) {
                                   return ClipRRect(
                                     borderRadius: BorderRadius.circular(8),
                                     child: Image.file(
@@ -287,25 +307,7 @@ class BookDetailsScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 52,
                   child: ElevatedButton(
-                    onPressed: isLoading
-                        ? null
-                        : () {
-                            context.read<BookingsBloc>().add(
-                                  CreateBookingEvent(
-                                    professionalId: professionalId,
-                                    serviceName: serviceName,
-                                    serviceNameAr: serviceNameAr,
-                                    servicePrice: servicePrice,
-                                    scheduledDate: scheduledDate,
-                                    scheduledTime: time,
-                                    address: address,
-                                    latitude: latitude,
-                                    longitude: longitude,
-                                    description: description,
-                                    imageUrls: const [],
-                                  ),
-                                );
-                          },
+                    onPressed: isLoading ? null : () => _submitBooking(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: orange,
                       foregroundColor: Colors.white,

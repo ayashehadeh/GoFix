@@ -163,7 +163,7 @@ class _FilterPageState extends State<FilterPage> {
                     // ── Maximum Distance ────────────────────────────
                     Row(
                       children: [
-                        const Icon(Icons.bookmark_border,
+                        const Icon(Icons.near_me,
                             color: AppColors.primaryOrange, size: 18),
                         const SizedBox(width: 8),
                         Text(t.maximumDistance,

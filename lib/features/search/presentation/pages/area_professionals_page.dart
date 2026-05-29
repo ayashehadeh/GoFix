@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/core/constants/app_colors.dart';
+import 'package:gp/core/widgets/skeletons/professional_list_skeleton.dart';
 import 'package:gp/features/professionals/domain/entities/professional.dart';
 import 'package:gp/features/professionals/domain/entities/service_category.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
@@ -30,11 +31,7 @@ class AreaProfessionalsPage extends StatelessWidget {
                   proCount: state.proCount,
                   activeCategory: null,
                 ),
-                const Expanded(
-                  child: Center(
-                    child: CircularProgressIndicator(color: AppColors.primaryOrange),
-                  ),
-                ),
+                const Expanded(child: ProfessionalListSkeleton()),
               ],
             ),
           );
@@ -87,7 +84,8 @@ class AreaProfessionalsPage extends StatelessWidget {
         }
 
         return const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
+          backgroundColor: Color(0xFFFCFCFC),
+          body: ProfessionalListSkeleton(),
         );
       },
     );

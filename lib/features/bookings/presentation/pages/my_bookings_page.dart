@@ -9,6 +9,7 @@ import '../../../favorites/presentation/bloc/favorites_bloc.dart';
 import '../../../favorites/presentation/pages/favorites_page.dart';
 import '../../../chat/presentation/bloc/chat_bloc.dart';
 import '../../../chat/presentation/pages/all_chats_page.dart';
+import '../../../../core/widgets/skeletons/booking_job_list_skeleton.dart';
 import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
 import '../bloc/bookings_state.dart';
@@ -59,9 +60,7 @@ class _MyBookingsPageState extends State<MyBookingsPage>
               child: BlocBuilder<BookingsBloc, BookingsState>(
                 builder: (context, state) {
                   if (state is BookingsLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(color: AppColors.primaryOrange),
-                    );
+                    return const BookingJobListSkeleton();
                   }
                   if (state is BookingsError) {
                     return _ErrorBody(

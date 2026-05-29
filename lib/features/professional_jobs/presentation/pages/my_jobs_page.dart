@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/widgets/skeletons/booking_job_list_skeleton.dart';
 import '../bloc/professional_jobs_bloc.dart';
 import '../bloc/professional_jobs_event.dart';
 import '../bloc/professional_jobs_state.dart';
@@ -77,9 +78,7 @@ class _MyJobsPageState extends State<MyJobsPage> {
                 child: BlocBuilder<ProfessionalJobsBloc, ProfessionalJobsState>(
                   builder: (context, state) {
                     if (state is ProfessionalJobsLoading || state is JobStatusUpdateLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(color: Color(0xFFFF8C1A)),
-                      );
+                      return const BookingJobListSkeleton();
                     }
 
                     if (state is ProfessionalJobsLoaded) {

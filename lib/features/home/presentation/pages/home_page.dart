@@ -18,6 +18,7 @@ import '../../../notifications/presentation/pages/notifications_page.dart';
 import '../../../professionals/domain/entities/service_category.dart';
 import '../../../professionals/presentation/bloc/professionals_bloc.dart';
 import '../../../professionals/presentation/pages/category_professionals_page.dart';
+import '../../../../core/widgets/skeletons/home_categories_skeleton.dart';
 import '../../domain/entities/category_entity.dart';
 import '../bloc/home_bloc.dart';
 import '../widgets/active_booking_card.dart';
@@ -155,9 +156,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
 
   Widget _buildBody(BuildContext context, HomeState state) {
     if (state is HomeLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primaryOrange),
-      );
+      return const HomeCategoriesSkeleton();
     }
 
     if (state is HomeError) {

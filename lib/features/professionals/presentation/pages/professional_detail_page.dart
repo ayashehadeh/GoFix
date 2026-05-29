@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/favorites/favorites_cache.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_event.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_state.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,6 +16,7 @@ import 'package:gp/features/chat/presentation/pages/chat_page.dart';
 import 'package:gp/injection_container.dart' as di;
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
+import 'package:gp/core/widgets/skeletons/professional_detail_skeleton.dart';
 import 'package:gp/features/professionals/domain/entities/service_category.dart';
 
 String _localizeDay(String day, AppLocalizations l10n) {
@@ -138,9 +140,7 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
             },
             builder: (context, state) {
               if (state is ProfessionalsLoading) {
-                return const Center(
-                  child: CircularProgressIndicator(color: AppColors.primaryOrange),
-                );
+                return const ProfessionalDetailSkeleton();
               }
 
               if (state is ProfessionalsError) {
@@ -316,12 +316,15 @@ class _DetailHeader extends StatelessWidget {
                   size: 28,
                 ),
               ),
-              GestureDetector(
-                onTap: onFavorite,
-                child: Icon(
-                  professional.isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: AppColors.primaryOrange,
-                  size: 24,
+              ValueListenableBuilder<Set<String>>(
+                valueListenable: FavoritesCache.instance.notifier,
+                builder: (_, ids, __) => GestureDetector(
+                  onTap: onFavorite,
+                  child: Icon(
+                    ids.contains(professional.id) ? Icons.favorite : Icons.favorite_border,
+                    color: AppColors.primaryOrange,
+                    size: 24,
+                  ),
                 ),
               ),
             ],
@@ -365,9 +368,11 @@ class _DetailHeader extends StatelessWidget {
                   label: l.yearsExp,
                 ),
                 _StatItem(
-                  icon: Icons.bookmark_border,
-                  value: professional.distanceKm != null ? professional.distanceKm!.toStringAsFixed(1) : 'N/A',
-                  label: l.kmAwayLabel,
+                  icon: Icons.near_me,
+                  value: professional.distanceKm != null
+                      ? '${professional.distanceKm!.toStringAsFixed(1)} KM'
+                      : '-- KM',
+                  label: 'From Base',
                 ),
                 _StatItem(
                   icon: Icons.star,

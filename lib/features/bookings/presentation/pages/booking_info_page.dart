@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/widgets/fullscreen_image_viewer.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/widgets/skeletons/booking_job_detail_skeleton.dart';
 import '../../../../injection_container.dart' as di;
-import '../../../professionals/domain/usecases/profeessional_usecases/toggle_favorite.dart';
+import '../../../professionals/presentation/bloc/professionals_bloc.dart';
+import '../../../professionals/presentation/pages/professional_detail_page.dart';
 import '../../domain/entities/booking.dart';
 import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
@@ -63,9 +66,7 @@ class _BookingInfoPageState extends State<BookingInfoPage> {
         },
         builder: (context, state) {
           if (state is BookingsLoading || state is BookingActionLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryOrange),
-            );
+            return const BookingJobDetailSkeleton();
           }
 
           if (state is BookingsError) {
@@ -142,7 +143,8 @@ class _BookingInfoBody extends StatelessWidget {
                       _DetailRow(
                         icon: Icons.location_on_outlined,
                         text: booking.address,
-                        onTap: () => _launchMaps(booking.address, latitude: booking.latitude, longitude: booking.longitude),
+                        onTap: () =>
+                            _launchMaps(booking.address, latitude: booking.latitude, longitude: booking.longitude),
                       ),
                       _DetailRow(
                         icon: Icons.attach_money,
@@ -171,6 +173,7 @@ class _BookingInfoBody extends StatelessWidget {
                           height: 1.6,
                         ),
                       ),
+                      // AFTER — in booking_info_page.dart
                       if (booking.imageUrls.isNotEmpty) ...[
                         const SizedBox(height: 14),
                         const Divider(height: 1, color: Color(0xFFF0F0F0)),
@@ -193,6 +196,44 @@ class _BookingInfoBody extends StatelessWidget {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: booking.imageUrls.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final url = entry.value;
+                            return GestureDetector(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => FullscreenImageViewer(
+                                    imageUrls: booking.imageUrls,
+                                    initialIndex: index,
+                                  ),
+                                ),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  url,
+                                  width: 72,
+                                  height: 72,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    width: 72,
+                                    height: 72,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF0F0F0),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Icon(Icons.broken_image_outlined, color: Colors.grey, size: 28),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
                       ],
                     ],
                   ),
@@ -212,28 +253,10 @@ class _BookingInfoBody extends StatelessWidget {
 
 // ─── Professional card ────────────────────────────────────────────────────────
 
-class _ProfessionalCard extends StatefulWidget {
+class _ProfessionalCard extends StatelessWidget {
   final Booking booking;
 
   const _ProfessionalCard({required this.booking});
-
-  @override
-  State<_ProfessionalCard> createState() => _ProfessionalCardState();
-}
-
-class _ProfessionalCardState extends State<_ProfessionalCard> {
-  bool _isFavorite = false;
-
-  Future<void> _toggleFavorite() async {
-    setState(() => _isFavorite = !_isFavorite);
-    final result = await di.sl<ToggleFavorite>()(widget.booking.professionalId);
-    result.fold(
-      (failure) {
-        if (mounted) setState(() => _isFavorite = !_isFavorite);
-      },
-      (_) {},
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -255,12 +278,10 @@ class _ProfessionalCardState extends State<_ProfessionalCard> {
           CircleAvatar(
             radius: 28,
             backgroundColor: const Color(0xFFE0E8F0),
-            backgroundImage: widget.booking.professionalImageUrl != null
-                ? NetworkImage(widget.booking.professionalImageUrl!)
-                : null,
-            child: widget.booking.professionalImageUrl == null
-                ? const Icon(Icons.person,
-                    color: AppColors.primaryDark, size: 28)
+            backgroundImage:
+                booking.professionalImageUrl != null ? NetworkImage(booking.professionalImageUrl!) : null,
+            child: booking.professionalImageUrl == null
+                ? const Icon(Icons.person, color: AppColors.primaryDark, size: 28)
                 : null,
           ),
           const SizedBox(width: 14),
@@ -269,7 +290,7 @@ class _ProfessionalCardState extends State<_ProfessionalCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.booking.professionalName,
+                  booking.professionalName,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -278,7 +299,7 @@ class _ProfessionalCardState extends State<_ProfessionalCard> {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  widget.booking.professionalRole,
+                  booking.professionalRole,
                   style: const TextStyle(
                     fontSize: 13,
                     color: AppColors.textSecondary,
@@ -287,15 +308,6 @@ class _ProfessionalCardState extends State<_ProfessionalCard> {
               ],
             ),
           ),
-          if (widget.booking.isPast)
-            GestureDetector(
-              onTap: _toggleFavorite,
-              child: Icon(
-                _isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: AppColors.primaryOrange,
-                size: 22,
-              ),
-            ),
         ],
       ),
     );
@@ -396,8 +408,7 @@ class _DetailRow extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (onTap != null)
-                  const Icon(Icons.open_in_new, size: 14, color: AppColors.primaryOrange),
+                if (onTap != null) const Icon(Icons.open_in_new, size: 14, color: AppColors.primaryOrange),
               ],
             ),
           ),
@@ -443,18 +454,18 @@ class _BottomActions extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               margin: const EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFF8F0),
+                color: AppColors.primaryOrange.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE87722).withOpacity(0.4)),
+                border: Border.all(color: AppColors.primaryOrange.withValues(alpha: 0.3)),
               ),
               child: const Row(
                 children: [
-                  Icon(Icons.hourglass_top_rounded, color: Color(0xFFE87722), size: 20),
+                  Icon(Icons.hourglass_top_rounded, color: AppColors.primaryOrange, size: 20),
                   SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       'Waiting for professional to set the payment amount...',
-                      style: TextStyle(fontSize: 13.5, color: Color(0xFFE87722), fontWeight: FontWeight.w500),
+                      style: TextStyle(fontSize: 13.5, color: AppColors.primaryOrange, fontWeight: FontWeight.w500),
                     ),
                   ),
                 ],
@@ -467,20 +478,20 @@ class _BottomActions extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               margin: const EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFFF0F7FF),
+                color: AppColors.primaryOrange.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF1A3A5C).withOpacity(0.2)),
+                border: Border.all(color: AppColors.primaryOrange.withValues(alpha: 0.3)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
                     'Agreed Amount',
-                    style: TextStyle(fontSize: 14, color: Color(0xFF1A3A5C), fontWeight: FontWeight.w500),
+                    style: TextStyle(fontSize: 14, color: AppColors.primaryDark, fontWeight: FontWeight.w500),
                   ),
                   Text(
                     '${booking.agreedAmount!.toStringAsFixed(2)} JD',
-                    style: const TextStyle(fontSize: 18, color: Color(0xFF1A3A5C), fontWeight: FontWeight.w800),
+                    style: const TextStyle(fontSize: 18, color: AppColors.primaryOrange, fontWeight: FontWeight.w800),
                   ),
                 ],
               ),
@@ -491,7 +502,7 @@ class _BottomActions extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => context.read<BookingsBloc>().add(ConfirmPaymentEvent(booking.id)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
+                  backgroundColor: AppColors.primaryOrange,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
@@ -510,8 +521,18 @@ class _BottomActions extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pop(context);
-                      // TODO: Navigate to booking flow with professionalId pre-filled
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider(
+                            create: (_) => di.sl<ProfessionalsBloc>(),
+                            child: ProfessionalDetailPage(
+                              professionalId: booking.professionalId,
+                              id: booking.professionalId,
+                            ),
+                          ),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryOrange,
@@ -547,7 +568,7 @@ class _BottomActions extends StatelessWidget {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(
-                      AppLocalizations.of(context)!.writeReview,
+                      AppLocalizations.of(context)!.leaveFeedback,
                       style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                     ),
                   ),

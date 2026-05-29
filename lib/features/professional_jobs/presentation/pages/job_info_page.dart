@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/widgets/fullscreen_image_viewer.dart';
 import 'package:gp/core/widgets/payment_amount_sheet.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -50,8 +51,7 @@ class JobInfoPage extends StatelessWidget {
             ],
           ),
         ),
-        bottomNavigationBar:
-            job.status.isActive ? _BottomActions(job: job) : null,
+        bottomNavigationBar: job.status.isActive ? _BottomActions(job: job) : null,
       ),
     );
   }
@@ -72,34 +72,31 @@ class _JobDetailsCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2)),
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2)),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(AppLocalizations.of(context)!.jobDetails,
-              style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF062B4D))),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF062B4D))),
           const SizedBox(height: 12),
           _Row(icon: Icons.build_outlined, text: job.serviceType),
           _Row(icon: Icons.person_outline, text: job.clientName),
           if ((job.status == ProJobStatus.arrived || job.status == ProJobStatus.inProgress) &&
-              job.clientPhone != null && job.clientPhone!.isNotEmpty)
+              job.clientPhone != null &&
+              job.clientPhone!.isNotEmpty)
             _Row(icon: Icons.phone_outlined, text: job.clientPhone!),
           _Row(icon: Icons.calendar_month_outlined, text: job.formattedDate),
           _Row(icon: Icons.access_time_outlined, text: job.formattedTime),
-          _Row(icon: Icons.location_on_outlined, text: job.location),
+          _Row(
+            icon: Icons.location_on_outlined,
+            text: job.location,
+            onTap: () => _launchMaps(job.location, latitude: job.latitude, longitude: job.longitude),
+          ),
           _Row(
             icon: Icons.attach_money,
-            text: job.agreedAmount != null
-                ? '${job.agreedAmount!.toStringAsFixed(2)} JD'
-                : job.price,
+            text: job.agreedAmount != null ? '${job.agreedAmount!.toStringAsFixed(2)} JD' : job.price,
             isLast: true,
           ),
         ],
@@ -123,10 +120,7 @@ class _ServiceDescriptionCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2)),
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2)),
         ],
       ),
       child: Column(
@@ -137,29 +131,63 @@ class _ServiceDescriptionCard extends StatelessWidget {
               const Icon(Icons.edit_outlined, color: Color(0xFFFF8C1A), size: 18),
               const SizedBox(width: 8),
               Text(AppLocalizations.of(context)!.serviceDescription,
-                  style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF062B4D))),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF062B4D))),
             ],
           ),
           const SizedBox(height: 10),
-          Text(job.description,
-              style: const TextStyle(
-                  fontSize: 13, color: Colors.grey, height: 1.6)),
-          if (job.pictureCount > 0) ...[
+          Text(job.description, style: const TextStyle(fontSize: 13, color: Colors.grey, height: 1.6)),
+          // AFTER — in job_info_page.dart
+          if (job.imageUrls.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            const Divider(height: 1, color: Color(0xFFF0F0F0)),
             const SizedBox(height: 12),
             Row(
               children: [
-                const Icon(Icons.image_outlined,
-                    color: Color(0xFF062B4D), size: 18),
+                const Icon(Icons.image_outlined, color: Color(0xFF062B4D), size: 18),
                 const SizedBox(width: 8),
                 Text(
-                  AppLocalizations.of(context)!.picturesAttached(job.pictureCount),
-                  style:
-                      const TextStyle(fontSize: 13, color: Color(0xFF062B4D)),
+                  AppLocalizations.of(context)!.picturesAttached(job.imageUrls.length),
+                  style: const TextStyle(fontSize: 13, color: Color(0xFF062B4D)),
                 ),
               ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: job.imageUrls.asMap().entries.map((entry) {
+                final index = entry.key;
+                final url = entry.value;
+                return GestureDetector(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FullscreenImageViewer(
+                        imageUrls: job.imageUrls,
+                        initialIndex: index,
+                      ),
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      url,
+                      width: 72,
+                      height: 72,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0F0F0),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.broken_image_outlined, color: Colors.grey, size: 28),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
           ],
         ],
@@ -189,13 +217,11 @@ class _BottomActions extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF8C1A),
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     elevation: 0,
                   ),
                   child: Text(AppLocalizations.of(context)!.updateStatus,
-                      style:
-                          const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                 ),
               ),
             ),
@@ -209,12 +235,10 @@ class _BottomActions extends StatelessWidget {
                 },
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Color(0xFF062B4D), width: 1.5),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   padding: EdgeInsets.zero,
                 ),
-                child: const Icon(Icons.chat_bubble_outline,
-                    color: Color(0xFF062B4D), size: 20),
+                child: const Icon(Icons.chat_bubble_outline, color: Color(0xFF062B4D), size: 20),
               ),
             ),
           ],
@@ -251,45 +275,46 @@ class _StatusSheetState extends State<_StatusSheet> {
   ProJobStatus? _selected;
 
   Set<ProJobStatus> _allowedStatuses(ProJobStatus current) => switch (current) {
-        ProJobStatus.confirmed  => {ProJobStatus.onTheWay, ProJobStatus.cancelled},
-        ProJobStatus.onTheWay   => {ProJobStatus.arrived},
-        ProJobStatus.arrived    => {ProJobStatus.inProgress},
-        ProJobStatus.inProgress => {ProJobStatus.completed},
-        _                       => {},
+        ProJobStatus.pending => {ProJobStatus.onTheWay, ProJobStatus.cancelled},
+        ProJobStatus.confirmed => {ProJobStatus.onTheWay, ProJobStatus.cancelled},
+        ProJobStatus.onTheWay => {ProJobStatus.arrived, ProJobStatus.cancelled},
+        ProJobStatus.arrived => {ProJobStatus.inProgress, ProJobStatus.cancelled},
+        ProJobStatus.inProgress => {ProJobStatus.completed, ProJobStatus.cancelled},
+        _ => {},
       };
 
   List<_StatusOption> _buildOptions(AppLocalizations l10n) => [
-    _StatusOption(
-      status: ProJobStatus.onTheWay,
-      title: l10n.statusOnTheWay,
-      subtitle: "Let the customer know you're heading over.",
-      icon: Icons.directions_car_outlined,
-    ),
-    _StatusOption(
-      status: ProJobStatus.arrived,
-      title: l10n.statusArrived,
-      subtitle: "You're at the client's location.",
-      icon: Icons.place_outlined,
-    ),
-    _StatusOption(
-      status: ProJobStatus.inProgress,
-      title: l10n.statusInProgress,
-      subtitle: "You've started the job.",
-      icon: Icons.settings_outlined,
-    ),
-    _StatusOption(
-      status: ProJobStatus.completed,
-      title: l10n.statusCompleted,
-      subtitle: "The job is done successfully.",
-      icon: Icons.check_circle_outline,
-    ),
-    _StatusOption(
-      status: ProJobStatus.cancelled,
-      title: l10n.cancelBooking,
-      subtitle: "Only use if the job can't be completed.",
-      icon: Icons.cancel_outlined,
-    ),
-  ];
+        _StatusOption(
+          status: ProJobStatus.onTheWay,
+          title: l10n.statusOnTheWay,
+          subtitle: "Let the customer know you're heading over.",
+          icon: Icons.directions_car_outlined,
+        ),
+        _StatusOption(
+          status: ProJobStatus.arrived,
+          title: l10n.statusArrived,
+          subtitle: "You're at the client's location.",
+          icon: Icons.place_outlined,
+        ),
+        _StatusOption(
+          status: ProJobStatus.inProgress,
+          title: l10n.statusInProgress,
+          subtitle: "You've started the job.",
+          icon: Icons.settings_outlined,
+        ),
+        _StatusOption(
+          status: ProJobStatus.completed,
+          title: l10n.statusCompleted,
+          subtitle: "The job is done successfully.",
+          icon: Icons.check_circle_outline,
+        ),
+        _StatusOption(
+          status: ProJobStatus.cancelled,
+          title: l10n.cancelBooking,
+          subtitle: "Only use if the job can't be completed.",
+          icon: Icons.cancel_outlined,
+        ),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -346,15 +371,15 @@ class _StatusSheetState extends State<_StatusSheet> {
 
                     // Status options
                     ..._buildOptions(AppLocalizations.of(ctx)!).map((opt) {
-                          final allowed = _allowedStatuses(widget.job.status);
-                          final isEnabled = allowed.contains(opt.status);
-                          return _StatusTile(
-                            option: opt,
-                            isSelected: _selected == opt.status,
-                            isEnabled: isEnabled,
-                            onTap: isEnabled ? () => setState(() => _selected = opt.status) : () {},
-                          );
-                        }),
+                      final allowed = _allowedStatuses(widget.job.status);
+                      final isEnabled = allowed.contains(opt.status);
+                      return _StatusTile(
+                        option: opt,
+                        isSelected: _selected == opt.status,
+                        isEnabled: isEnabled,
+                        onTap: isEnabled ? () => setState(() => _selected = opt.status) : () {},
+                      );
+                    }),
                     const SizedBox(height: 16),
 
                     // Confirm button
@@ -387,19 +412,16 @@ class _StatusSheetState extends State<_StatusSheet> {
                           backgroundColor: const Color(0xFFFF8C1A),
                           foregroundColor: Colors.white,
                           disabledBackgroundColor: Colors.grey.shade300,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           elevation: 0,
                         ),
                         child: isLoading
                             ? const SizedBox(
                                 width: 22,
                                 height: 22,
-                                child: CircularProgressIndicator(
-                                    color: Colors.white, strokeWidth: 2))
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                             : Text(AppLocalizations.of(ctx)!.confirmUpdate,
-                                style: const TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.w700)),
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                       ),
                     ),
                   ],
@@ -448,47 +470,41 @@ class _StatusTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Opacity(
-      opacity: isEnabled ? 1.0 : 0.4,
-      child: GestureDetector(
-      onTap: isEnabled ? onTap : null,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? const Color(0xFFFF8C1A) : Colors.grey.shade200,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(option.icon, color: _iconColor, size: 26),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(option.title,
-                      style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF062B4D))),
-                  const SizedBox(height: 3),
-                  Text(option.subtitle,
-                      style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                ],
+        opacity: isEnabled ? 1.0 : 0.4,
+        child: GestureDetector(
+          onTap: isEnabled ? onTap : null,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected ? const Color(0xFFFF8C1A) : Colors.grey.shade200,
+                width: isSelected ? 2 : 1,
               ),
             ),
-            if (isSelected)
-              const Icon(Icons.check_circle,
-                  color: Color(0xFFFF8C1A), size: 20),
-          ],
-        ),
-      ),
-    ));
+            child: Row(
+              children: [
+                Icon(option.icon, color: _iconColor, size: 26),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(option.title,
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFF062B4D))),
+                      const SizedBox(height: 3),
+                      Text(option.subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                    ],
+                  ),
+                ),
+                if (isSelected) const Icon(Icons.check_circle, color: Color(0xFFFF8C1A), size: 20),
+              ],
+            ),
+          ),
+        ));
   }
 }
 
@@ -524,8 +540,7 @@ class _Row extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (onTap != null)
-                  const Icon(Icons.open_in_new, size: 13, color: Color(0xFFFF8C1A)),
+                if (onTap != null) const Icon(Icons.open_in_new, size: 13, color: Color(0xFFFF8C1A)),
               ],
             ),
           ),

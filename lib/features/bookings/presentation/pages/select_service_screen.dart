@@ -47,7 +47,6 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
 
   bool _showServiceError = false;
   bool _showDescriptionError = false;
-  bool _showPictureError = false;
 
   static const Color darkBlue = Color(0xFF1A3A52);
   static const Color orange = Color(0xFFFF9800);
@@ -69,10 +68,7 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
       imageQuality: 85,
     );
     if (image != null) {
-      setState(() {
-        _pickedImages.add(File(image.path));
-        _showPictureError = false;
-      });
+      setState(() => _pickedImages.add(File(image.path)));
     }
   }
 
@@ -84,9 +80,8 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
     setState(() {
       _showServiceError = _selectedServiceIndex == null;
       _showDescriptionError = _descriptionController.text.trim().isEmpty;
-      _showPictureError = _pickedImages.isEmpty;
     });
-    return !_showServiceError && !_showDescriptionError && !_showPictureError;
+    return !_showServiceError && !_showDescriptionError;
   }
 
   void _onContinue() {
@@ -367,7 +362,7 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: (_showDescriptionError || _showPictureError) ? Border.all(color: errorRed, width: 1.5) : null,
+            border: _showDescriptionError ? Border.all(color: errorRed, width: 1.5) : null,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
@@ -427,6 +422,13 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
                   Text(
                     t.uploadPicture,
                     style: const TextStyle(color: darkBlue, fontSize: 14),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    Localizations.localeOf(context).languageCode == 'ar'
+                        ? '(اختياري)'
+                        : '(Optional)',
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
                   ),
                   const Spacer(),
                   GestureDetector(
@@ -518,14 +520,6 @@ class _SelectServiceScreenState extends State<SelectServiceScreen> {
             padding: const EdgeInsets.only(top: 6, left: 4),
             child: Text(
               t.descriptionRequired,
-              style: const TextStyle(color: errorRed, fontSize: 12),
-            ),
-          ),
-        if (_showPictureError)
-          Padding(
-            padding: const EdgeInsets.only(top: 4, left: 4),
-            child: Text(
-              t.pictureRequired,
               style: const TextStyle(color: errorRed, fontSize: 12),
             ),
           ),

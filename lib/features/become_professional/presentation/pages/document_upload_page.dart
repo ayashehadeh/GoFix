@@ -26,7 +26,16 @@ class DocumentUploadPage extends StatefulWidget {
 
 class _DocumentUploadPageState extends State<DocumentUploadPage> {
   final _picker = ImagePicker();
+  final _nameController = TextEditingController();
+  final _issuedYearController = TextEditingController();
   ActionStatus _previousUploadStatus = ActionStatus.idle;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _issuedYearController.dispose();
+    super.dispose();
+  }
 
   ActionStatus _statusFrom(BecomeProfessionalState state) {
     return widget.documentType == null
@@ -127,14 +136,27 @@ class _DocumentUploadPageState extends State<DocumentUploadPage> {
       return;
     }
 
+    if (widget.documentType == DocumentType.certification &&
+        _nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter the certification name.')),
+      );
+      return;
+    }
+
     final bloc = context.read<BecomeProfessionalBloc>();
     if (widget.documentType == null) {
-      // Path carried directly — no race condition
       bloc.add(UploadProfilePictureWithPathRequested(path));
     } else {
       bloc.add(UploadDocumentWithPathRequested(
         documentType: widget.documentType!,
         filePath: path,
+        name: widget.documentType == DocumentType.certification
+            ? _nameController.text.trim()
+            : null,
+        issuedYear: widget.documentType == DocumentType.certification
+            ? int.tryParse(_issuedYearController.text.trim())
+            : null,
       ));
     }
   }
@@ -199,44 +221,103 @@ class _DocumentUploadPageState extends State<DocumentUploadPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  widget.documentType == null
-                      ? t.uploadProfilePicture
-                      : t.uploadDoc(widget.title),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primaryDark,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  t.tapToChoosePhoto,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 24),
                 Expanded(
-                  child: GestureDetector(
-                    onTap: isLoading ? null : _pickPhoto,
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: AppColors.divider,
-                          width: 1.5,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.documentType == null
+                              ? t.uploadProfilePicture
+                              : t.uploadDoc(widget.title),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primaryDark,
+                          ),
                         ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: path == null
-                            ? _buildPlaceholder()
-                            : _buildPreview(path),
-                      ),
+                        const SizedBox(height: 6),
+                        Text(
+                          t.tapToChoosePhoto,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        GestureDetector(
+                          onTap: isLoading ? null : _pickPhoto,
+                          child: Container(
+                            width: double.infinity,
+                            height: 220,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: AppColors.divider,
+                                width: 1.5,
+                              ),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: path == null
+                                  ? _buildPlaceholder()
+                                  : _buildPreview(path),
+                            ),
+                          ),
+                        ),
+                        if (widget.documentType == DocumentType.certification) ...[
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: _nameController,
+                            decoration: InputDecoration(
+                              labelText: 'Certification Name *',
+                              hintText: 'e.g. Plumbing Level 2',
+                              filled: true,
+                              fillColor: Colors.white,
+                              floatingLabelStyle: const TextStyle(color: AppColors.primaryOrange),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: AppColors.divider),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: AppColors.divider),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(color: AppColors.primaryOrange),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextField(
+                            controller: _issuedYearController,
+                            keyboardType: TextInputType.number,
+                            maxLength: 4,
+                            decoration: InputDecoration(
+                              labelText: 'Issued Year (optional)',
+                              hintText: 'e.g. 2021',
+                              counterText: '',
+                              filled: true,
+                              fillColor: Colors.white,
+                              floatingLabelStyle: const TextStyle(color: AppColors.primaryOrange),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: AppColors.divider),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: AppColors.divider),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(color: AppColors.primaryOrange),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ),
