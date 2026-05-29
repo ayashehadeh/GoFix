@@ -732,7 +732,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
                           onTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(builder: (_) => const PersonalInformationPage()),
-                              )),
+                              ).then((_) { if (mounted) _loadUserInfo(); })),
                       _menuItem(context, Icons.notifications, t.notifications,
                           onTap: () => Navigator.push(
                                 context,
