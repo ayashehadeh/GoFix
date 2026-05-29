@@ -58,5 +58,10 @@ flutter:
     - assets/approved_balloons.svg
     - assets/inqueue_phone.svg
     - assets/notapproved_clock.svg
+    - assets/gofix-logo.png
+    - assets/gofix-logo-color.png
+    - assets/scene-handyman.png
+    - assets/scene-house.png
+    - assets/scene-moon.png
   uses-material-design: true
   generate: true
