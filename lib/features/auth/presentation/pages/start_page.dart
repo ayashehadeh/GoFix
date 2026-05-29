@@ -61,18 +61,13 @@ class _StartPageState extends State<StartPage>
 
           return Stack(
             children: [
-              // ── dark sky background ──────────────────────────────────────
-              Positioned.fill(
-                child: _SkyLayer(sw: sw, sh: sh),
-              ),
+              // Sky background with all scene elements
+              Positioned.fill(child: _SkyLayer(sw: sw, sh: sh)),
 
-              // ── fading content ───────────────────────────────────────────
-              Opacity(
-                opacity: contentOpacity,
-                child: _buildContent(context),
-              ),
+              // Bottom content fades in
+              Opacity(opacity: contentOpacity, child: _buildContent(context)),
 
-              // ── animated badge ───────────────────────────────────────────
+              // Animated badge (circle → pill)
               Positioned(
                 left: bLeft,
                 top: bTop,
@@ -94,24 +89,21 @@ class _StartPageState extends State<StartPage>
                     borderRadius: BorderRadius.circular(bRadius),
                     child: Row(
                       children: [
-                        // logo image
                         SizedBox(
                           width: bH,
                           height: bH,
                           child: Padding(
                             padding: EdgeInsets.all(bH * 0.07),
                             child: Image.asset(
-                              'assets/logo3.png',
+                              'assets/gofix-logo-color.png',
                               fit: BoxFit.contain,
                             ),
                           ),
                         ),
-                        // text
                         Opacity(
                           opacity: textOpacity,
                           child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,11 +151,7 @@ class _StartPageState extends State<StartPage>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.star_rounded,
-                color: Color(0xFFD4952A),
-                size: 26,
-              ),
+              const Icon(Icons.star_rounded, color: Color(0xFFD4952A), size: 26),
               const SizedBox(height: 4),
               const Text(
                 'Anything broken?',
@@ -196,65 +184,54 @@ class _StartPageState extends State<StartPage>
               const SizedBox(height: 28),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => BlocProvider.value(
-                        value: context.read<AuthBloc>(),
-                        child: const Signup(),
-                      ),
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => BlocProvider.value(
+                      value: context.read<AuthBloc>(),
+                      child: const Signup(),
                     ),
-                  );
+                  ));
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.accent,
                   minimumSize: const Size(double.infinity, 54),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
+                      borderRadius: BorderRadius.circular(30)),
                   elevation: 0,
                 ),
                 child: const Text(
                   'Get Started',
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 16),
               Center(
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => BlocProvider.value(
-                          value: context.read<AuthBloc>(),
-                          child: const SigninPage(),
-                        ),
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => BlocProvider.value(
+                        value: context.read<AuthBloc>(),
+                        child: const SigninPage(),
                       ),
-                    );
+                    ));
                   },
                   child: RichText(
-                    text: const TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Already with us? ',
-                          style: TextStyle(
-                            color: Color(0x99FFFFFF),
-                            fontSize: 14,
-                          ),
-                        ),
-                        TextSpan(
-                          text: 'Sign in',
-                          style: TextStyle(
+                    text: const TextSpan(children: [
+                      TextSpan(
+                        text: 'Already with us? ',
+                        style:
+                            TextStyle(color: Color(0x99FFFFFF), fontSize: 14),
+                      ),
+                      TextSpan(
+                        text: 'Sign in',
+                        style: TextStyle(
                             color: AppColors.accent,
                             fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ]),
                   ),
                 ),
               ),
@@ -266,7 +243,7 @@ class _StartPageState extends State<StartPage>
   }
 }
 
-// ── Sky layer with all decorative elements ───────────────────────────────────
+// ── Sky layer ────────────────────────────────────────────────────────────────
 
 class _SkyLayer extends StatelessWidget {
   const _SkyLayer({required this.sw, required this.sh});
@@ -278,40 +255,13 @@ class _SkyLayer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Crescent moon
+        // Moon image
         Positioned(
-          right: sw * 0.10,
-          top: sh * 0.28,
-          child: SizedBox(
-            width: 68,
-            height: 68,
-            child: Stack(
-              children: [
-                // cream circle
-                Container(
-                  width: 68,
-                  height: 68,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color(0xFFF0D9A0),
-                  ),
-                ),
-                // dark overlay to carve crescent
-                Positioned(
-                  left: -20,
-                  top: -16,
-                  child: Container(
-                    width: 64,
-                    height: 64,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0xFF0B1A2E),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          right: sw * 0.08,
+          top: sh * 0.26,
+          width: sw * 0.22,
+          height: sw * 0.22,
+          child: Image.asset('assets/scene-moon.png', fit: BoxFit.contain),
         ),
 
         // White star dots
@@ -345,7 +295,7 @@ class _SkyLayer extends StatelessWidget {
             ),
           ),
 
-        // Buildings
+        // City buildings
         Positioned(
           left: 0,
           right: 0,
@@ -354,87 +304,62 @@ class _SkyLayer extends StatelessWidget {
           child: CustomPaint(painter: _BuildingsPainter()),
         ),
 
-        // House roof outline (orange)
+        // House scene
         Positioned(
-          left: sw * 0.15,
-          right: sw * 0.15,
-          bottom: sh * 0.30,
-          height: 100,
-          child: CustomPaint(painter: _RoofPainter()),
+          left: sw * 0.10,
+          right: sw * 0.10,
+          bottom: sh * 0.28,
+          height: sh * 0.22,
+          child: Image.asset('assets/scene-house.png', fit: BoxFit.contain),
         ),
 
+        // Handyman / character
+        Positioned(
+          left: sw * 0.28,
+          right: sw * 0.28,
+          bottom: sh * 0.25,
+          height: sh * 0.20,
+          child: Image.asset('assets/scene-handyman.png', fit: BoxFit.contain),
+        ),
       ],
     );
   }
 
-  // white dots  [relX, relY, size]
   static const List<List<double>> _dots = [
-    [0.13, 0.20, 2.5],
-    [0.35, 0.15, 2.0],
-    [0.55, 0.11, 2.5],
-    [0.67, 0.24, 2.0],
-    [0.85, 0.18, 2.0],
-    [0.10, 0.46, 2.0],
-    [0.76, 0.42, 2.0],
-    [0.44, 0.50, 1.8],
-    [0.88, 0.50, 2.0],
-    [0.28, 0.55, 1.8],
+    [0.13, 0.18, 2.5],
+    [0.35, 0.13, 2.0],
+    [0.55, 0.09, 2.5],
+    [0.67, 0.22, 2.0],
+    [0.85, 0.16, 2.0],
+    [0.10, 0.44, 2.0],
+    [0.76, 0.40, 2.0],
+    [0.44, 0.48, 1.8],
+    [0.88, 0.48, 2.0],
+    [0.28, 0.53, 1.8],
   ];
 
-  // orange + signs  [relX, relY, scale]
   static const List<List<double>> _plusses = [
-    [0.06, 0.38, 2.4],
-    [0.44, 0.32, 2.8],
-    [0.64, 0.25, 2.2],
+    [0.06, 0.36, 2.4],
+    [0.44, 0.30, 2.8],
+    [0.64, 0.23, 2.2],
   ];
-}
-
-class _RoofPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFFD4952A)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    canvas.drawPath(
-      Path()
-        ..moveTo(0, size.height)
-        ..lineTo(size.width / 2, 0)
-        ..lineTo(size.width, size.height),
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter old) => false;
 }
 
 class _BuildingsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..color = const Color(0xFF112240);
-
-    // [relLeft, relTop, relWidth]
-    const buildings = [
+    for (final b in const [
       [0.00, 0.45, 0.14],
       [0.12, 0.10, 0.12],
       [0.36, 0.20, 0.10],
       [0.54, 0.15, 0.14],
       [0.76, 0.35, 0.12],
       [0.87, 0.55, 0.13],
-    ];
-
-    for (final b in buildings) {
+    ]) {
       canvas.drawRect(
-        Rect.fromLTWH(
-          size.width * b[0],
-          size.height * b[1],
-          size.width * b[2],
-          size.height * (1.0 - b[1]),
-        ),
+        Rect.fromLTWH(size.width * b[0], size.height * b[1],
+            size.width * b[2], size.height * (1.0 - b[1])),
         paint,
       );
     }

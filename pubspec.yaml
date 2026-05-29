@@ -43,6 +43,11 @@ flutter:
     - assets/logo.png
     - assets/logo2.png
     - assets/logo3.png
+    - assets/gofix-logo.png
+    - assets/gofix-logo-color.png
+    - assets/scene-handyman.png
+    - assets/scene-house.png
+    - assets/scene-moon.png
     - assets/reset_password.png
     - assets/Password_changed.png
     - assets/email_verification.png

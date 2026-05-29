@@ -207,7 +207,7 @@ class _SplashRouterState extends State<_SplashRouter>
                   child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: Image.asset(
-                      'assets/logo3.png',
+                      'assets/gofix-logo-color.png',
                       fit: BoxFit.contain,
                     ),
                   ),
