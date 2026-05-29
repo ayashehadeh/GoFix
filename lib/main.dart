@@ -196,10 +196,22 @@ class _SplashRouterState extends State<_SplashRouter>
           children: [
             RotationTransition(
               turns: _rotateCtrl,
-              child: Image.asset(
-                'assets/logo2.png',
+              child: Container(
                 width: 180,
                 height: 180,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                ),
+                child: ClipOval(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Image.asset(
+                      'assets/logo3.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 48),

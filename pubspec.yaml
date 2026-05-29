@@ -42,6 +42,7 @@ flutter:
     - assets/home_screen/
     - assets/logo.png
     - assets/logo2.png
+    - assets/logo3.png
     - assets/reset_password.png
     - assets/Password_changed.png
     - assets/email_verification.png
