@@ -16,6 +16,7 @@ import 'package:gp/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:gp/features/chat/presentation/pages/chat_page.dart';
 import 'package:gp/injection_container.dart' as di;
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/l10n/area_name_l10n.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
 import 'package:gp/core/widgets/skeletons/professional_detail_skeleton.dart';
 import 'package:gp/features/professionals/domain/entities/service_category.dart';
@@ -464,7 +465,7 @@ class _AboutTab extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: AppColors.divider),
                     ),
-                    child: Text(area.name, style: AppTextStyles.bodySmall),
+                    child: Text(localizeAreaName(area.name, l10n, nameAr: area.nameAr), style: AppTextStyles.bodySmall),
                   ),
                 )
                 .toList(),

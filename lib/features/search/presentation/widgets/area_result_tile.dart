@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/features/search/domain/entities/search_result.dart';
+import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/l10n/area_name_l10n.dart';
 
 class AreaResultTile extends StatelessWidget {
   final AreaResult area;
@@ -16,6 +18,9 @@ class AreaResultTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final localizedName = localizeAreaName(area.name, l10n, nameAr: area.nameAr);
+    final localizedCity = localizeCityName(area.city, l10n, nameAr: area.cityNameAr);
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -44,10 +49,10 @@ class AreaResultTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _HighlightedText(text: area.name, query: query),
+                  _HighlightedText(text: localizedName, query: query),
                   const SizedBox(height: 2),
                   Text(
-                    '${area.city} · ${area.proCount} pros serve here',
+                    '$localizedCity · ${area.proCount} pros serve here',
                     style: const TextStyle(
                         fontSize: 12, color: Color(0xFF888888)),
                   ),

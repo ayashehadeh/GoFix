@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/l10n/area_name_l10n.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
 import 'package:gp/core/theme/app_text_styles.dart';
 import 'package:gp/features/become_professional/presentation/pages/edit_certifications_screen.dart';
@@ -383,7 +384,7 @@ class _AboutTab extends StatelessWidget {
                             border: Border.all(color: AppColors.divider),
                           ),
                           child: Text(
-                            area.name,
+                            localizeAreaName(area.name, l10n, nameAr: area.nameAr),
                             style: AppTextStyles.bodySmall,
                           ),
                         ),
