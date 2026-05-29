@@ -363,20 +363,6 @@ class _SkyLayer extends StatelessWidget {
           child: CustomPaint(painter: _RoofPainter()),
         ),
 
-        // Mascot / man in background (semi-transparent)
-        Positioned(
-          left: sw * 0.25,
-          right: sw * 0.25,
-          bottom: sh * 0.22,
-          height: sh * 0.20,
-          child: Opacity(
-            opacity: 0.55,
-            child: Image.asset(
-              'assets/logo2.png',
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
       ],
     );
   }
