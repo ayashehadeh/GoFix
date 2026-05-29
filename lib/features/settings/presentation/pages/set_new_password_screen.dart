@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/core/theme/app_text_styles.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/features/settings/presentation/bloc/set_password_bloc.dart';
 import 'package:gp/features/settings/presentation/widgets/password_field.dart';
 import 'package:gp/l10n/app_localizations.dart';
@@ -86,23 +87,13 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
         listener: (context, state) {
           if (state is SetPasswordSuccess) {
             final t = AppLocalizations.of(context)!;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(t.passwordChangedSuccess),
-                backgroundColor: AppColors.primaryOrange,
-              ),
-            );
+            showSuccessSnackbar(context, t.passwordChangedSuccess);
             Navigator.of(context)
               ..pop()
               ..pop();
           }
           if (state is SetPasswordError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-              ),
-            );
+            showErrorSnackbar(context, state.message);
           }
         },
         child: SafeArea(

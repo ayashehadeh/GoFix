@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/core/favorites/favorites_cache.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_event.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_state.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -117,9 +118,7 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
               ),
             );
           } else if (state is ChatError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            showErrorSnackbar(context, state.message);
           }
         },
         child: Scaffold(
@@ -127,12 +126,7 @@ class _ProfessionalDetailPageState extends State<ProfessionalDetailPage> {
           body: BlocConsumer<ProfessionalsBloc, ProfessionalsState>(
             listener: (context, state) {
               if (state is ReviewActionSuccess) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: AppColors.primaryOrange,
-                  ),
-                );
+                showWarningSnackbar(context, state.message);
                 context.read<ProfessionalsBloc>().add(
                       LoadProfessionalDetail(widget.professionalId),
                     );

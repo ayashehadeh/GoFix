@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/features/professional_dashboard/presentation/bloc/professional_dashboard_bloc.dart';
 import 'package:gp/features/professional_dashboard/presentation/bloc/professional_dashboard_event.dart';
 import 'package:gp/features/professional_dashboard/presentation/bloc/professional_dashboard_state.dart';
@@ -67,12 +68,7 @@ class _PaymentAmountSheetState extends State<_PaymentAmountSheet> {
               Navigator.pop(context);
               widget.onSuccess?.call();
               if (widget.pageContext.mounted) {
-                ScaffoldMessenger.of(widget.pageContext).showSnackBar(
-                  const SnackBar(
-                    content: Text('Amount submitted. Waiting for customer confirmation.'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
+                showSuccessSnackbar(widget.pageContext, 'Amount submitted. Waiting for customer confirmation.');
               }
             }
           },

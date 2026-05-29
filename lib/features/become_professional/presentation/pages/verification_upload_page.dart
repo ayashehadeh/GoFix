@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/snackbar_helper.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/document_type.dart';
 import '../bloc/become_professional_bloc.dart';
@@ -50,9 +51,7 @@ class _VerificationUploadPageState extends State<VerificationUploadPage> {
   }
 
   void _showSnack(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
-    );
+    showErrorSnackbar(context, msg);
   }
 
   Future<void> _openUpload({

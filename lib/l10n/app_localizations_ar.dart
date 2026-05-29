@@ -1390,7 +1390,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get selectAddress => 'اختر العنوان';
 
   @override
-  String get noSavedAddresses => 'لا توجد عناوين محفوظة. يرجى إضافة عنوان من الإعدادات.';
+  String get noSavedAddresses => 'لا توجد عناوين محفوظة.';
+
+  @override
+  String get addAddress => 'إضافة عنوان';
 
   @override
   String get loadingAddresses => 'جاري تحميل العناوين...';

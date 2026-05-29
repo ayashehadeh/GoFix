@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -96,12 +97,7 @@ class _CancelSheet extends StatelessWidget {
     return BlocConsumer<BookingsBloc, BookingsState>(
       listener: (context, state) {
         if (state is BookingsError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: AppColors.error,
-            ),
-          );
+          showErrorSnackbar(context, state.message);
           Navigator.of(context).pop();
         }
       },

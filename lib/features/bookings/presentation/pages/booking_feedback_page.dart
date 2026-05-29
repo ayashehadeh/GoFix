@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
 import '../../../../injection_container.dart' as di;
@@ -42,13 +43,7 @@ class _BookingFeedbackPageState extends State<BookingFeedbackPage> {
     Navigator.of(context).pop();
     Navigator.of(context).pop();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: const Color(0xFFFF8C1A),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showSuccessSnackbar(context, message);
     });
   }
 
@@ -214,9 +209,7 @@ class _ReviewSheetState extends State<_ReviewSheet> {
     result.fold(
       (failure) {
         setState(() => _submitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(failure.message), backgroundColor: Colors.red),
-        );
+        showErrorSnackbar(context, failure.message);
       },
       (_) => widget.onSuccess(),
     );
@@ -347,9 +340,7 @@ class _ReportSheetState extends State<_ReportSheet> {
       listener: (ctx, state) {
         if (state is BookingActionSuccess) widget.onSuccess();
         if (state is BookingsError) {
-          ScaffoldMessenger.of(ctx).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-          );
+          showErrorSnackbar(ctx, state.message);
         }
       },
       builder: (ctx, state) {

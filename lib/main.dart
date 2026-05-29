@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:gp/core/bloc/app_bloc_observer.dart';
 import 'package:gp/core/bloc/locale_bloc.dart';
 import 'package:gp/core/storage/token_storage.dart';
 import 'package:gp/core/storage/user_type_storage.dart';
@@ -18,6 +19,7 @@ import 'package:gp/injection_container.dart' as di;
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:dio/dio.dart';
 import 'package:gp/features/auth/presentation/pages/start_page.dart';
+import 'package:gp/core/utils/app_navigator.dart';
 import 'package:gp/core/utils/statuschecker.dart';
 
 @pragma('vm:entry-point')
@@ -30,6 +32,8 @@ Future<void> main() async {
 
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  Bloc.observer = AppBlocObserver();
 
   await di.init();
   await _registerFcmToken();
@@ -78,6 +82,7 @@ class MainApp extends StatelessWidget {
       builder: (context, localeState) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
+          navigatorKey: appNavigatorKey,
           locale: localeState.locale,
           localizationsDelegates: const [
             AppLocalizations.delegate,

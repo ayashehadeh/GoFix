@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/snackbar_helper.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../l10n/service_name_l10n.dart';
 import '../../domain/entities/booking.dart';
@@ -112,21 +113,11 @@ class _ReportSheetState extends State<_ReportSheet> {
       listener: (context, state) {
         if (state is BookingActionSuccess) {
           Navigator.of(context).pop(); // close sheet
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(t.reportSubmittedSuccess),
-              backgroundColor: AppColors.primaryOrange,
-            ),
-          );
+          showSuccessSnackbar(context, t.reportSubmittedSuccess);
           Navigator.of(context).popUntil((route) => route.isFirst);
         }
         if (state is BookingsError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: AppColors.error,
-            ),
-          );
+          showErrorSnackbar(context, state.message);
         }
       },
       builder: (context, state) {

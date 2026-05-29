@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/core/theme/app_colors.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -53,9 +54,7 @@ class _ResetPassword2State extends State<ResetPassword2> {
           );
         }
         if (state is AuthError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-          );
+          showErrorSnackbar(context, state.message);
         }
       },
       builder: (context, state) {

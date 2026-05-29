@@ -3,20 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/features/settings/data/repositories/profile_repository_impl.dart';
-import 'package:gp/features/settings/presentation/pages/update_email_page.dart';
 import 'package:gp/features/settings/presentation/pages/update_field_page.dart';
 import 'package:gp/features/settings/presentation/pages/update_phone_page.dart';
 import 'package:gp/features/settings/presentation/pages/update_dob_page.dart';
 import 'package:gp/features/settings/presentation/pages/update_gender_page.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:shimmer/shimmer.dart';
 
 class PersonalInformationPage extends StatefulWidget {
   const PersonalInformationPage({super.key});
 
   @override
-  State<PersonalInformationPage> createState() =>
-      _PersonalInformationPageState();
+  State<PersonalInformationPage> createState() => _PersonalInformationPageState();
 }
 
 class _PersonalInformationPageState extends State<PersonalInformationPage> {
@@ -113,12 +112,11 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
   }
 
   void _showSnackbar(String message, {bool success = true}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: success ? Colors.green : Colors.red,
-      ),
-    );
+    if (success) {
+      showSuccessSnackbar(context, message);
+    } else {
+      showErrorSnackbar(context, message);
+    }
   }
 
   @override
@@ -144,6 +142,8 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
     );
   }
 
+  // ── Skeleton ─────────────────────────────────────────────────────────────────
+
   Widget _buildSkeleton() {
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -166,89 +166,47 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
             child: Column(
               children: List.generate(5, (i) => _SkeletonTile(isLast: i == 4)),
             ),
-            const SizedBox(height: 8),
-            const Divider(thickness: 1),
-            Expanded(
-              child: _loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : ListView(
-                      children: [
-                        _InfoTile(
-                          label: t.nameLabelField,
-                          value: name,
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => UpdateFieldPage(
-                                  title: t.updateYourName,
-                                  subtitle: t.namePersonalizeExp,
-                                  hint: t.enterNewName,
-                                  onUpdate: _updateName,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        _InfoTile(
-                          label: t.phoneNumberField,
-                          value: phone,
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => UpdatePhonePage(
-                                  onUpdate: _updatePhone,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        _InfoTile(
-                          label: t.emailField,
-                          value: email,
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => UpdateEmailPage(
-                                  onUpdate: _updateEmail,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        _InfoTile(
-                          label: t.dateOfBirthField,
-                          value: dob,
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => UpdateDobPage(
-                                  currentDob: dob,
-                                  onUpdate: _updateDob,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        _InfoTile(
-                          label: t.genderField,
-                          value: gender,
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => UpdateGenderPage(
-                                  currentGender: gender,
-                                  onUpdate: _updateGender,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── Content ──────────────────────────────────────────────────────────────────
+
+  Widget _buildContent(AppLocalizations t) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              _InfoTile(
+                icon: Icons.person_outline,
+                label: t.nameLabelField,
+                value: name,
+                isLast: false,
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => UpdateFieldPage(
+                        title: t.updateYourName,
+                        subtitle: t.namePersonalizeExp,
+                        hint: t.enterNewName,
+                        onUpdate: _updateName,
+                      ),
                     ),
                   );
                 },
@@ -351,9 +309,7 @@ class _InfoTile extends StatelessWidget {
       children: [
         InkWell(
           onTap: onTap,
-          borderRadius: isLast
-              ? const BorderRadius.vertical(bottom: Radius.circular(14))
-              : BorderRadius.zero,
+          borderRadius: isLast ? const BorderRadius.vertical(bottom: Radius.circular(14)) : BorderRadius.zero,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             child: Row(
@@ -392,8 +348,7 @@ class _InfoTile extends StatelessWidget {
             ),
           ),
         ),
-        if (!isLast)
-          const Divider(height: 1, indent: 52, endIndent: 16),
+        if (!isLast) const Divider(height: 1, indent: 52, endIndent: 16),
       ],
     );
   }
@@ -449,8 +404,7 @@ class _SkeletonTile extends StatelessWidget {
             ],
           ),
         ),
-        if (!isLast)
-          Container(height: 1, color: Colors.white),
+        if (!isLast) Container(height: 1, color: Colors.white),
       ],
     );
   }

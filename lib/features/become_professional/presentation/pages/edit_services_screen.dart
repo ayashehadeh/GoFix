@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/core/constants/app_colors.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/features/become_professional/presentation/bloc/become_professional_bloc.dart';
 import 'package:gp/features/become_professional/presentation/bloc/become_professional_event.dart';
 import 'package:gp/features/become_professional/presentation/bloc/become_professional_state.dart';
@@ -39,12 +40,7 @@ class _EditServicesView extends StatelessWidget {
               prev.errorMessage != curr.errorMessage &&
               curr.errorMessage != null,
           listener: (context, state) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.errorMessage!),
-                backgroundColor: AppColors.error,
-              ),
-            );
+            showErrorSnackbar(context, state.errorMessage!);
           },
           child: Column(
             children: [

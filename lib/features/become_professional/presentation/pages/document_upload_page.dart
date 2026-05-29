@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/snackbar_helper.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/document_type.dart';
 import '../bloc/become_professional_bloc.dart';
@@ -112,12 +113,7 @@ class _DocumentUploadPageState extends State<DocumentUploadPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Could not pick image: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        showErrorSnackbar(context, 'Could not pick image: $e');
       }
     }
   }
@@ -127,20 +123,13 @@ class _DocumentUploadPageState extends State<DocumentUploadPage> {
     final path = _pathFrom(state);
     if (path == null) {
       final t = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(t.pleaseChoosePhotoFirst),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      showWarningSnackbar(context, t.pleaseChoosePhotoFirst);
       return;
     }
 
     if (widget.documentType == DocumentType.certification &&
         _nameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter the certification name.')),
-      );
+      showWarningSnackbar(context, 'Please enter the certification name.');
       return;
     }
 
@@ -192,21 +181,11 @@ class _DocumentUploadPageState extends State<DocumentUploadPage> {
           if (_previousUploadStatus == ActionStatus.loading &&
               status == ActionStatus.success) {
             final t = AppLocalizations.of(context)!;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(t.uploadedSuccessfully),
-                backgroundColor: AppColors.primaryOrange,
-              ),
-            );
+            showSuccessSnackbar(context, t.uploadedSuccessfully);
             Navigator.pop(context);
           } else if (status == ActionStatus.failure &&
               state.errorMessage != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.errorMessage!),
-                backgroundColor: AppColors.error,
-              ),
-            );
+            showErrorSnackbar(context, state.errorMessage!);
           }
           _previousUploadStatus = status;
         },

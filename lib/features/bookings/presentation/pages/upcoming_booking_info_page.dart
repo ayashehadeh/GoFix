@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/core/widgets/fullscreen_image_viewer.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
@@ -53,12 +54,7 @@ class _UpcomingBookingInfoPageState extends State<UpcomingBookingInfoPage> {
               ),
             );
           } else if (state is ChatError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-              ),
-            );
+            showErrorSnackbar(context, state.message);
           }
         },
         child: Scaffold(
@@ -87,23 +83,13 @@ class _UpcomingBookingInfoPageState extends State<UpcomingBookingInfoPage> {
                 );
               }
               if (state is ConfirmPaymentSuccess) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(AppLocalizations.of(context)!.paymentConfirmedMoved),
-                    backgroundColor: Colors.green,
-                  ),
-                );
+                showSuccessSnackbar(context, AppLocalizations.of(context)!.paymentConfirmedMoved);
                 Navigator.of(context).popUntil(
                   (route) => route.settings.name == '/bookings' || route.isFirst,
                 );
               }
               if (state is ConfirmPaymentError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: Colors.red,
-                  ),
-                );
+                showErrorSnackbar(context, state.message);
               }
             },
             builder: (context, state) {

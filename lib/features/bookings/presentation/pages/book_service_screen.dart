@@ -9,8 +9,9 @@ import 'package:gp/features/bookings/presentation/pages/book_details_screen.dart
 import 'package:gp/features/professionals/domain/entities/working_hours.dart' as wh;
 import 'package:gp/features/settings/domain/entities/address_entity.dart';
 import 'package:gp/features/settings/presentation/bloc/address_bloc.dart';
+import 'package:gp/features/settings/presentation/pages/addresses_screen.dart';
 import 'package:gp/injection_container.dart' as di;
-import 'package:gp/core/constants/app_colors.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/l10n/app_localizations.dart';
 
 class BookServiceScreen extends StatefulWidget {
@@ -186,18 +187,24 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
       _loadingSlots = true;
       _bookedHours = {};
     });
-    final repo = di.sl<BookingsRepository>();
-    final result = await repo.getBookedSlots(widget.professionalId, date);
-    result.fold(
-      (_) {}, // on error, show all slots as available
-      (slots) {
-        setState(() {
-          _bookedHours =
-              slots.map(_parseHourFromTimeString).whereType<int>().toSet();
-        });
-      },
-    );
-    if (mounted) setState(() => _loadingSlots = false);
+    try {
+      final repo = di.sl<BookingsRepository>();
+      final result = await repo.getBookedSlots(widget.professionalId, date);
+      if (!mounted) return;
+      result.fold(
+        (_) {}, // on error, show all slots as available
+        (slots) {
+          setState(() {
+            _bookedHours =
+                slots.map(_parseHourFromTimeString).whereType<int>().toSet();
+          });
+        },
+      );
+    } catch (_) {
+      // silently ignore — all slots remain available
+    } finally {
+      if (mounted) setState(() => _loadingSlots = false);
+    }
   }
 
   // ── Event handlers ──────────────────────────────────────────────────────────
@@ -250,11 +257,43 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
           const SizedBox(height: 8),
           if (addresses.isEmpty)
             Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(
-                t.noSavedAddresses,
-                style: const TextStyle(color: Colors.grey),
-                textAlign: TextAlign.center,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              child: Column(
+                children: [
+                  Text(
+                    t.noSavedAddresses,
+                    style: const TextStyle(color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider.value(
+                            value: context.read<AddressBloc>(),
+                            child: const AddressesScreen(),
+                          ),
+                        ),
+                      ).then((_) {
+                        if (mounted) {
+                          context.read<AddressBloc>().add(const GetAddressesEvent());
+                        }
+                      });
+                    },
+                    icon: const Icon(Icons.add_location_alt_outlined, size: 18),
+                    label: Text(t.addAddress),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _orange,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             )
           else
@@ -299,12 +338,7 @@ class _BookServiceScreenState extends State<BookServiceScreen> {
     final selectedDate = dates[selectedDateIndex];
     final today = DateTime.now();
     if (selectedDate.isBefore(DateTime(today.year, today.month, today.day))) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.cannotBookPastDate),
-          backgroundColor: AppColors.primaryOrange,
-        ),
-      );
+      showWarningSnackbar(context, AppLocalizations.of(context)!.cannotBookPastDate);
       return false;
     }
     return true;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -79,12 +80,7 @@ class _ServicesPricingPageState extends State<ServicesPricingPage> {
   void _onContinuePressed() {
     final services = context.read<BecomeProfessionalBloc>().state.application.services;
     if (services.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.atLeastOneService),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      showWarningSnackbar(context, AppLocalizations.of(context)!.atLeastOneService);
       return;
     }
     context.read<BecomeProfessionalBloc>().add(const SubmitStep2());

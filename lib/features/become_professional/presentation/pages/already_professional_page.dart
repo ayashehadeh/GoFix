@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get_it/get_it.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/snackbar_helper.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../data/datasources/become_professional_remote_datasource.dart';
 import '../../data/repositories/become_professional_repository_impl.dart';
@@ -115,9 +116,7 @@ class _AlreadyProfessionalPageState extends State<AlreadyProfessionalPage> {
     setState(() => _isLoading = false);
 
     result.fold(
-      (failure) => ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(failure.message), backgroundColor: AppColors.error),
-      ),
+      (failure) => showErrorSnackbar(context, failure.message),
       (_) => Navigator.of(context).pushNamedAndRemoveUntil('/home', (_) => false),
     );
   }
