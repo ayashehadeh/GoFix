@@ -51,7 +51,7 @@ class _StartPageState extends State<StartPage>
           final t = Curves.easeInOut.transform(_ctrl.value);
 
           final bH = _lerp(200.0, 50.0, t);
-          final bW = _lerp(200.0, 168.0, t);
+          final bW = _lerp(200.0, 155.0, t);
           final bLeft = _lerp(sw / 2 - 100, 16.0, t);
           final bTop = _lerp(sh / 2 - 100, topPad + 16.0, t);
           final bRadius = bH / 2;
@@ -103,30 +103,35 @@ class _StartPageState extends State<StartPage>
                       ),
                       Opacity(
                         opacity: textOpacity,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'HOME SERVICES',
-                                style: TextStyle(
-                                  fontSize: 8,
-                                  color: AppColors.accent,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.8,
+                        child: SizedBox(
+                          width: 90,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'HOME SERVICES',
+                                  style: TextStyle(
+                                    fontSize: 7,
+                                    color: AppColors.accent,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.5,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
-                              Text(
-                                'GoFix',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.bold,
+                                Text(
+                                  'GoFix',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),

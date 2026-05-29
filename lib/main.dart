@@ -114,16 +114,22 @@ class _SplashRouter extends StatefulWidget {
 }
 
 class _SplashRouterState extends State<_SplashRouter>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _rotateCtrl;
+  late AnimationController _loadingCtrl;
 
   @override
   void initState() {
     super.initState();
     _rotateCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 3),
     )..repeat();
+
+    _loadingCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 5),
+    )..forward();
 
     _route();
   }
@@ -131,11 +137,11 @@ class _SplashRouterState extends State<_SplashRouter>
   @override
   void dispose() {
     _rotateCtrl.dispose();
+    _loadingCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _route() async {
-    // Always show splash for at least 5 seconds
     final results = await Future.wait([
       TokenStorage.isLoggedIn(),
       Future.delayed(const Duration(seconds: 5)),
@@ -181,16 +187,48 @@ class _SplashRouterState extends State<_SplashRouter>
 
   @override
   Widget build(BuildContext context) {
+    final sw = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: const Color(0xFF062B54),
       body: Center(
-        child: RotationTransition(
-          turns: _rotateCtrl,
-          child: Image.asset(
-            'assets/logo2.png',
-            width: 180,
-            height: 180,
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            RotationTransition(
+              turns: _rotateCtrl,
+              child: Image.asset(
+                'assets/logo2.png',
+                width: 180,
+                height: 180,
+              ),
+            ),
+            const SizedBox(height: 48),
+            // Loading bar
+            AnimatedBuilder(
+              animation: _loadingCtrl,
+              builder: (context, _) {
+                return Container(
+                  width: sw * 0.6,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      width: sw * 0.6 * _loadingCtrl.value,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF8C1A),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
