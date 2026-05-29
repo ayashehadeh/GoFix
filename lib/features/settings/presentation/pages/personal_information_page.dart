@@ -166,89 +166,45 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
             child: Column(
               children: List.generate(5, (i) => _SkeletonTile(isLast: i == 4)),
             ),
-            const SizedBox(height: 8),
-            const Divider(thickness: 1),
-            Expanded(
-              child: _loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : ListView(
-                      children: [
-                        _InfoTile(
-                          label: t.nameLabelField,
-                          value: name,
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => UpdateFieldPage(
-                                  title: t.updateYourName,
-                                  subtitle: t.namePersonalizeExp,
-                                  hint: t.enterNewName,
-                                  onUpdate: _updateName,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        _InfoTile(
-                          label: t.phoneNumberField,
-                          value: phone,
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => UpdatePhonePage(
-                                  onUpdate: _updatePhone,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        _InfoTile(
-                          label: t.emailField,
-                          value: email,
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => UpdateEmailPage(
-                                  onUpdate: _updateEmail,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        _InfoTile(
-                          label: t.dateOfBirthField,
-                          value: dob,
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => UpdateDobPage(
-                                  currentDob: dob,
-                                  onUpdate: _updateDob,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        _InfoTile(
-                          label: t.genderField,
-                          value: gender,
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => UpdateGenderPage(
-                                  currentGender: gender,
-                                  onUpdate: _updateGender,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildContent(AppLocalizations t) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              _InfoTile(
+                icon: Icons.person_outline,
+                label: t.nameLabelField,
+                value: name,
+                isLast: false,
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => UpdateFieldPage(
+                        title: t.updateYourName,
+                        subtitle: t.namePersonalizeExp,
+                        hint: t.enterNewName,
+                        onUpdate: _updateName,
+                      ),
                     ),
                   );
                 },
@@ -276,10 +232,7 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => UpdateFieldPage(
-                        title: t.updateYourEmail,
-                        subtitle: t.emailVerificationMsg,
-                        hint: t.enterNewEmail,
+                      builder: (_) => UpdateEmailPage(
                         onUpdate: _updateEmail,
                       ),
                     ),
