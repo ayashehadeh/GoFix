@@ -28,16 +28,47 @@ class JobModel extends ProJob {
       location: json['location'] as String? ?? json['address'] as String? ?? '',
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
-      scheduledTime: DateTime.tryParse(
-            json['scheduledTime'] as String? ?? '',
-          ) ??
-          DateTime.now(),
-      price: json['price']?.toString() ?? '',
+      scheduledTime: _parseScheduledDateTime(
+        json['scheduledDate'] as String?,
+        json['scheduledTime'] as String?,
+      ),
+      price: json['servicePrice']?.toString() ?? json['price']?.toString() ?? '',
       agreedAmount: (json['agreedAmount'] as num?)?.toDouble(),
       description: json['description'] as String? ?? '',
       imageUrls: List<String>.from(json['imageUrls'] as List? ?? []),
       status: _parseStatus(json['status']),
     );
+  }
+
+  static DateTime _parseScheduledDateTime(String? dateStr, String? timeStr) {
+    // If scheduledTime is a full ISO datetime (ProJobDto format), use it directly
+    if (timeStr != null) {
+      final full = DateTime.tryParse(timeStr);
+      if (full != null) return full;
+    }
+    // Parse the date part from scheduledDate
+    final date = dateStr != null ? DateTime.tryParse(dateStr) : null;
+    if (date == null) return DateTime.now();
+    // Parse time string like "3:00 PM" or "10:00 AM"
+    if (timeStr != null && timeStr.isNotEmpty) {
+      final ampm = RegExp(r'(\d{1,2}):(\d{2})\s*(AM|PM)', caseSensitive: false).firstMatch(timeStr);
+      if (ampm != null) {
+        int hour = int.parse(ampm.group(1)!);
+        final minute = int.parse(ampm.group(2)!);
+        final isPm = ampm.group(3)!.toUpperCase() == 'PM';
+        if (isPm && hour != 12) hour += 12;
+        if (!isPm && hour == 12) hour = 0;
+        return DateTime(date.year, date.month, date.day, hour, minute);
+      }
+      // 24-hour fallback "HH:mm" or "HH:mm:ss"
+      final parts = timeStr.split(':');
+      if (parts.length >= 2) {
+        final h = int.tryParse(parts[0]);
+        final m = int.tryParse(parts[1]);
+        if (h != null && m != null) return DateTime(date.year, date.month, date.day, h, m);
+      }
+    }
+    return date;
   }
 
   Map<String, dynamic> toJson() {

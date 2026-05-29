@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gp/core/widgets/cancel_reason_dialog.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/features/professional_dashboard/presentation/pages/job_request_info_page.dart';
 import 'package:gp/features/professional_jobs/presentation/bloc/professional_jobs_bloc.dart';
@@ -995,6 +996,12 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
                               Navigator.pop(sheetCtx);
                               if (selected == 'Completed') {
                                 _showPaymentAmountSheet(jobId);
+                              } else if (selected == 'Cancelled') {
+                                showCancelReasonDialog(context, onConfirm: (reason) {
+                                  context.read<ProfessionalDashboardBloc>().add(
+                                    UpdateStatus(jobId, 'Cancelled', reason: reason),
+                                  );
+                                });
                               } else {
                                 context.read<ProfessionalDashboardBloc>().add(UpdateStatus(jobId, selected!));
                               }

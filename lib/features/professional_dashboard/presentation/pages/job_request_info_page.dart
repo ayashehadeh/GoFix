@@ -388,8 +388,12 @@ class _JobDetailsCard extends StatelessWidget {
           _Row(
             icon: Icons.location_on_outlined,
             text: job.location,
-            isLast: true,
             onTap: () => _launchMaps(job.location, latitude: job.latitude, longitude: job.longitude),
+          ),
+          _Row(
+            icon: Icons.attach_money,
+            text: job.price,
+            isLast: true,
           ),
         ],
       ),

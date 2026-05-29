@@ -9,6 +9,7 @@ abstract class ProfessionalDashboardRemoteDataSource {
   Future<void> acceptJobRequest(String jobId);
   Future<void> declineJobRequest(String jobId);
   Future<void> updateJobStatus(String jobId, String status);
+  Future<void> cancelJob(String jobId, {String? reason});
 }
 
 class ProfessionalDashboardRemoteDataSourceImpl implements ProfessionalDashboardRemoteDataSource {
@@ -74,6 +75,16 @@ class ProfessionalDashboardRemoteDataSourceImpl implements ProfessionalDashboard
     await dio.put(
       '/bookings/$jobId/job-status',
       data: {'status': status},
+    );
+  }
+
+  // DELETE /bookings/professional/jobs/{id}   body: { "reason": "..." }
+  @override
+  Future<void> cancelJob(String jobId, {String? reason}) async {
+    await dio.delete(
+      '/bookings/professional/jobs/$jobId',
+      data: {'reason': reason ?? ''},
+      options: Options(contentType: 'application/json'),
     );
   }
 }

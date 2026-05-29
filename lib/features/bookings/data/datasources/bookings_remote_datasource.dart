@@ -132,7 +132,11 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
 
   @override
   Future<void> cancelBooking(String id, {String? reason}) async {
-    await dio.delete('/bookings/$id', data: {'reason': reason ?? ''});
+    await dio.delete(
+      '/bookings/$id',
+      data: {'reason': reason ?? ''},
+      options: Options(contentType: 'application/json'),
+    );
   }
 
   @override

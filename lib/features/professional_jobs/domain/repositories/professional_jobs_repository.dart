@@ -9,4 +9,5 @@ abstract class ProfessionalJobsRepository {
     required String jobId,
     required ProJobStatus newStatus,
   });
+  Future<Either<Failure, void>> cancelJob(String jobId, {String? reason});
 }

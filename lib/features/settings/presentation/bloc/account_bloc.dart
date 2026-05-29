@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gp/core/error/app_error_state.dart';
 import 'package:gp/features/settings/domain/entities/feedback_entity.dart';
 import 'package:gp/features/settings/domain/usecases/account_usecases.dart';
 

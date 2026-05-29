@@ -149,4 +149,10 @@ class MockProfessionalDashboardDataSource
       ),
     );
   }
+
+  @override
+  Future<void> cancelJob(String jobId, {String? reason}) async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    _scheduled.removeWhere((j) => j.id == jobId);
+  }
 }

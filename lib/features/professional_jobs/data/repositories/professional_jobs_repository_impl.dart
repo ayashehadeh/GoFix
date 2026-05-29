@@ -48,4 +48,18 @@ class ProfessionalJobsRepositoryImpl implements ProfessionalJobsRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> cancelJob(String jobId, {String? reason}) async {
+    try {
+      await remoteDataSource.cancelJob(jobId, reason: reason);
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(ServerFailure(
+        e.response?.data?['message'] as String? ?? 'Something went wrong',
+      ));
+    } catch (e) {
+      return Left(ServerFailure('Something went wrong'));
+    }
+  }
 }
