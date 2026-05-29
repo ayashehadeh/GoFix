@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:gp/core/error/app_error_state.dart';
 import '../../domain/entities/availability_entity.dart';
 
 abstract class AvailabilityState extends Equatable {
@@ -72,7 +73,7 @@ class AvailabilitySaved extends AvailabilityLoaded {
   });
 }
 
-class AvailabilityError extends AvailabilityState {
+class AvailabilityError extends AvailabilityState with AppErrorState {
   final String message;
 
   const AvailabilityError({required this.message});

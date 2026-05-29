@@ -148,5 +148,7 @@
   "markArrived": "تحديد كـ وصلت",
   "startJob": "بدء العمل",
   "completeJob": "إنهاء العمل",
-  "activeBooking": "الحجز النشط"
+  "activeBooking": "الحجز النشط",
+  "errorTitle": "حدث خطأ ما",
+  "errorMessage": "يرجى المحاولة مرة أخرى لاحقاً."
 }

@@ -56,3 +56,12 @@ class ResetPasswordSubmitted extends AuthEvent {
 }
 
 class AuthReset extends AuthEvent {}
+
+class SendVerificationEmailSubmitted extends AuthEvent {}
+
+class VerifyEmailSubmitted extends AuthEvent {
+  final String code;
+  VerifyEmailSubmitted({required this.code});
+  @override
+  List<Object?> get props => [code];
+}

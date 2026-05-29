@@ -307,7 +307,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
         ),
         const SizedBox(height: 14),
         SizedBox(
-          height: 185,
+          height: MediaQuery.of(context).size.height * 0.245,
           child: state.scheduledJobs.isEmpty
               ? _buildEmptyState(Icons.event_note_outlined, AppLocalizations.of(context)!.noScheduledJobsYet)
               : ListView.builder(
@@ -336,6 +336,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
 
   Widget _buildScheduledJobCard(JobEntity job) {
     final chip = _statusChipData(job.status);
+    final screenWidth = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: () {
         final proJob = ProJob(
@@ -370,7 +371,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
         });
       },
       child: Container(
-      width: 280,
+      width: screenWidth * 0.72,
       margin: const EdgeInsets.only(right: 16),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -435,7 +436,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
                     style: TextStyle(color: Colors.grey[600], fontSize: 13)),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -504,7 +505,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
         ),
         const SizedBox(height: 14),
         SizedBox(
-          height: 205,
+          height: MediaQuery.of(context).size.height * 0.26,
           child: state.incomingRequests.isEmpty
               ? _buildEmptyState(Icons.inbox_outlined, AppLocalizations.of(context)!.noIncomingRequests)
               : ListView.builder(
@@ -519,6 +520,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
   }
 
   Widget _buildRequestCard(JobEntity request) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -536,7 +538,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
         });
       },
       child: Container(
-        width: 280,
+        width: screenWidth * 0.72,
         margin: const EdgeInsets.only(right: 16),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -855,24 +857,21 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
                       ),
                     ),
                     const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(sheetCtx).pop();
-                          bloc.add(DeclineRequest(jobId));
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE87722),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          AppLocalizations.of(sheetCtx)!.done,
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                        ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(sheetCtx).pop();
+                        bloc.add(DeclineRequest(jobId));
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE87722),
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 52),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        AppLocalizations.of(sheetCtx)!.done,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
@@ -985,31 +984,28 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
                       );
                     }),
                     const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: selected == null
-                            ? null
-                            : () {
-                                Navigator.pop(sheetCtx);
-                                if (selected == 'Completed') {
-                                  _showPaymentAmountSheet(jobId);
-                                } else {
-                                  context.read<ProfessionalDashboardBloc>().add(UpdateStatus(jobId, selected!));
-                                }
-                              },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE87722),
-                          foregroundColor: Colors.white,
-                          disabledBackgroundColor: Colors.grey.shade300,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          AppLocalizations.of(sheetCtx)!.confirmUpdate,
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                        ),
+                    ElevatedButton(
+                      onPressed: selected == null
+                          ? null
+                          : () {
+                              Navigator.pop(sheetCtx);
+                              if (selected == 'Completed') {
+                                _showPaymentAmountSheet(jobId);
+                              } else {
+                                context.read<ProfessionalDashboardBloc>().add(UpdateStatus(jobId, selected!));
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE87722),
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: Colors.grey.shade300,
+                        minimumSize: const Size(double.infinity, 52),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        AppLocalizations.of(sheetCtx)!.confirmUpdate,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],

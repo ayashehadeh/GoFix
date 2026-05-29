@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/error/app_error_state.dart';
 import 'package:gp/features/settings/domain/entities/notification_settings_entity.dart';
 import 'package:gp/features/settings/domain/usecases/get_notification_settings_usecase.dart';
 import 'package:gp/features/settings/domain/usecases/update_notification_settings_usecase.dart';
@@ -68,7 +69,7 @@ class NotificationSettingsUpdateSuccess extends NotificationSettingsState {
   List<Object?> get props => [settings];
 }
 
-class NotificationSettingsError extends NotificationSettingsState {
+class NotificationSettingsError extends NotificationSettingsState with AppErrorState {
   final String message;
   const NotificationSettingsError(this.message);
   @override

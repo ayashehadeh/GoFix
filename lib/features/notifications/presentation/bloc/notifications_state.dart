@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:gp/core/error/app_error_state.dart';
 import '../../domain/entities/notification_item.dart';
 
 abstract class NotificationsState extends Equatable {
@@ -42,7 +43,7 @@ class NotificationsLoaded extends NotificationsState {
   List<Object?> get props => [allNotifications, showAll, role];
 }
 
-class NotificationsError extends NotificationsState {
+class NotificationsError extends NotificationsState with AppErrorState {
   final String message;
   NotificationsError(this.message);
 

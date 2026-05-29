@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:gp/core/error/app_error_state.dart';
 import '../../domain/entities/application_status_entity.dart';
 
 abstract class ApplicationStatusState extends Equatable {
@@ -22,7 +23,7 @@ class ApplicationStatusLoaded extends ApplicationStatusState {
   List<Object?> get props => [status];
 }
 
-class ApplicationStatusError extends ApplicationStatusState {
+class ApplicationStatusError extends ApplicationStatusState with AppErrorState {
   final String message;
   const ApplicationStatusError(this.message);
   @override

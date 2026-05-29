@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/error/app_error_state.dart';
 import 'package:gp/features/settings/domain/entities/address_entity.dart';
 import 'package:gp/features/settings/domain/usecases/address_usecases.dart';
 
@@ -66,7 +67,7 @@ class AddressActionSuccess extends AddressState {
   List<Object?> get props => [addresses];
 }
 
-class AddressError extends AddressState {
+class AddressError extends AddressState with AppErrorState {
   final String message;
   const AddressError(this.message);
   @override

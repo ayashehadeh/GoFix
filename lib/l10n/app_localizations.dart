@@ -1619,6 +1619,10 @@ abstract class AppLocalizations {
   /// No description provided for @ok.
   String get ok;
 
+  String get errorTitle;
+
+  String get errorMessage;
+
   // ── Feedback / Review / Report ───────────────────────────────────────────────
   String get leaveFeedback;
   String get whatWouldYouDo;
@@ -1708,6 +1712,9 @@ abstract class AppLocalizations {
   String get selectAddress;
   String get noSavedAddresses;
   String get loadingAddresses;
+  String get pleaseSelectATimeSlot;
+  String get professionalNotAvailableOnThisDay;
+  String get noSlotsAvailable;
   String get tapToSelectAddress;
   String get pleaseSelectYourAddress;
   String get cancelBookingTitle;
@@ -1858,6 +1865,17 @@ abstract class AppLocalizations {
   String get pleaseEnterEmail;
   String get atLeastOneService;
   String get noServiceAreasAdded;
+
+  // ── Email verification (personal info) ───────────────────────────────────────
+  String get emailVerificationTitle;
+  String get emailNotVerified;
+  String get sendVerificationCode;
+  String get codeSentToEmail;
+  String get enterVerificationCode;
+  String get verifyCode;
+  String get emailVerifiedTitle;
+  String get emailVerifiedMessage;
+  String get invalidVerificationCode;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -148,5 +148,7 @@
   "markArrived": "Mark as Arrived",
   "startJob": "Start Job",
   "completeJob": "Complete Job",
-  "activeBooking": "Active Booking"
+  "activeBooking": "Active Booking",
+  "errorTitle": "Something went wrong",
+  "errorMessage": "Please try again later."
 }

@@ -59,3 +59,18 @@ class ResetPasswordUseCase {
         confirmPassword: confirmPassword,
       );
 }
+
+class SendVerificationEmailUseCase {
+  final AuthRepository repository;
+  const SendVerificationEmailUseCase(this.repository);
+
+  Future<Either<Failure, void>> call() => repository.sendVerificationEmail();
+}
+
+class VerifyEmailUseCase {
+  final AuthRepository repository;
+  const VerifyEmailUseCase(this.repository);
+
+  Future<Either<Failure, void>> call({required String code}) =>
+      repository.verifyEmail(code: code);
+}

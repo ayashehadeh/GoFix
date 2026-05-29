@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:gp/core/error/app_error_state.dart';
 import 'package:gp/features/professionals/domain/entities/professional.dart';
 import 'package:gp/features/professionals/domain/entities/review.dart';
 import 'package:gp/features/professionals/domain/entities/service_category.dart';
@@ -60,7 +61,7 @@ class ReviewActionSuccess extends ProfessionalsState {
   List<Object?> get props => [professional, reviews, message];
 }
 
-class ProfessionalsError extends ProfessionalsState {
+class ProfessionalsError extends ProfessionalsState with AppErrorState {
   final String message;
   ProfessionalsError(this.message);
   @override

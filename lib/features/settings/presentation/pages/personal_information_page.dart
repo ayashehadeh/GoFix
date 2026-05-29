@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:gp/features/settings/data/repositories/profile_repository_impl.dart';
+import 'package:gp/features/settings/presentation/pages/update_email_page.dart';
 import 'package:gp/features/settings/presentation/pages/update_field_page.dart';
 import 'package:gp/features/settings/presentation/pages/update_phone_page.dart';
 import 'package:gp/features/settings/presentation/pages/update_dob_page.dart';
@@ -187,10 +188,7 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
                             await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => UpdateFieldPage(
-                                  title: t.updateYourEmail,
-                                  subtitle: t.emailVerificationMsg,
-                                  hint: t.enterNewEmail,
+                                builder: (_) => UpdateEmailPage(
                                   onUpdate: _updateEmail,
                                 ),
                               ),

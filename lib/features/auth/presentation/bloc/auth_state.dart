@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:gp/core/error/app_error_state.dart';
 import 'package:gp/features/auth/domain/entities/auth_user.dart';
 
 abstract class AuthState extends Equatable {
@@ -31,7 +32,13 @@ class AuthForgotPasswordSent extends AuthState {}
 /// Password reset succeeded — navigate to PasswordChanged page
 class AuthPasswordReset extends AuthState {}
 
-class AuthError extends AuthState {
+/// Verification code sent — show snackbar and stay on verify page
+class AuthEmailVerificationSent extends AuthState {}
+
+/// Email verified — navigate to Created page
+class AuthEmailVerified extends AuthState {}
+
+class AuthError extends AuthState with AppErrorState {
   final String message;
   AuthError(this.message);
   @override

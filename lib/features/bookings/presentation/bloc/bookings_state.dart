@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:gp/core/error/app_error_state.dart';
 import '../../domain/entities/booking.dart';
 
 abstract class BookingsState extends Equatable {
@@ -60,7 +61,7 @@ class BookingModifiedSuccess extends BookingsState {}
 
 class ConfirmPaymentSuccess extends BookingsState {}
 
-class ConfirmPaymentError extends BookingsState {
+class ConfirmPaymentError extends BookingsState with AppErrorState {
   final String message;
   ConfirmPaymentError(this.message);
 
@@ -68,7 +69,7 @@ class ConfirmPaymentError extends BookingsState {
   List<Object?> get props => [message];
 }
 
-class BookingsError extends BookingsState {
+class BookingsError extends BookingsState with AppErrorState {
   final String message;
   BookingsError(this.message);
 
