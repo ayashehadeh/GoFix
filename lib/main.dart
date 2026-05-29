@@ -125,17 +125,7 @@ class _SplashRouterState extends State<_SplashRouter> {
     if (!mounted) return;
 
     if (!isLoggedIn) {
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (_, __, ___) => BlocProvider.value(
-            value: context.read<AuthBloc>(),
-            child: const StartPage(),
-          ),
-          transitionDuration: Duration.zero,
-          reverseTransitionDuration: Duration.zero,
-          transitionsBuilder: (_, __, ___, child) => child,
-        ),
-      );
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
       return;
     }
 
@@ -162,7 +152,7 @@ class _SplashRouterState extends State<_SplashRouter> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF062B54),
+      backgroundColor: Color(0xFF1A3A5C),
       body: Center(
         child: Container(
           width: 200,
@@ -171,7 +161,8 @@ class _SplashRouterState extends State<_SplashRouter> {
             color: Colors.white,
             shape: BoxShape.circle,
           ),
-          child: ClipOval(child: Image.asset('assets/logo.png', fit: BoxFit.cover)),
+          padding: const EdgeInsets.all(24),
+          child: Image.asset('assets/logo2.png'),
         ),
       ),
     );
