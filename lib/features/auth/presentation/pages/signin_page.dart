@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/core/theme/app_colors.dart';
 import 'package:gp/core/utils/login_helper.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -57,12 +58,7 @@ class _SigninPageState extends State<SigninPage> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) async {
         if (state is AuthLoggedIn) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(t.welcomeUser(state.user.firstName)),
-              backgroundColor: Colors.green,
-            ),
-          );
+          showSuccessSnackbar(context, t.welcomeUser(state.user.firstName));
           await LoginHelper.navigateAfterLogin(context);
         }
         if (state is AuthError) {

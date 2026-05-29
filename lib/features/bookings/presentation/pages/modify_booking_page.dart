@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -9,6 +10,7 @@ import '../../../professionals/domain/entities/service_offered.dart';
 import '../../../professionals/domain/usecases/profeessional_usecases/get_professional_by_id.dart';
 import '../../../settings/domain/entities/address_entity.dart';
 import '../../../settings/presentation/bloc/address_bloc.dart';
+import '../../../settings/presentation/pages/addresses_screen.dart';
 import '../../domain/entities/booking.dart';
 import '../bloc/bookings_bloc.dart';
 import '../bloc/bookings_event.dart';
@@ -119,12 +121,7 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
               );
             }
             if (state is BookingsError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: AppColors.error,
-                ),
-              );
+              showErrorSnackbar(context, state.message);
             }
           },
           builder: (context, bookingState) {
@@ -171,14 +168,7 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
                               setState(() => _description = v),
                           onContinue: () {
                             if (_selectedServiceIndex == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(AppLocalizations.of(
-                                          context)!
-                                      .pleaseSelectService),
-                                  backgroundColor: AppColors.error,
-                                ),
-                              );
+                              showWarningSnackbar(context, AppLocalizations.of(context)!.pleaseSelectService);
                               return;
                             }
                             _goToStep(1);
@@ -205,23 +195,11 @@ class _ModifyBookingPageState extends State<ModifyBookingPage> {
                             final today = DateTime.now();
                             final todayOnly = DateTime(today.year, today.month, today.day);
                             if (selectedDate.isBefore(todayOnly)) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(AppLocalizations.of(context)!.cannotBookPastDate),
-                                  backgroundColor: AppColors.primaryOrange,
-                                ),
-                              );
+                              showWarningSnackbar(context, AppLocalizations.of(context)!.cannotBookPastDate);
                               return;
                             }
                             if (_selectedAddress == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(AppLocalizations.of(
-                                          context)!
-                                      .pleaseSelectYourAddress),
-                                  backgroundColor: AppColors.error,
-                                ),
-                              );
+                              showWarningSnackbar(context, AppLocalizations.of(context)!.pleaseSelectYourAddress);
                               return;
                             }
                             _goToStep(2);
@@ -605,11 +583,43 @@ class _Step2DateTimeState extends State<_Step2DateTime> {
           const SizedBox(height: 8),
           if (addresses.isEmpty)
             Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(
-                t.noSavedAddresses,
-                style: const TextStyle(color: Colors.grey),
-                textAlign: TextAlign.center,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              child: Column(
+                children: [
+                  Text(
+                    t.noSavedAddresses,
+                    style: const TextStyle(color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider.value(
+                            value: context.read<AddressBloc>(),
+                            child: const AddressesScreen(),
+                          ),
+                        ),
+                      ).then((_) {
+                        if (mounted) {
+                          context.read<AddressBloc>().add(const GetAddressesEvent());
+                        }
+                      });
+                    },
+                    icon: const Icon(Icons.add_location_alt_outlined, size: 18),
+                    label: Text(t.addAddress),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryOrange,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             )
           else

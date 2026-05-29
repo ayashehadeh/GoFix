@@ -5,6 +5,7 @@ import 'package:gp/core/theme/app_text_styles.dart';
 import 'package:gp/features/settings/presentation/bloc/set_password_bloc.dart';
 import 'package:gp/features/settings/presentation/pages/set_new_password_screen.dart';
 import 'package:gp/features/settings/presentation/widgets/password_field.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/l10n/app_localizations.dart';
 
 class VerifyCurrentPasswordScreen extends StatefulWidget {
@@ -63,12 +64,7 @@ class _VerifyCurrentPasswordScreenState
             );
           }
           if (state is SetPasswordError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-              ),
-            );
+            showErrorSnackbar(context, state.message);
           }
         },
         child: SafeArea(

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
@@ -158,9 +159,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _showSnack(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    showWarningSnackbar(context, message);
   }
 
   @override
@@ -196,7 +195,7 @@ class _ChatPageState extends State<ChatPage> {
             _scrollToBottom();
           }
           if (state is ChatError) {
-            _showSnack(state.message);
+            showErrorSnackbar(context, state.message);
           }
         },
         builder: (context, state) {

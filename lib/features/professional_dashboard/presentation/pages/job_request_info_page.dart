@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/features/professional_jobs/domain/entities/pro_job.dart';
 import 'package:intl/intl.dart';
@@ -32,12 +33,7 @@ class _JobRequestInfoPageState extends State<JobRequestInfoPage> {
           _showResultSheet(context, accepted: accepted);
         }
         if (state is RequestActionError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-            ),
-          );
+          showErrorSnackbar(context, state.message);
         }
       },
       builder: (context, state) {

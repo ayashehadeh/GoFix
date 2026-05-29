@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/core/widgets/fullscreen_image_viewer.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
@@ -54,14 +55,10 @@ class _BookingInfoPageState extends State<BookingInfoPage> {
       body: BlocConsumer<BookingsBloc, BookingsState>(
         listener: (context, state) {
           if (state is ConfirmPaymentSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(AppLocalizations.of(context)!.paymentConfirmed)),
-            );
+            showSuccessSnackbar(context, AppLocalizations.of(context)!.paymentConfirmed);
             context.read<BookingsBloc>().add(LoadBookingById(widget.bookingId));
           } else if (state is ConfirmPaymentError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            showErrorSnackbar(context, state.message);
           }
         },
         builder: (context, state) {

@@ -1711,6 +1711,7 @@ abstract class AppLocalizations {
   // ── Booking flow ──────────────────────────────────────────────────────────────
   String get selectAddress;
   String get noSavedAddresses;
+  String get addAddress;
   String get loadingAddresses;
   String get pleaseSelectATimeSlot;
   String get professionalNotAvailableOnThisDay;

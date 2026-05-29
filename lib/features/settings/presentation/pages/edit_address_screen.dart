@@ -6,6 +6,7 @@ import 'package:gp/core/theme/app_text_styles.dart';
 import 'package:gp/features/settings/domain/entities/address_entity.dart';
 import 'package:gp/features/settings/presentation/bloc/address_bloc.dart';
 import 'package:gp/features/settings/presentation/widgets/address_form.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -138,9 +139,7 @@ class EditAddressScreen extends StatelessWidget {
                           Navigator.pop(context);
                         }
                         if (state is AddressError) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(state.message)),
-                          );
+                          showErrorSnackbar(context, state.message);
                         }
                       },
                       builder: (context, state) {

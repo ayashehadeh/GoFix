@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/core/widgets/fullscreen_image_viewer.dart';
 import 'package:gp/core/widgets/payment_amount_sheet.dart';
 import 'package:gp/l10n/app_localizations.dart';
@@ -325,9 +326,7 @@ class _StatusSheetState extends State<_StatusSheet> {
         }
         if (state is ProfessionalJobsError) {
           Navigator.of(ctx).pop();
-          ScaffoldMessenger.of(ctx).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-          );
+          showErrorSnackbar(ctx, state.message);
         }
       },
       builder: (ctx, state) {

@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/snackbar_helper.dart';
 import '../../../../injection_container.dart' as di;
 import '../../../../l10n/app_localizations.dart';
 import '../../../../l10n/service_name_l10n.dart';
@@ -108,22 +109,12 @@ class _ReviewSheetState extends State<_ReviewSheet> {
       listener: (context, state) {
         if (state is ReviewActionSuccess) {
           Navigator.of(context).pop(); // close sheet
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(t.reviewSubmittedSuccess),
-              backgroundColor: AppColors.primaryOrange,
-            ),
-          );
+          showSuccessSnackbar(context, t.reviewSubmittedSuccess);
           // pop all the way back to My Bookings
           Navigator.of(context).popUntil((route) => route.isFirst);
         }
         if (state is ProfessionalsError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: AppColors.error,
-            ),
-          );
+          showErrorSnackbar(context, state.message);
         }
       },
       builder: (context, state) {
