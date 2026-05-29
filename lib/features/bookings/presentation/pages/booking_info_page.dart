@@ -547,17 +547,7 @@ class _BottomActions extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => BlocProvider.value(
-                            value: context.read<BookingsBloc>(),
-                            child: BookingFeedbackPage(booking: booking),
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: () => openFeedbackSheet(context, booking),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primaryDark,
                       minimumSize: const Size(0, 50),

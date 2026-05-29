@@ -83,6 +83,16 @@ class MainApp extends StatelessWidget {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           navigatorKey: appNavigatorKey,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFFF3800D),
+              primary: const Color(0xFFF3800D),
+              onPrimary: Colors.white,
+              secondary: const Color(0xFF012249),
+              onSecondary: Colors.white,
+            ),
+            useMaterial3: true,
+          ),
           locale: localeState.locale,
           localizationsDelegates: const [
             AppLocalizations.delegate,

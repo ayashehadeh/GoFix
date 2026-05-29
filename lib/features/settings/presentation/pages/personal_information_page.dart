@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/features/settings/data/repositories/profile_repository_impl.dart';
+import 'package:gp/core/utils/user_info_helper.dart';
+import 'package:gp/features/settings/presentation/pages/update_name_page.dart';
 import 'package:gp/features/settings/presentation/pages/update_field_page.dart';
 import 'package:gp/features/settings/presentation/pages/update_phone_page.dart';
 import 'package:gp/features/settings/presentation/pages/update_dob_page.dart';
@@ -51,14 +53,18 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
     );
   }
 
-  Future<void> _updateName(String val) async {
+  Future<void> _updateName(String firstName, String lastName) async {
     final t = AppLocalizations.of(context)!;
-    final result = await _repo.updateName(val);
+    final fullName = '$firstName $lastName'.trim();
+    final result = await _repo.updateName(fullName);
     result.fold(
       (err) => _showSnackbar(err, success: false),
-      (_) {
-        setState(() => name = val);
-        _showSnackbar(t.nameUpdatedSuccess);
+      (_) async {
+        await UserInfoHelper.setDisplayName(fullName);
+        if (mounted) {
+          setState(() => name = fullName);
+          _showSnackbar(t.nameUpdatedSuccess);
+        }
       },
     );
   }
@@ -201,10 +207,8 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => UpdateFieldPage(
-                        title: t.updateYourName,
-                        subtitle: t.namePersonalizeExp,
-                        hint: t.enterNewName,
+                      builder: (_) => UpdateNamePage(
+                        currentName: name,
                         onUpdate: _updateName,
                       ),
                     ),
