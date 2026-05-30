@@ -150,5 +150,7 @@
   "completeJob": "إنهاء العمل",
   "activeBooking": "الحجز النشط",
   "errorTitle": "حدث خطأ ما",
-  "errorMessage": "يرجى المحاولة مرة أخرى لاحقاً."
+  "errorMessage": "يرجى المحاولة مرة أخرى لاحقاً.",
+  "fromBase": "من مكان الاقامة",
+  "more": "المزيد"
 }

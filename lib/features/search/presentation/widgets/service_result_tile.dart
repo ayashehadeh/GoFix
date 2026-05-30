@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/features/search/domain/entities/search_result.dart';
+import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/l10n/service_name_l10n.dart';
 
 class ServiceResultTile extends StatelessWidget {
   final ServiceResult service;
@@ -45,7 +47,8 @@ class ServiceResultTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _HighlightedText(
-                      text: service.serviceName, query: query),
+                      text: localizeServiceName(service.serviceName, AppLocalizations.of(context)!, nameAr: service.serviceNameAr),
+                      query: query),
                   const SizedBox(height: 2),
                   Text(
                     service.category.displayName +

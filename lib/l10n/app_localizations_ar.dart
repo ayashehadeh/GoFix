@@ -1107,6 +1107,12 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get errorMessage => 'يرجى المحاولة مرة أخرى لاحقاً.';
 
+  @override
+  String get fromBase => 'من مكان الاقامة';
+
+  @override
+  String get more => 'المزيد';
+
   // ── Feedback / Review / Report ───────────────────────────────────────────────
 
   @override

@@ -55,20 +55,23 @@ class SearchLoaded extends SearchState {
 /// User tapped an area — loading pros for that area
 class AreaProfessionalsLoading extends SearchState {
   final String areaName;
+  final String? areaNameAr;
   final String city;
   final int proCount;
   AreaProfessionalsLoading({
     required this.areaName,
+    this.areaNameAr,
     required this.city,
     required this.proCount,
   });
   @override
-  List<Object?> get props => [areaName, city, proCount];
+  List<Object?> get props => [areaName, areaNameAr, city, proCount];
 }
 
 /// Area professionals loaded
 class AreaProfessionalsLoaded extends SearchState {
   final String areaName;
+  final String? areaNameAr;
   final String city;
   final int proCount;
   final List<Professional> professionals;
@@ -76,6 +79,7 @@ class AreaProfessionalsLoaded extends SearchState {
 
   AreaProfessionalsLoaded({
     required this.areaName,
+    this.areaNameAr,
     required this.city,
     required this.proCount,
     required this.professionals,
@@ -89,6 +93,7 @@ class AreaProfessionalsLoaded extends SearchState {
   }) {
     return AreaProfessionalsLoaded(
       areaName: areaName,
+      areaNameAr: areaNameAr,
       city: city,
       proCount: proCount,
       professionals: professionals ?? this.professionals,
@@ -99,7 +104,7 @@ class AreaProfessionalsLoaded extends SearchState {
 
   @override
   List<Object?> get props =>
-      [areaName, city, proCount, professionals, activeCategory];
+      [areaName, areaNameAr, city, proCount, professionals, activeCategory];
 }
 
 class SearchError extends SearchState with AppErrorState {

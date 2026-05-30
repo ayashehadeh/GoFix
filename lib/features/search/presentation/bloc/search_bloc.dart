@@ -16,6 +16,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   List<RecentSearch> _recentSearches = [];
   int? _selectedAreaId;
   String? _selectedAreaName;
+  String? _selectedAreaNameAr;
   String? _selectedAreaCity;
   int? _selectedAreaProCount;
   Timer? _debounce;
@@ -147,11 +148,13 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   ) async {
     _selectedAreaId = event.areaId;
     _selectedAreaName = event.areaName;
+    _selectedAreaNameAr = event.areaNameAr;
     _selectedAreaCity = event.city;
     _selectedAreaProCount = event.proCount;
 
     emit(AreaProfessionalsLoading(
       areaName: event.areaName,
+      areaNameAr: event.areaNameAr,
       city: event.city,
       proCount: event.proCount,
     ));
@@ -161,6 +164,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       (failure) => emit(SearchError(failure.message)),
       (pros) => emit(AreaProfessionalsLoaded(
         areaName: event.areaName,
+        areaNameAr: event.areaNameAr,
         city: event.city,
         proCount: event.proCount,
         professionals: pros,
@@ -179,6 +183,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
     emit(AreaProfessionalsLoading(
       areaName: current.areaName,
+      areaNameAr: current.areaNameAr,
       city: current.city,
       proCount: current.proCount,
     ));
@@ -191,6 +196,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       (failure) => emit(SearchError(failure.message)),
       (pros) => emit(AreaProfessionalsLoaded(
         areaName: _selectedAreaName!,
+        areaNameAr: _selectedAreaNameAr,
         city: _selectedAreaCity!,
         proCount: _selectedAreaProCount!,
         professionals: pros,

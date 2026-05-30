@@ -43,16 +43,18 @@ class RecentSearchesCleared extends SearchEvent {}
 class AreaSelected extends SearchEvent {
   final int areaId;
   final String areaName;
+  final String? areaNameAr;
   final String city;
   final int proCount;
   AreaSelected({
     required this.areaId,
     required this.areaName,
+    this.areaNameAr,
     required this.city,
     required this.proCount,
   });
   @override
-  List<Object?> get props => [areaId, areaName, city, proCount];
+  List<Object?> get props => [areaId, areaName, areaNameAr, city, proCount];
 }
 
 /// User tapped a category chip on the area results page

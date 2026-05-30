@@ -496,6 +496,7 @@ class _ResultsList extends StatelessWidget {
                     AreaSelected(
                       areaId: area.id,
                       areaName: area.name,
+                      areaNameAr: area.nameAr,
                       city: area.city,
                       proCount: area.proCount,
                     ),

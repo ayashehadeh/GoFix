@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/l10n/area_name_l10n.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/entities/service_area.dart';
@@ -408,7 +410,7 @@ class _AreaCheckTile extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    area.name,
+                    localizeAreaName(area.name, AppLocalizations.of(context)!, nameAr: area.nameAr),
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,

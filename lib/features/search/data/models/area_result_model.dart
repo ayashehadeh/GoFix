@@ -4,6 +4,7 @@ class AreaResultModel extends AreaResult {
   const AreaResultModel({
     required super.id,
     required super.name,
+    super.nameAr,
     required super.city,
     required super.proCount,
   });
@@ -12,6 +13,7 @@ class AreaResultModel extends AreaResult {
     return AreaResultModel(
       id: (json['id'] as num?)?.toInt() ?? 0,
       name: json['name'] as String? ?? '',
+      nameAr: json['nameAr'] as String? ?? json['name_ar'] as String?,
       city: json['city'] as String? ?? '',
       proCount: (json['availableProfessionalCount'] as num? ?? json['proCount'] as num? ?? 0).toInt(),
     );
@@ -20,6 +22,7 @@ class AreaResultModel extends AreaResult {
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
+        if (nameAr != null) 'nameAr': nameAr,
         'city': city,
         'proCount': proCount,
       };
