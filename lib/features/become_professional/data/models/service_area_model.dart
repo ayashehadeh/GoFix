@@ -32,7 +32,7 @@ class ServiceAreaModel extends ServiceArea {
     return ServiceAreaModel(
       id: (json['id'] as num).toInt(),
       name: json['name'] as String? ?? '',
-      nameAr: json['nameAr'] as String?,
+      nameAr: json['nameAr'] as String? ?? json['name_ar'] as String?,
       cityId: cityId,
       cityName: cityName,
     );

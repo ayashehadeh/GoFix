@@ -110,6 +110,7 @@ class SearchRemoteDataSourceImpl implements SearchRemoteDataSource {
       return ServiceResult(
         serviceId: (map['id'] as num? ?? 0).toInt(),
         serviceName: map['name'] as String? ?? '',
+        serviceNameAr: map['nameAr'] as String? ?? map['name_ar'] as String?,
         category: category,
         proCount: (map['availableProfessionalCount'] as num? ?? 0).toInt(),
       );

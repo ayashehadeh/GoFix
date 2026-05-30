@@ -14,7 +14,7 @@ class AreaResultModel extends AreaResult {
     return AreaResultModel(
       id: (json['id'] as num?)?.toInt() ?? 0,
       name: json['name'] as String? ?? '',
-      nameAr: json['nameAr'] as String?,
+      nameAr: json['nameAr'] as String? ?? json['name_ar'] as String?,
       city: json['city'] as String? ?? '',
       cityNameAr: json['cityNameAr'] as String?,
       proCount: (json['availableProfessionalCount'] as num? ?? json['proCount'] as num? ?? 0).toInt(),

@@ -150,5 +150,7 @@
   "completeJob": "Complete Job",
   "activeBooking": "Active Booking",
   "errorTitle": "Something went wrong",
-  "errorMessage": "Please try again later."
+  "errorMessage": "Please try again later.",
+  "fromBase": "From Base",
+  "more": "More"
 }

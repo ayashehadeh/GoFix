@@ -497,8 +497,9 @@ class _ResultsList extends StatelessWidget {
               onTap: () => context.read<SearchBloc>().add(
                     AreaSelected(
                       areaId: area.id,
-                      areaName: localizeAreaName(area.name, l10n, nameAr: area.nameAr),
-                      city: localizeCityName(area.city, l10n, nameAr: area.cityNameAr),
+                      areaName: area.name,
+                      areaNameAr: area.nameAr,
+                      city: area.city,
                       proCount: area.proCount,
                     ),
                   ),

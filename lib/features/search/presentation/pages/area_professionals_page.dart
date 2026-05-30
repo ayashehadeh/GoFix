@@ -7,6 +7,8 @@ import 'package:gp/features/professionals/domain/entities/service_category.dart'
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
 import 'package:gp/features/professionals/presentation/pages/professional_detail_page.dart';
 import 'package:gp/injection_container.dart' as di;
+import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/l10n/area_name_l10n.dart';
 import '../bloc/search_bloc.dart';
 import '../bloc/search_event.dart';
 import '../bloc/search_state.dart';
@@ -27,6 +29,7 @@ class AreaProfessionalsPage extends StatelessWidget {
               children: [
                 _AreaHeader(
                   areaName: state.areaName,
+                  areaNameAr: state.areaNameAr,
                   city: state.city,
                   proCount: state.proCount,
                   activeCategory: null,
@@ -44,6 +47,7 @@ class AreaProfessionalsPage extends StatelessWidget {
               children: [
                 _AreaHeader(
                   areaName: state.areaName,
+                  areaNameAr: state.areaNameAr,
                   city: state.city,
                   proCount: state.proCount,
                   activeCategory: state.activeCategory,
@@ -51,7 +55,7 @@ class AreaProfessionalsPage extends StatelessWidget {
                 _CategoryChips(activeCategory: state.activeCategory),
                 Expanded(
                   child: state.professionals.isEmpty
-                      ? _EmptyArea(areaName: state.areaName)
+                      ? _EmptyArea(areaName: state.areaName, areaNameAr: state.areaNameAr)
                       : _ProList(professionals: state.professionals),
                 ),
               ],
@@ -96,12 +100,14 @@ class AreaProfessionalsPage extends StatelessWidget {
 
 class _AreaHeader extends StatelessWidget {
   final String areaName;
+  final String? areaNameAr;
   final String city;
   final int proCount;
   final ServiceCategory? activeCategory;
 
   const _AreaHeader({
     required this.areaName,
+    this.areaNameAr,
     required this.city,
     required this.proCount,
     required this.activeCategory,
@@ -130,7 +136,7 @@ class _AreaHeader extends StatelessWidget {
               const Icon(Icons.location_on_outlined, color: Colors.white, size: 16),
               const SizedBox(width: 4),
               Text(
-                areaName,
+                localizeAreaName(areaName, AppLocalizations.of(context)!, nameAr: areaNameAr),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 17,
@@ -143,7 +149,7 @@ class _AreaHeader extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 30),
             child: Text(
-              '$city · $proCount professional${proCount != 1 ? 's' : ''}',
+              '${localizeCity(city, AppLocalizations.of(context)!)} · $proCount professional${proCount != 1 ? 's' : ''}',
               style: const TextStyle(
                 color: Color(0xFFB8C5D6),
                 fontSize: 12,
@@ -259,11 +265,13 @@ class _ProList extends StatelessWidget {
 
 class _EmptyArea extends StatelessWidget {
   final String areaName;
+  final String? areaNameAr;
 
-  const _EmptyArea({required this.areaName});
+  const _EmptyArea({required this.areaName, this.areaNameAr});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -271,7 +279,7 @@ class _EmptyArea extends StatelessWidget {
           const Icon(Icons.location_off_outlined, size: 52, color: AppColors.divider),
           const SizedBox(height: 16),
           Text(
-            'No professionals found in $areaName',
+            l10n.noProfessionalsInArea(localizeAreaName(areaName, l10n, nameAr: areaNameAr)),
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 14,

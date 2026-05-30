@@ -32,18 +32,20 @@ class AreaResult extends Equatable {
 class ServiceResult extends Equatable {
   final int serviceId;
   final String serviceName;
+  final String? serviceNameAr;
   final ServiceCategory category;
   final int proCount;
 
   const ServiceResult({
     required this.serviceId,
     required this.serviceName,
+    this.serviceNameAr,
     required this.category,
     required this.proCount,
   });
 
   @override
-  List<Object?> get props => [serviceId, serviceName, category, proCount];
+  List<Object?> get props => [serviceId, serviceName, serviceNameAr, category, proCount];
 }
 
 // ─── Unified search result ────────────────────────────────────────────────────

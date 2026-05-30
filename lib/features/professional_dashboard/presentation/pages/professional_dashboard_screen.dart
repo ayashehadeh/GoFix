@@ -358,9 +358,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: const Border(left: BorderSide(color: Color(0xFF1A3A5C), width: 3)),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 12, offset: const Offset(0, 4))
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 12, offset: const Offset(0, 4))],
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -431,7 +429,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
                     elevation: 0,
                   ),
                   child: Text(
-                    AppLocalizations.of(context)!.updateStatus,
+                    AppLocalizations.of(context)!.updateJobStatus,
                     style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
                   ),
                 ),

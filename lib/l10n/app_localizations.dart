@@ -1623,6 +1623,10 @@ abstract class AppLocalizations {
 
   String get errorMessage;
 
+  String get fromBase;
+
+  String get more;
+
   // ── Feedback / Review / Report ───────────────────────────────────────────────
   String get leaveFeedback;
   String get whatWouldYouDo;

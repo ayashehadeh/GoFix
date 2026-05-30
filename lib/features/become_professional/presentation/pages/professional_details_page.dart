@@ -412,7 +412,7 @@ class _AreaCheckTile extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    localizeAreaName(area.name, l10n, nameAr: area.nameAr),
+                    localizeAreaName(area.name, AppLocalizations.of(context)!, nameAr: area.nameAr),
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,

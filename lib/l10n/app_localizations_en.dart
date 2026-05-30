@@ -1107,6 +1107,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorMessage => 'Please try again later.';
 
+  @override
+  String get fromBase => 'From Base';
+
+  @override
+  String get more => 'More';
+
   // ── Feedback / Review / Report ───────────────────────────────────────────────
 
   @override

@@ -32,7 +32,7 @@ class JobModel extends ProJob {
         json['scheduledDate'] as String?,
         json['scheduledTime'] as String?,
       ),
-      price: json['servicePrice']?.toString() ?? json['price']?.toString() ?? '',
+      price: json['price']?.toString() ?? '',
       agreedAmount: (json['agreedAmount'] as num?)?.toDouble(),
       description: json['description'] as String? ?? '',
       imageUrls: List<String>.from(json['imageUrls'] as List? ?? []),
@@ -41,34 +41,33 @@ class JobModel extends ProJob {
   }
 
   static DateTime _parseScheduledDateTime(String? dateStr, String? timeStr) {
-    // If scheduledTime is a full ISO datetime (ProJobDto format), use it directly
-    if (timeStr != null) {
+    // Try the time field alone first — backend may send a full ISO timestamp.
+    if (timeStr != null && timeStr.isNotEmpty) {
       final full = DateTime.tryParse(timeStr);
       if (full != null) return full;
     }
-    // Parse the date part from scheduledDate
-    final date = dateStr != null ? DateTime.tryParse(dateStr) : null;
-    if (date == null) return DateTime.now();
-    // Parse time string like "3:00 PM" or "10:00 AM"
-    if (timeStr != null && timeStr.isNotEmpty) {
-      final ampm = RegExp(r'(\d{1,2}):(\d{2})\s*(AM|PM)', caseSensitive: false).firstMatch(timeStr);
-      if (ampm != null) {
-        int hour = int.parse(ampm.group(1)!);
-        final minute = int.parse(ampm.group(2)!);
-        final isPm = ampm.group(3)!.toUpperCase() == 'PM';
-        if (isPm && hour != 12) hour += 12;
-        if (!isPm && hour == 12) hour = 0;
-        return DateTime(date.year, date.month, date.day, hour, minute);
-      }
-      // 24-hour fallback "HH:mm" or "HH:mm:ss"
-      final parts = timeStr.split(':');
-      if (parts.length >= 2) {
-        final h = int.tryParse(parts[0]);
-        final m = int.tryParse(parts[1]);
-        if (h != null && m != null) return DateTime(date.year, date.month, date.day, h, m);
-      }
-    }
-    return date;
+
+    // Parse the date part.
+    final date = dateStr != null && dateStr.isNotEmpty
+        ? DateTime.tryParse(dateStr) ?? DateTime.now()
+        : DateTime.now();
+
+    if (timeStr == null || timeStr.isEmpty) return date;
+
+    // Parse a time string like "10:00 AM", "14:30", "09:00:00".
+    final upper = timeStr.trim().toUpperCase();
+    final isPM = upper.endsWith('PM');
+    final isAM = upper.endsWith('AM');
+    final clean = upper.replaceAll('AM', '').replaceAll('PM', '').trim();
+    final parts = clean.split(':');
+
+    int hour = int.tryParse(parts[0]) ?? 0;
+    final minute = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
+
+    if (isPM && hour < 12) hour += 12;
+    if (isAM && hour == 12) hour = 0;
+
+    return DateTime(date.year, date.month, date.day, hour, minute);
   }
 
   Map<String, dynamic> toJson() {

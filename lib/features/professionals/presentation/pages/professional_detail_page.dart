@@ -367,7 +367,7 @@ class _DetailHeader extends StatelessWidget {
                   value: professional.distanceKm != null
                       ? '${professional.distanceKm!.toStringAsFixed(1)} KM'
                       : '-- KM',
-                  label: 'From Base',
+                  label: l.fromBase,
                 ),
                 _StatItem(
                   icon: Icons.star,
@@ -465,7 +465,7 @@ class _AboutTab extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: AppColors.divider),
                     ),
-                    child: Text(localizeAreaName(area.name, l10n, nameAr: area.nameAr), style: AppTextStyles.bodySmall),
+                    child: Text(localizeAreaName(area.name, AppLocalizations.of(context)!, nameAr: area.nameAr), style: AppTextStyles.bodySmall),
                   ),
                 )
                 .toList(),

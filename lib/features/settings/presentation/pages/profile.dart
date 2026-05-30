@@ -801,9 +801,9 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
                         child: ExpansionTile(
                           tilePadding: EdgeInsets.zero,
                           leading: const Icon(Icons.more_horiz, color: Color(0xFF062B4D)),
-                          title: const Text(
-                            'More',
-                            style: TextStyle(fontSize: 16, color: Color(0xFF062B4D)),
+                          title: Text(
+                            t.more,
+                            style: const TextStyle(fontSize: 16, color: Color(0xFF062B4D)),
                           ),
                           children: [
                             InkWell(

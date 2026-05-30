@@ -49,10 +49,12 @@ class AreaResultTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _HighlightedText(text: localizedName, query: query),
+                  _HighlightedText(
+                      text: localizeAreaName(area.name, AppLocalizations.of(context)!, nameAr: area.nameAr),
+                      query: query),
                   const SizedBox(height: 2),
                   Text(
-                    '$localizedCity · ${area.proCount} pros serve here',
+                    '${localizeCity(area.city, AppLocalizations.of(context)!)} · ${area.proCount} pros serve here',
                     style: const TextStyle(
                         fontSize: 12, color: Color(0xFF888888)),
                   ),

@@ -207,8 +207,10 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => UpdateNamePage(
-                        currentName: name,
+                      builder: (_) => UpdateFieldPage(
+                        title: t.updateYourName,
+                        subtitle: t.namePersonalizeExp,
+                        hint: t.enterNewName,
                         onUpdate: _updateName,
                       ),
                     ),
@@ -238,12 +240,7 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => UpdateFieldPage(
-                        title: t.updateYourEmail,
-                        subtitle: t.emailVerificationMsg,
-                        hint: t.enterNewEmail,
-                        onUpdate: _updateEmail,
-                      ),
+                      builder: (_) => UpdateEmailPage(onUpdate: _updateEmail),
                     ),
                   );
                 },
