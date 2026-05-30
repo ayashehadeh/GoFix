@@ -1482,6 +1482,8 @@ class AppLocalizationsAr extends AppLocalizations {
   @override String get serviceShowerInstallation => 'تركيب دش';
   @override String get serviceSinkInstallation => 'تركيب حوض';
   @override String get serviceToiletInstallation => 'تركيب مرحاض';
+  @override String get serviceSewerLineCleaning => 'تنظيف خط الصرف الصحي';
+  @override String get serviceWaterPressureAdjustment => 'ضبط ضغط المياه';
 
   // ── Service names — Electrical Work ─────────────────────────────────────────
 
@@ -1498,6 +1500,8 @@ class AppLocalizationsAr extends AppLocalizations {
   @override String get serviceCeilingFanInstallation => 'تركيب مروحة سقفية';
   @override String get serviceElectricalInspection => 'فحص كهربائي';
   @override String get serviceGeneratorInstallation => 'تركيب مولد كهربائي';
+  @override String get serviceEmergencyElectricalRepair => 'إصلاح كهربائي طارئ';
+  @override String get serviceDoorbellAndIntercomInstallation => 'تركيب جرس الباب والإنتركم';
 
   // ── Service names — AC Repair ─────────────────────────────────────────────
 
@@ -1509,6 +1513,9 @@ class AppLocalizationsAr extends AppLocalizations {
   @override String get serviceSplitAcInstallation => 'تركيب مكيف سبليت';
   @override String get serviceAcInspection => 'فحص مكيف';
   @override String get serviceCentralAcService => 'صيانة تكييف مركزي';
+  @override String get serviceDuctCleaning => 'تنظيف قنوات الهواء';
+  @override String get serviceThermostatInstallation => 'تركيب الثرموستات';
+  @override String get serviceAcFilterReplacement => 'استبدال فلتر المكيف';
 
   // ── Service names — Carpentry ─────────────────────────────────────────────
 
@@ -1520,8 +1527,10 @@ class AppLocalizationsAr extends AppLocalizations {
   @override String get serviceShelfInstallation => 'تركيب رفوف';
   @override String get serviceWardrobeAssembly => 'تجميع خزانة ملابس';
   @override String get serviceKitchenCabinetInstallation => 'تركيب خزائن مطبخ';
+  @override String get serviceKitchenCarpentry => 'نجارة المطابخ';
   @override String get serviceDoorInstallation => 'تركيب أبواب';
   @override String get serviceCustomWoodwork => 'أعمال خشبية مخصصة';
+  @override String get serviceFurnitureRestoration => 'ترميم الأثاث';
 
   // ── Service names — Painting ─────────────────────────────────────────────
 
@@ -1532,6 +1541,12 @@ class AppLocalizationsAr extends AppLocalizations {
   @override String get serviceTexturePainting => 'دهان زخرفي';
   @override String get serviceWallpaperInstallation => 'تركيب ورق جدران';
   @override String get serviceTouchUpPainting => 'دهان ترميمي';
+  @override String get serviceWallRepairAndPatching => 'إصلاح الجدران وترقيعها';
+  @override String get serviceWoodStaining => 'تلوين الخشب';
+  @override String get serviceDecorativePainting => 'الدهان الزخرفي';
+  @override String get serviceDoorAndTrimPainting => 'دهان الأبواب والإطارات';
+  @override String get serviceWaterproofCoating => 'الطلاء العازل للماء';
+  @override String get serviceCabinetPainting => 'دهان الخزائن';
 
   // ── Service names — Cleaning ─────────────────────────────────────────────
 
@@ -1544,6 +1559,7 @@ class AppLocalizationsAr extends AppLocalizations {
   @override String get servicePostConstructionCleaning => 'تنظيف ما بعد البناء';
   @override String get serviceKitchenDeepClean => 'تنظيف مطبخ شامل';
   @override String get serviceBathroomDeepClean => 'تنظيف حمام شامل';
+  @override String get serviceOfficeCleaning => 'تنظيف المكاتب';
 
   // ── Service names — Moving Services ─────────────────────────────────────
 
@@ -1555,6 +1571,8 @@ class AppLocalizationsAr extends AppLocalizations {
   @override String get serviceOfficeMoving => 'نقل مكتب';
   @override String get serviceStorageService => 'خدمة التخزين';
   @override String get serviceLoadingAndUnloading => 'تحميل وتفريغ';
+  @override String get serviceFurnitureDisassemblyAndReassembly => 'تفكيك الأثاث وإعادة تركيبه';
+  @override String get serviceLongDistanceMoving => 'النقل لمسافات بعيدة';
 
   // ── Service names — Appliance Repair ─────────────────────────────────────
 
@@ -1567,6 +1585,9 @@ class AppLocalizationsAr extends AppLocalizations {
   @override String get serviceStoveRepair => 'إصلاح موقد';
   @override String get serviceWaterHeaterRepair => 'إصلاح سخان مياه';
   @override String get serviceTvRepair => 'إصلاح تلفاز';
+  @override String get serviceFreezerRepair => 'إصلاح فريزر';
+  @override String get serviceAirPurifierRepair => 'إصلاح منقّي الهواء';
+  @override String get serviceSmallApplianceRepair => 'إصلاح أجهزة منزلية صغيرة';
 
   // ── Booking status ────────────────────────────────────────────────────────────
 

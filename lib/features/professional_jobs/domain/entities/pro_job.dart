@@ -41,6 +41,7 @@ class ProJob extends Equatable {
   final String clientImageUrl;
   final String? clientPhone;
   final String serviceType;
+  final String? serviceTypeAr;
   final String location;
   final double? latitude;
   final double? longitude;
@@ -57,6 +58,7 @@ class ProJob extends Equatable {
     required this.clientImageUrl,
     this.clientPhone,
     required this.serviceType,
+    this.serviceTypeAr,
     required this.location,
     this.latitude,
     this.longitude,
@@ -93,6 +95,7 @@ class ProJob extends Equatable {
       clientImageUrl: clientImageUrl,
       clientPhone: clientPhone,
       serviceType: serviceType,
+      serviceTypeAr: serviceTypeAr,
       location: location,
       latitude: latitude,
       longitude: longitude,
@@ -112,6 +115,7 @@ class ProJob extends Equatable {
         clientImageUrl,
         clientPhone,
         serviceType,
+        serviceTypeAr,
         location,
         scheduledTime,
         price,

@@ -230,7 +230,7 @@ Future<void> init() async {
   );
 
   sl.registerFactory(
-    () => ActiveBookingCubit(getUpcomingBookings: sl(), getBookingById: sl()),
+    () => ActiveBookingCubit(getUpcomingBookings: sl(), getBookingById: sl(), getPastBookings: sl()),
   );
 
   sl.registerFactory(

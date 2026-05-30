@@ -1483,6 +1483,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override String get serviceShowerInstallation => 'Shower Installation';
   @override String get serviceSinkInstallation => 'Sink Installation';
   @override String get serviceToiletInstallation => 'Toilet Installation';
+  @override String get serviceSewerLineCleaning => 'Sewer Line Cleaning';
+  @override String get serviceWaterPressureAdjustment => 'Water Pressure Adjustment';
 
   // ── Service names — Electrical Work ─────────────────────────────────────────
 
@@ -1499,6 +1501,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override String get serviceCeilingFanInstallation => 'Ceiling Fan Installation';
   @override String get serviceElectricalInspection => 'Electrical Inspection';
   @override String get serviceGeneratorInstallation => 'Generator Installation';
+  @override String get serviceEmergencyElectricalRepair => 'Emergency Electrical Repair';
+  @override String get serviceDoorbellAndIntercomInstallation => 'Doorbell & Intercom Installation';
 
   // ── Service names — AC Repair ─────────────────────────────────────────────
 
@@ -1510,6 +1514,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override String get serviceSplitAcInstallation => 'Split AC Installation';
   @override String get serviceAcInspection => 'AC Inspection';
   @override String get serviceCentralAcService => 'Central AC Service';
+  @override String get serviceDuctCleaning => 'Duct Cleaning';
+  @override String get serviceThermostatInstallation => 'Thermostat Installation';
+  @override String get serviceAcFilterReplacement => 'AC Filter Replacement';
 
   // ── Service names — Carpentry ─────────────────────────────────────────────
 
@@ -1521,8 +1528,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override String get serviceShelfInstallation => 'Shelf Installation';
   @override String get serviceWardrobeAssembly => 'Wardrobe Assembly';
   @override String get serviceKitchenCabinetInstallation => 'Kitchen Cabinet Installation';
+  @override String get serviceKitchenCarpentry => 'Kitchen Carpentry';
   @override String get serviceDoorInstallation => 'Door Installation';
   @override String get serviceCustomWoodwork => 'Custom Woodwork';
+  @override String get serviceFurnitureRestoration => 'Furniture Restoration';
 
   // ── Service names — Painting ─────────────────────────────────────────────
 
@@ -1533,6 +1542,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override String get serviceTexturePainting => 'Texture Painting';
   @override String get serviceWallpaperInstallation => 'Wallpaper Installation';
   @override String get serviceTouchUpPainting => 'Touch-up Painting';
+  @override String get serviceWallRepairAndPatching => 'Wall Repair & Patching';
+  @override String get serviceWoodStaining => 'Wood Staining';
+  @override String get serviceDecorativePainting => 'Decorative Painting';
+  @override String get serviceDoorAndTrimPainting => 'Door & Trim Painting';
+  @override String get serviceWaterproofCoating => 'Waterproof Coating';
+  @override String get serviceCabinetPainting => 'Cabinet Painting';
 
   // ── Service names — Cleaning ─────────────────────────────────────────────
 
@@ -1545,6 +1560,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override String get servicePostConstructionCleaning => 'Post-Construction Cleaning';
   @override String get serviceKitchenDeepClean => 'Kitchen Deep Clean';
   @override String get serviceBathroomDeepClean => 'Bathroom Deep Clean';
+  @override String get serviceOfficeCleaning => 'Office Cleaning';
 
   // ── Service names — Moving Services ─────────────────────────────────────
 
@@ -1556,6 +1572,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override String get serviceOfficeMoving => 'Office Moving';
   @override String get serviceStorageService => 'Storage Service';
   @override String get serviceLoadingAndUnloading => 'Loading & Unloading';
+  @override String get serviceFurnitureDisassemblyAndReassembly => 'Furniture Disassembly & Reassembly';
+  @override String get serviceLongDistanceMoving => 'Long-Distance Moving';
 
   // ── Service names — Appliance Repair ─────────────────────────────────────
 
@@ -1568,6 +1586,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override String get serviceStoveRepair => 'Stove Repair';
   @override String get serviceWaterHeaterRepair => 'Water Heater Repair';
   @override String get serviceTvRepair => 'TV Repair';
+  @override String get serviceFreezerRepair => 'Freezer Repair';
+  @override String get serviceAirPurifierRepair => 'Air Purifier Repair';
+  @override String get serviceSmallApplianceRepair => 'Small Appliance Repair';
 
   // ── Booking status ────────────────────────────────────────────────────────────
 

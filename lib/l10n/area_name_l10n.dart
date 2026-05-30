@@ -20,17 +20,6 @@ String localizeCity(String city, AppLocalizations l10n) {
     case 'zarqa':  return 'الزرقاء';
     case 'aqaba':  return 'العقبة';
     default:       return city;
-
-  switch (name) {
-    case 'Sweifieh':          return 'الصويفية';
-    case 'Khalda':            return 'خلدا';
-    case 'Al Rabiah':         return 'الرابية';
-    case 'Um Uthaina':        return 'أم أذينة';
-    case 'AlJubaiha':         return 'الجبيهة';
-    case 'Abdoun':            return 'عبدون';
-    case 'Shmeisani':         return 'الشميساني';
-    case 'Downtown Amman':    return 'وسط البلد';
-    default:                  return name;
   }
 }
 
