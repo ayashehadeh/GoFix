@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get_it/get_it.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/services/cache_service.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../data/datasources/become_professional_remote_datasource.dart';
 import '../../data/repositories/become_professional_repository_impl.dart';
@@ -20,6 +21,7 @@ class _AlreadyProfessionalPageState extends State<AlreadyProfessionalPage> {
     BecomeProfessionalRepositoryImpl(
       remoteDataSource: BecomeProfessionalRemoteDataSourceImpl(
         dio: GetIt.instance<Dio>(),
+        cache: GetIt.instance<CacheService>(),
       ),
     ),
   );

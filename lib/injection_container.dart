@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:gp/core/services/cache_service.dart';
 import 'package:gp/features/become_professional/domain/usecases/update_profile.dart';
 import 'package:gp/features/bookings/domain/usecases/submit_payment_amount.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -476,13 +477,13 @@ Future<void> init() async {
   );
 
   // ── Data Sources ──────────────────────────────────────────────────────────
-  sl.registerLazySingleton<HomeRemoteDataSource>(() => HomeRemoteDataSourceImpl(dio: sl()));
+  sl.registerLazySingleton<HomeRemoteDataSource>(() => HomeRemoteDataSourceImpl(dio: sl(), cache: sl()));
 
   sl.registerLazySingleton<EarningsRemoteDataSource>(
     () => EarningsRemoteDataSourceImpl(dio: sl()),
   );
 
-  sl.registerLazySingleton<ProfessionalsRemoteDataSource>(() => ProfessionalsRemoteDataSourceImpl(dio: sl()));
+  sl.registerLazySingleton<ProfessionalsRemoteDataSource>(() => ProfessionalsRemoteDataSourceImpl(dio: sl(), cache: sl()));
   sl.registerLazySingleton<BookingsRemoteDataSource>(
     () => _useMockBookings ? MockBookingsDataSource() : BookingsRemoteDataSourceImpl(dio: sl()),
   );
@@ -492,7 +493,7 @@ Future<void> init() async {
   sl.registerLazySingleton<NotificationSettingsRemoteDataSource>(
       () => NotificationSettingsRemoteDataSourceImpl(dio: sl()));
   sl.registerLazySingleton<SetPasswordRemoteDataSource>(() => SetPasswordRemoteDataSourceImpl(dio: sl()));
-  sl.registerLazySingleton<BecomeProfessionalRemoteDataSource>(() => BecomeProfessionalRemoteDataSourceImpl(dio: sl()));
+  sl.registerLazySingleton<BecomeProfessionalRemoteDataSource>(() => BecomeProfessionalRemoteDataSourceImpl(dio: sl(), cache: sl()));
   sl.registerLazySingleton<ApplicationStatusRemoteDataSource>(() => ApplicationStatusRemoteDataSourceImpl(dio: sl()));
   sl.registerLazySingleton<SearchRemoteDataSource>(() => SearchRemoteDataSourceImpl(dio: sl()));
   sl.registerLazySingleton<FavoritesRemoteDataSource>(
@@ -516,6 +517,7 @@ Future<void> init() async {
   // ── External ──────────────────────────────────────────────────────────────
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
+  sl.registerLazySingleton(() => CacheService());
 
   sl.registerLazySingleton(() {
     final dio = Dio(

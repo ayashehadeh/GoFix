@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:gp/core/services/cache_service.dart';
 import 'package:gp/core/storage/token_storage.dart';
 import '../models/category_model.dart';
 import '../models/category_service_model.dart';
@@ -47,8 +48,9 @@ abstract class BecomeProfessionalRemoteDataSource {
 
 class BecomeProfessionalRemoteDataSourceImpl implements BecomeProfessionalRemoteDataSource {
   final Dio dio;
+  final CacheService cache;
 
-  const BecomeProfessionalRemoteDataSourceImpl({required this.dio});
+  const BecomeProfessionalRemoteDataSourceImpl({required this.dio, required this.cache});
 
   Future<Map<String, dynamic>> _authHeaders() async {
     final token = await TokenStorage.getToken();
@@ -91,33 +93,57 @@ class BecomeProfessionalRemoteDataSourceImpl implements BecomeProfessionalRemote
 
   @override
   Future<List<CategoryModel>> getCategories() async {
+    const key = 'categories';
+    final cached = cache.get<List<CategoryModel>>(key);
+    if (cached != null) return cached;
+
     final response = await dio.get('/categories');
     final list = _extractList(response.data);
-    return list.map((e) => CategoryModel.fromJson(e as Map<String, dynamic>)).toList();
+    final result = list.map((e) => CategoryModel.fromJson(e as Map<String, dynamic>)).toList();
+    cache.set(key, result);
+    return result;
   }
 
   @override
   Future<List<CategoryServiceModel>> getServicesForCategory(int categoryId) async {
+    final key = 'services:cat:$categoryId';
+    final cached = cache.get<List<CategoryServiceModel>>(key);
+    if (cached != null) return cached;
+
     final response = await dio.get(
       '/professionals/services',
       queryParameters: {'categoryId': categoryId},
     );
     final list = _extractList(response.data);
-    return list.map((e) => CategoryServiceModel.fromJson(e as Map<String, dynamic>)).toList();
+    final result = list.map((e) => CategoryServiceModel.fromJson(e as Map<String, dynamic>)).toList();
+    cache.set(key, result);
+    return result;
   }
 
   @override
   Future<List<ServiceAreaModel>> getServiceAreas() async {
+    const key = 'service-areas:all';
+    final cached = cache.get<List<ServiceAreaModel>>(key);
+    if (cached != null) return cached;
+
     final response = await dio.get('/professionals/service-areas');
     final list = _extractList(response.data);
-    return list.map((e) => ServiceAreaModel.fromJson(e as Map<String, dynamic>)).toList();
+    final result = list.map((e) => ServiceAreaModel.fromJson(e as Map<String, dynamic>)).toList();
+    cache.set(key, result);
+    return result;
   }
 
   @override
   Future<List<CityModel>> getCities() async {
+    const key = 'cities';
+    final cached = cache.get<List<CityModel>>(key);
+    if (cached != null) return cached;
+
     final response = await dio.get('/professionals/cities');
     final list = _extractList(response.data);
-    return list.map((e) => CityModel.fromJson(e as Map<String, dynamic>)).toList();
+    final result = list.map((e) => CityModel.fromJson(e as Map<String, dynamic>)).toList();
+    cache.set(key, result);
+    return result;
   }
 
   @override

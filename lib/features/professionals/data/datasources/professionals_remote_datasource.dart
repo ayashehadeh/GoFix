@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:gp/core/services/cache_service.dart';
 import 'package:gp/features/professionals/data/models/city_model.dart';
 import 'package:gp/features/professionals/data/models/professional_model.dart';
 import 'package:gp/features/professionals/data/models/review_model.dart';
@@ -42,8 +43,9 @@ abstract class ProfessionalsRemoteDataSource {
 class ProfessionalsRemoteDataSourceImpl
     implements ProfessionalsRemoteDataSource {
   final Dio dio;
+  final CacheService cache;
 
-  ProfessionalsRemoteDataSourceImpl({required this.dio});
+  ProfessionalsRemoteDataSourceImpl({required this.dio, required this.cache});
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -85,10 +87,15 @@ class ProfessionalsRemoteDataSourceImpl
 
   @override
   Future<List<CityModel>> getCities() async {
-    // FIXED: was /cities, must be /professionals/cities per backend guide
+    const key = 'cities';
+    final cached = cache.get<List<CityModel>>(key);
+    if (cached != null) return cached;
+
     final response = await dio.get('/professionals/cities');
     final data = response.data['data'] as List;
-    return data.map((e) => CityModel.fromJson(e)).toList();
+    final result = data.map((e) => CityModel.fromJson(e)).toList();
+    cache.set(key, result);
+    return result;
   }
 
   @override
@@ -99,6 +106,10 @@ class ProfessionalsRemoteDataSourceImpl
 
   @override
   Future<List<ServiceAreaModel>> getServiceAreas({int? cityId}) async {
+    final key = 'service-areas:${cityId ?? "all"}';
+    final cached = cache.get<List<ServiceAreaModel>>(key);
+    if (cached != null) return cached;
+
     final response = await dio.get(
       '/professionals/service-areas',
       queryParameters: {
@@ -106,7 +117,9 @@ class ProfessionalsRemoteDataSourceImpl
       },
     );
     final data = response.data['data'] as List;
-    return data.map((e) => ServiceAreaModel.fromJson(e)).toList();
+    final result = data.map((e) => ServiceAreaModel.fromJson(e)).toList();
+    cache.set(key, result);
+    return result;
   }
 
   @override
@@ -126,21 +139,32 @@ class ProfessionalsRemoteDataSourceImpl
   @override
   Future<List<ProfessionalModel>> getProfessionalsByCategory(
       ServiceCategory category) async {
+    final catId = _categoryId(category);
     final position = await _getUserLocation();
+    final key = 'professionals:cat:$catId';
+    final cached = cache.get<List<ProfessionalModel>>(key);
+    if (cached != null) return cached;
+
     final response = await dio.get(
       '/professionals',
       queryParameters: {
-        'categoryId': _categoryId(category),
+        'categoryId': catId,
         if (position != null) 'lat': position.latitude,
         if (position != null) 'lon': position.longitude,
       },
     );
     final data = response.data['data'] as List;
-    return data.map((e) => ProfessionalModel.fromJson(e)).toList();
+    final result = data.map((e) => ProfessionalModel.fromJson(e)).toList();
+    cache.set(key, result, ttl: const Duration(minutes: 5));
+    return result;
   }
 
   @override
   Future<ProfessionalModel> getProfessionalById(String id) async {
+    final key = 'professional:$id';
+    final cached = cache.get<ProfessionalModel>(key);
+    if (cached != null) return cached;
+
     final position = await _getUserLocation();
     final response = await dio.get(
       '/professionals/$id',
@@ -149,19 +173,30 @@ class ProfessionalsRemoteDataSourceImpl
         if (position != null) 'lon': position.longitude,
       },
     );
-    return ProfessionalModel.fromJson(response.data['data']);
+    final result = ProfessionalModel.fromJson(response.data['data']);
+    cache.set(key, result, ttl: const Duration(minutes: 5));
+    return result;
   }
 
   @override
   Future<List<ProfessionalModel>> getFavorites() async {
+    const key = 'favorites';
+    final cached = cache.get<List<ProfessionalModel>>(key);
+    if (cached != null) return cached;
+
     final response = await dio.get('/professionals/favorites');
     final data = response.data['data'] as List;
-    return data.map((e) => ProfessionalModel.fromJson(e)).toList();
+    final result = data.map((e) => ProfessionalModel.fromJson(e)).toList();
+    cache.set(key, result, ttl: const Duration(minutes: 2));
+    return result;
   }
 
   @override
   Future<void> toggleFavorite(String professionalId) async {
     await dio.post('/professionals/$professionalId/favorite');
+    // Invalidate so favorites list and profile IsFavorite flag are re-fetched
+    cache.invalidate('favorites');
+    cache.invalidate('professional:$professionalId');
   }
 
   @override
@@ -231,6 +266,8 @@ class ProfessionalsRemoteDataSourceImpl
         'comment': comment,
       },
     );
+    // Invalidate cached profile so updated rating is reflected
+    cache.invalidate('professional:$professionalId');
     return ReviewModel.fromJson(response.data['data']);
   }
 
