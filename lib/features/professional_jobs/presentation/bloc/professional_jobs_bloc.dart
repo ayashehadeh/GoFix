@@ -9,6 +9,7 @@ class ProfessionalJobsBloc
   final GetUpcomingJobs getUpcomingJobs;
   final GetPastJobs getPastJobs;
   final UpdateProJobStatus updateJobStatus;
+  final CancelProJob cancelProJob;
 
   // In-memory cache so status updates reflect immediately
   List<ProJob> _upcomingCache = [];
@@ -18,10 +19,12 @@ class ProfessionalJobsBloc
     required this.getUpcomingJobs,
     required this.getPastJobs,
     required this.updateJobStatus,
+    required this.cancelProJob,
   }) : super(ProfessionalJobsInitial()) {
     on<LoadUpcomingJobs>(_onLoadUpcoming);
     on<LoadPastJobs>(_onLoadPast);
     on<UpdateProJobStatusEvent>(_onUpdateStatus);
+    on<CancelProJobEvent>(_onCancelJob);
   }
 
   Future<void> _onLoadUpcoming(
@@ -71,12 +74,10 @@ class ProfessionalJobsBloc
         final movedToPast = !event.newStatus.isActive;
 
         if (movedToPast) {
-          // Remove from upcoming cache, add to past cache
           _upcomingCache =
               _upcomingCache.where((j) => j.id != event.jobId).toList();
           _pastCache = [updatedJob, ..._pastCache];
         } else {
-          // Update in-place in upcoming cache
           _upcomingCache = _upcomingCache
               .map((j) => j.id == event.jobId ? updatedJob : j)
               .toList();
@@ -85,6 +86,45 @@ class ProfessionalJobsBloc
         emit(JobStatusUpdateSuccess(
           updatedJob: updatedJob,
           movedToPast: movedToPast,
+        ));
+      },
+    );
+  }
+
+  Future<void> _onCancelJob(
+    CancelProJobEvent event,
+    Emitter<ProfessionalJobsState> emit,
+  ) async {
+    emit(JobStatusUpdateLoading(event.jobId));
+
+    final result = await cancelProJob(event.jobId, reason: event.reason);
+
+    result.fold(
+      (failure) => emit(ProfessionalJobsError(failure.message)),
+      (_) {
+        final cancelled = _upcomingCache
+            .where((j) => j.id == event.jobId)
+            .map((j) => j.copyWith(status: ProJobStatus.cancelled))
+            .firstOrNull;
+
+        _upcomingCache =
+            _upcomingCache.where((j) => j.id != event.jobId).toList();
+        if (cancelled != null) _pastCache = [cancelled, ..._pastCache];
+
+        emit(JobStatusUpdateSuccess(
+          updatedJob: cancelled ??
+              ProJob(
+                id: event.jobId,
+                clientName: '',
+                clientImageUrl: '',
+                serviceType: '',
+                location: '',
+                scheduledTime: DateTime.now(),
+                price: '',
+                description: '',
+                status: ProJobStatus.cancelled,
+              ),
+          movedToPast: true,
         ));
       },
     );

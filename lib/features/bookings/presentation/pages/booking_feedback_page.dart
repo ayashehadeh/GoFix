@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
 import '../../../../injection_container.dart' as di;
@@ -10,6 +11,95 @@ import '../bloc/bookings_event.dart';
 import '../bloc/bookings_state.dart';
 
 enum _Sheet { choose, review, report }
+
+/// Opens the feedback bottom-sheet flow directly from [context].
+/// [context] must have a [BookingsBloc] ancestor (e.g. called from BookingInfoPage).
+void openFeedbackSheet(BuildContext context, Booking booking) {
+  // Capture stable references up-front. When the report is submitted,
+  // BookingActionLoading causes BookingInfoPage to rebuild its body (skeleton),
+  // which removes the widget that owns [context] from the tree. If we relied
+  // on [context] for navigation after that point it would be deactivated.
+  // Using NavigatorState and ScaffoldMessengerState directly avoids this.
+  _runFeedbackFlow(
+    context,
+    booking,
+    _Sheet.choose,
+    Navigator.of(context),
+    ScaffoldMessenger.of(context),
+    context.read<BookingsBloc>(),
+  );
+}
+
+void _runFeedbackFlow(
+  BuildContext context,
+  Booking booking,
+  _Sheet sheet,
+  NavigatorState navigator,
+  ScaffoldMessengerState messenger,
+  BookingsBloc bloc,
+) {
+  showModalBottomSheet<String>(
+    context: context,
+    backgroundColor: Colors.white,
+    isScrollControlled: true,
+    isDismissible: sheet == _Sheet.choose,
+    enableDrag: sheet == _Sheet.choose,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    ),
+    builder: (sheetCtx) {
+      switch (sheet) {
+        case _Sheet.choose:
+          return _ChooseSheet(
+            onReviewChosen: () => Navigator.of(sheetCtx).pop('review'),
+            onReportChosen: () => Navigator.of(sheetCtx).pop('report'),
+          );
+        case _Sheet.review:
+          return _ReviewSheet(
+            booking: booking,
+            onSuccess: () => Navigator.of(sheetCtx).pop('review_done'),
+          );
+        case _Sheet.report:
+          return BlocProvider.value(
+            value: bloc,
+            child: _ReportSheet(
+              booking: booking,
+              onSuccess: () => Navigator.of(sheetCtx).pop('report_done'),
+            ),
+          );
+      }
+    },
+  ).then((result) {
+    // For recursive sheet openings (choose → review/report), context is still
+    // alive (BookingActionLoading hasn't fired yet). Guard with mounted.
+    if (result == 'review') {
+      if (!context.mounted) return;
+      _runFeedbackFlow(context, booking, _Sheet.review, navigator, messenger, bloc);
+    } else if (result == 'report') {
+      if (!context.mounted) return;
+      _runFeedbackFlow(context, booking, _Sheet.report, navigator, messenger, bloc);
+    } else if (result == 'review_done') {
+      // context may still be alive here (review doesn't emit BookingActionLoading)
+      navigator.pop();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (navigator.mounted) {
+          showSuccessSnackbar(navigator.context, AppLocalizations.of(navigator.context)!.reviewSubmittedSuccess);
+        }
+      });
+    } else if (result == 'report_done') {
+      // context is deactivated here — BookingActionLoading fired during submission
+      // and replaced the page body, removing context's widget from the tree.
+      // Use the pre-captured navigator/messenger instead.
+      navigator.pop();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (navigator.mounted) {
+          showSuccessSnackbar(navigator.context, AppLocalizations.of(navigator.context)!.reportSubmittedSuccess);
+        }
+      });
+    }
+    // null: user dismissed the choose sheet → stay on BookingInfoPage
+  });
+}
 
 class BookingFeedbackPage extends StatefulWidget {
   final Booking booking;
@@ -42,13 +132,7 @@ class _BookingFeedbackPageState extends State<BookingFeedbackPage> {
     Navigator.of(context).pop();
     Navigator.of(context).pop();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: const Color(0xFFFF8C1A),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      showSuccessSnackbar(context, message);
     });
   }
 
@@ -214,9 +298,7 @@ class _ReviewSheetState extends State<_ReviewSheet> {
     result.fold(
       (failure) {
         setState(() => _submitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(failure.message), backgroundColor: Colors.red),
-        );
+        showErrorSnackbar(context, failure.message);
       },
       (_) => widget.onSuccess(),
     );
@@ -347,9 +429,7 @@ class _ReportSheetState extends State<_ReportSheet> {
       listener: (ctx, state) {
         if (state is BookingActionSuccess) widget.onSuccess();
         if (state is BookingsError) {
-          ScaffoldMessenger.of(ctx).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-          );
+          showErrorSnackbar(ctx, state.message);
         }
       },
       builder: (ctx, state) {
@@ -584,7 +664,7 @@ class _ProfessionalMiniCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8)
+            BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8)
           ],
         ),
         child: Row(
@@ -630,7 +710,7 @@ class _BookingDetailsSummary extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8)
+            BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8)
           ],
         ),
         child: Column(

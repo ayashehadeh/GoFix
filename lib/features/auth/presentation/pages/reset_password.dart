@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/core/theme/app_colors.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -26,9 +27,7 @@ class _ResetPasswordState extends State<ResetPassword> {
   void _submit() {
     final email = _emailCtrl.text.trim();
     if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.pleaseEnterEmail)),
-      );
+      showWarningSnackbar(context, AppLocalizations.of(context)!.pleaseEnterEmail);
       return;
     }
     context
@@ -53,11 +52,7 @@ class _ResetPasswordState extends State<ResetPassword> {
           );
         }
         if (state is AuthError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red),
-          );
+          showErrorSnackbar(context, state.message);
         }
       },
       builder: (context, state) {

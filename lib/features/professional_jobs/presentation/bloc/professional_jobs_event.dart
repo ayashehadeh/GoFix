@@ -19,3 +19,13 @@ class UpdateProJobStatusEvent extends ProfessionalJobsEvent {
   @override
   List<Object?> get props => [jobId, newStatus];
 }
+
+class CancelProJobEvent extends ProfessionalJobsEvent {
+  final String jobId;
+  final String? reason;
+
+  CancelProJobEvent({required this.jobId, this.reason});
+
+  @override
+  List<Object?> get props => [jobId, reason];
+}

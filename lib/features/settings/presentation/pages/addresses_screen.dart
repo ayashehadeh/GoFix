@@ -5,6 +5,7 @@ import 'package:gp/features/settings/domain/entities/address_entity.dart';
 import 'package:gp/features/settings/presentation/bloc/address_bloc.dart';
 import 'package:gp/features/settings/presentation/pages/confirm_location_screen.dart';
 import 'package:gp/features/settings/presentation/pages/edit_address_screen.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -65,9 +66,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
       body: BlocConsumer<AddressBloc, AddressState>(
         listener: (context, state) {
           if (state is AddressError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            showErrorSnackbar(context, state.message);
           }
         },
         builder: (context, state) {

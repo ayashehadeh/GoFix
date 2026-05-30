@@ -18,6 +18,9 @@ class AreaResultTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final localizedName = localizeAreaName(area.name, l10n, nameAr: area.nameAr);
+    final localizedCity = localizeCityName(area.city, l10n, nameAr: area.cityNameAr);
     return GestureDetector(
       onTap: onTap,
       child: Container(

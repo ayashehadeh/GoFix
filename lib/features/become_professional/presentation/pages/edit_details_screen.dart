@@ -4,6 +4,7 @@ import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/features/become_professional/presentation/bloc/become_professional_bloc.dart';
 import 'package:gp/features/become_professional/presentation/bloc/become_professional_event.dart';
 import 'package:gp/features/become_professional/presentation/bloc/become_professional_state.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/features/become_professional/presentation/pages/professional_details_page.dart';
 import 'package:gp/features/become_professional/presentation/pages/profile_updated_page.dart';
 import 'package:gp/features/professionals/domain/entities/professional.dart';
@@ -40,12 +41,7 @@ class _EditDetailsView extends StatelessWidget {
               prev.errorMessage != curr.errorMessage &&
               curr.errorMessage != null,
           listener: (context, state) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.errorMessage!),
-                backgroundColor: AppColors.error,
-              ),
-            );
+            showErrorSnackbar(context, state.errorMessage!);
           },
           child: Column(
             children: [

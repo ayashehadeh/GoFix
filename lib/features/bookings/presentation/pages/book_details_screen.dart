@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/features/bookings/presentation/pages/booking_success_screen.dart';
 import 'package:gp/injection_container.dart' as di;
 import 'package:gp/l10n/app_localizations.dart';
@@ -80,12 +81,7 @@ class _BookDetailsScreenState extends State<BookDetailsScreen> {
       }
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to upload images. Please try again.'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      showErrorSnackbar(context, 'Failed to upload images. Please try again.');
       setState(() => _isUploading = false);
       return;
     }
@@ -123,12 +119,7 @@ class _BookDetailsScreenState extends State<BookDetailsScreen> {
           );
         }
         if (state is BookingsError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-            ),
-          );
+          showErrorSnackbar(context, state.message);
         }
       },
       builder: (context, state) {

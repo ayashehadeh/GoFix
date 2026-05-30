@@ -66,6 +66,9 @@ class MockBookingsDataSource implements BookingsRemoteDataSource {
 
   final List<BookingModel> _past = [
     // Card 1 — Past Bookings/a + Past Booking info/a screens
+    // professionalConfirmedPayment=true means the professional set the amount;
+    // paymentConfirmed=false means the customer hasn't confirmed yet.
+    // isUpcoming == true, so the home-screen widget will pick this up.
     BookingModel(
       id: 'b4',
       professionalId: 'p1',
@@ -78,8 +81,10 @@ class MockBookingsDataSource implements BookingsRemoteDataSource {
       scheduledTime: '3:00 PM',
       address: 'Apartment, AlJubaiha',
       description: _pipeDesc,
-      imageUrls: ['img1.jpg'], // renders as "1 picture attached"
+      imageUrls: ['img1.jpg'],
       status: BookingStatus.completed,
+      professionalConfirmedPayment: true,
+      agreedAmount: 35.0,
       createdAt: DateTime(2025, 2, 1),
     ),
 
@@ -152,7 +157,7 @@ class MockBookingsDataSource implements BookingsRemoteDataSource {
   @override
   Future<List<String>> getBookedSlotsForProfessional(String professionalId, DateTime date) async {
     await Future.delayed(const Duration(milliseconds: 200));
-    return [];
+    return ['09:00 AM', '11:00 AM', '02:00 PM'];
   }
 
   /// Creates a new booking and prepends it to the upcoming list.
@@ -261,10 +266,63 @@ class MockBookingsDataSource implements BookingsRemoteDataSource {
     );
   }
 
-  /// No-op — simulates a successful report submission.
   @override
   Future<void> confirmPayment(String id) async {
     await Future.delayed(const Duration(milliseconds: 400));
+    // Move from upcoming → past with paymentConfirmed=true so the home widget
+    // drops it and it appears in My Bookings (past tab).
+    final upcomingIndex = _upcoming.indexWhere((b) => b.id == id);
+    if (upcomingIndex != -1) {
+      final existing = _upcoming[upcomingIndex];
+      _upcoming.removeAt(upcomingIndex);
+      _past.insert(
+        0,
+        BookingModel(
+          id: existing.id,
+          professionalId: existing.professionalId,
+          professionalName: existing.professionalName,
+          professionalRole: existing.professionalRole,
+          professionalImageUrl: existing.professionalImageUrl,
+          serviceName: existing.serviceName,
+          servicePrice: existing.servicePrice,
+          scheduledDate: existing.scheduledDate,
+          scheduledTime: existing.scheduledTime,
+          address: existing.address,
+          description: existing.description,
+          imageUrls: existing.imageUrls,
+          status: BookingStatus.completed,
+          paymentConfirmed: true,
+          professionalConfirmedPayment: existing.professionalConfirmedPayment,
+          agreedAmount: existing.agreedAmount,
+          createdAt: existing.createdAt,
+        ),
+      );
+      return;
+    }
+    // If already in past (e.g. real backend flow), update in place.
+    final pastIndex = _past.indexWhere((b) => b.id == id);
+    if (pastIndex != -1) {
+      final existing = _past[pastIndex];
+      _past[pastIndex] = BookingModel(
+        id: existing.id,
+        professionalId: existing.professionalId,
+        professionalName: existing.professionalName,
+        professionalRole: existing.professionalRole,
+        professionalImageUrl: existing.professionalImageUrl,
+        serviceName: existing.serviceName,
+        servicePrice: existing.servicePrice,
+        scheduledDate: existing.scheduledDate,
+        scheduledTime: existing.scheduledTime,
+        address: existing.address,
+        description: existing.description,
+        imageUrls: existing.imageUrls,
+        status: BookingStatus.completed,
+        paymentConfirmed: true,
+        professionalConfirmedPayment: existing.professionalConfirmedPayment,
+        agreedAmount: existing.agreedAmount,
+        createdAt: existing.createdAt,
+      );
+    }
   }
 
   @override

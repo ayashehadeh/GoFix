@@ -1397,7 +1397,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectAddress => 'Select Address';
 
   @override
-  String get noSavedAddresses => 'No saved addresses. Please add one in Settings.';
+  String get noSavedAddresses => 'No saved addresses.';
+
+  @override
+  String get addAddress => 'Add Address';
 
   @override
   String get loadingAddresses => 'Loading addresses...';

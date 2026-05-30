@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gp/core/widgets/cancel_reason_dialog.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/features/professional_dashboard/presentation/pages/job_request_info_page.dart';
 import 'package:gp/features/professional_jobs/presentation/bloc/professional_jobs_bloc.dart';
@@ -23,6 +24,7 @@ import 'package:gp/core/utils/user_info_helper.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
 import 'package:gp/features/professionals/presentation/pages/professional_my_profile_page.dart';
 import 'dart:ui';
+import 'package:gp/core/utils/snackbar_helper.dart';
 
 class ProfessionalDashboardScreen extends StatefulWidget {
   const ProfessionalDashboardScreen({Key? key}) : super(key: key);
@@ -53,37 +55,17 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
       body: SafeArea(
         child: BlocConsumer<ProfessionalDashboardBloc, ProfessionalDashboardState>(
           buildWhen: (prev, curr) =>
-              curr is DashboardInitial || curr is DashboardLoading || curr is DashboardLoaded || curr is DashboardError,
+              curr is DashboardInitial || curr is DashboardLoading || curr is DashboardLoaded,
           listener: (context, state) {
             if (state is RequestActionSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message), backgroundColor: Colors.green),
-              );
+              showSuccessSnackbar(context, state.message);
             } else if (state is RequestActionError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-              );
+              showErrorSnackbar(context, state.message);
             }
           },
           builder: (context, state) {
             if (state is DashboardLoading) {
               return const DashboardSkeleton();
-            }
-
-            if (state is DashboardError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Error: ${state.message}', style: const TextStyle(color: Colors.red)),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () => context.read<ProfessionalDashboardBloc>().add(RefreshDashboard()),
-                      child: Text(AppLocalizations.of(context)!.retry),
-                    ),
-                  ],
-                ),
-              );
             }
 
             if (state is DashboardLoaded) {
@@ -458,6 +440,8 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
       ),
     );
   }
+
+  // ── Status chip helpers ──────────────────────────────────────────────────────
 
   ({String label, Color color, Color bg}) _statusChipData(ProJobStatus status) {
     return switch (status) {
@@ -888,7 +872,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
     );
   }
 
-  // ── Status update dialogs ────────────────────────────────────────────────────
+  // ── Status update dialog ─────────────────────────────────────────────────────
 
   void _showStatusUpdateDialog(String jobId, ProJobStatus currentStatus) {
     final Set<String> allowedKeys = switch (currentStatus) {
@@ -1010,6 +994,12 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
                               Navigator.pop(sheetCtx);
                               if (selected == 'Completed') {
                                 _showPaymentAmountSheet(jobId);
+                              } else if (selected == 'Cancelled') {
+                                showCancelReasonDialog(context, onConfirm: (reason) {
+                                  context.read<ProfessionalDashboardBloc>().add(
+                                    UpdateStatus(jobId, 'Cancelled', reason: reason),
+                                  );
+                                });
                               } else {
                                 context.read<ProfessionalDashboardBloc>().add(UpdateStatus(jobId, selected!));
                               }

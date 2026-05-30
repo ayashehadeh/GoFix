@@ -9,6 +9,7 @@ class AreaResult extends Equatable {
   final String name;
   final String? nameAr;
   final String city;
+  final String? cityNameAr;
   final int proCount;
 
   const AreaResult({
@@ -16,11 +17,12 @@ class AreaResult extends Equatable {
     required this.name,
     this.nameAr,
     required this.city,
+    this.cityNameAr,
     required this.proCount,
   });
 
   @override
-  List<Object?> get props => [id, name, nameAr, city, proCount];
+  List<Object?> get props => [id, name, nameAr, city, cityNameAr, proCount];
 }
 
 // ─── Service result ───────────────────────────────────────────────────────────

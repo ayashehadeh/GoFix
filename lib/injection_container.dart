@@ -319,6 +319,7 @@ Future<void> init() async {
       acceptJobRequest: sl(),
       declineJobRequest: sl(),
       updateJobStatus: sl(),
+      cancelJobProfessional: sl(),
       submitPaymentAmount: sl(),
     ),
   );
@@ -335,6 +336,7 @@ Future<void> init() async {
         getUpcomingJobs: sl(),
         getPastJobs: sl(),
         updateJobStatus: sl(),
+        cancelProJob: sl(),
       ));
 
   // ── Use Cases — Home ───────────────────────────────────────────────────────
@@ -430,6 +432,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => AcceptJobRequest(sl()));
   sl.registerLazySingleton(() => DeclineJobRequest(sl()));
   sl.registerLazySingleton(() => UpdateJobStatus(sl()));
+  sl.registerLazySingleton(() => CancelJobProfessional(sl()));
 
   // ── Use Cases — Professional Availability ──────────────────────────────────
   sl.registerLazySingleton(() => GetAvailability(sl()));
@@ -440,6 +443,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetUpcomingJobs(sl()));
   sl.registerLazySingleton(() => GetPastJobs(sl()));
   sl.registerLazySingleton(() => UpdateProJobStatus(sl()));
+  sl.registerLazySingleton(() => CancelProJob(sl()));
 
   // ── Repositories ──────────────────────────────────────────────────────────
   sl.registerLazySingleton<HomeRepository>(() => HomeRepositoryImpl(remoteDataSource: sl()));

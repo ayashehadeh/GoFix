@@ -6,6 +6,7 @@ class AreaResultModel extends AreaResult {
     required super.name,
     super.nameAr,
     required super.city,
+    super.cityNameAr,
     required super.proCount,
   });
 
@@ -15,6 +16,7 @@ class AreaResultModel extends AreaResult {
       name: json['name'] as String? ?? '',
       nameAr: json['nameAr'] as String? ?? json['name_ar'] as String?,
       city: json['city'] as String? ?? '',
+      cityNameAr: json['cityNameAr'] as String?,
       proCount: (json['availableProfessionalCount'] as num? ?? json['proCount'] as num? ?? 0).toInt(),
     );
   }
@@ -24,6 +26,7 @@ class AreaResultModel extends AreaResult {
         'name': name,
         if (nameAr != null) 'nameAr': nameAr,
         'city': city,
+        if (cityNameAr != null) 'cityNameAr': cityNameAr,
         'proCount': proCount,
       };
 }

@@ -41,6 +41,7 @@ class ServiceAreaModel extends ServiceArea {
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
+        if (nameAr != null) 'nameAr': nameAr,
         'cityId': cityId,
         if (cityName != null) 'cityName': cityName,
       };

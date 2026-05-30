@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:gp/features/professional_jobs/domain/entities/pro_job.dart';
 import '../../domain/entities/dashboard_stats_entity.dart';
 import '../../domain/repositories/professional_dashboard_repository.dart';
@@ -16,7 +17,7 @@ class ProfessionalDashboardRepositoryImpl
       final stats = await remoteDataSource.getDashboardStats();
       return Right(stats);
     } catch (e) {
-      return Left(e.toString());
+      return Left(_extractMessage(e));
     }
   }
 
@@ -26,7 +27,7 @@ class ProfessionalDashboardRepositoryImpl
       final requests = await remoteDataSource.getIncomingRequests();
       return Right(requests);
     } catch (e) {
-      return Left(e.toString());
+      return Left(_extractMessage(e));
     }
   }
 
@@ -36,7 +37,7 @@ class ProfessionalDashboardRepositoryImpl
       final jobs = await remoteDataSource.getScheduledJobs();
       return Right(jobs);
     } catch (e) {
-      return Left(e.toString());
+      return Left(_extractMessage(e));
     }
   }
 
@@ -46,7 +47,7 @@ class ProfessionalDashboardRepositoryImpl
       await remoteDataSource.acceptJobRequest(jobId);
       return const Right(null);
     } catch (e) {
-      return Left(e.toString());
+      return Left(_extractMessage(e));
     }
   }
 
@@ -56,7 +57,7 @@ class ProfessionalDashboardRepositoryImpl
       await remoteDataSource.declineJobRequest(jobId);
       return const Right(null);
     } catch (e) {
-      return Left(e.toString());
+      return Left(_extractMessage(e));
     }
   }
 
@@ -66,7 +67,24 @@ class ProfessionalDashboardRepositoryImpl
       await remoteDataSource.updateJobStatus(jobId, status);
       return const Right(null);
     } catch (e) {
-      return Left(e.toString());
+      return Left(_extractMessage(e));
     }
+  }
+
+  @override
+  Future<Either<String, void>> cancelJob(String jobId, {String? reason}) async {
+    try {
+      await remoteDataSource.cancelJob(jobId, reason: reason);
+      return const Right(null);
+    } catch (e) {
+      return Left(_extractMessage(e));
+    }
+  }
+
+  String _extractMessage(Object e) {
+    if (e is DioException) {
+      return e.response?.data?['message'] as String? ?? 'Something went wrong';
+    }
+    return 'Something went wrong';
   }
 }

@@ -14,6 +14,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/injection_container.dart' as di;
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/core/utils/user_info_helper.dart';
 
 // Notifications
@@ -252,20 +253,10 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
             listener: (context, state) {
               if (state is FeedbackSuccess) {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(t.thankYouFeedback),
-                    backgroundColor: AppColors.primaryOrange,
-                  ),
-                );
+                showSuccessSnackbar(context, t.thankYouFeedback);
               }
               if (state is AccountError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: AppColors.error,
-                  ),
-                );
+                showErrorSnackbar(context, state.message);
               }
             },
             builder: (context, state) {
@@ -383,9 +374,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
               _navigateToStart(context);
             }
             if (state is AccountError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message), backgroundColor: AppColors.error),
-              );
+              showErrorSnackbar(context, state.message);
             }
           },
           builder: (context, state) {
@@ -560,9 +549,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
               _navigateToStart(context);
             }
             if (state is AccountError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message), backgroundColor: AppColors.error),
-              );
+              showErrorSnackbar(context, state.message);
             }
           },
           builder: (context, state) {
@@ -745,7 +732,7 @@ class _ProfilePageState extends State<ProfilePage> with WidgetsBindingObserver, 
                           onTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(builder: (_) => const PersonalInformationPage()),
-                              )),
+                              ).then((_) { if (mounted) _loadUserInfo(); })),
                       _menuItem(context, Icons.notifications, t.notifications,
                           onTap: () => Navigator.push(
                                 context,

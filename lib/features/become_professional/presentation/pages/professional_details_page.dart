@@ -342,6 +342,7 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
   void _pickCity(BuildContext context, BecomeProfessionalState state) {
     final cities = state.derivedCities;
     if (cities.isEmpty) return;
+    final l10n = AppLocalizations.of(context)!;
     final currentId = state.application.cityId;
     final selected = currentId == null
         ? null
@@ -353,7 +354,7 @@ class _ProfessionalDetailsPageState extends State<ProfessionalDetailsPage> {
       context: context,
       title: 'Select City',
       items: cities,
-      labelOf: (c) => c.name,
+      labelOf: (c) => localizeCityName(c.name, l10n),
       selected: selected,
       onSelected: (city) {
         context.read<BecomeProfessionalBloc>().add(
@@ -381,6 +382,7 @@ class _AreaCheckTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         InkWell(

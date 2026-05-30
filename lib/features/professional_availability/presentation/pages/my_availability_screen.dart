@@ -4,6 +4,7 @@ import 'package:gp/core/storage/user_type_storage.dart';
 import 'package:gp/core/widgets/skeletons/availability_skeleton.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/snackbar_helper.dart';
 import '../../domain/entities/availability_entity.dart';
 import '../bloc/availability_bloc.dart';
 import '../bloc/availability_event.dart';
@@ -45,13 +46,7 @@ class _MyAvailabilityView extends StatelessWidget {
       body: BlocConsumer<AvailabilityBloc, AvailabilityState>(
         listener: (context, state) async {
           if (state is AvailabilitySaved) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(AppLocalizations.of(context)!.availabilitySaved),
-                backgroundColor: Colors.green,
-                duration: const Duration(seconds: 2),
-              ),
-            );
+            showSuccessSnackbar(context, AppLocalizations.of(context)!.availabilitySaved);
             await UserTypeStorage.setAsProfessional('');
             Future.delayed(const Duration(milliseconds: 500), () {
               if (context.mounted) {
@@ -59,12 +54,7 @@ class _MyAvailabilityView extends StatelessWidget {
               }
             });
           } else if (state is AvailabilityError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
+            showErrorSnackbar(context, state.message);
           }
         },
         builder: (context, state) {

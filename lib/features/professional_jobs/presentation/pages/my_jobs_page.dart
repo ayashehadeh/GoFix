@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/core/widgets/skeletons/booking_job_list_skeleton.dart';
 import '../bloc/professional_jobs_bloc.dart';
 import '../bloc/professional_jobs_event.dart';
@@ -44,24 +45,13 @@ class _MyJobsPageState extends State<MyJobsPage> {
           final msg = state.movedToPast
               ? 'Job marked as ${state.updatedJob.status.label}'
               : 'Status updated to ${state.updatedJob.status.label}';
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(msg),
-              backgroundColor: const Color(0xFFFF8C1A),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          showSuccessSnackbar(context, msg);
           // Reload the upcoming list to reflect any changes
           context.read<ProfessionalJobsBloc>().add(LoadUpcomingJobs());
           setState(() => _isUpcoming = true);
         }
         if (state is ProfessionalJobsError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-            ),
-          );
+          showErrorSnackbar(context, state.message);
         }
       },
       child: Scaffold(

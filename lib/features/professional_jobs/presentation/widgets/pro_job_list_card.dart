@@ -112,7 +112,9 @@ class ProJobListCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    job.price,
+                    job.agreedAmount != null
+                        ? '${job.agreedAmount!.toStringAsFixed(2)} JD'
+                        : job.price,
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,

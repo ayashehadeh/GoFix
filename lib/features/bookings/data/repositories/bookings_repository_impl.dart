@@ -123,9 +123,9 @@ class BookingsRepositoryImpl implements BookingsRepository {
   }
 
   @override
-  Future<Either<Failure, void>> cancelBooking(String bookingId) async {
+  Future<Either<Failure, void>> cancelBooking(String bookingId, {String? reason}) async {
     try {
-      await remoteDataSource.cancelBooking(bookingId);
+      await remoteDataSource.cancelBooking(bookingId, reason: reason);
       return const Right(null);
     } on DioException catch (e) {
       return Left(_handleDioError(e));

@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/booking.dart';
 import '../../domain/usecases/get_upcoming_bookings.dart';
 import '../../domain/usecases/get_booking_by_id.dart';
+import '../../domain/usecases/get_past_bookings.dart';
 
 // ── States ────────────────────────────────────────────────────────────────────
 
@@ -35,6 +36,11 @@ class ActiveBookingCubit extends Cubit<ActiveBookingState> {
   ActiveBookingCubit({
     required this.getUpcomingBookings,
     required this.getBookingById,
+  final GetPastBookings getPastBookings;
+
+  ActiveBookingCubit({
+    required this.getUpcomingBookings,
+    required this.getPastBookings,
   }) : super(ActiveBookingInitial());
 
   Future<void> load() async {
@@ -79,7 +85,41 @@ class ActiveBookingCubit extends Cubit<ActiveBookingState> {
           emit(ActiveBookingEmpty());
         }
       },
+
+    // Step 1: upcoming bookings — primary source, same as before.
+    final upcomingResult = await getUpcomingBookings();
+
+    String? errorMessage;
+    final allBookings = <Booking>[];
+
+    upcomingResult.fold(
+      (failure) => errorMessage = failure.message,
+      (bookings) => allBookings.addAll(bookings),
     );
+
+    // Step 2: only check past if upcoming returned nothing active. This catches
+    // completed-but-unpaid bookings that the backend may have moved to past.
+    final active = allBookings.where((b) => b.isUpcoming).toList();
+    if (active.isEmpty) {
+      final pastResult = await getPastBookings();
+      pastResult.fold(
+        (failure) => null, // past failure is non-fatal
+        (bookings) => allBookings.addAll(bookings),
+      );
+    }
+
+    final finalActive = allBookings.where((b) => b.isUpcoming).toList();
+
+    if (finalActive.isEmpty) {
+      if (errorMessage != null && allBookings.isEmpty) {
+        emit(ActiveBookingError(errorMessage!));
+      } else {
+        emit(ActiveBookingEmpty());
+      }
+      return;
+    }
+
+    emit(ActiveBookingLoaded(_pickMostActive(finalActive)));
   }
 
   Future<void> _saveLastBookingId(String id) async {

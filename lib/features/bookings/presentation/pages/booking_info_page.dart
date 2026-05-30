@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gp/core/utils/snackbar_helper.dart';
 import 'package:gp/core/widgets/fullscreen_image_viewer.dart';
 import 'package:gp/l10n/app_localizations.dart';
 import 'package:gp/l10n/service_name_l10n.dart';
@@ -54,14 +55,10 @@ class _BookingInfoPageState extends State<BookingInfoPage> {
       body: BlocConsumer<BookingsBloc, BookingsState>(
         listener: (context, state) {
           if (state is ConfirmPaymentSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(AppLocalizations.of(context)!.paymentConfirmed)),
-            );
+            showSuccessSnackbar(context, AppLocalizations.of(context)!.paymentConfirmed);
             context.read<BookingsBloc>().add(LoadBookingById(widget.bookingId));
           } else if (state is ConfirmPaymentError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            showErrorSnackbar(context, state.message);
           }
         },
         builder: (context, state) {
@@ -550,17 +547,7 @@ class _BottomActions extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => BlocProvider.value(
-                            value: context.read<BookingsBloc>(),
-                            child: BookingFeedbackPage(booking: booking),
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: () => openFeedbackSheet(context, booking),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.primaryDark,
                       minimumSize: const Size(0, 50),

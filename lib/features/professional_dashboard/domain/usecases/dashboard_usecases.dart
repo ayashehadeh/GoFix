@@ -62,3 +62,12 @@ class UpdateJobStatus {
     return await repository.updateJobStatus(jobId, status);
   }
 }
+
+class CancelJobProfessional {
+  final ProfessionalDashboardRepository repository;
+
+  CancelJobProfessional(this.repository);
+
+  Future<Either<String, void>> call(String jobId, {String? reason}) =>
+      repository.cancelJob(jobId, reason: reason);
+}
