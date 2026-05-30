@@ -1776,6 +1776,8 @@ abstract class AppLocalizations {
   String get serviceShowerInstallation;
   String get serviceSinkInstallation;
   String get serviceToiletInstallation;
+  String get serviceSewerLineCleaning;
+  String get serviceWaterPressureAdjustment;
 
   // ── Service names — Electrical Work ─────────────────────────────────────────
   String get serviceWiringRepair;
@@ -1791,6 +1793,8 @@ abstract class AppLocalizations {
   String get serviceCeilingFanInstallation;
   String get serviceElectricalInspection;
   String get serviceGeneratorInstallation;
+  String get serviceEmergencyElectricalRepair;
+  String get serviceDoorbellAndIntercomInstallation;
 
   // ── Service names — AC Repair ─────────────────────────────────────────────
   String get serviceAcInstallation;
@@ -1801,6 +1805,9 @@ abstract class AppLocalizations {
   String get serviceSplitAcInstallation;
   String get serviceAcInspection;
   String get serviceCentralAcService;
+  String get serviceDuctCleaning;
+  String get serviceThermostatInstallation;
+  String get serviceAcFilterReplacement;
 
   // ── Service names — Carpentry ─────────────────────────────────────────────
   String get serviceFurnitureAssembly;
@@ -1811,8 +1818,10 @@ abstract class AppLocalizations {
   String get serviceShelfInstallation;
   String get serviceWardrobeAssembly;
   String get serviceKitchenCabinetInstallation;
+  String get serviceKitchenCarpentry;
   String get serviceDoorInstallation;
   String get serviceCustomWoodwork;
+  String get serviceFurnitureRestoration;
 
   // ── Service names — Painting ─────────────────────────────────────────────
   String get serviceInteriorPainting;
@@ -1822,6 +1831,12 @@ abstract class AppLocalizations {
   String get serviceTexturePainting;
   String get serviceWallpaperInstallation;
   String get serviceTouchUpPainting;
+  String get serviceWallRepairAndPatching;
+  String get serviceWoodStaining;
+  String get serviceDecorativePainting;
+  String get serviceDoorAndTrimPainting;
+  String get serviceWaterproofCoating;
+  String get serviceCabinetPainting;
 
   // ── Service names — Cleaning ─────────────────────────────────────────────
   String get serviceDeepCleaning;
@@ -1833,6 +1848,7 @@ abstract class AppLocalizations {
   String get servicePostConstructionCleaning;
   String get serviceKitchenDeepClean;
   String get serviceBathroomDeepClean;
+  String get serviceOfficeCleaning;
 
   // ── Service names — Moving Services ─────────────────────────────────────
   String get servicePackingAndUnpacking;
@@ -1843,6 +1859,8 @@ abstract class AppLocalizations {
   String get serviceOfficeMoving;
   String get serviceStorageService;
   String get serviceLoadingAndUnloading;
+  String get serviceFurnitureDisassemblyAndReassembly;
+  String get serviceLongDistanceMoving;
 
   // ── Service names — Appliance Repair ─────────────────────────────────────
   String get serviceRefrigeratorRepair;
@@ -1854,6 +1872,9 @@ abstract class AppLocalizations {
   String get serviceStoveRepair;
   String get serviceWaterHeaterRepair;
   String get serviceTvRepair;
+  String get serviceFreezerRepair;
+  String get serviceAirPurifierRepair;
+  String get serviceSmallApplianceRepair;
 
   // ── Misc ──────────────────────────────────────────────────────────────────────
   String get describeIssuePlaceholder;

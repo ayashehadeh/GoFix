@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/l10n/service_name_l10n.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/booking.dart';
 import 'booking_status_badge.dart';
@@ -68,7 +70,7 @@ class BookingListCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      booking.professionalRole,
+                      localizeServiceName(booking.serviceName, AppLocalizations.of(context)!, nameAr: booking.serviceNameAr),
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,

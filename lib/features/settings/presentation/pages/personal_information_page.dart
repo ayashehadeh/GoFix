@@ -5,7 +5,7 @@ import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/features/settings/data/repositories/profile_repository_impl.dart';
 import 'package:gp/core/utils/user_info_helper.dart';
 import 'package:gp/features/settings/presentation/pages/update_name_page.dart';
-import 'package:gp/features/settings/presentation/pages/update_field_page.dart';
+import 'package:gp/features/settings/presentation/pages/update_email_page.dart';
 import 'package:gp/features/settings/presentation/pages/update_phone_page.dart';
 import 'package:gp/features/settings/presentation/pages/update_dob_page.dart';
 import 'package:gp/features/settings/presentation/pages/update_gender_page.dart';
@@ -207,10 +207,8 @@ class _PersonalInformationPageState extends State<PersonalInformationPage> {
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => UpdateFieldPage(
-                        title: t.updateYourName,
-                        subtitle: t.namePersonalizeExp,
-                        hint: t.enterNewName,
+                      builder: (_) => UpdateNamePage(
+                        currentName: name,
                         onUpdate: _updateName,
                       ),
                     ),

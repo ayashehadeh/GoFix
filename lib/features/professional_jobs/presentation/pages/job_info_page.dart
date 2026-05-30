@@ -6,6 +6,7 @@ import 'package:gp/core/widgets/cancel_reason_dialog.dart';
 import 'package:gp/core/widgets/fullscreen_image_viewer.dart';
 import 'package:gp/core/widgets/payment_amount_sheet.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/l10n/service_name_l10n.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../bloc/professional_jobs_bloc.dart';
 import '../bloc/professional_jobs_event.dart';
@@ -83,7 +84,7 @@ class _JobDetailsCard extends StatelessWidget {
           Text(AppLocalizations.of(context)!.jobDetails,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF062B4D))),
           const SizedBox(height: 12),
-          _Row(icon: Icons.build_outlined, text: job.serviceType),
+          _Row(icon: Icons.build_outlined, text: localizeServiceName(job.serviceType, AppLocalizations.of(context)!, nameAr: job.serviceTypeAr)),
           _Row(icon: Icons.person_outline, text: job.clientName),
           if ((job.status == ProJobStatus.arrived || job.status == ProJobStatus.inProgress) &&
               job.clientPhone != null &&

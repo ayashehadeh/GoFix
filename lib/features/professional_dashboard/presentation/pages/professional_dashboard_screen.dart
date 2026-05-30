@@ -6,6 +6,7 @@ import 'package:gp/features/professional_jobs/presentation/bloc/professional_job
 import 'package:gp/features/professional_jobs/presentation/pages/job_info_page.dart';
 import 'package:gp/features/professional_jobs/domain/entities/pro_job.dart';
 import 'package:gp/l10n/app_localizations.dart';
+import 'package:gp/l10n/service_name_l10n.dart';
 import 'package:gp/features/professional_jobs/presentation/pages/my_jobs_page.dart';
 import 'incoming_requests_page.dart';
 import 'package:intl/intl.dart';
@@ -385,7 +386,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis),
-                        Text(job.serviceType,
+                        Text(localizeServiceName(job.serviceType, AppLocalizations.of(context)!, nameAr: job.serviceTypeAr),
                             style: TextStyle(color: Colors.grey[600], fontSize: 13),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis),
@@ -560,7 +561,7 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis),
-                        Text(request.serviceType,
+                        Text(localizeServiceName(request.serviceType, AppLocalizations.of(context)!, nameAr: request.serviceTypeAr),
                             style: TextStyle(color: Colors.grey[600], fontSize: 13),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis),
