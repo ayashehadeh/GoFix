@@ -58,12 +58,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
     super.dispose();
   }
 
-  void _onCategoryTap(CategoryEntity category) {
+  void _onCategoryTap(CategoryEntity category) async {
     final serviceCategory = ServiceCategory.values.firstWhere(
       (e) => e.displayName == category.name,
       orElse: () => ServiceCategory.plumbing,
     );
-    Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => BlocProvider(
@@ -72,10 +72,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
         ),
       ),
     );
+    if (mounted) _activeBookingCubit.load();
   }
 
-  void _onActiveBookingTap(Booking booking) {
-    Navigator.push(
+  void _onActiveBookingTap(Booking booking) async {
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => BlocProvider(
@@ -84,6 +85,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
         ),
       ),
     );
+    if (mounted) _activeBookingCubit.load();
   }
 
   void _onNotificationTap() {
@@ -192,7 +194,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver, Profes
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (!isProfessional) _ActiveBookingSection(onBookingTap: _onActiveBookingTap),
+              _ActiveBookingSection(onBookingTap: _onActiveBookingTap),
               const SizedBox(height: 24),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),

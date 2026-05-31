@@ -76,6 +76,10 @@ class _UpcomingBookingInfoPageState extends State<UpcomingBookingInfoPage> {
             centerTitle: false,
           ),
           body: BlocConsumer<BookingsBloc, BookingsState>(
+            buildWhen: (previous, current) {
+              if (current is BookingsLoading) return previous is! BookingDetailLoaded;
+              return current is BookingsError || current is BookingDetailLoaded;
+            },
             listener: (context, state) {
               if (state is BookingCancelledSuccess) {
                 Navigator.of(context).popUntil(
@@ -249,16 +253,23 @@ class _UpcomingInfoBody extends StatelessWidget {
 
 // ─── Bottom action bar ────────────────────────────────────────────────────────
 
-class _BottomActionBar extends StatelessWidget {
+class _BottomActionBar extends StatefulWidget {
   final Booking booking;
 
   const _BottomActionBar({required this.booking});
 
   @override
+  State<_BottomActionBar> createState() => _BottomActionBarState();
+}
+
+class _BottomActionBarState extends State<_BottomActionBar> {
+  bool _reportSubmitted = false;
+
+  @override
   Widget build(BuildContext context) {
-    final isCompleted = booking.status == BookingStatus.completed;
-    final waitingForAmount = isCompleted && !booking.paymentConfirmed && !booking.professionalConfirmedPayment;
-    final canConfirm = isCompleted && !booking.paymentConfirmed && booking.professionalConfirmedPayment;
+    final isCompleted = widget.booking.status == BookingStatus.completed;
+    final waitingForAmount = isCompleted && !widget.booking.paymentConfirmed && !widget.booking.professionalConfirmedPayment;
+    final canConfirm = isCompleted && !widget.booking.paymentConfirmed && widget.booking.professionalConfirmedPayment;
 
     if (waitingForAmount) {
       return Container(
@@ -289,6 +300,34 @@ class _BottomActionBar extends StatelessWidget {
     }
 
     if (canConfirm) {
+      if (_reportSubmitted) {
+        return Container(
+          color: Colors.white,
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+            decoration: BoxDecoration(
+              color: AppColors.primaryOrange.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.primaryOrange.withValues(alpha: 0.3)),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.info_outline_rounded, color: AppColors.primaryOrange, size: 20),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Your report has been submitted. Our team will review it shortly.',
+                    style: TextStyle(fontSize: 13.5, color: AppColors.primaryOrange, fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
       return Container(
         color: Colors.white,
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
@@ -312,7 +351,7 @@ class _BottomActionBar extends StatelessWidget {
                     style: TextStyle(fontSize: 14, color: AppColors.primaryDark, fontWeight: FontWeight.w500),
                   ),
                   Text(
-                    '${booking.agreedAmount!.toStringAsFixed(2)} JD',
+                    '${widget.booking.agreedAmount!.toStringAsFixed(2)} JD',
                     style: const TextStyle(fontSize: 18, color: AppColors.primaryOrange, fontWeight: FontWeight.w800),
                   ),
                 ],
@@ -322,7 +361,7 @@ class _BottomActionBar extends StatelessWidget {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: () => context.read<BookingsBloc>().add(ConfirmPaymentEvent(booking.id)),
+                onPressed: () => context.read<BookingsBloc>().add(ConfirmPaymentEvent(widget.booking.id)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryOrange,
                   foregroundColor: Colors.white,
@@ -332,6 +371,23 @@ class _BottomActionBar extends StatelessWidget {
                 child: Text(
                   AppLocalizations.of(context)!.confirmPayment,
                   style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+            GestureDetector(
+              onTap: () => _showReportSheet(context),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.flag_outlined, size: 13, color: Colors.grey.shade400),
+                    const SizedBox(width: 5),
+                    Text(
+                      'Report an issue',
+                      style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -345,22 +401,22 @@ class _BottomActionBar extends StatelessWidget {
           MaterialPageRoute(
             builder: (_) => BlocProvider.value(
               value: context.read<BookingsBloc>(),
-              child: CancelBookingPage(booking: booking),
+              child: CancelBookingPage(booking: widget.booking),
             ),
           ),
         );
 
     void goToChat() => context.read<ChatBloc>().add(
           GetOrCreateChatEvent(
-            professionalId: booking.professionalId,
-            professionalName: booking.professionalName,
+            professionalId: widget.booking.professionalId,
+            professionalName: widget.booking.professionalName,
           ),
         );
 
-    final isPending = booking.status == BookingStatus.pending;
+    final isPending = widget.booking.status == BookingStatus.pending;
     final isCancellable = isPending ||
-        booking.status == BookingStatus.confirmed ||
-        booking.status == BookingStatus.accepted;
+        widget.booking.status == BookingStatus.confirmed ||
+        widget.booking.status == BookingStatus.accepted;
 
     return Container(
       color: Colors.white,
@@ -380,7 +436,7 @@ class _BottomActionBar extends StatelessWidget {
                           BlocProvider(create: (_) => di.sl<BookingsBloc>()),
                           BlocProvider(create: (_) => di.sl<AddressBloc>()),
                         ],
-                        child: ModifyBookingPage(booking: booking),
+                        child: ModifyBookingPage(booking: widget.booking),
                       ),
                     ),
                   );
@@ -448,6 +504,146 @@ class _BottomActionBar extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+
+  void _showReportSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => BlocProvider.value(
+        value: context.read<BookingsBloc>(),
+        child: _ReportSheet(
+          booking: widget.booking,
+          onSuccess: () => setState(() => _reportSubmitted = true),
+        ),
+      ),
+    );
+  }
+}
+
+class _ReportSheet extends StatefulWidget {
+  final Booking booking;
+  final VoidCallback onSuccess;
+  const _ReportSheet({required this.booking, required this.onSuccess});
+
+  @override
+  State<_ReportSheet> createState() => _ReportSheetState();
+}
+
+class _ReportSheetState extends State<_ReportSheet> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<BookingsBloc, BookingsState>(
+      listener: (context, state) {
+        if (state is BookingActionSuccess) {
+          showSuccessSnackbar(context, state.message);
+          Navigator.of(context).pop();
+          widget.onSuccess();
+        } else if (state is BookingsError) {
+          showErrorSnackbar(context, state.message);
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state is BookingsLoading;
+        return Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE0E0E0),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Report a Payment Issue',
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.primaryDark),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Describe the issue to our admin team',
+                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _controller,
+                  minLines: 3,
+                  maxLines: 6,
+                  decoration: InputDecoration(
+                    hintText: 'e.g. The professional charged more than what was agreed...',
+                    hintStyle: const TextStyle(fontSize: 13, color: Color(0xFFAAAAAA)),
+                    filled: true,
+                    fillColor: const Color(0xFFF5F6FA),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.all(14),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: isLoading
+                        ? null
+                        : () {
+                            final text = _controller.text.trim();
+                            if (text.isEmpty) return;
+                            context.read<BookingsBloc>().add(
+                                  SubmitReportEvent(
+                                    bookingId: widget.booking.id,
+                                    description: text,
+                                  ),
+                                );
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryOrange,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : const Text(
+                            'Submit Report',
+                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

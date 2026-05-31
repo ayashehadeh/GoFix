@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/l10n/app_localizations.dart';
@@ -26,15 +27,23 @@ class MyBookingsPage extends StatefulWidget {
 
 class _MyBookingsPageState extends State<MyBookingsPage>
     with WidgetsBindingObserver, ProfessionalNavMixin<MyBookingsPage> {
+  Timer? _pollingTimer;
+
   @override
   void initState() {
     super.initState();
     initProfessionalNav();
     context.read<BookingsBloc>().add(LoadUpcomingBookings());
+    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (mounted) {
+        context.read<BookingsBloc>().add(SilentRefreshBookings());
+      }
+    });
   }
 
   @override
   void dispose() {
+    _pollingTimer?.cancel();
     disposeProfessionalNav();
     super.dispose();
   }
