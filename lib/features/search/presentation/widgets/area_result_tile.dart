@@ -18,9 +18,6 @@ class AreaResultTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final localizedName = localizeAreaName(area.name, l10n, nameAr: area.nameAr);
-    final localizedCity = localizeCityName(area.city, l10n, nameAr: area.cityNameAr);
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -55,15 +52,13 @@ class AreaResultTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     '${localizeCity(area.city, AppLocalizations.of(context)!)} · ${area.proCount} pros serve here',
-                    style: const TextStyle(
-                        fontSize: 12, color: Color(0xFF888888)),
+                    style: const TextStyle(fontSize: 12, color: Color(0xFF888888)),
                   ),
                 ],
               ),
             ),
 
-            const Icon(Icons.chevron_right,
-                color: Color(0xFFCCCCCC), size: 20),
+            const Icon(Icons.chevron_right, color: Color(0xFFCCCCCC), size: 20),
           ],
         ),
       ),
@@ -84,8 +79,7 @@ class _HighlightedText extends StatelessWidget {
     if (query.isEmpty) {
       return Text(
         text,
-        style:
-            const TextStyle(fontSize: 14, color: Color(0xFF222222)),
+        style: const TextStyle(fontSize: 14, color: Color(0xFF222222)),
       );
     }
 
@@ -96,15 +90,13 @@ class _HighlightedText extends StatelessWidget {
     if (idx == -1) {
       return Text(
         text,
-        style:
-            const TextStyle(fontSize: 14, color: Color(0xFF222222)),
+        style: const TextStyle(fontSize: 14, color: Color(0xFF222222)),
       );
     }
 
     return RichText(
       text: TextSpan(
-        style:
-            const TextStyle(fontSize: 14, color: Color(0xFF222222)),
+        style: const TextStyle(fontSize: 14, color: Color(0xFF222222)),
         children: [
           if (idx > 0) TextSpan(text: text.substring(0, idx)),
           TextSpan(
@@ -114,8 +106,7 @@ class _HighlightedText extends StatelessWidget {
               color: AppColors.primaryOrange,
             ),
           ),
-          if (idx + query.length < text.length)
-            TextSpan(text: text.substring(idx + query.length)),
+          if (idx + query.length < text.length) TextSpan(text: text.substring(idx + query.length)),
         ],
       ),
     );

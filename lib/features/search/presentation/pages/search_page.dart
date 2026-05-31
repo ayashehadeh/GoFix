@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gp/core/constants/app_colors.dart';
 import 'package:gp/l10n/app_localizations.dart';
-import 'package:gp/l10n/area_name_l10n.dart';
 import 'package:gp/features/professionals/presentation/bloc/professionals_bloc.dart';
 import 'package:gp/features/professionals/presentation/pages/category_professionals_page.dart';
 import 'package:gp/features/professionals/presentation/pages/professional_detail_page.dart';
@@ -31,8 +30,7 @@ class _SearchPageState extends State<SearchPage> {
   void initState() {
     super.initState();
     context.read<SearchBloc>().add(LoadRecentSearches());
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _focus.requestFocus());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _focus.requestFocus());
   }
 
   @override
@@ -42,8 +40,7 @@ class _SearchPageState extends State<SearchPage> {
     super.dispose();
   }
 
-  void _onChanged(String value) =>
-      context.read<SearchBloc>().add(SearchQueryChanged(value));
+  void _onChanged(String value) => context.read<SearchBloc>().add(SearchQueryChanged(value));
 
   void _onClear() {
     _controller.clear();
@@ -132,8 +129,7 @@ class _SearchHeader extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: onBack,
-            child: const Icon(Icons.arrow_back_ios_new,
-                color: Colors.white, size: 20),
+            child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -146,22 +142,18 @@ class _SearchHeader extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 14),
               child: Row(
                 children: [
-                  const Icon(Icons.search,
-                      color: Color(0xFF888888), size: 18),
+                  const Icon(Icons.search, color: Color(0xFF888888), size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: TextField(
                       controller: controller,
                       focusNode: focus,
                       onChanged: onChanged,
-                      style: const TextStyle(
-                          fontSize: 14, color: Color(0xFF222222)),
+                      style: const TextStyle(fontSize: 14, color: Color(0xFF222222)),
                       decoration: const InputDecoration(
                         border: InputBorder.none,
-                        hintText:
-                            'Search professionals, services or areas',
-                        hintStyle: TextStyle(
-                            fontSize: 13, color: Color(0xFF999999)),
+                        hintText: 'Search professionals, services or areas',
+                        hintStyle: TextStyle(fontSize: 13, color: Color(0xFF999999)),
                         isDense: true,
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -172,8 +164,7 @@ class _SearchHeader extends StatelessWidget {
                       if (controller.text.isEmpty) return const SizedBox();
                       return GestureDetector(
                         onTap: onClear,
-                        child: const Icon(Icons.close,
-                            color: Color(0xFF999999), size: 18),
+                        child: const Icon(Icons.close, color: Color(0xFF999999), size: 18),
                       );
                     },
                   ),
@@ -207,18 +198,14 @@ class _SearchBody extends StatelessWidget {
           return _RecentSearchesView(
             recentSearches: state.recentSearchObjects,
             onTap: onRecentTapped,
-            onDelete: (id) =>
-                context.read<SearchBloc>().add(RecentSearchDeleted(id)),
-            onClearAll: () =>
-                context.read<SearchBloc>().add(RecentSearchesCleared()),
+            onDelete: (id) => context.read<SearchBloc>().add(RecentSearchDeleted(id)),
+            onClearAll: () => context.read<SearchBloc>().add(RecentSearchesCleared()),
           );
         }
 
         // ── Typing / loading ───────────────────────────────────────────────
         if (state is SearchTyping || state is SearchLoading) {
-          final query = state is SearchTyping
-              ? state.query
-              : (state as SearchLoading).query;
+          final query = state is SearchTyping ? state.query : (state as SearchLoading).query;
           return Column(
             children: [
               if (state is SearchLoading)
@@ -232,14 +219,11 @@ class _SearchBody extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.search,
-                          size: 52, color: AppColors.divider),
+                      const Icon(Icons.search, size: 52, color: AppColors.divider),
                       const SizedBox(height: 16),
                       Text(
                         'Searching "$query"…',
-                        style: const TextStyle(
-                            fontSize: 14,
-                            color: AppColors.textSecondary),
+                        style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
                       ),
                     ],
                   ),
@@ -252,9 +236,7 @@ class _SearchBody extends StatelessWidget {
         // ── Error ──────────────────────────────────────────────────────────
         if (state is SearchError) {
           return Center(
-            child: Text(state.message,
-                style:
-                    const TextStyle(color: AppColors.textSecondary)),
+            child: Text(state.message, style: const TextStyle(color: AppColors.textSecondary)),
           );
         }
 
@@ -277,7 +259,7 @@ class _SearchBody extends StatelessWidget {
 
 class _RecentSearchesView extends StatelessWidget {
   final List<RecentSearch> recentSearches;
-  final ValueChanged<String> onTap;    // passes query string
+  final ValueChanged<String> onTap; // passes query string
   final ValueChanged<String> onDelete; // passes server id
   final VoidCallback onClearAll;
 
@@ -300,8 +282,7 @@ class _RecentSearchesView extends StatelessWidget {
             Text(
               'Search professionals, services or areas',
               textAlign: TextAlign.center,
-              style:
-                  TextStyle(fontSize: 14, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
             ),
           ],
         ),
@@ -369,14 +350,12 @@ class _RecentSearchRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Row(
           children: [
-            const Icon(Icons.history,
-                size: 18, color: Color(0xFFAAAAAA)),
+            const Icon(Icons.history, size: 18, color: Color(0xFFAAAAAA)),
             const SizedBox(width: 14),
             Expanded(
               child: Text(
                 query,
-                style: const TextStyle(
-                    fontSize: 14, color: Color(0xFF333333)),
+                style: const TextStyle(fontSize: 14, color: Color(0xFF333333)),
               ),
             ),
             GestureDetector(
@@ -384,8 +363,7 @@ class _RecentSearchRow extends StatelessWidget {
               behavior: HitTestBehavior.opaque,
               child: const Padding(
                 padding: EdgeInsets.only(left: 12),
-                child: Icon(Icons.close,
-                    size: 16, color: Color(0xFFCCCCCC)),
+                child: Icon(Icons.close, size: 16, color: Color(0xFFCCCCCC)),
               ),
             ),
           ],
@@ -407,14 +385,12 @@ class _NoResults extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.search_off,
-              size: 52, color: AppColors.divider),
+          const Icon(Icons.search_off, size: 52, color: AppColors.divider),
           const SizedBox(height: 16),
           Text(
             'No results for "$query"',
             textAlign: TextAlign.center,
-            style: const TextStyle(
-                fontSize: 14, color: AppColors.textSecondary),
+            style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -430,7 +406,6 @@ class _ResultsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -474,8 +449,7 @@ class _ResultsList extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (_) => BlocProvider(
                       create: (_) => di.sl<ProfessionalsBloc>(),
-                      child: ProfessionalDetailPage(
-                          professionalId: pro.id, id: pro.id),
+                      child: ProfessionalDetailPage(professionalId: pro.id, id: pro.id),
                     ),
                   ),
                 ),
@@ -533,8 +507,7 @@ class _SectionHeader extends StatelessWidget {
         ),
         const SizedBox(width: 6),
         Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
           decoration: BoxDecoration(
             color: AppColors.primaryOrange.withOpacity(0.12),
             borderRadius: BorderRadius.circular(8),

@@ -4,7 +4,7 @@ import 'package:gp/l10n/service_name_l10n.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../bookings/domain/entities/booking.dart';
 
-class ActiveBookingCard extends StatelessWidget {
+class ActiveBookingCard extends StatefulWidget {
   final Booking booking;
   final VoidCallback onTap;
 
@@ -14,6 +14,44 @@ class ActiveBookingCard extends StatelessWidget {
     required this.onTap,
   });
 
+  @override
+  State<ActiveBookingCard> createState() => _ActiveBookingCardState();
+}
+
+class _ActiveBookingCardState extends State<ActiveBookingCard> {
+  @override
+  Widget build(BuildContext context) {
+    // AnimatedSwitcher is at the outer level so it never interacts with
+    // IntrinsicHeight (which can collapse to zero inside a Stack).
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      transitionBuilder: (child, animation) => FadeTransition(
+        opacity: animation,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.08),
+            end: Offset.zero,
+          ).animate(animation),
+          child: child,
+        ),
+      ),
+      child: _CardContent(
+        key: ValueKey(widget.booking.status),
+        booking: widget.booking,
+        onTap: widget.onTap,
+      ),
+    );
+  }
+}
+
+// ─── Full card widget, keyed by status for AnimatedSwitcher ──────────────────
+
+class _CardContent extends StatelessWidget {
+  final Booking booking;
+  final VoidCallback onTap;
+
+  const _CardContent({super.key, required this.booking, required this.onTap});
+
   static const _phases = [
     (label: 'On the Way',  subtitle: 'Professional is heading to you'),
     (label: 'Arrived',     subtitle: 'Professional is at your location'),
@@ -21,19 +59,13 @@ class ActiveBookingCard extends StatelessWidget {
     (label: 'Completed',   subtitle: 'Service has been completed'),
   ];
 
-  // 0-3 for tracker phases, -1 for pre-phase statuses
   int get _activePhaseIndex {
     switch (booking.status) {
-      case BookingStatus.onTheWay:
-        return 0;
-      case BookingStatus.arrived:
-        return 1;
-      case BookingStatus.inProgress:
-        return 2;
-      case BookingStatus.completed:
-        return 3;
-      default:
-        return -1;
+      case BookingStatus.onTheWay:    return 0;
+      case BookingStatus.arrived:     return 1;
+      case BookingStatus.inProgress:  return 2;
+      case BookingStatus.completed:   return 3;
+      default:                        return -1;
     }
   }
 
@@ -73,7 +105,7 @@ class ActiveBookingCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Left colour strip — always orange for active bookings
+              // Left colour strip
               Container(
                 width: 6,
                 decoration: const BoxDecoration(
@@ -93,7 +125,7 @@ class ActiveBookingCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // ── Info row ──────────────────────────────────────
+                      // ── Info row ────────────────────────────────────────
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -194,7 +226,7 @@ class ActiveBookingCard extends StatelessWidget {
                         ],
                       ),
 
-                      // ── Phase tracker (only for onTheWay → completed) ──
+                      // ── Phase tracker (onTheWay → completed) ────────────
                       if (showTracker) ...[
                         const SizedBox(height: 14),
                         Container(height: 1, color: const Color(0xFFF0F0F0)),
@@ -255,7 +287,9 @@ class _PhaseProgressTracker extends StatelessWidget {
           ),
           if (i < _stepCount - 1)
             Expanded(
-              child: Container(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
                 height: 3,
                 decoration: BoxDecoration(
                   color: i < activeIndex
@@ -280,7 +314,9 @@ class _StepDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final filled = isCompleted || isCurrent;
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
       width: 22,
       height: 22,
       decoration: BoxDecoration(

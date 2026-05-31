@@ -9,6 +9,8 @@ class LoadUpcomingBookings extends BookingsEvent {}
 
 class LoadPastBookings extends BookingsEvent {}
 
+class SilentRefreshBookings extends BookingsEvent {}
+
 class LoadBookingById extends BookingsEvent {
   final String bookingId;
   LoadBookingById(this.bookingId);
