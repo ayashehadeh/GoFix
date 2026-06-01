@@ -120,7 +120,7 @@ class _SignupState extends State<Signup> {
                   backgroundColor: Colors.white,
                   child: Padding(
                     padding: const EdgeInsets.all(8),
-                    child: Image.asset('assets/logo2.png', fit: BoxFit.contain),
+                    child: Image.asset('assets/logo2edit.png', fit: BoxFit.contain),
                   ),
                 ),
                 const SizedBox(height: 10),

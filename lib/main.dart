@@ -169,54 +169,15 @@ class _SplashRouterState extends State<_SplashRouter> {
     return Scaffold(
       backgroundColor: const Color(0xFFFDF5EC),
       body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 140,
-              height: 140,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.18),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: ClipOval(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Image.asset(
-                    'assets/logo2.png',
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'GoFix',
-              style: TextStyle(
-                color: Color(0xFF062B54),
-                fontSize: 36,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.2,
-              ),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'HOME SERVICES',
-              style: TextStyle(
-                color: Color(0xFFFF8C1A),
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 3.5,
-              ),
-            ),
-          ],
+        child: Container(
+          width: 200,
+          height: 200,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Image.asset('assets/logo2edit.png'),
         ),
       ),
     );
