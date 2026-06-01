@@ -42,6 +42,7 @@ class NotificationItem extends Equatable {
   final NotificationType type;
   final bool isRead;
   final DateTime createdAt;
+  final String? referenceId;
 
   const NotificationItem({
     required this.id,
@@ -50,6 +51,7 @@ class NotificationItem extends Equatable {
     required this.type,
     required this.isRead,
     required this.createdAt,
+    this.referenceId,
   });
 
   NotificationItem copyWith({bool? isRead}) => NotificationItem(
@@ -59,8 +61,9 @@ class NotificationItem extends Equatable {
         type: type,
         isRead: isRead ?? this.isRead,
         createdAt: createdAt,
+        referenceId: referenceId,
       );
 
   @override
-  List<Object?> get props => [id, title, body, type, isRead, createdAt];
+  List<Object?> get props => [id, title, body, type, isRead, createdAt, referenceId];
 }

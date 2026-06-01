@@ -93,7 +93,7 @@ class BecomeProfessionalRemoteDataSourceImpl implements BecomeProfessionalRemote
 
   @override
   Future<List<CategoryModel>> getCategories() async {
-    const key = 'categories';
+    const key = 'bp:categories';
     final cached = cache.get<List<CategoryModel>>(key);
     if (cached != null) return cached;
 

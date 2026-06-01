@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:gp/core/widgets/cancel_reason_dialog.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -36,12 +37,24 @@ class ProfessionalDashboardScreen extends StatefulWidget {
 
 class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScreen> {
   String _userName = '';
+  Timer? _pollingTimer;
 
   @override
   void initState() {
     super.initState();
     context.read<ProfessionalDashboardBloc>().add(LoadDashboard());
     _loadUserName();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (mounted) {
+        context.read<ProfessionalDashboardBloc>().add(RefreshDashboard());
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadUserName() async {
@@ -117,15 +130,11 @@ class _ProfessionalDashboardScreenState extends State<ProfessionalDashboardScree
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF091929), Color(0xFF1A3A5C)],
-          ),
+          color: const Color(0xFF012249),
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF1A3A5C).withValues(alpha: 0.35),
+              color: const Color(0xFF012249).withValues(alpha: 0.35),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),

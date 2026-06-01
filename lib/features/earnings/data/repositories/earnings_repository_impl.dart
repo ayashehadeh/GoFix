@@ -20,16 +20,13 @@ class EarningsRepositoryImpl implements EarningsRepository {
 
   @override
   Future<Either<Failure, Map<String, Earning>>> getEarnings() async {
-    try {
-      // Try cache first
-      final cachedData = await _getCachedEarnings();
-      if (cachedData != null) {
-        return Right(cachedData);
-      }
-    } catch (_) {}
+    final result = await _fetchFromRemote();
+    if (result.isRight()) return result;
 
-    // Fetch from remote
-    return await _fetchFromRemote();
+    // Network failed — fall back to cache
+    final cachedData = await _getCachedEarnings();
+    if (cachedData != null) return Right(cachedData);
+    return result;
   }
 
   @override
