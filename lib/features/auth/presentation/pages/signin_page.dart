@@ -84,7 +84,7 @@ class _SigninPageState extends State<SigninPage> {
                   backgroundColor: Colors.white,
                   child: Padding(
                     padding: const EdgeInsets.all(15),
-                    child: Image.asset('assets/logo2.png', fit: BoxFit.contain),
+                    child: Image.asset('assets/logo2edit.png', fit: BoxFit.contain),
                   ),
                 ),
                 const SizedBox(height: 20),

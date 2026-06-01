@@ -36,12 +36,20 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.3        
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/logofinal.png"
 
 flutter:
   assets:
     - assets/home_screen/
     - assets/logo.png
-    - assets/logo2.png
+    - assets/logoNoBg.png
+    - assets/logo2edit.png
+    - assets/logofinal.png
     - assets/reset_password.png
     - assets/Password_changed.png
     - assets/email_verification.png

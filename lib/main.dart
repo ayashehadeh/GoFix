@@ -177,7 +177,7 @@ class _SplashRouterState extends State<_SplashRouter> {
             shape: BoxShape.circle,
           ),
           padding: const EdgeInsets.all(24),
-          child: Image.asset('assets/logo2.png'),
+          child: Image.asset('assets/logo2edit.png'),
         ),
       ),
     );

@@ -82,7 +82,7 @@ class StartPage extends StatelessWidget {
                           ),
                           child: ClipOval(
                             child: Image.asset(
-                              'assets/logo.png',
+                              'assets/logo2edit.png',
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return const Icon(
