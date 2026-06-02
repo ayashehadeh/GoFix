@@ -30,15 +30,46 @@ class ProJobModel extends ProJob {
       location: json['location'] ?? '',
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
-      scheduledTime: json['scheduledTime'] != null
-          ? DateTime.parse(json['scheduledTime'] as String)
-          : DateTime.parse(json['scheduled_time'] as String),
+      scheduledTime: _parseScheduledDateTime(
+        json['scheduledDate'] as String? ?? json['scheduled_date'] as String?,
+        json['scheduledTime'] as String? ?? json['scheduled_time'] as String?,
+      ),
       price: json['price'] ?? '',
       agreedAmount: (json['agreedAmount'] as num?)?.toDouble(),
       description: json['description'] ?? '',
-      imageUrls: List<String>.from(json['imageUrls'] as List? ?? []), // ← was: pictureCount int
+      imageUrls: List<String>.from(json['imageUrls'] as List? ?? []),
       status: _parseStatus(json['status'] as String?),
     );
+  }
+
+  static DateTime _parseScheduledDateTime(String? dateStr, String? timeStr) {
+    // If timeStr is a full ISO timestamp, use it directly.
+    if (timeStr != null && timeStr.isNotEmpty) {
+      final full = DateTime.tryParse(timeStr);
+      if (full != null) return full;
+    }
+
+    // Parse the date part.
+    final date = dateStr != null && dateStr.isNotEmpty
+        ? DateTime.tryParse(dateStr) ?? DateTime.now()
+        : DateTime.now();
+
+    if (timeStr == null || timeStr.isEmpty) return date;
+
+    // Parse a time string like "10:00 AM", "14:30", "09:00:00".
+    final upper = timeStr.trim().toUpperCase();
+    final isPM = upper.endsWith('PM');
+    final isAM = upper.endsWith('AM');
+    final clean = upper.replaceAll('AM', '').replaceAll('PM', '').trim();
+    final parts = clean.split(':');
+
+    int hour = int.tryParse(parts[0]) ?? 0;
+    final minute = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
+
+    if (isPM && hour < 12) hour += 12;
+    if (isAM && hour == 12) hour = 0;
+
+    return DateTime(date.year, date.month, date.day, hour, minute);
   }
 
   Map<String, dynamic> toJson() => {

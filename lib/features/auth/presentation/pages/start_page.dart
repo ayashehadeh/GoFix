@@ -142,28 +142,6 @@ class _StartPageState extends State<StartPage> with SingleTickerProviderStateMix
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 160),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // ── Sign In ──────────────────────────────────────────
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => BlocProvider.value(
-                                value: context.read<AuthBloc>(),
-                                child: const SigninPage(),
-                              ),
-                            ),
-                          ),
-                        ),
                         const SizedBox(height: 20),
                         const Text(
                           'GoFix',
@@ -206,6 +184,7 @@ class _StartPageState extends State<StartPage> with SingleTickerProviderStateMix
           ),
         ],
       ),
+      
     );
   }
 }
