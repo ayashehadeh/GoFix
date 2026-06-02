@@ -8,6 +8,7 @@ class NotificationModel extends NotificationItem {
     required super.type,
     required super.isRead,
     required super.createdAt,
+    super.referenceId,
   });
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
@@ -24,6 +25,7 @@ class NotificationModel extends NotificationItem {
             json['created_at'] as String? ??
             DateTime.now().toIso8601String(),
       ),
+      referenceId: json['referenceId'] as String? ?? json['reference_id'] as String?,
     );
   }
 
@@ -34,5 +36,6 @@ class NotificationModel extends NotificationItem {
         'type': type.name,
         'is_read': isRead,
         'created_at': createdAt.toIso8601String(),
+        'reference_id': referenceId,
       };
 }

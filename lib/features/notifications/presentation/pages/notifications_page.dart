@@ -9,6 +9,9 @@ import '../bloc/notifications_bloc.dart';
 import '../bloc/notifications_event.dart';
 import '../bloc/notifications_state.dart';
 import '../widgets/notification_tile.dart';
+import '../../../bookings/presentation/bloc/bookings_bloc.dart';
+import '../../../bookings/presentation/pages/upcoming_booking_info_page.dart';
+import '../../../../injection_container.dart' as di;
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -412,6 +415,7 @@ class _GroupedList extends StatelessWidget {
                       .read<NotificationsBloc>()
                       .add(MarkAsReadEvent(item.id));
                 }
+                _handleNotificationNavigation(context, item);
               },
             );
           }
@@ -476,6 +480,30 @@ class _EmptyBody extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+void _handleNotificationNavigation(BuildContext context, NotificationItem item) {
+  switch (item.type) {
+    case NotificationType.bookingConfirmed:
+    case NotificationType.bookingDeclined:
+    case NotificationType.bookingReminder:
+      if (item.referenceId == null) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => di.sl<BookingsBloc>(),
+            child: UpcomingBookingInfoPage(bookingId: item.referenceId!),
+          ),
+        ),
+      );
+      break;
+    case NotificationType.message:
+      // TODO: navigate to chat when referenceId = conversationId
+      break;
+    case NotificationType.general:
+      break;
   }
 }
 

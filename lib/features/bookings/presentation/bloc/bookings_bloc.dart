@@ -33,6 +33,7 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
   }) : super(BookingsInitial()) {
     on<LoadUpcomingBookings>(_onLoadUpcoming);
     on<LoadPastBookings>(_onLoadPast);
+    on<SilentRefreshBookings>(_onSilentRefresh);
     on<LoadBookingById>(_onLoadBookingById);
     on<SubmitReportEvent>(_onSubmitReport);
     on<CreateBookingEvent>(_onCreateBooking);
@@ -110,6 +111,34 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     final upcoming = all.where((b) => b.isUpcoming).toList();
     final past = all.where((b) => b.isPast).toList();
     return (upcoming, past);
+  }
+
+  Future<void> _onSilentRefresh(
+    SilentRefreshBookings event,
+    Emitter<BookingsState> emit,
+  ) async {
+    final currentState = state;
+    final isUpcoming = currentState is BookingsLoaded ? currentState.isUpcomingTab : true;
+
+    final upcomingResult = await getUpcomingBookings();
+    final pastResult = await getPastBookings();
+
+    upcomingResult.fold(
+      (_) => null,
+      (upcoming) {
+        pastResult.fold(
+          (_) => null,
+          (past) {
+            final corrected = _correctBookingLists(upcoming, past);
+            emit(BookingsLoaded(
+              upcomingBookings: corrected.$1,
+              pastBookings: corrected.$2,
+              isUpcomingTab: isUpcoming,
+            ));
+          },
+        );
+      },
+    );
   }
 
   Future<void> _onLoadBookingById(

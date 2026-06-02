@@ -1,10 +1,10 @@
 name: gp
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 version: 0.1.0
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   blur: ^3.1.0
@@ -60,5 +60,9 @@ flutter:
     - assets/approved_balloons.svg
     - assets/inqueue_phone.svg
     - assets/notapproved_clock.svg
+    - assets/house.png
+    - assets/mascot.png
+    - assets/moon.png
+    - assets/logo_white.png
   uses-material-design: true
   generate: true

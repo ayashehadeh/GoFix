@@ -167,7 +167,7 @@ class _SplashRouterState extends State<_SplashRouter> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF1A3A5C),
+      backgroundColor: const Color(0xFFFDF5EC),
       body: Center(
         child: Container(
           width: 200,
